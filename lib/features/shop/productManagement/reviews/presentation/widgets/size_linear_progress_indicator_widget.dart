@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../generated/l10n.dart';
@@ -26,7 +25,7 @@ class SizeLinearProgressIndicatorWidget extends StatelessWidget {
         Visibility(
           visible: showTextAtTheBeginningOnly,
           child: Padding(
-            padding: EdgeInsets.only(left: 38.w, right: 38.w, bottom: 4.h),
+            padding: EdgeInsets.only(left: 30.w, right: 30.w, bottom: 4.h),
             child: AutoSizeTextWidget(
               text: S.of(context).doesTheProductSizeFitWell,
               colorText: AppColors.fontColor,
@@ -39,35 +38,35 @@ class SizeLinearProgressIndicatorWidget extends StatelessWidget {
             Container(
               width: 0.8.w,
               height: 24.h,
-              color: const Color(0xffe0e0e0),
-              margin: EdgeInsets.only(right: 20.w, left: 16.w),
+              color: AppColors.fontColor2.withValues(alpha: 0.4),
+              margin: EdgeInsets.symmetric(horizontal: 14.w),
             ),
             SizedBox(
-              width: 34.w,
+              width: 36.w,
               child: AutoSizeTextWidget(
                 text: sizeName.toString(),
                 fontSize: 9.6.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            6.w.horizontalSpace,
+            2.w.horizontalSpace,
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4.sp),
                 child: LinearProgressIndicator(
                   value: value,
-                  valueColor: const AlwaysStoppedAnimation(Color(0xff8A1538)),
-                  minHeight: 5,
-                  backgroundColor: const Color(0xffe0e0e0),
+                  valueColor: const AlwaysStoppedAnimation( Color(0xFFCA9A2C)),
+                  minHeight: 4.5,
+                  backgroundColor: AppColors.scaffoldColor,
                 ),
               ),
             ),
             4.w.horizontalSpace,
             SizedBox(
-              width: 34.w,
+              width: 28.w,
               child: AutoSizeTextWidget(
-                text: " ${(percentageValue * 10).truncate() / 10}%",
-                fontSize: 8.5.sp,
+                text: "${percentageValue.toInt()}%",
+                fontSize: 9.sp,
                 minFontSize: 4,
                 fontWeight: FontWeight.w600,
               ),

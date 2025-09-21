@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
-
+import '../../../../../../core/constants/app_icons.dart';
+import '../../../../../../core/theme/app_colors.dart';
+import '../../../../../../generated/l10n.dart';
 
 class ShowImageSourceWidget extends StatefulWidget {
   final List<File> images;
@@ -31,11 +34,14 @@ class _ShowImageSourceWidgetState extends State<ShowImageSourceWidget> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        'تحديد طريقة اختيار صورة',
-        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+        S.of(context).chooseImageSource,
+        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
         textAlign: TextAlign.center,
       ),
       backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.r),
+      ),
       content: Padding(
         padding: EdgeInsets.only(top: 8.h),
         child: Row(
@@ -46,44 +52,58 @@ class _ShowImageSourceWidgetState extends State<ShowImageSourceWidget> {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
                 },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.camera_alt_outlined,
-                      size: 38.r,
-                    ),
-                    4.h.verticalSpace,
-                    Text(
-                      'كاميرا',
-                      style: TextStyle(
-                        fontSize: 11.5.sp,
-                        fontWeight: FontWeight.w600,
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 6.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.scaffoldColor,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(AppIcons.takePhoto),
+                      8.h.verticalSpace,
+                      Text(
+                        S.of(context).takePhoto,
+                        style: TextStyle(
+                          fontSize: 10.8.sp,
+                          color: AppColors.fontColor2,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
+            10.w.horizontalSpace,
             Expanded(
               child: GestureDetector(
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
                 },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.photo_library, size: 38.r),
-                    4.h.verticalSpace,
-                    Text(
-                      'الهاتف',
-                      style: TextStyle(
-                        fontSize: 11.5.sp,
-                        fontWeight: FontWeight.w600,
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 6.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.scaffoldColor,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(AppIcons.gallery),
+                      8.h.verticalSpace,
+                      Text(
+                        S.of(context).gallery,
+                        style: TextStyle(
+                          fontSize: 10.8.sp,
+                          color: AppColors.fontColor2,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

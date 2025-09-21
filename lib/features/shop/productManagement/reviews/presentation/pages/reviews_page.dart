@@ -14,10 +14,8 @@ import '../../../../../../generated/l10n.dart';
 import '../../../../myOrders/data/model/product_order_details_model.dart';
 import '../riverpod/reviews_riverpod.dart';
 import '../widgets/card_for_comments_widget.dart';
-import '../widgets/evaluation_value_and_number_of_rating_stars_widget.dart';
-import '../widgets/review_product_card_widget.dart';
+import '../widgets/reviews_widget.dart';
 import '../widgets/shimmer_for_reviews_widget.dart';
-import '../widgets/size_linear_progress_indicator_widget.dart';
 import 'add_reviews_dialog.dart';
 
 class ReviewsPage extends ConsumerStatefulWidget {
@@ -54,7 +52,6 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
     }
   }
 
-  //dispose
   @override
   void dispose() {
     _scrollController.dispose();
@@ -65,67 +62,31 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
   Widget build(BuildContext context) {
     var state = ref.watch(getAllReviewsProvider(widget.products.id));
     return Scaffold(
-      appBar: SecondaryAppBarWidget(title: S.of(context).evaluations),
-      body: CheckStateInGetApiDataWidget(
-        state: state,
-        widgetOfLoading: const ShimmerForReviewsWidget(),
-        widgetOfData: RefreshIndicator(
-          color: AppColors.primaryColor,
-          backgroundColor: Colors.white,
-          onRefresh: () async {
-            ref.refresh(getAllReviewsProvider(widget.products.id));
-          },
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            child: state.data.review.data.isNotEmpty
+      appBar: SecondaryAppBarWidget(
+        title: S.of(context).evaluations,
+        fontSize: 15.2.sp,
+      ),
+      body: RefreshIndicator(
+        color: AppColors.primaryColor,
+        backgroundColor: Colors.white,
+        onRefresh: () async {
+          ref.refresh(getAllReviewsProvider(widget.products.id));
+        },
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          child: CheckStateInGetApiDataWidget(
+            state: state,
+            widgetOfLoading: const ShimmerForReviewsWidget(),
+            widgetOfData: state.data.review.data.isNotEmpty
                 ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ReviewProductCardWidget(
-                        image: widget.products.image.toString(),
-                        name: widget.products.name.toString(),
-                        price: widget.products.price.toString(),
+                      ReviewsWidget(
+                        rates: state.data.rates,
+                        total: state.data.total.toDouble(),
+                        counter: state.data.counter,
                       ),
-                      Container(
-                        margin: EdgeInsets.only(top: 8.h),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.w, vertical: 8.h),
-                        decoration: BoxDecoration(
-                          color: AppColors.whiteColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(.02),
-                              blurRadius: 1.r,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            EvaluationValueAndNumberOfRatingStarsWidget(
-                              rates: state.data.rates,
-                              total: state.data.total.toDouble(),
-                            ),
-                            Expanded(
-                              child: Column(
-                                children: List.generate(
-                                  state.data.counter.length,
-                                  (index) {
-                                    return SizeLinearProgressIndicatorWidget(
-                                      value: state.data.counter[index].value! /
-                                          state.data.total,
-                                      sizeName: state.data.counter[index].name
-                                          .toString(),
-                                      showTextAtTheBeginningOnly:
-                                          index == 0 ? true : false,
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      8.h.verticalSpace,
+                      4.h.verticalSpace,
                       Column(
                         children: state.data.review.data.map((items) {
                           return CardForCommentsWidget(
@@ -133,10 +94,10 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
                           );
                         }).toList(),
                       ),
-                      10.h.verticalSpace,
+                      12.h.verticalSpace,
                       if (state.stateData == States.loadingMore)
                         Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.h),
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
                           child: const CircularProgressIndicatorWidget(),
                         ),
                     ],
@@ -160,23 +121,24 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
               : widget.status == 6
                   ? ButtonBottomNavigationBarDesignWidget(
                       child: DefaultButtonWidget(
-                          text: S.of(context).addRating,
-                          textSize: 12.sp,
-                          onPressed: () {
-                            showModalBottomSheetWidget(
-                              context: context,
-                              backgroundColor: Colors.transparent,
-                              page: AddReviewsDialog(
-                                orderId: widget.orderId,
-                                productId: widget.products.id,
-                                colorId: widget.products.colorId,
-                                colorHex: widget.products.colorHex.toString(),
-                                colorName: widget.products.colorName.toString(),
-                                sizeId: widget.products.sizeId!,
-                                sizeValue: widget.products.sizeValue.toString(),
-                              ),
-                            );
-                          }),
+                        text: S.of(context).addRating,
+                        textSize: 13.sp,
+                        onPressed: () {
+                          scrollShowModalBottomSheetWidget(
+                            context: context,
+                            title: S.of(context).canYouLeaveYourReview,
+                            page: AddReviewsDialog(
+                              orderId: widget.orderId,
+                              productId: widget.products.id,
+                              colorId: widget.products.colorId,
+                              colorHex: widget.products.colorHex.toString(),
+                              colorName: widget.products.colorName.toString(),
+                              sizeId: widget.products.sizeId!,
+                              sizeValue: widget.products.sizeValue.toString(),
+                            ),
+                          );
+                        },
+                      ),
                     )
                   : null,
     );

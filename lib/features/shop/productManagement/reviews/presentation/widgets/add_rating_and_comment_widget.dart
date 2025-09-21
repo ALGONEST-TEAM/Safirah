@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/text_form_field.dart';
@@ -24,15 +23,10 @@ class AddRatingAndCommentWidget extends StatelessWidget {
     return Column(
       children: [
         AutoSizeTextWidget(
-          text: S.of(context).canYouLeaveYourReview,
-          fontSize: 15.5.sp,
-        ),
-        12.h.verticalSpace,
-        AutoSizeTextWidget(
           text: "$countEvaluation",
           fontSize: 18.sp,
           fontWeight: FontWeight.w600,
-          colorText: AppColors.primaryColor,
+          colorText: AppColors.secondaryColor,
         ),
         8.h.verticalSpace,
         RatingBar.builder(
@@ -44,8 +38,9 @@ class AddRatingAndCommentWidget extends StatelessWidget {
           itemSize: 30.r,
           unratedColor: const Color(0xfffed9a3),
           itemPadding: const EdgeInsets.symmetric(horizontal: 9.0),
+          glowColor: AppColors.primaryColor,
           itemBuilder: (context, _) => const Icon(
-            Icons.star_rate,
+            Icons.star_rate_rounded,
             color: Color(0xffffbd30),
           ),
           onRatingUpdate: (rating) => onRatingUpdate(rating),
@@ -54,18 +49,18 @@ class AddRatingAndCommentWidget extends StatelessWidget {
         TextFormFieldWidget(
           controller: commentController,
           type: TextInputType.text,
-          maxLine: 3,
+          maxLine: 4,
           hintText: S.of(context).AddAComment,
-          hintTextColor: AppColors.greySwatch.shade600.withOpacity(.7),
+          hintTextColor: AppColors.fontColor,
           hintFontSize: 11.5.sp,
-          fillColor: AppColors.greySwatch.shade50,
+          fillColor: AppColors.scaffoldColor,
           fieldValidator: (value) {
             if (value == null || value.toString().isEmpty) {
-              return "يرجى إضافة تعليق";
+              return S.of(context).pleaseAddAComment;
             }
           },
         ),
-        18.h.verticalSpace,
+        16.h.verticalSpace,
       ],
     );
   }

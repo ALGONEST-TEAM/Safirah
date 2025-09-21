@@ -96,6 +96,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "checkInternetOrServiceUrl": MessageLookupByLibrary.simpleMessage(
       "Check your internet connection or service URL",
     ),
+    "chooseImageSource": MessageLookupByLibrary.simpleMessage(
+      "Choose Image Source",
+    ),
     "city": MessageLookupByLibrary.simpleMessage("City"),
     "clear": MessageLookupByLibrary.simpleMessage("Clear"),
     "clickAgainToExit": MessageLookupByLibrary.simpleMessage(
@@ -164,6 +167,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "following": MessageLookupByLibrary.simpleMessage("Following"),
     "forUnitPrice": MessageLookupByLibrary.simpleMessage("For unit price"),
     "forYou": MessageLookupByLibrary.simpleMessage("For you"),
+    "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
     "gatewayTimeout": MessageLookupByLibrary.simpleMessage("Gateway timeout"),
     "gatewayTimeout2": MessageLookupByLibrary.simpleMessage(
       "Check your internet connection or try again later",
@@ -418,6 +422,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "supportDescription": MessageLookupByLibrary.simpleMessage(
       "If you encounter an issue or have a suggestion to improve the service, you can contact us through one of the following channels",
     ),
+    "takePhoto": MessageLookupByLibrary.simpleMessage("Take Photo"),
     "theAddressWillBePermanentlyDeleted": MessageLookupByLibrary.simpleMessage(
       "The address will be permanently deleted",
     ),

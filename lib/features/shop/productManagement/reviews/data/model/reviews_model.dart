@@ -3,7 +3,7 @@ import 'reviews_pagination_model.dart';
 class ReviewsModel {
   final dynamic rates;
   final int total;
-  final List<Counter> counter;
+  final List<CounterModel> counter;
   final PaginatedReviewsModel review;
 
   ReviewsModel({
@@ -17,8 +17,8 @@ class ReviewsModel {
     return ReviewsModel(
       rates: json['rates'] ,
       total: json['totle'] ?? 0,
-      counter: List<Counter>.from((json['counter'] ?? List<Counter>.empty())
-          .map((e) => Counter.fromJson(e))),
+      counter: List<CounterModel>.from((json['counter'] ?? List<CounterModel>.empty())
+          .map((e) => CounterModel.fromJson(e))),
       review: json['review'] == null
           ? PaginatedReviewsModel.empty()
           : PaginatedReviewsModel.fromJson(
@@ -36,7 +36,7 @@ class ReviewsModel {
   ReviewsModel copyWith({
     double? rates,
     int? total,
-    List<Counter>? counter,
+    List<CounterModel>? counter,
     PaginatedReviewsModel? review,
   }) {
     return ReviewsModel(
@@ -48,17 +48,17 @@ class ReviewsModel {
   }
 }
 
-class Counter {
+class CounterModel {
   final String? name;
   final int? value;
 
-  Counter({
+  CounterModel({
     required this.name,
     required this.value,
   });
 
-  factory Counter.fromJson(Map<String, dynamic> json) {
-    return Counter(
+  factory CounterModel.fromJson(Map<String, dynamic> json) {
+    return CounterModel(
       name: json['name'] ??"",
       value: json['value'] as int?,
     );

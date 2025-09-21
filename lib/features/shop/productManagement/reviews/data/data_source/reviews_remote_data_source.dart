@@ -9,7 +9,7 @@ class ReviewsRemoteDataSource {
   Future<ReviewsModel> getAllReviews({
     required int productId,
     required int page,
-    int limit = 10,
+    int limit = 5,
   }) async {
     final response = await RemoteRequest.getData(
       url: "${AppURL.getAllReviews}/$productId",
@@ -18,7 +18,6 @@ class ReviewsRemoteDataSource {
         'perPage': limit,
       },
     );
-    print(response.data);
     return ReviewsModel.fromJson(response.data);
   }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/shimmer_widget.dart';
 
@@ -11,7 +11,6 @@ class ShimmerForEvaluationLinearProgressIndicatorWidget
 
   @override
   Widget build(BuildContext context) {
-    int numberingLinearProgressIndicator = 6;
     return Expanded(
       child: ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
@@ -24,8 +23,8 @@ class ShimmerForEvaluationLinearProgressIndicatorWidget
                 child: Container(
                   width: 0.8.w,
                   height: 24.h,
-                  color: Colors.grey[200]!,
-                  margin: EdgeInsets.only(right: 20.w, left: 16.w),
+                  color: AppColors.fontColor2.withValues(alpha: 0.65),
+                  margin: EdgeInsets.symmetric(horizontal: 14.w),
                 ),
               ),
               ShimmerPlaceholderWidget(
@@ -45,9 +44,9 @@ class ShimmerForEvaluationLinearProgressIndicatorWidget
               ),
               6.w.horizontalSpace,
               ShimmerWidget(
-                baseColor: Colors.grey[400]!,
+                baseColor: AppColors.greySwatch.shade900,
                 child: AutoSizeTextWidget(
-                  text: "0.0%",
+                  text: "0%",
                   fontSize: 8.5.sp,
                 ),
               ),

@@ -27,8 +27,14 @@ class GetAllReviewsController extends StateNotifier<DataState<ReviewsModel>> {
   Future<void> getData({
     bool moreData = false,
   }) async {
+    if (moreData &&
+        state.data.review.currentPage >= state.data.review.lastPage) {
+      return;
+    }
     if (state.stateData == States.loadingMore ||
-        state.stateData == States.loading) return;
+        state.stateData == States.loading) {
+      return;
+    }
 
     if (moreData) {
       state = state.copyWith(state: States.loadingMore);

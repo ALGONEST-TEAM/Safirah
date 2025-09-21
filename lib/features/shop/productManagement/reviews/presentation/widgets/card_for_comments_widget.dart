@@ -7,12 +7,12 @@ import '../../../../../../core/constants/app_icons.dart';
 import '../../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
-import '../../../../../../core/widgets/online_images_widget.dart';
-import '../../../../../../core/widgets/rating_bar_widget.dart';
 import '../../../../../../generated/l10n.dart';
 import '../../../../../../services/auth/auth.dart';
 import '../../data/model/review_data.dart';
 import '../riverpod/reviews_riverpod.dart';
+import 'comment_card_information_widget.dart';
+import 'review_images_strip_widget.dart';
 
 class CardForCommentsWidget extends ConsumerWidget {
   final ReviewData reviews;
@@ -25,87 +25,43 @@ class CardForCommentsWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     var state = ref.watch(addLikeOrDislikeProvider(reviews.id).notifier);
-
+    String fixedDate =
+        "${reviews.createdAt.substring(0, 10)} ${reviews.createdAt.substring(10)}";
+    DateTime date = DateTime.parse(fixedDate);
 
     return Container(
-      color: Colors.white,
-      margin: EdgeInsets.only(top: 0.8.h),
-      padding: EdgeInsets.symmetric(vertical: 8.h),
+      margin: EdgeInsets.only(top: 10.h),
+      padding: EdgeInsets.symmetric(vertical: 6.h),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(8.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.01),
+            blurRadius: 1.r,
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: AutoSizeTextWidget(
-                        text: reviews.userName,
-                        colorText: Colors.black,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11.5.sp,
-                        minFontSize: 12,
-                      ),
-                    ),
-                    4.w.horizontalSpace,
-                    RatingBarWidget(
-                      evaluation: reviews.reviewValue.toDouble(),
-                      itemSize: 11.sp,
-                    ),
-                  ],
-                ),
-                3.h.verticalSpace,
-                AutoSizeTextWidget(
-                  text: reviews.colorName.toString().isNotEmpty
-                      ? "${S.of(context).color}: ${reviews.colorName.toString()} / ${S.of(context).size}: ${reviews.sizeValue.toString()} "
-                      : "${S.of(context).size}: ${reviews.sizeValue.toString()} ",
-                  colorText: AppColors.fontColor,
-                  fontSize: 9.5.sp,
-                  minFontSize: 8,
-                ),
-                8.h.verticalSpace,
-                AutoSizeTextWidget(
-                  text: reviews.comment.toString(),
-                  fontSize: 11.8.sp,
-                  minFontSize: 10,
-                  maxLines: 20,
-                ),
-              ],
-            ),
+          CommentCardInformationWidget(
+            reviews: reviews,
+            date: date,
           ),
-          reviews.image!.isNotEmpty
-              ? SizedBox(
-                  height: 130.h,
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.all(12.sp),
-                    itemBuilder: (context, index) {
-                      return OnlineImagesWidget(
-                        imageUrl:reviews.image![index],
-                        size: Size(130.w, double.infinity),
-                        borderRadius: 4.r,
-                      );
-                    },
-                    separatorBuilder: (context, index) => SizedBox(width: 6.w),
-                    itemCount: reviews.image!.length,
-                  ),
-                )
-              : const SizedBox.shrink(),
-          reviews.image!.isNotEmpty ? 2.h.verticalSpace : 8.h.verticalSpace,
+          2.h.verticalSpace,
+          ReviewImagesStripWidget(images: reviews.image ?? ['']),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: Row(
-              textDirection: TextDirection.ltr,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 LikeButton(
                   likeCount: reviews.reviewLikeCount,
                   circleColor: const CircleColor(
-                      start: Color(0xfff0687c), end: Colors.red),
+                    start: Color(0xfff0687c),
+                    end: Colors.red,
+                  ),
                   bubblesColor: const BubblesColor(
                     dotPrimaryColor: Color(0xfff0687c),
                     dotSecondaryColor: Colors.red,
@@ -135,13 +91,12 @@ class CardForCommentsWidget extends ConsumerWidget {
                   },
                   likeBuilder: (bool isLiked) {
                     return Padding(
-                      padding: EdgeInsets.only(
-                        top: isLiked ? 3.h : 5.h,
-                        bottom: isLiked ? 3.h : 6.h,
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 3.6.h),
                       child: SvgPicture.asset(
-                        isLiked ? AppIcons.like : AppIcons.disLike,
-                        color: AppColors.primarySwatch.shade700.withOpacity(.9),
+                        AppIcons.like,
+                        color: isLiked
+                            ? AppColors.secondaryColor
+                            : AppColors.fontColor2,
                       ),
                     );
                   },
@@ -149,16 +104,10 @@ class CardForCommentsWidget extends ConsumerWidget {
                   countBuilder: (likeCount, isLiked, text) {
                     return AutoSizeTextWidget(
                       text: text,
-                      fontSize: 9.sp,
+                      fontSize: 9.6.sp,
                       fontWeight: FontWeight.w600,
                     );
                   },
-                ),
-                AutoSizeTextWidget(
-                  text: reviews.createdAt,
-                  fontSize: 9.6.sp,
-                  fontWeight: FontWeight.w600,
-                  colorText: AppColors.fontColor,
                 ),
               ],
             ),

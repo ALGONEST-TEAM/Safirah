@@ -3,6 +3,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../constants/app_icons.dart';
+import '../theme/app_colors.dart';
 
 class RatingBarWidget extends StatelessWidget {
   final double evaluation;
@@ -26,12 +27,11 @@ class RatingBarWidget extends StatelessWidget {
       ignoreGestures: true,
       itemCount: length ?? 5,
       itemSize: itemSize ?? 14.sp,
+      unratedColor: AppColors.fontColor2.withValues(alpha: 0.5),
       itemBuilder: (context, index) {
         return Padding(
           padding: EdgeInsets.only(bottom: 0.6.h),
-          child: SvgPicture.asset(
-            AppIcons.starActive,
-          ),
+          child: SvgPicture.asset(AppIcons.starActive),
         );
       },
       onRatingUpdate: (rating) {},

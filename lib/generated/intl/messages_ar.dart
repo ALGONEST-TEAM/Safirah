@@ -88,6 +88,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "checkInternetOrServiceUrl": MessageLookupByLibrary.simpleMessage(
       "تحقق من اتصالك بالإنترنت أو رابط الخدمة",
     ),
+    "chooseImageSource": MessageLookupByLibrary.simpleMessage(
+      "تحديد طريقة اختيار صورة",
+    ),
     "city": MessageLookupByLibrary.simpleMessage("المدينة"),
     "clear": MessageLookupByLibrary.simpleMessage("مسح"),
     "clickAgainToExit": MessageLookupByLibrary.simpleMessage(
@@ -152,6 +155,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "following": MessageLookupByLibrary.simpleMessage("متابعة"),
     "forUnitPrice": MessageLookupByLibrary.simpleMessage("لسعر الوحدة"),
     "forYou": MessageLookupByLibrary.simpleMessage("المقترح لك"),
+    "gallery": MessageLookupByLibrary.simpleMessage("معرض الصور"),
     "gatewayTimeout": MessageLookupByLibrary.simpleMessage(
       "انتهى وقت الاتصال بالخادم",
     ),
@@ -400,6 +404,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "supportDescription": MessageLookupByLibrary.simpleMessage(
       "في حال واجهتكم مشكلة او لديكم مقترح لتحسين الخدمة يمكنكم التواصل معنا عبر أحد الوسائل التالية",
     ),
+    "takePhoto": MessageLookupByLibrary.simpleMessage("التقاط صورة"),
     "theAddressWillBePermanentlyDeleted": MessageLookupByLibrary.simpleMessage(
       "سيتم حذف العنوان نهائيا",
     ),

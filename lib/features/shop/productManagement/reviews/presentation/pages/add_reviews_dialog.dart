@@ -9,7 +9,6 @@ import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/buttons/default_button.dart';
 import '../../../../../../generated/l10n.dart';
-import '../../../../myOrders/presentation/widgets/order_details_card_data_design_widget.dart';
 import '../riverpod/reviews_riverpod.dart';
 import '../widgets/add_image_button_widget.dart';
 import '../widgets/add_rating_and_comment_widget.dart';
@@ -54,148 +53,149 @@ class _AddReviewsDialogState extends ConsumerState<AddReviewsDialog> {
     var state = ref.watch(addReviewsProvider);
     return Form(
       key: formKey,
-      child: Container(
-        margin: EdgeInsets.only(top: 180.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(12.r),
-            topRight: Radius.circular(12.r),
-          ),
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(14.0.sp),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AddRatingAndCommentWidget(
-                      commentController: commentController,
-                      countEvaluation: countEvaluation,
-                      onRatingUpdate: (double rating) {
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(12.sp),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AddRatingAndCommentWidget(
+                    commentController: commentController,
+                    countEvaluation: countEvaluation,
+                    onRatingUpdate: (double rating) {
+                      setState(() {
+                        countEvaluation = rating;
+                      });
+                    },
+                  ),
+                  Row(
+                    children: [
+                      if (widget.colorHex.isNotEmpty)
+                        AutoSizeTextWidget(
+                          text: "${S.of(context).color}: ",
+                          fontSize: 11.8.sp,
+                          colorText: AppColors.fontColor,
+                        ),
+                      if (widget.colorHex.isNotEmpty)
+                        Container(
+                          height: 12.h,
+                          width: 12.w,
+                          decoration: BoxDecoration(
+                            color: widget.colorHex.toString().toColor(),
+                            borderRadius: BorderRadius.circular(2.r),
+                          ),
+                        ),
+                      Flexible(
+                        child: AutoSizeTextWidget(
+                          text:
+                          " ${widget.colorName.toString()}${widget.colorName.isNotEmpty ? "  -  " : ''}${S.of(context).size}: ${widget.sizeValue.toString()}",
+                          fontSize: 11.8.sp,
+                          colorText: AppColors.fontColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  16.h.verticalSpace,
+                  AutoSizeTextWidget(
+                    text: S.of(context).doesTheProductSizeFitWell,
+                    colorText: AppColors.fontColor,
+                    fontSize: 12.sp,
+                  ),
+                  8.h.verticalSpace,
+                  RadioForTheRightSizeWidget(
+                    title: S.of(context).small,
+                    value: "1",
+                    sizeMethodGroupValue: tempSizeMethodGroupValue,
+                    onTap: () {
+                      setState(() {
+                        tempSizeMethodGroupValue = "1";
+                      });
+                    },
+                  ),
+                  RadioForTheRightSizeWidget(
+                    title: S.of(context).appropriate,
+                    value: "2",
+                    sizeMethodGroupValue: tempSizeMethodGroupValue,
+                    onTap: () {
+                      setState(() {
+                        tempSizeMethodGroupValue = "2";
+                      });
+                    },
+                  ),
+                  RadioForTheRightSizeWidget(
+                    title: S.of(context).big,
+                    value: "3",
+                    sizeMethodGroupValue: tempSizeMethodGroupValue,
+                    onTap: () {
+                      setState(() {
+                        tempSizeMethodGroupValue = "3";
+                      });
+                    },
+                  ),
+                  8.h.verticalSpace,
+                  AutoSizeTextWidget(
+                    text: S.of(context).addPhotos,
+                    colorText: AppColors.fontColor,
+                    fontSize: 12.sp,
+                  ),
+                  8.h.verticalSpace,
+
+                  AddImageButtonWidget(
+                    showImageSource: ShowImageSourceWidget(
+                      images: _images,
+                      onImagePicked: (List<File> newImages) {
                         setState(() {
-                          countEvaluation = rating;
+                          _images = newImages;
                         });
                       },
                     ),
-                    Row(
-                      children: [
-                        widget.colorName.isNotEmpty
-                            ? Expanded(
-                                child: OrderDetailsCardDataDesignWidget(
-                                  title: "${S.of(context).color}:",
-                                  color: widget.colorHex.toColor(),
-                                  subTitle: widget.colorName,
-                                  isColor: true,
-                                ),
-                              )
-                            : const SizedBox.shrink(),
-                        Expanded(
-                          child: OrderDetailsCardDataDesignWidget(
-                            title: "${S.of(context).size}:",
-                            subTitle: widget.sizeValue,
-                          ),
-                        ),
-                      ],
-                    ),
-                    14.h.verticalSpace,
-                    AutoSizeTextWidget(
-                      text: S.of(context).doesTheProductSizeFitWell,
-                      colorText: AppColors.fontColor,
-                      fontSize: 11.5.sp,
-                    ),
-                    10.h.verticalSpace,
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        RadioForTheRightSizeWidget(
-                          title: S.of(context).small,
-                          value: "1",
-                          sizeMethodGroupValue: tempSizeMethodGroupValue,
-                          onTap: () {
-                            setState(() {
-                              tempSizeMethodGroupValue = "1";
-                            });
-                          },
-                        ),
-                        RadioForTheRightSizeWidget(
-                          title: S.of(context).appropriate,
-                          value: "2",
-                          sizeMethodGroupValue: tempSizeMethodGroupValue,
-                          onTap: () {
-                            setState(() {
-                              tempSizeMethodGroupValue = "2";
-                            });
-                          },
-                        ),
-                        RadioForTheRightSizeWidget(
-                          title: S.of(context).big,
-                          value: "3",
-                          sizeMethodGroupValue: tempSizeMethodGroupValue,
-                          onTap: () {
-                            setState(() {
-                              tempSizeMethodGroupValue = "3";
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    16.h.verticalSpace,
-                    AddImageButtonWidget(
-                      showImageSource: ShowImageSourceWidget(
-                        images: _images,
-                        onImagePicked: (List<File> newImages) {
-                          setState(() {
-                            _images = newImages;
-                          });
-                        },
-                      ),
-                    ),
-                    _images.isEmpty
-                        ? const SizedBox.shrink()
-                        : ListOfSelectedImagesToAddAReviewWidget(
-                            images: _images),
-                  ],
-                ),
+                  ),
+                  _images.isEmpty
+                      ? const SizedBox.shrink()
+                      : ListOfSelectedImagesToAddAReviewWidget(
+                          images: _images),
+                ],
               ),
             ),
-            Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                child: CheckStateInPostApiDataWidget(
-                  state: state,
-                  functionSuccess: () {
-                    Navigator.of(context).pop();
-                    ref.refresh(getAllReviewsProvider(widget.productId));
-                  },
-                  bottonWidget: DefaultButtonWidget(
-                    text: S.of(context).confirm,
-                    height: 39.h,
-                    textSize: 12.sp,
-                    isLoading: state.stateData == States.loading,
-                    onPressed: () {
-                      final isValid = formKey.currentState!.validate();
-                      FocusManager.instance.primaryFocus?.unfocus();
+          ),
+          Padding(
+              padding: EdgeInsets.symmetric(horizontal: 14.w),
+              child: CheckStateInPostApiDataWidget(
+                state: state,
+                functionSuccess: () {
+                  Navigator.of(context).pop();
+                  ref.refresh(getAllReviewsProvider(widget.productId));
+                },
+                bottonWidget: DefaultButtonWidget(
+                  text: S.of(context).confirm,
+                  height: 39.h,
+                  textSize: 13.sp,
+                  isLoading: state.stateData == States.loading,
+                  onPressed: () {
+                    final isValid = formKey.currentState!.validate();
+                    FocusManager.instance.primaryFocus?.unfocus();
 
-                      if (isValid) {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        ref.read(addReviewsProvider.notifier).addReviews(
-                              orderId: widget.orderId,
-                              productId: widget.productId,
-                              colorId: widget.colorId,
-                              sizeId: widget.sizeId,
-                              comment: commentController.text,
-                              evaluation: countEvaluation,
-                              proportion: int.parse(tempSizeMethodGroupValue),
-                              images: _images,
-                            );
-                      }
-                    },
-                  ),
-                )),
-          ],
-        ),
+                    if (isValid) {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      ref.read(addReviewsProvider.notifier).addReviews(
+                            orderId: widget.orderId,
+                            productId: widget.productId,
+                            colorId: widget.colorId,
+                            sizeId: widget.sizeId,
+                            comment: commentController.text,
+                            evaluation: countEvaluation,
+                            proportion: int.parse(tempSizeMethodGroupValue),
+                            images: _images,
+                          );
+                    }
+                  },
+                ),
+              )),
+        ],
       ),
     );
   }

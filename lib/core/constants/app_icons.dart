@@ -51,8 +51,10 @@ class AppIcons {
   // Reviews
   static const String like = '${_iconsPath}like.svg';
   static const String disLike = '${_iconsPath}dis_like.svg';
-  static const String addComment = '${_iconsPath}add_comment.svg';
-
+  static const String addPhotos = '${_iconsPath}add_photos.svg';
+  static const String takePhoto = '${_iconsPath}take_photo.svg';
+  static const String gallery = '${_iconsPath}gallery.svg';
+  
   /// Wishlist
   static const String multipleChoice = '${_iconsPath}multiple_choice.svg';
   static const String wishlist = '${_iconsPath}wishlist.svg';

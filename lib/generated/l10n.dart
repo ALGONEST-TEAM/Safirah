@@ -1144,6 +1144,26 @@ class S {
     return Intl.message('Add photos', name: 'addPhotos', desc: '', args: []);
   }
 
+  /// `Take Photo`
+  String get takePhoto {
+    return Intl.message('Take Photo', name: 'takePhoto', desc: '', args: []);
+  }
+
+  /// `Gallery`
+  String get gallery {
+    return Intl.message('Gallery', name: 'gallery', desc: '', args: []);
+  }
+
+  /// `Choose Image Source`
+  String get chooseImageSource {
+    return Intl.message(
+      'Choose Image Source',
+      name: 'chooseImageSource',
+      desc: '',
+      args: [],
+    );
+  }
+
   // skipped getter for the '--------profile-----------' key
 
   /// `Currency`
