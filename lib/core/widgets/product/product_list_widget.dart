@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:safirah/features/shop/productManagement/detailsProducts/data/model/product_data.dart';
 
-import '../theme/app_colors.dart';
+import '../../theme/app_colors.dart';
 import 'product_card.dart';
 
 class ProductListWidget extends StatelessWidget {
@@ -25,10 +25,9 @@ class ProductListWidget extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           primary: false,
-
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          mainAxisSpacing: 6.0,
-          crossAxisSpacing: 8.0,
+          mainAxisSpacing: 6.h,
+          crossAxisSpacing: 6.w,
           gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
           ),
@@ -42,23 +41,28 @@ class ProductListWidget extends StatelessWidget {
                 rates: 4,
                 price: product[index].price!,
                 isFavorite: true,
+                productColorsCount:product[index].productColorsCount ,
+                colorsOfProduct: product[index].colorsProduct,
+                discountData: product[index].discountModel,
               ),
             );
           },
         ),
         if (isLoadingMore)
-          const Padding(
-            padding: EdgeInsets.all(8.0),
+           Padding(
+            padding: EdgeInsets.all(8.sp).copyWith(bottom: 18.h),
             child: SizedBox(
-              width: 24.0,
-              height: 24.0,
+              width: 24.w,
+              height: 24.h,
               child: CircularProgressIndicator(
                 color: AppColors.primaryColor,
-                strokeWidth: 2.0,
+                strokeWidth: 2.r,
               ),
             ),
           ),
+        28.h.verticalSpace,
       ],
     );
   }
 }
+

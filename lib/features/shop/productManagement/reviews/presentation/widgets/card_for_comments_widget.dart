@@ -16,10 +16,12 @@ import 'review_images_strip_widget.dart';
 
 class CardForCommentsWidget extends ConsumerWidget {
   final ReviewData reviews;
+  final bool detailsPage;
 
   const CardForCommentsWidget({
     super.key,
     required this.reviews,
+    this.detailsPage = false,
   });
 
   @override
@@ -33,7 +35,7 @@ class CardForCommentsWidget extends ConsumerWidget {
       margin: EdgeInsets.only(top: 10.h),
       padding: EdgeInsets.symmetric(vertical: 6.h),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: detailsPage ? AppColors.scaffoldColor : AppColors.whiteColor,
         borderRadius: BorderRadius.circular(8.r),
         boxShadow: [
           BoxShadow(
@@ -66,11 +68,7 @@ class CardForCommentsWidget extends ConsumerWidget {
                     dotPrimaryColor: Color(0xfff0687c),
                     dotSecondaryColor: Colors.red,
                   ),
-                  isLiked: reviews.likeStatus.isEmpty
-                      ? false
-                      : reviews.likeStatus[0].status == 0
-                          ? false
-                          : true,
+                  isLiked: reviews.likeStatus == 0 ? false : true,
                   onTap: (bool isLiked) async {
                     if (!Auth().loggedIn) {
                       showFlashBarError(
@@ -93,10 +91,7 @@ class CardForCommentsWidget extends ConsumerWidget {
                     return Padding(
                       padding: EdgeInsets.symmetric(vertical: 3.6.h),
                       child: SvgPicture.asset(
-                        AppIcons.like,
-                        color: isLiked
-                            ? AppColors.secondaryColor
-                            : AppColors.fontColor2,
+                        isLiked ? AppIcons.like : AppIcons.disLike,
                       ),
                     );
                   },

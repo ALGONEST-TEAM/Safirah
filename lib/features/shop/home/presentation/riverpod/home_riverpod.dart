@@ -5,27 +5,27 @@ import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';
 import '../../../home/data/model/section_with_product_data.dart';
 import '../../../productManagement/detailsProducts/data/model/paginated_products_list_data.dart';
-import '../../data/model/section_with_category_of_all_data.dart';
+import '../../data/model/sections_and_offers_data.dart';
 import '../../data/reposaitory/reposaitories.dart';
 
 final sectionProvider = StateNotifierProvider<SectionNotifier,
-    DataState<SectionWithCategoryOfAllData>>((ref) => SectionNotifier());
+    DataState<SectionsAndOffersData>>((ref) => SectionNotifier());
 
 class SectionNotifier
-    extends StateNotifier<DataState<SectionWithCategoryOfAllData>> {
+    extends StateNotifier<DataState<SectionsAndOffersData>> {
   SectionNotifier()
-      : super(DataState<SectionWithCategoryOfAllData>.initial(
-      SectionWithCategoryOfAllData.empty())) {
-    getMainSectionAndAllProduct();
+      : super(DataState<SectionsAndOffersData>.initial(
+      SectionsAndOffersData.empty())) {
+    getAllSectionAndAllOffers();
   }
 
   int idSection = 1;
 
   final _controller = SectionReposaitory();
 
-  Future<void> getMainSectionAndAllProduct() async {
+  Future<void> getAllSectionAndAllOffers() async {
     state = state.copyWith(state: States.loading);
-    final data = await _controller.getAllSectionAndAllProductData();
+    final data = await _controller.getAllSectionAndAllOffersData();
     data.fold((f) {
       state = state.copyWith(state: States.error, exception: f);
     }, (section) {
@@ -71,7 +71,6 @@ class SubSectionNotifier
 
     final data =
     await _controller.getSectionData(idSection, page, isRefresh, idFilter);
-    print(idFilter);
     data.fold((f) {
       state = state.copyWith(state: States.error, exception: f);
     }, (section) {

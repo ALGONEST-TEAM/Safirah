@@ -48,6 +48,7 @@ class AddressFormController {
   void fillForm(AddressModel address) {
     group.patchValue({
       'address': address.address,
+      'phone_number': address.phoneNumber,
       'city_name': address.cityName.toString(),
       'city_id': address.cityId,
       'district_name': address.districtName.toString(),

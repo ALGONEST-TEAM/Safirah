@@ -21,10 +21,9 @@ class ProductDataAdapter extends TypeAdapter<ProductData> {
       name: fields[1] as String?,
       price: fields[2] as dynamic,
       categoryId: fields[3] as int?,
-      discount: fields[4] as String?,
       description: fields[5] as String?,
-      currency: fields[6] as String?,
       mainImage: (fields[9] as List?)?.cast<String>(),
+      discount: fields[4] as String?,
       discountModel: fields[11] as DiscountModel?,
       priceAfterDiscount: fields[12] as dynamic,
       coponPrice: fields[13] as dynamic,
@@ -34,7 +33,7 @@ class ProductDataAdapter extends TypeAdapter<ProductData> {
   @override
   void write(BinaryWriter writer, ProductData obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -43,14 +42,12 @@ class ProductDataAdapter extends TypeAdapter<ProductData> {
       ..write(obj.price)
       ..writeByte(3)
       ..write(obj.categoryId)
-      ..writeByte(4)
-      ..write(obj.discount)
       ..writeByte(5)
       ..write(obj.description)
-      ..writeByte(6)
-      ..write(obj.currency)
       ..writeByte(9)
       ..write(obj.mainImage)
+      ..writeByte(4)
+      ..write(obj.discount)
       ..writeByte(11)
       ..write(obj.discountModel)
       ..writeByte(12)

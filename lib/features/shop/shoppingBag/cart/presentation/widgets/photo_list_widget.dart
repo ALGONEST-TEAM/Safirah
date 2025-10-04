@@ -17,7 +17,7 @@ class PhotoListWidget extends ConsumerWidget {
       child: ListView.separated(
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.all(10.sp),
+        padding: EdgeInsets.symmetric(horizontal: 12.w,vertical: 8.h),
         itemBuilder: (context, index) {
           return InkWell(
             onTap: () {

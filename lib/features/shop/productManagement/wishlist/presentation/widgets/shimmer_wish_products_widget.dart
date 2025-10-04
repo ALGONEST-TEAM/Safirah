@@ -35,19 +35,9 @@ class ShimmerWishProductsWidget extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  ShimmerPlaceholderWidget(
-                    height: 140.h,
-                    width: double.infinity,
-                  ),
-                  Image.asset(
-                    AppImages.logoWithText,
-                    height: 54.h,
-                    width: 54.w,
-                  ),
-                ],
+              ShimmerPlaceholderWidget(
+                height: 140.h,
+                width: double.infinity,
               ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.w),

@@ -17,12 +17,12 @@ class QuantityWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 22.h,
-      width: 25.w,
+      height: 20.h,
+      width: 23.w,
       margin: EdgeInsets.symmetric(horizontal: 6.w),
       decoration: BoxDecoration(
         color: AppColors.scaffoldColor,
-        borderRadius: BorderRadius.circular(6.6.r),
+        borderRadius: BorderRadius.circular(5.r),
       ),
       alignment: Alignment.center,
       child: isLoading
@@ -32,7 +32,7 @@ class QuantityWidget extends StatelessWidget {
             )
           : AutoSizeTextWidget(
               text: quantity,
-              fontSize: 10.4.sp,
+              fontSize: 9.6.sp,
               fontWeight: FontWeight.w400,
               colorText: AppColors.fontColor,
               textAlign: TextAlign.center,

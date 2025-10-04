@@ -23,9 +23,11 @@ class InkWellButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(20.sp),
-      splashColor: AppColors.secondarySwatch.shade800.withOpacity(.1),
-      highlightColor: AppColors.secondarySwatch.shade800.withOpacity(.1),
+      borderRadius: BorderRadius.circular(20.r),
+      hoverColor: AppColors.primaryColor.withValues(alpha: 0.4),
+      splashColor: AppColors.primaryColor.withValues(alpha: 0.4),
+      highlightColor: AppColors.primaryColor.withValues(alpha: 0.4),
+      mouseCursor: SystemMouseCursors.click,
       onTap: onPressed,
       child: SvgPicture.asset(
         icon,

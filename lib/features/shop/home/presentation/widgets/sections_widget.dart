@@ -1,15 +1,14 @@
 import 'dart:async';
-import 'package:animate_do/animate_do.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:safirah/core/theme/app_colors.dart';
 import '../../../../../core/state/state.dart';
-import '../../../../../core/widgets/skeletonizer_widget.dart';
-import '../../../productManagement/detailsProducts/data/model/product_data.dart';
+import '../../../../../core/widgets/product/products_shimmer_widget.dart';
 import '../riverpod/home_riverpod.dart';
-import 'check_sub_section_and_category_widget.dart';
+import 'category_widget.dart';
 import 'filter_products_home_widget.dart';
-import '../../../../../core/widgets/product_list_widget.dart';
+import '../../../../../core/widgets/product/product_list_widget.dart';
 
 class SectionOfCategoryInHomePage extends ConsumerStatefulWidget {
   const SectionOfCategoryInHomePage({
@@ -47,8 +46,8 @@ class _SectionOfCategoryInHomePageState
       try {
         await ref
             .read(
-                subSectionProvider(Tuple2(widget.idSection, numberFilter ?? 1))
-                    .notifier)
+            subSectionProvider(Tuple2(widget.idSection, numberFilter ?? 1))
+                .notifier)
             .getSubSectionData(moreData: true);
       } finally {
         if (mounted) setState(() => isLoadingMore = false);
@@ -60,15 +59,17 @@ class _SectionOfCategoryInHomePageState
   Widget build(BuildContext context) {
     super.build(context);
     var numberFilter =
-        ref.watch(getSectionFilterTypeProvider(widget.idSection));
+    ref.watch(getSectionFilterTypeProvider(widget.idSection));
     var state = ref.watch(subSectionProvider(Tuple2(widget.idSection, 1)));
 
     return RefreshIndicator(
+      backgroundColor: Colors.white,
+      color: AppColors.primaryColor,
       onRefresh: () async {
         await ref
             .read(
-                subSectionProvider(Tuple2(widget.idSection, numberFilter ?? 1))
-                    .notifier)
+            subSectionProvider(Tuple2(widget.idSection, numberFilter ?? 1))
+                .notifier)
             .getSubSectionData(isRefresh: true, moreData: false);
       },
       child: NotificationListener<ScrollNotification>(
@@ -77,7 +78,6 @@ class _SectionOfCategoryInHomePageState
             final metrics = scrollNotification.metrics;
             final double scrollPercentage =
                 metrics.pixels / metrics.maxScrollExtent;
-
             if (scrollPercentage > _loadMoreThreshold &&
                 !isLoadingMore &&
                 metrics.maxScrollExtent > 0) {
@@ -87,21 +87,27 @@ class _SectionOfCategoryInHomePageState
           return false;
         },
         child: CustomScrollView(
-          physics: state.stateData == States.loading
-              ? const NeverScrollableScrollPhysics()
-              : const BouncingScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
           slivers: [
             SliverOverlapInjector(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
             ),
-            CheckSubSectionAndCategoryWidget(
+            CategoryWidget(
               state: state,
+              refresh: () async {
+                await ref
+                    .read(subSectionProvider(
+                    Tuple2(widget.idSection, numberFilter ?? 1))
+                    .notifier)
+                    .getSubSectionData(isRefresh: true, moreData: false);
+              },
             ),
-            SliverToBoxAdapter(
-              child: FilterProductsHomeWidget(
-                idSection: widget.idSection,
+            if (state.stateData != States.error)
+              SliverToBoxAdapter(
+                child: FilterProductsHomeWidget(
+                  idSection: widget.idSection,
+                ),
               ),
-            ),
             SliverToBoxAdapter(
               child: Consumer(
                 builder: (context, ref, child) {
@@ -110,16 +116,11 @@ class _SectionOfCategoryInHomePageState
                         Tuple2(widget.idSection, numberFilter ?? 1)));
                   }
                   return state.stateData == States.loading
-                      ? SkeletonizerWidget(
-                          child: ProductListWidget(
-                          product: ProductData.fakeProductData,
-                        ))
-                      : FadeIn(
-                          child: ProductListWidget(
-                            isLoadingMore: isLoadingMore,
-                            product: state.data.product?.data ?? [],
-                          ),
-                        );
+                      ? const ProductsShimmerWidget()
+                      : ProductListWidget(
+                    isLoadingMore: isLoadingMore,
+                    product: state.data.product?.data ?? [],
+                  );
                 },
               ),
             ),

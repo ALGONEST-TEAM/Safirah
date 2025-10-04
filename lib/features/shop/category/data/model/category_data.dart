@@ -28,7 +28,7 @@ class CategoryData {
       id: json['id'] ?? 0,
       name: json['name'] ?? "",
       categoryLevel: json['category_level'] ?? 0,
-      hasChildren: json['has_children'] ?? "",
+      hasChildren: json['has_children'] ?? false,
       image: json['image'],
     );
   }

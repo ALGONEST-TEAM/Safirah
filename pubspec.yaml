@@ -53,6 +53,7 @@ dependencies:
   smooth_page_indicator:
   intl:
   cached_network_image:
+  cached_network_svg_image:
   photo_view:
   flutter_spinkit:
   shimmer:

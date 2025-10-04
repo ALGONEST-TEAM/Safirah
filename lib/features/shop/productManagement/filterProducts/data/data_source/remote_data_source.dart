@@ -34,6 +34,6 @@ class RemoteFilterDataSource {
         "/product_filter/?page=$page&perPage=10$sizeQuery$colorQuery$categoryQuery$priceQuery$searchQuery";
 
     final response = await RemoteRequest.getData(url: url);
-    return PaginatedProductsList.fromJson(response.data);
+    return PaginatedProductsList.fromJson(response.data['data']);
   }
 }

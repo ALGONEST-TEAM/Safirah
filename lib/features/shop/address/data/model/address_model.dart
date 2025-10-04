@@ -14,6 +14,7 @@ class AddressModel {
   final String lat;
   final String lon;
   final bool? isDefault;
+  final dynamic phoneNumber;
 
   AddressModel({
     required this.id,
@@ -28,6 +29,7 @@ class AddressModel {
     required this.lon,
     this.nearestLandmark,
     this.isDefault,
+    this.phoneNumber,
   });
 
   factory AddressModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +50,8 @@ class AddressModel {
       lon: json['lng'] ?? "",
       nearestLandmark: json['nearest_landmark'] ?? "",
       isDefault: json['isDefault'] as bool? ?? false,
+      phoneNumber: json['phone_number'] ?? "",
+
     );
   }
 
@@ -64,6 +68,7 @@ class AddressModel {
       'lat': lat,
       'lng': lon,
       'is_default': 0,
+      'phone_number':phoneNumber,
     };
   }
 

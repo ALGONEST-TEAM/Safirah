@@ -75,18 +75,38 @@ class _ListForCartWidgetState extends ConsumerState<ListForCartWidget> {
                     id: item.id, ref: ref);
               },
               onUpdateQuantity: (int newQuantity) {
+                setState(
+                  () {
+                    loadingId = item.id;
+
+                    cartStateNotifier.updateCart(
+                      id: item.id,
+                      prodectId: item.productId!,
+                      colorId: item.colorId,
+                      sizeId: item.sizeId!,
+                      price: item.price.toString(),
+                      quantity: newQuantity,
+                      numberId: item.numberId,
+                      isPrintable: item.isPrintable!,
+                    );
+                  },
+                );
+              },
+              onCancelPrinting: () {
                 setState(() {
                   loadingId = item.id;
-
-                  cartStateNotifier.updateCart(
-                    id: item.id,
-                    prodectId: item.productId!,
-                    colorId: item.colorId,
-                    sizeId: item.sizeId!,
-                    price: item.price.toString(),
-                    quantity: newQuantity,
-                  );
+                  delete = false;
                 });
+                cartStateNotifier.updateCart(
+                  id: item.id,
+                  prodectId: item.productId!,
+                  colorId: item.colorId,
+                  sizeId: item.sizeId!,
+                  price: item.price.toString(),
+                  quantity: item.quantity!,
+                  numberId: item.numberId,
+                  isPrintable: 0,
+                );
               },
             ),
           );

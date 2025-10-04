@@ -7,6 +7,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/buttons/icon_button_widget.dart';
 import '../../../../../core/widgets/buttons/ink_well_button_widget.dart';
+import '../../../../../generated/l10n.dart';
 import '../../../../../services/auth/auth.dart';
 import '../../../../user/presentation/pages/log_in_page.dart';
 import '../../../productManagement/search_product/presntation/page/search_page.dart';
@@ -27,14 +28,14 @@ AppBar appBarHomeWidget({required BuildContext context}) {
       children: [
         12.w.horizontalSpace,
         AutoSizeTextWidget(
-          text: "مرحبا بك",
+          text: S.of(context).welcome,
           colorText: AppColors.fontColor,
           fontSize: 12.6.sp,
         ),
         4.w.horizontalSpace,
         Flexible(
           child: AutoSizeTextWidget(
-            text: "رائد مسعود",
+            text: Auth().name,
             colorText: AppColors.secondaryColor,
             fontSize: 12.6.sp,
             maxLines: 2,

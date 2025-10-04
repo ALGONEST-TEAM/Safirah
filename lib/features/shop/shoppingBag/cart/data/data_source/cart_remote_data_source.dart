@@ -12,13 +12,14 @@ class CartRemoteDataSource {
   CartRemoteDataSource();
 
   Future<List<CartModel>> getAllCart() async {
-    // String? fcmToken = await PushNotificationService().getToken();
-
     final response = await RemoteRequest.getData(
       url: AppURL.getAllCart,
-      fcmToken: fcmToken,
     );
-    return CartModel.fromJsonList(response.data);
+    final List<dynamic> items =
+        (response.data is Map && response.data['data'] is List)
+            ? response.data['data'] as List
+            : const [];
+    return CartModel.fromJsonList(items);
   }
 
   Future<Unit> addToCart(
@@ -27,18 +28,19 @@ class CartRemoteDataSource {
     int sizeId,
     dynamic price,
     int quantity,
+    int? numberId,
+    int isPrintable,
   ) async {
-    // String? fcmToken = await PushNotificationService().getToken();
-
     await RemoteRequest.postData(
       path: AppURL.addToCart,
-      fcmToken: fcmToken,
       data: {
         'product_id': productId,
         'color_id': colorId,
         'parent_measuring_id': sizeId,
         'price': price,
         'quantity': quantity,
+        if (numberId != 0) 'number_id': numberId,
+        'is_printable': isPrintable,
       },
     );
     return Future.value(unit);
@@ -51,30 +53,28 @@ class CartRemoteDataSource {
     int sizeId,
     dynamic price,
     int quantity,
+    int? numberId,
+    int isPrintable,
   ) async {
-    // String? fcmToken = await PushNotificationService().getToken();
-
     final response = await RemoteRequest.postData(
       path: "${AppURL.updateCart}/$id",
-      fcmToken: fcmToken,
       data: {
         'product_id': productId,
         'color_id': colorId,
         'parent_measuring_id': sizeId,
         'price': price,
         'quantity': quantity,
+        if (numberId != 0) 'number_id': numberId,
+        'is_printable': isPrintable,
       },
     );
-    return CartProductModel.fromJson(response.data);
+    return CartProductModel.fromJson(response.data['data']);
   }
 
   Future<Unit> deleteAProductFromTheCart(
     int id,
   ) async {
-    // String? fcmToken = await PushNotificationService().getToken();
-
-    await RemoteRequest.postData(
-        path: "${AppURL.deleteCart}/$id", fcmToken: fcmToken);
+    await RemoteRequest.postData(path: "${AppURL.deleteCart}/$id");
     return Future.value(unit);
   }
 }

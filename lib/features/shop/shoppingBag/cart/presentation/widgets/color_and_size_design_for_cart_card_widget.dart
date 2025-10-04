@@ -6,6 +6,7 @@ import '../../../../../../core/constants/app_icons.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
+import '../../../../../../generated/l10n.dart';
 import '../pages/update_cart_page.dart';
 
 class ColorAndSizeDesignForCartCardWidget extends StatelessWidget {
@@ -16,8 +17,11 @@ class ColorAndSizeDesignForCartCardWidget extends StatelessWidget {
   final String colorHex;
   final String colorName;
   final String sizeName;
+  final int? numberId;
+  final String? numberName;
   final int quantity;
   final Function onSuccess;
+  final int isPrintable;
 
   const ColorAndSizeDesignForCartCardWidget({
     super.key,
@@ -28,12 +32,20 @@ class ColorAndSizeDesignForCartCardWidget extends StatelessWidget {
     required this.colorName,
     required this.sizeName,
     required this.id,
+    this.numberId,
+    this.numberName,
     required this.quantity,
     required this.onSuccess,
+    required this.isPrintable,
   });
 
   @override
   Widget build(BuildContext context) {
+    final parts = <String>[];
+    if (colorName.isNotEmpty) parts.add(colorName);
+    if (sizeName.isNotEmpty) parts.add(sizeName);
+    final numLabel = S.of(context).number;
+    if ((numberName ?? '').isNotEmpty) parts.add('$numLabel $numberName');
     return InkWell(
       onTap: () {
         showModalBottomSheetWidget(
@@ -48,6 +60,9 @@ class ColorAndSizeDesignForCartCardWidget extends StatelessWidget {
             colorId: colorId,
             sizeTypeName: sizeName,
             colorName: colorName,
+            numberId: numberId,
+            numberName: numberName,
+            isPrintable: isPrintable,
           ),
         );
       },
@@ -64,27 +79,29 @@ class ColorAndSizeDesignForCartCardWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            colorHex.isNotEmpty
-                ? CircleAvatar(
-                    backgroundColor: colorHex.toColor(),
-                    radius: 5.r,
-                  )
-                : const SizedBox.shrink(),
+            if(            colorHex.isNotEmpty)
+            Container(
+              height: 9.6.h,
+              width: 9.6.w,
+              decoration: BoxDecoration(
+                color: colorHex.toString().toColor(),
+                borderRadius: BorderRadius.circular(2.6.r),
+              ),
+            ),
             3.4.w.horizontalSpace,
             Flexible(
               child: AutoSizeTextWidget(
-                text: colorName.isNotEmpty
-                    ? "${colorName.toString()} / ${sizeName.toString()}"
-                    : sizeName.toString(),
+                text: parts.join(' / '),
                 colorText: AppColors.fontColor,
-                fontSize: 10.2.sp,
+                fontSize: 9.2.sp,
                 maxLines: 2,
               ),
             ),
-            3.w.horizontalSpace,
+            4.w.horizontalSpace,
             SvgPicture.asset(
               AppIcons.arrowBottom2,
               color: AppColors.fontColor,
+              height: 9.h,
             ),
           ],
         ),

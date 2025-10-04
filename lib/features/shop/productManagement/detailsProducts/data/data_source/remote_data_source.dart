@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-
+import 'package:safirah/core/network/urls.dart';
 import '../../../../../../core/network/remote_request.dart';
 import '../model/product_data.dart';
 
@@ -12,9 +11,8 @@ class ProductDetailsRemoteDataSource {
   Future<ProductData> getDetailsOfProduct(int idProduct) async {
 
     final response = await RemoteRequest.getData(
-      url: "/products/$idProduct",
+      url: "${AppURL.getDetailsOfProduct}/$idProduct",
     );
-    debugPrint(response.data['product'].toString(),wrapWidth: 1024);
-    return ProductData.fromJson(response.data['product']);
+    return ProductData.fromJson(response.data['data']['product']);
   }
 }

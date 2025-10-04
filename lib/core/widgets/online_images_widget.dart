@@ -37,7 +37,7 @@ class OnlineImagesWidget extends StatelessWidget {
           height: size?.height,
           width: size?.width,
           decoration: BoxDecoration(
-            color: Colors.grey[300],
+            color: AppColors.greySwatch.shade100,
             borderRadius: BorderRadius.circular(borderRadius ?? 8.r),
           ),
           child: SpinKitPulse(
@@ -80,12 +80,12 @@ class OnlineImagesWidget extends StatelessWidget {
         height: size?.height,
         width: size?.width,
         decoration: BoxDecoration(
-          color: AppColors.greySwatch.shade50,
+          color: AppColors.greySwatch.shade100,
           borderRadius: BorderRadius.circular(borderRadius ?? 8.r),
         ),
         child: Center(
           child: SvgPicture.asset(
-            AppIcons.logo,
+            AppIcons.logoText,
             width: logoWidth ?? 50.w,
           ),
         ),

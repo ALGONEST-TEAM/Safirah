@@ -10,19 +10,19 @@ class SectionAndProductData {
   final List<SectionData>? sections;
   @HiveField(2)
   final PaginatedProductsList? product;
-  @HiveField(3)
-  final List<dynamic>? imageBanner;
+  // @HiveField(3)
+  // final List<dynamic>? imageBanner;
   SectionAndProductData({
     this.sections,
     this.product,
-    this.imageBanner
+    // this.imageBanner
   });
 
   factory SectionAndProductData.fromJson(Map<String, dynamic> json) {
     return SectionAndProductData(
       sections: SectionData.fromJsonSectionList(json['sections']??[]),
       product: PaginatedProductsList.fromJson(json['products']??PaginatedProductsList.empty()),
-      imageBanner: List<dynamic>.from(json['panner_images']?.map((item) => item['image']) ?? []),
+      // imageBanner: List<dynamic>.from(json['panner_images']?.map((item) => item['image']) ?? []),
     );
   }
   bool isValid() {
@@ -53,7 +53,7 @@ class SectionAndProductData {
 
       product: products ?? product,
       sections: section ?? sections,
-      imageBanner: imagesBanner??imageBanner
+      // imageBanner: imagesBanner??imageBanner
     );
   }
 }

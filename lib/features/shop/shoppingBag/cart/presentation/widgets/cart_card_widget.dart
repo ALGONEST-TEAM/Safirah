@@ -7,10 +7,11 @@ import '../../../../../../core/state/state.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/online_images_widget.dart';
-import '../../../../../../core/widgets/price_and_currency_widget.dart';
 import '../riverpod/cart_riverpod.dart';
+import 'cancel_printing_widget.dart';
 import 'check_box_for_cart_products_widget.dart';
 import 'color_and_size_design_for_cart_card_widget.dart';
+import 'product_price_and_discount_in_the_cart_widget.dart';
 import 'quantity_widget.dart';
 
 class CartCardWidget extends ConsumerWidget {
@@ -18,6 +19,7 @@ class CartCardWidget extends ConsumerWidget {
   final int? loadingId;
   final Function onDelete;
   final Function(int) onUpdateQuantity;
+  final VoidCallback onCancelPrinting;
 
   const CartCardWidget({
     super.key,
@@ -25,6 +27,7 @@ class CartCardWidget extends ConsumerWidget {
     required this.loadingId,
     required this.onDelete,
     required this.onUpdateQuantity,
+    required this.onCancelPrinting,
   });
 
   @override
@@ -33,7 +36,7 @@ class CartCardWidget extends ConsumerWidget {
     var cartStateNotifier = ref.watch(cartProvider.notifier);
 
     return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
+      margin: EdgeInsets.only(bottom: 8.h),
       padding: EdgeInsets.symmetric(vertical: 6.h),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
@@ -71,12 +74,24 @@ class CartCardWidget extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AutoSizeTextWidget(
-                  text: cartProductState.productName.toString(),
-                  maxLines: 2,
-                  fontSize: 11.8.sp,
-                  minFontSize: 10,
-                  colorText: AppColors.mainColorFont,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: AutoSizeTextWidget(
+                        text: cartProductState.productName.toString(),
+                        maxLines: 2,
+                        fontSize: 11.6.sp,
+                        minFontSize: 10,
+                        colorText: AppColors.mainColorFont,
+                      ),
+                    ),
+                    2.w.horizontalSpace,
+                    Visibility(
+                      visible: cartProductState.isPrintable == 1,
+                      child: CancelPrintingWidget(onConfirm: onCancelPrinting),
+                    ),
+                  ],
                 ),
                 8.h.verticalSpace,
                 ColorAndSizeDesignForCartCardWidget(
@@ -87,7 +102,10 @@ class CartCardWidget extends ConsumerWidget {
                   colorHex: cartProductState.colorHex!,
                   colorName: cartProductState.colorName.toString(),
                   sizeName: cartProductState.sizeName.toString(),
+                  numberId: cartProductState.numberId,
+                  numberName: cartProductState.numberName,
                   quantity: cartProductState.quantity!,
+                  isPrintable: cartProductState.isPrintable ?? 0,
                   onSuccess: () {
                     ref
                         .read(cartProductProvider(productId).notifier)
@@ -100,6 +118,7 @@ class CartCardWidget extends ConsumerWidget {
                       cartStateNotifier.updateSelectedProduct(cartProductState
                           .updateCartProduct(ref.read(cartProvider).data));
                     }
+
                     Navigator.of(context).pop();
                   },
                 ),
@@ -108,15 +127,16 @@ class CartCardWidget extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Flexible(
-                      child: PriceAndCurrencyWidget(
-                        price:
-                            (double.parse(cartProductState.price.toString()) *
-                                    cartProductState.quantity!)
-                                .toString(),
-                        fontSize1: 12.2.sp,
-                        fontSize2: 10.6.sp,
-                      ),
+                    ProductPriceAndDiscountInTheCartWidget(
+                      price: (double.parse(cartProductState.price.toString()) *
+                              cartProductState.quantity!)
+                          .toString(),
+                      productPriceAfterDiscount: (double.parse(cartProductState
+                                  .productPriceAfterDiscount
+                                  .toString()) *
+                              cartProductState.quantity!)
+                          .toString(),
+                      discount: cartProductState.discount,
                     ),
                     4.w.horizontalSpace,
                     Row(
@@ -125,7 +145,7 @@ class CartCardWidget extends ConsumerWidget {
                         InkWell(
                           child: SvgPicture.asset(
                             AppIcons.cartMinus,
-                            height: 22.h,
+                            height: 21.h,
                           ),
                           onTap: () {
                             if (cartProductState.quantity! > 1) {
@@ -142,7 +162,7 @@ class CartCardWidget extends ConsumerWidget {
                         InkWell(
                           child: SvgPicture.asset(
                             AppIcons.cartPlus,
-                            height: 22.h,
+                            height: 21.h,
                           ),
                           onTap: () {
                             onUpdateQuantity(cartProductState.quantity! + 1);
@@ -150,17 +170,17 @@ class CartCardWidget extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    6.w.horizontalSpace,
+                    4.w.horizontalSpace,
                     InkWell(
                       child: SvgPicture.asset(
                         AppIcons.cartDelete,
-                        height: 22.h,
+                        height: 21.h,
                       ),
                       onTap: () {
                         onDelete();
                       },
                     ),
-                    4.w.horizontalSpace,
+                    2.w.horizontalSpace,
                   ],
                 ),
               ],

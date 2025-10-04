@@ -7,11 +7,13 @@ import '../model/cart_product_model.dart';
 
 class CartReposaitory {
   CartReposaitory();
+
   Future<Either<DioException, List<CartModel>>> getAllCart() async {
     try {
       final remote = await CartRemoteDataSource().getAllCart();
       return Right(remote);
     } on DioException catch (e) {
+      print(e);
       return Left(e);
     }
   }
@@ -20,8 +22,10 @@ class CartReposaitory {
     int prodectId,
     dynamic colorId,
     int sizeId,
-      dynamic price,
+    dynamic price,
     int quantity,
+    int? numberId,
+    int isPrintable,
   ) async {
     try {
       final remote = await CartRemoteDataSource().addToCart(
@@ -30,6 +34,8 @@ class CartReposaitory {
         sizeId,
         price,
         quantity,
+        numberId,
+        isPrintable,
       );
       return Right(remote);
     } on DioException catch (e) {
@@ -42,8 +48,10 @@ class CartReposaitory {
     int prodectId,
     dynamic colorId,
     int sizeId,
-      dynamic price,
-      int quantity,
+    dynamic price,
+    int quantity,
+    int? numberId,
+    int isPrintable,
   ) async {
     try {
       final remote = await CartRemoteDataSource().updateCart(
@@ -53,6 +61,8 @@ class CartReposaitory {
         sizeId,
         price,
         quantity,
+        numberId,
+        isPrintable,
       );
       return Right(remote);
     } on DioException catch (e) {

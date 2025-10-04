@@ -44,9 +44,9 @@ class _ListOfAddressesToConfirmTheOrderWidgetState
                       state.data.userAddresses[index].id;
                   widget.form.control('address').value =
                       state.data.userAddresses[index].address;
-                  widget.form.control('district').value =
-                      "${state.data.userAddresses[index].city!.name} - ${state.data.userAddresses[index].district!.name} ";
-      
+                  widget.form.control('district').value =state.data.userAddresses[index].district!.name;
+                      // "${state.data.userAddresses[index].city!.name} - ${state.data.userAddresses[index].district!.name} ";
+                  widget.form.control('city_name').value=state.data.userAddresses[index].city!.name;
                   ref.refresh(confirmOrderProvider.notifier);
                 });
                 Navigator.of(context).pop();

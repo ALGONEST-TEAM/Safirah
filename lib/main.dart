@@ -14,7 +14,7 @@ import 'core/theme/theme.dart';
 import 'features/profile/settings/presentation/riverpod/setting_riverpod.dart';
 import 'features/shop/category/data/model/category_data.dart';
 import 'features/shop/home/data/model/section_data.dart';
-import 'features/shop/home/data/model/section_with_category_of_all_data.dart';
+import 'features/shop/home/data/model/sections_and_offers_data.dart';
 import 'features/shop/home/data/model/section_with_product_data.dart';
 import 'features/shop/productManagement/detailsProducts/data/model/color_data.dart';
 import 'features/shop/productManagement/detailsProducts/data/model/discount_model.dart';
@@ -46,7 +46,7 @@ void main() async {
       Hive.registerAdapter(CategoryDataAdapter());
       Hive.registerAdapter(ProductDataAdapter());
       Hive.registerAdapter(ColorOfProductDataAdapter());
-      Hive.registerAdapter(SectionWithCategoryOfAllDataAdapter());
+      // Hive.registerAdapter(SectionWithCategoryOfAllDataAdapter());
       Hive.registerAdapter(DiscountModelAdapter());
       await di.init();
       Auth();

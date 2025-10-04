@@ -73,8 +73,8 @@ class _ResendCodeWidgetState extends ConsumerState<ResendCodeWidget> {
       children: [
         AutoSizeTextWidget(
           text: S.of(context).resendCodeIN,
-          fontSize: 12.5.sp,
-          colorText: Colors.black,
+          fontSize: 12.sp,
+          colorText: AppColors.fontColor,
           textAlign: TextAlign.center,
         ),
         canResend ? 6.w.horizontalSpace : 3.w.horizontalSpace,
@@ -92,9 +92,9 @@ class _ResendCodeWidgetState extends ConsumerState<ResendCodeWidget> {
                     },
                     bottonWidget: InkWell(
                       onTap: () {
-                        ref.read(userProvider.notifier).resendOTP(
-                              phoneNumberOrEmail: widget.phoneNumberOrEmail,
-                            );
+                        // ref.read(userProvider.notifier).resendOTP(
+                        //       phoneNumberOrEmail: widget.phoneNumberOrEmail,
+                        //     );
                       },
                       child: Text(
                         S.of(context).resend,

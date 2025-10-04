@@ -13,6 +13,7 @@ class AppIcons {
   static const String close = '${_iconsPath}close.svg';
   static const String sharing = '${_iconsPath}sharing.svg';
   static const String trash = '${_iconsPath}trash.svg';
+  static const String error = '${_iconsPath}error.svg';
 
   // Logo
   static const String logo = '${_iconsPath}logo.svg';
@@ -27,6 +28,7 @@ class AppIcons {
   static const String arrowRight = '${_iconsPath}arrow_right.svg';
 
   // Prodect details
+  static const String printing = '${_iconsPath}printing.svg';
   static const String sizeDetails = '${_iconsPath}size_details.svg';
   static const String shippingDetails = '${_iconsPath}shipping_details.svg';
   static const String returnPolicy = '${_iconsPath}return_policy.svg';
@@ -54,7 +56,7 @@ class AppIcons {
   static const String addPhotos = '${_iconsPath}add_photos.svg';
   static const String takePhoto = '${_iconsPath}take_photo.svg';
   static const String gallery = '${_iconsPath}gallery.svg';
-  
+
   /// Wishlist
   static const String multipleChoice = '${_iconsPath}multiple_choice.svg';
   static const String wishlist = '${_iconsPath}wishlist.svg';

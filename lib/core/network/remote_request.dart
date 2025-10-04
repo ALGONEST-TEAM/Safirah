@@ -19,7 +19,7 @@ class RemoteRequest {
   static Future<Response> getData({
     required String url,
     dynamic query,
-    String fcmToken = '',
+    // String fcmToken = '',
     String lang = 'ar',
   }) async {
     String currency = await Auth().getCurrency();
@@ -27,10 +27,9 @@ class RemoteRequest {
       'Content-Type': 'application/json',
       'Currency-Code': currency,
       'lang': lang,
-      if (fcmToken.isNotEmpty) 'user-fcm-token': fcmToken,
+      // if (fcmToken.isNotEmpty) 'user-fcm-token': fcmToken,
       'Authorization': 'Bearer ${Auth().token}',
     };
-    print(Auth().token);
     final response = await dio.get(url, queryParameters: query);
     debugPrint(response.statusCode.toString());
     debugPrint(response.data.toString());
@@ -47,7 +46,7 @@ class RemoteRequest {
     required String path,
     Map<String, dynamic>? query,
     dynamic data,
-    String fcmToken = '',
+    // String fcmToken = '',
     String lang = 'ar',
   }) async {
     String currency = await Auth().getCurrency();
@@ -55,7 +54,7 @@ class RemoteRequest {
       'Content-Type': 'application/json',
       'Currency-Code': currency,
       'lang': lang,
-      if (fcmToken.isNotEmpty) 'user-fcm-token': fcmToken,
+      // if (fcmToken.isNotEmpty) 'user-fcm-token': fcmToken,
       'Authorization': 'Bearer ${Auth().token}',
     };
     final response = await dio.post(

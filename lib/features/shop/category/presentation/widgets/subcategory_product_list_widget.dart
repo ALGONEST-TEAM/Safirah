@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/state/state.dart';
-import '../../../../../core/widgets/product_list_widget.dart';
-import '../../../../../core/widgets/skeletonizer_widget.dart';
-import '../../../productManagement/detailsProducts/data/model/product_data.dart';
+import '../../../../../core/widgets/product/product_list_widget.dart';
+import '../../../../../core/widgets/product/products_shimmer_widget.dart';
 import '../../../productManagement/filterProducts/presentation/state_mangment/riverpod.dart';
 
 class SubcategoryProductListWidget extends ConsumerWidget {
@@ -44,13 +43,9 @@ class SubcategoryProductListWidget extends ConsumerWidget {
 
     return SliverToBoxAdapter(
       child: isLoading
-          ? SkeletonizerWidget(
-              child: ProductListWidget(
-                product: ProductData.fakeProductData,
-                isLoadingMore: isLoadingMore,
-              ),
-            )
-          : ProductListWidget(
+          ?               const ProductsShimmerWidget()
+
+        : ProductListWidget(
               product: products,
               isLoadingMore: isLoadingMore,
             ),

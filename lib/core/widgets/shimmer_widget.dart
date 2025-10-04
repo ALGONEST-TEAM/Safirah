@@ -13,12 +13,9 @@ class ShimmerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      // baseColor: const Color(0xffCFE4FB),
-      //
-      // highlightColor: Colors.grey.shade200,
-      baseColor: AppColors.greySwatch.shade200,
-
+      baseColor: AppColors.greySwatch.shade100,
       highlightColor: Colors.grey.shade100,
+      direction: ShimmerDirection.rtl,
       child: child,
     );
   }
@@ -41,16 +38,16 @@ class ShimmerPlaceholderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      // baseColor:baseColor?? const Color(0xffedf0f5),
-      // highlightColor: Colors.grey.shade50,
-      baseColor: AppColors.greySwatch.shade200,
+      baseColor: AppColors.greySwatch.shade100,
 
       highlightColor: Colors.grey.shade100,
+      direction: ShimmerDirection.rtl,
+
       child: Container(
           width: width ?? double.infinity,
           height: height ?? 100.h,
           decoration: BoxDecoration(
-            color: AppColors.primarySwatch.shade50.withOpacity(.8),
+            color: AppColors.greySwatch.shade100,
             borderRadius: BorderRadius.circular(borderRadius ?? 8.r),
           )),
     );

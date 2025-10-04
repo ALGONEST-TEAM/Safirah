@@ -28,7 +28,7 @@ class ShowDetailsComeFromCardProductWithShimmerWidget extends StatelessWidget {
     return SingleChildScrollView(
       child: Consumer(
         builder: (context, ref, child) {
-          var indexColorImage = ref.watch(changeIndexOfColorImageProvider);
+          var indexColorImage = ref.watch(changeIndexOfColorImageAndSizeProvider);
           var indexImage = ref.watch(showNumberOfScrollImageProvider);
 
           return Column(

@@ -30,12 +30,11 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "طريقة جديدة لإدارة المنتجات المفضلة لديك! يمكنك التصنيف بطريقتك الخاصة",
         ),
-    "accountNotFound": MessageLookupByLibrary.simpleMessage("الحساب غير موجود"),
+    "accountCreatedSuccessfully": MessageLookupByLibrary.simpleMessage(
+      "تم إنشاء حساب بنجاح",
+    ),
     "addANewAddress": MessageLookupByLibrary.simpleMessage("أضافة عنوان جديد"),
     "addGoods": MessageLookupByLibrary.simpleMessage("إضافة البضائع"),
-    "addMoreThanOneReviewOnOneProduct": MessageLookupByLibrary.simpleMessage(
-      "إضافة أكثر من مراجعة واحدة على منتج واحد",
-    ),
     "addPhotos": MessageLookupByLibrary.simpleMessage("إضافة صور"),
     "addProducts": MessageLookupByLibrary.simpleMessage("أضف منتجات"),
     "addRating": MessageLookupByLibrary.simpleMessage("إضافة تقييم"),
@@ -75,6 +74,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "هل يمكنك ترك رأيك؟",
     ),
     "cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
+    "cancelPrinting": MessageLookupByLibrary.simpleMessage("إلغاء الطباعة"),
     "cannotReachServer": MessageLookupByLibrary.simpleMessage(
       "تعذّر الاتصال بالخادم",
     ),
@@ -101,6 +101,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "color": MessageLookupByLibrary.simpleMessage("لون"),
     "colors": MessageLookupByLibrary.simpleMessage("الألوان"),
+    "comments": MessageLookupByLibrary.simpleMessage("التعليقات"),
     "confirm": MessageLookupByLibrary.simpleMessage("تأكيد"),
     "confirmAddress": MessageLookupByLibrary.simpleMessage("تأكيد العنوان"),
     "confirmOrder": MessageLookupByLibrary.simpleMessage("تأكيد الطلب"),
@@ -109,11 +110,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyToList": MessageLookupByLibrary.simpleMessage("نسخ إلى القائمة"),
     "createAList": MessageLookupByLibrary.simpleMessage("إنشاء قائمة"),
     "createANewList": MessageLookupByLibrary.simpleMessage("إنشاء قائمة جديدة"),
-    "createAccount": MessageLookupByLibrary.simpleMessage(
-      "إنشاء حساب في صافرة",
-    ),
+    "createAccount": MessageLookupByLibrary.simpleMessage("إنشاء حساب"),
     "createAccountDesc": MessageLookupByLibrary.simpleMessage(
       "سجل حساب جديد للاستفادة من جميع خدمات صافرة",
+    ),
+    "createAccountS": MessageLookupByLibrary.simpleMessage(
+      "إنشاء حساب في صافرة",
     ),
     "currency": MessageLookupByLibrary.simpleMessage("العملة"),
     "dailyNew": MessageLookupByLibrary.simpleMessage("الجديد اليومي"),
@@ -174,19 +176,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "httpVersionNotSupported2": MessageLookupByLibrary.simpleMessage(
       "تأكد من تحديث التطبيق إلى آخر إصدار",
     ),
-    "ifYouWantToModifyTheProductGoToTheShoppingBag":
-        MessageLookupByLibrary.simpleMessage(
-          "إذا كنت تريد تعديل المنتج، انتقل إلى حقيبة التسوق",
-        ),
-    "incorrectPassword": MessageLookupByLibrary.simpleMessage(
-      "كلمة المرور غير صحيحة",
-    ),
-    "incorrectVerificationCode": MessageLookupByLibrary.simpleMessage(
-      "كود التحقق غير صحيح",
-    ),
-    "incorrectVerificationCode2": MessageLookupByLibrary.simpleMessage(
-      "الرجاء التأكد من كود التحقق",
-    ),
     "internalServerError": MessageLookupByLibrary.simpleMessage(
       "خطأ داخلي في الخادم",
     ),
@@ -209,6 +198,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "loginRequired": MessageLookupByLibrary.simpleMessage("تسجيل الدخول مطلوب"),
     "loginSubTitle": MessageLookupByLibrary.simpleMessage(
       "باستخدام رقم الهاتف",
+    ),
+    "loginSuccessful": MessageLookupByLibrary.simpleMessage(
+      "تم تسجيل الدخول بنجاح",
     ),
     "loginTitle": MessageLookupByLibrary.simpleMessage("سجل الدخول الى صافرة"),
     "logoutSuccessfully": MessageLookupByLibrary.simpleMessage(
@@ -239,16 +231,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "notImplemented2": MessageLookupByLibrary.simpleMessage(
       "تأكد من تحديث التطبيق أو التواصل مع الدعم",
     ),
+    "number": MessageLookupByLibrary.simpleMessage("رقم"),
     "numberOfProducts": MessageLookupByLibrary.simpleMessage("عدد المنتجات"),
+    "numbers": MessageLookupByLibrary.simpleMessage("الأرقام"),
     "opinions": MessageLookupByLibrary.simpleMessage("آراء"),
     "optional": MessageLookupByLibrary.simpleMessage("(اختياري)"),
     "order": MessageLookupByLibrary.simpleMessage("الطلب"),
     "orderDetails": MessageLookupByLibrary.simpleMessage("تفاصيل الطلب"),
     "orderNumber": MessageLookupByLibrary.simpleMessage("رقم الطلب"),
     "orderStatus": MessageLookupByLibrary.simpleMessage("حالة الطلب"),
-    "passwordIsSameUserPassword": MessageLookupByLibrary.simpleMessage(
-      "كلمة المرور هي نفس كلمة مرور المستخدم",
-    ),
     "payment": MessageLookupByLibrary.simpleMessage("الدفع"),
     "paymentDetails": MessageLookupByLibrary.simpleMessage("تفاصيل الدفع:"),
     "paymentMethod": MessageLookupByLibrary.simpleMessage("طريقة الدفع"),
@@ -269,9 +260,6 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "pleaseAddAddress": MessageLookupByLibrary.simpleMessage(
       "يرجى إضافة عنوان.",
-    ),
-    "pleaseCheckThePhoneNumberOrEmail": MessageLookupByLibrary.simpleMessage(
-      "يرجى التحقق من رقم الهاتف أو البريد الإلكتروني",
     ),
     "pleaseChoseACity": MessageLookupByLibrary.simpleMessage(
       "الرجاء اختيار المدينة",
@@ -300,11 +288,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "pleaseLoginToContinue": MessageLookupByLibrary.simpleMessage(
       "يرجى تسجيل الدخول للمتابعة",
     ),
+    "pleaseSelectANumber": MessageLookupByLibrary.simpleMessage(
+      "يرجى اختيار رقم",
+    ),
     "pleaseSelectASize": MessageLookupByLibrary.simpleMessage(
       "يرجى اختيار مقاس",
-    ),
-    "pleaseSelectAUnit": MessageLookupByLibrary.simpleMessage(
-      "يرجى اختيار الوحدة",
     ),
     "pleaseSelectTheProductsYouWishToPayFor":
         MessageLookupByLibrary.simpleMessage(
@@ -313,13 +301,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "pleaseTryAgain": MessageLookupByLibrary.simpleMessage(
       "يرجى المحاولة مرة أخرى",
     ),
-    "pleaseVerifyTheAccount": MessageLookupByLibrary.simpleMessage(
-      "الرجاء التأكد من الحساب",
-    ),
     "price": MessageLookupByLibrary.simpleMessage("السعر"),
     "priceHigh": MessageLookupByLibrary.simpleMessage("الأعلى سعرًا"),
     "priceLow": MessageLookupByLibrary.simpleMessage("الأقل سعرًا"),
+    "printingOnTheProduct": MessageLookupByLibrary.simpleMessage(
+      "الطباعة على المنتج",
+    ),
     "processing": MessageLookupByLibrary.simpleMessage("قيد التجهيز"),
+    "productAddedToCartSuccessfully": MessageLookupByLibrary.simpleMessage(
+      "تمت اضافة المنتج الى السلة بنجاح",
+    ),
     "products": MessageLookupByLibrary.simpleMessage("المنتجات"),
     "productsHaveBeenAddedToTheList": MessageLookupByLibrary.simpleMessage(
       "تمت إضافة المنتجات إلى القائمة",
@@ -362,6 +353,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "returns": MessageLookupByLibrary.simpleMessage(" المسترجعة"),
     "review": MessageLookupByLibrary.simpleMessage(" التعليق"),
     "save": MessageLookupByLibrary.simpleMessage("حفظ"),
+    "sections": MessageLookupByLibrary.simpleMessage("الأقسام"),
     "selectionOfProducts": MessageLookupByLibrary.simpleMessage(
       "اختيار المنتجات",
     ),
@@ -417,14 +409,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "theModificationHasBeenCompletedSuccessfully":
         MessageLookupByLibrary.simpleMessage("لقد تم التعديل بنجاح"),
-    "thePasswordDoesNotMeetTheConditions": MessageLookupByLibrary.simpleMessage(
-      "كلمة السر غير مستوفية لشروط",
-    ),
     "thePasswordHasBeenChanged": MessageLookupByLibrary.simpleMessage(
       "تم تغيير كلمة السر بنجاح",
-    ),
-    "theProductIsAlreadyInTheCart": MessageLookupByLibrary.simpleMessage(
-      "المنتج موجود بالفعل في سلة التسوق",
     ),
     "theTotal": MessageLookupByLibrary.simpleMessage("المجموع"),
     "thereAreNoLists": MessageLookupByLibrary.simpleMessage("لاتوجد قوائم"),
@@ -442,16 +428,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "transactionSuccessful": MessageLookupByLibrary.simpleMessage(
       "تمت العملية بنجاح",
     ),
+    "understood": MessageLookupByLibrary.simpleMessage("لقد فهمت"),
     "unpaid": MessageLookupByLibrary.simpleMessage("غير مدفوع"),
-    "userCannot": MessageLookupByLibrary.simpleMessage("لا يمكن للمستخدم"),
-    "verificationCodeExpired": MessageLookupByLibrary.simpleMessage(
-      "انتهت صلاحية كود التحقق",
-    ),
-    "verificationCodeExpired2": MessageLookupByLibrary.simpleMessage(
-      "الرجاء إعادة إرسال كود التحقق",
-    ),
+    "verificationCode": MessageLookupByLibrary.simpleMessage("رمز التحقق"),
     "viewAll": MessageLookupByLibrary.simpleMessage("عرض الكل"),
     "viewMore": MessageLookupByLibrary.simpleMessage("عرض المزيد"),
+    "welcome": MessageLookupByLibrary.simpleMessage("مرحبًا بك"),
     "wishlist": MessageLookupByLibrary.simpleMessage("قائمة الأماني"),
     "yes": MessageLookupByLibrary.simpleMessage("نعم"),
     "youDontHaveAnyProductInMyWishlist": MessageLookupByLibrary.simpleMessage(

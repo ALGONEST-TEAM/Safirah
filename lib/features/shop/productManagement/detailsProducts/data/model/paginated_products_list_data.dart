@@ -9,8 +9,6 @@ class PaginatedProductsList {
   final List<ProductData> data;
   @HiveField(1)
   final int currentPage;
-
-
   @HiveField(2)
   final int? lastPage;
   final int? totalProduct;

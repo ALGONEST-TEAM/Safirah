@@ -20,11 +20,13 @@ import 'add_reviews_dialog.dart';
 
 class ReviewsPage extends ConsumerStatefulWidget {
   final ProductOrderDetailsModel products;
+  final int? productId;
   final int orderId;
   final int status;
 
   const ReviewsPage({
     super.key,
+    this.productId,
     required this.products,
     required this.orderId,
     required this.status,
@@ -46,7 +48,10 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
   void _onScroll() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
-      ref.read(getAllReviewsProvider(widget.products.id).notifier).getData(
+      ref
+          .read(getAllReviewsProvider( widget.productId!)
+              .notifier)
+          .getData(
             moreData: true,
           );
     }
@@ -60,7 +65,7 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
 
   @override
   Widget build(BuildContext context) {
-    var state = ref.watch(getAllReviewsProvider(widget.products.id));
+    var state = ref.watch(getAllReviewsProvider( widget.productId!));
     return Scaffold(
       appBar: SecondaryAppBarWidget(
         title: S.of(context).evaluations,
@@ -70,13 +75,16 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
         color: AppColors.primaryColor,
         backgroundColor: Colors.white,
         onRefresh: () async {
-          ref.refresh(getAllReviewsProvider(widget.products.id));
+          ref.refresh(getAllReviewsProvider(widget.productId!));
         },
         child: SingleChildScrollView(
           controller: _scrollController,
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: CheckStateInGetApiDataWidget(
             state: state,
+            refresh: () {
+              ref.refresh(getAllReviewsProvider( widget.productId!));
+            },
             widgetOfLoading: const ShimmerForReviewsWidget(),
             widgetOfData: state.data.review.data.isNotEmpty
                 ? Column(
@@ -115,6 +123,30 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
           ),
         ),
       ),
+      // bottomNavigationBar: state.stateData == States.loaded
+      //     ? ButtonBottomNavigationBarDesignWidget(
+      //         child: DefaultButtonWidget(
+      //           text: S.of(context).addRating,
+      //           textSize: 13.sp,
+      //           onPressed: () {
+      //             print(widget.productId);
+      //             scrollShowModalBottomSheetWidget(
+      //               context: context,
+      //               title: S.of(context).canYouLeaveYourReview,
+      //               page: AddReviewsDialog(
+      //                 orderId: widget.orderId,
+      //                 productId: widget.products.id,
+      //                 colorId: widget.products.colorId,
+      //                 colorHex: widget.products.colorHex.toString(),
+      //                 colorName: widget.products.colorName.toString(),
+      //                 sizeId: widget.products.sizeId!,
+      //                 sizeValue: widget.products.sizeValue.toString(),
+      //               ),
+      //             );
+      //           },
+      //         ),
+      //       )
+      //     : null,
       bottomNavigationBar:
           state.stateData == States.loading || state.stateData == States.error
               ? null

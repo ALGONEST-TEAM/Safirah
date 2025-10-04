@@ -47,7 +47,8 @@ class AddressToConfirmTheOrderWidget extends StatelessWidget {
                       ),
                       4.h.verticalSpace,
                       AutoSizeTextWidget(
-                        text: form.control('district').value ?? "",
+                        text:
+                            "${form.control('city_name').value ?? ''} - ${form.control('district').value ?? ''}",
                         fontSize: 10.4.sp,
                         colorText: AppColors.fontColor2,
                         fontWeight: FontWeight.w400,

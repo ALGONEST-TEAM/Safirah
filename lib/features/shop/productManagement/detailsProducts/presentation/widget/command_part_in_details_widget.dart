@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
-import '../../../../../../core/widgets/product_list_widget.dart';
+import '../../../../../../core/widgets/product/product_list_widget.dart';
 
 
 

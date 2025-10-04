@@ -5,26 +5,32 @@ import '../../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../../core/state/check_state_in_post_api_data_widget.dart';
 import '../../../../../../core/state/state.dart';
 import '../../../../../../core/theme/app_colors.dart';
+import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/buttons/default_button.dart';
 import '../../../../../../generated/l10n.dart';
 import '../../../../productManagement/detailsProducts/presentation/state_mangment/riverpod_details.dart';
+import '../../../../productManagement/detailsProducts/presentation/widget/list_of_colors_product_widget.dart';
+import '../../../../productManagement/detailsProducts/presentation/widget/list_of_number_product_widget.dart';
+import '../../../../productManagement/detailsProducts/presentation/widget/list_of_size_product_widget.dart';
+import '../../../../productManagement/detailsProducts/presentation/widget/printing_on_the_product_widget.dart';
 import '../riverpod/cart_riverpod.dart';
 import '../widgets/name_description_and_price_of_the_product_widget.dart';
 import '../widgets/photo_list_widget.dart';
-import '../widgets/product_colors_widget.dart';
-import '../widgets/products_sizes_widget.dart';
 
 class UpdateCartPage extends ConsumerStatefulWidget {
   final int id;
   final int productId;
-  dynamic colorId;
-  int? sizeId;
-  String? sizeTypeName;
-  String? colorName;
+  final int? colorId;
+  final int? sizeId;
+  final String? sizeTypeName;
+  final String? colorName;
+  final int? numberId;
+  final String? numberName;
   final int quantity;
   final Function onSuccess;
+  final int isPrintable;
 
-  UpdateCartPage({
+  const UpdateCartPage({
     super.key,
     required this.id,
     required this.productId,
@@ -34,6 +40,9 @@ class UpdateCartPage extends ConsumerStatefulWidget {
     this.sizeId,
     this.sizeTypeName,
     this.colorName,
+    this.numberId,
+    this.numberName,
+    required this.isPrintable,
   });
 
   @override
@@ -41,22 +50,22 @@ class UpdateCartPage extends ConsumerStatefulWidget {
 }
 
 class _UpdateCartPageState extends ConsumerState<UpdateCartPage> {
-  int mainIndex = 0;
   bool isMainInitialized = false;
+  bool isSizeIdValid = false;
+  bool isNumberIdValid = false;
 
-  /// تحديد اللون الأساسي عند تحميل الصفحة لأول مرة
-  void _initializeMainColor(data) {
+  /// تحديد الصورة عند تحميل الصفحة لأول مرة
+  void _initializeImage(data) {
     if (!isMainInitialized && data.colorsProduct!.isNotEmpty) {
-      mainIndex = data.colorsProduct!
+      final mainIndex = data.colorsProduct!
           .indexWhere((color) => color.idColor == widget.colorId);
       isMainInitialized = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(changeIndexOfColorImageAndSizeProvider.notifier)
+            .setIndexColor(mainIndex);
+      });
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(changePriceProvider(data).notifier).setIdColor(widget.colorId!);
-      ref
-          .read(changePriceProvider(data).notifier)
-          .setNameSize(widget.sizeTypeName!);
-    });
   }
 
   @override
@@ -65,7 +74,7 @@ class _UpdateCartPageState extends ConsumerState<UpdateCartPage> {
     var cartState = ref.watch(cartProvider);
 
     return Container(
-      margin: EdgeInsets.only(top: 140.h),
+      margin: EdgeInsets.only(top: 90.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -91,9 +100,10 @@ class _UpdateCartPageState extends ConsumerState<UpdateCartPage> {
         ),
         widgetOfData: Consumer(
           builder: (context, ref, child) {
+            _initializeImage(state.data);
             var price = ref.watch(changePriceProvider(state.data));
-
-            _initializeMainColor(state.data);
+            var indexColorImage =
+                ref.watch(changeIndexOfColorImageAndSizeProvider);
 
             return Column(
               mainAxisSize: MainAxisSize.min,
@@ -109,71 +119,152 @@ class _UpdateCartPageState extends ConsumerState<UpdateCartPage> {
                         PhotoListWidget(
                           image: state.data.colorHasImage == false
                               ? state.data.allImage!
-                              : state.data.colorsProduct![mainIndex].image!,
+                              : state
+                                  .data.colorsProduct![indexColorImage!].image!,
                         ),
-                      NameDescriptionAndPriceOfTheProductWidget(
-                        idProduct: state.data.id!,
-                        image: state.data.allImage,
-                        name: state.data.name.toString(),
-                        description: state.data.description.toString(),
-                        price: price ?? state.data.price!,
-                        updateCart: true,
-                      ),
-                      if (state.data.colorsProduct!.isNotEmpty)
-                        ProductColorsWidget(
-                          productsColors: state.data.colorsProduct!,
-                          colorId: widget.colorId!,
-                          colorName: widget.colorName.toString(),
-                          onSelect: (int colorId, int index, String colorName) {
-                            setState(() {
-                              widget.colorId = colorId;
-                              mainIndex = index;
-                              widget.colorName = colorName;
-                            });
-                            ref
-                                .read(changePriceProvider(state.data).notifier)
-                                .setIdColor(colorId);
-                          },
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            NameDescriptionAndPriceOfTheProductWidget(
+                              idProduct: state.data.id!,
+                              image: state.data.allImage,
+                              name: state.data.name.toString(),
+                              description: state.data.description.toString(),
+                              price: price ?? state.data.price!,
+                              updateCart: true,
+                              discountModel: state.data.discountModel,
+
+                            ),
+                            Visibility(
+                              visible:
+                                  state.data.colorsProduct?.isNotEmpty == true,
+                              child: ListOfColorsProductWidget(
+                                colorsProduct: state.data,
+                                colorIdOfTheCart: widget.colorId,
+                                colorNameOfTheCart: widget.colorName,
+                              ),
+                            ),
+                            if (isSizeIdValid)
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 2.h),
+                                child: AutoSizeTextWidget(
+                                  text: S.of(context).pleaseSelectASize,
+                                  fontSize: 11.sp,
+                                  colorText: AppColors.dangerColor,
+                                ),
+                              ),
+                            Visibility(
+                              visible: state.data.sizeProduct!.isNotEmpty,
+                              child: ListOfSizeProductWidget(
+                                sizeProduct: state.data,
+                                sizeIdOfTheCart: widget.sizeId,
+                                sizeNameOfTheCart: widget.sizeTypeName,
+                              ),
+                            ),
+                            if (isNumberIdValid)
+                              Padding(
+                                padding: EdgeInsets.only(top: 6.h),
+                                child: AutoSizeTextWidget(
+                                  text: S.of(context).pleaseSelectANumber,
+                                  fontSize: 11.sp,
+                                  colorText: AppColors.dangerColor,
+                                ),
+                              ),
+                            Visibility(
+                              visible: state.data.numbersOfProduct!.isNotEmpty,
+                              child: ListOfNumberProductWidget(
+                                product: state.data,
+                                numberIdOfTheCart: widget.numberId,
+                                numberOfTheCart: widget.numberName,
+                              ),
+                            ),
+                            Visibility(
+                              visible: state.data.isPrintable == true &&
+                                  widget.isPrintable == 0,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 12.h),
+                                child: PrintingOnTheProductWidget(
+                                  stateKey: 'update:${widget.productId}',
+                                  printingPrice: state.data.productPrintingPrice
+                                      .toString(),
+                                  color: AppColors.scaffoldColor,
+                                ),
+                              ),
+                            ),
+                            14.h.verticalSpace,
+                          ],
                         ),
-                      ProductsSizesWidget(
-                        data: state.data,
-                        sizeId: widget.sizeId!,
-                        sizeTypeName: widget.sizeTypeName,
-                        onSelect: (int sizeId, String sizeTypeName) {
-                          setState(() {
-                            widget.sizeId = sizeId;
-                            widget.sizeTypeName = sizeTypeName;
-                          });
-                          ref
-                              .read(changePriceProvider(state.data).notifier)
-                              .setNameSize(sizeTypeName);
-                        },
-                        onCounterChanged: (int value) {},
                       ),
-                      10.h.verticalSpace,
                     ],
                   ),
                 ),
                 CheckStateInPostApiDataWidget(
                   state: cartState,
                   hasMessageSuccess: false,
-                  functionSuccess: widget.onSuccess,
+                  functionSuccess: () {
+                    widget.onSuccess();
+                    if (state.data.isPrintable == true &&
+                        widget.isPrintable == 0) {
+                      ref
+                          .read(activatePrintingOnTheProductProvider(
+                                  'update:${widget.productId}')
+                              .notifier)
+                          .state = false;
+                    }
+                  },
                   bottonWidget: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
                     child: DefaultButtonWidget(
                       text: S.of(context).refresh,
                       background: AppColors.secondaryColor,
                       height: 38.h,
-                      textSize: 12.sp,
+                      textSize: 13.6.sp,
                       isLoading: cartState.stateData == States.loading,
                       onPressed: () {
+                        final notifier =
+                            ref.read(changePriceProvider(state.data).notifier);
+
+                        final isPrintable = ref.read(
+                            activatePrintingOnTheProductProvider(
+                                    'update:${widget.productId}')
+                                .notifier);
+                        final idColor = notifier.getIdColor();
+                        final idSize = notifier.getIdSize();
+                        final numberId = notifier.getIdNumber();
+                        final needsSize = idSize == 0;
+                        final needsNumber =
+                            (state.data.numbersOfProduct?.isNotEmpty ??
+                                    false) &&
+                                numberId == 0;
+
+                        if (needsSize) {
+                          setState(() => isSizeIdValid = true);
+                          return;
+                        }
+                        if (needsNumber) {
+                          setState(() => isNumberIdValid = true);
+                          return;
+                        }
+
+                        setState(() {
+                          isSizeIdValid = false;
+                          isNumberIdValid = false;
+                        });
                         ref.read(cartProvider.notifier).updateCart(
                               id: widget.id,
                               prodectId: widget.productId,
-                              colorId: widget.colorId ?? '',
-                              sizeId: widget.sizeId!,
+                              colorId: idColor,
+                              sizeId: idSize,
                               price: price ?? state.data.price!,
                               quantity: widget.quantity,
+                              numberId: numberId,
+                              isPrintable: state.data.isPrintable == true &&
+                                      widget.isPrintable == 0 &&
+                                      isPrintable.state
+                                  ? 1
+                                  : widget.isPrintable,
                             );
                       },
                     ),

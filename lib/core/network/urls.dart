@@ -1,5 +1,5 @@
 class AppURL {
-  static String get base => 'https://dash-jeeey.dev-station.com';
+  static String get base => 'https://saferah.dev-station.com';
 
   //https://saferah.dev-station.com
   ///https://dash.jeeey.net
@@ -18,6 +18,8 @@ class AppURL {
   static String get resendOtp => '/auth/update_otp';
 
   static String get logout => '/auth/logout';
+
+  static String get getDetailsOfProduct => '/products';
 
   static String get addresses => '/addresses';
 

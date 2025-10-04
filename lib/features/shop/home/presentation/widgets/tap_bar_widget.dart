@@ -32,46 +32,54 @@ class TapBarWidget extends StatelessWidget {
       overlayColor: MaterialStateProperty.all(Colors.transparent),
       labelPadding: EdgeInsets.zero,
       indicatorPadding: EdgeInsets.symmetric(horizontal: 4.5.w, vertical: 2),
-      labelColor: Colors.white,
-      unselectedLabelColor: AppColors.secondaryColor,
-      labelStyle: TextStyle(
-        fontFamily: 'IBMPlexSansArabic',
-        fontWeight: FontWeight.w500,
-        fontSize: font,
-      ),
-      unselectedLabelStyle: TextStyle(
-        fontFamily: 'IBMPlexSansArabic',
-        fontWeight: FontWeight.w500,
-        fontSize: font,
-        color: AppColors.secondaryColor,
-      ),
       indicator: ShapeDecoration(
-        color:AppColors.secondaryColor,
+        color: AppColors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radius),
         ),
       ),
       tabs: [
-        for (final title in titles)
-          Tab(
-            height: chipHeight,
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 4.5.w),
-              padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
-              decoration: BoxDecoration(
-                color:AppColors.transparent,
-                borderRadius: BorderRadius.circular(radius),
-                border:
-                    Border.all(color: AppColors.greySwatch.shade200, width: 1),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textDirection: TextDirection.rtl,
-              ),
-            ),
+        for (int i = 0; i < titles.length; i++)
+          AnimatedBuilder(
+            animation: controller.animation!,
+            builder: (context, _) {
+              // موقع الأنيميشن الحالي
+              final value =
+                  controller.animation?.value ?? controller.index.toDouble();
+              // حساب القرب من التبويبة الحالية
+              final selectness = (1.0 - (value - i).abs()).clamp(0.0, 1.0);
+              final bgColor = Color.lerp(
+                  Colors.white, AppColors.secondaryColor, selectness)!;
+              final textColor = Color.lerp(
+                  AppColors.secondaryColor, Colors.white, selectness)!;
+
+              return Container(
+                height: chipHeight,
+                margin: EdgeInsets.symmetric(horizontal: 4.5.w),
+                padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(radius),
+                  border: Border.all(
+                    color: AppColors.greySwatch.shade100,
+                    width: 0.4,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  titles[i],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(
+                    fontFamily: 'IBMPlexSansArabic',
+                    fontWeight: FontWeight.w500,
+                    fontSize: font,
+                    color: textColor,
+                  ),
+                ),
+              );
+            },
           ),
       ],
     );

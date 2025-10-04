@@ -1,9 +1,6 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
@@ -18,30 +15,29 @@ class HomeCategoryWidget extends ConsumerWidget {
   const HomeCategoryWidget(
       {super.key,
       required this.name,
-      //required this.category,
-
       required this.image,
       required this.idCategory
-      //required this.index
       });
 
   @override
   Widget build(BuildContext context, ref) {
     return InkWell(
       onTap: () {
-        print(idCategory.toString() + "-------------");
         navigateTo(
-            context,
-            SubcategoryProductFilterPage(
-              idCategory: idCategory,
-              nameCategoryForHintSearch: name,
-              isSearchPage: false,
-            ));
+          context,
+          SubcategoryProductFilterPage(
+            idCategory: idCategory,
+            nameCategoryForHintSearch: name,
+            isSearchPage: false,
+          ),
+        );
       },
       child: Container(
-        padding: EdgeInsets.all(4.sp),
+        padding: EdgeInsets.symmetric(horizontal: 3.w,vertical: 2.h),
         decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(6.r)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6.r),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -49,13 +45,13 @@ class HomeCategoryWidget extends ConsumerWidget {
               imageUrl: image,
               circularImage: true,
               circularRadius: 38.sp,
-              size: Size(27.w, 27.h),
+              size: Size(34.w, 34.h),
             ),
-            6.w.horizontalSpace,
+            4.w.horizontalSpace,
             Flexible(
               child: AutoSizeTextWidget(
                 text: name,
-                fontSize: 9.4.sp,
+                fontSize: 10.2.sp,
                 fontWeight: FontWeight.w500,
                 colorText: AppColors.fontColor,
                 textAlign: TextAlign.center,

@@ -28,7 +28,8 @@ class ConfirmOrderPage extends ConsumerWidget {
   ConfirmOrderPage({super.key});
 
   final TextEditingController noteController = TextEditingController();
-
+  final _formKey = GlobalKey<FormState>(); // جديد
+  final TextEditingController printableController = TextEditingController();
   @override
   Widget build(BuildContext context, ref) {
     var confirmOrderState = ref.watch(confirmOrderProvider);
@@ -38,151 +39,172 @@ class ConfirmOrderPage extends ConsumerWidget {
     var formData;
     return Scaffold(
       appBar: SecondaryAppBarWidget(title: S.of(context).confirmOrder),
-      body: CheckStateInGetApiDataWidget(
-        state: getConfirmOrderDataState,
-        widgetOfData: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 12.w),
-          child: ReactiveFormBuilder(
-            form: () => ConfirmOrderController.form.group,
-            builder: (context, form, child) {
-              formData = form.value['shipping_method_id'];
+      body: Form(
+        key: _formKey,
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AddressToConfirmTheOrderWidget(
-                    form: form,
-                  ),
-                  RequiredInputsWidget(
-                    form: form,
-                    value: 'payment_method',
-                    requiredText: S.of(context).pleaseChoseAPaymentMethod,
-                  ),
-                  GeneralDesignForOrderDetailsWidget(
-                    title: S.of(context).paymentMethod,
-                    child: ListOfPaymentMethodWidget(
+        child: CheckStateInGetApiDataWidget(
+          state: getConfirmOrderDataState,
+          widgetOfData: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
+            child: ReactiveFormBuilder(
+              form: () => ConfirmOrderController.form.group,
+              builder: (context, form, child) {
+                formData = form.value['shipping_method_id'];
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AddressToConfirmTheOrderWidget(
                       form: form,
                     ),
-                  ),
-                  RequiredInputsWidget(
-                    form: form,
-                    value: 'shipping_method_id',
-                    requiredText: S.of(context).pleaseChoseAShippingMethod,
-                  ),
-                  GeneralDesignForOrderDetailsWidget(
-                    title: S.of(context).shippingMethod,
-                    child: ListOfShippingMethodsWidget(
+
+                    GeneralDesignForOrderDetailsWidget(
+                      title: S.of(context).paymentMethod,
+                      child: ListOfPaymentMethodWidget(
+                        form: form,
+                      ),
+                    ),
+                    RequiredInputsWidget(
                       form: form,
+                      value: 'payment_method',
+                      requiredText: S.of(context).pleaseChoseAPaymentMethod,
                     ),
-                  ),
-                  GeneralDesignForOrderDetailsWidget(
-                    title: S.of(context).haveACouponOrDiscountVoucher,
-                    child: TextFormFieldWidget(
-                      controller: noteController,
-                      textAlign: TextAlign.center,
-                      hintText: "xxx - xxx",
-                      fillColor: AppColors.scaffoldColor,
-                      suffixIcon: CheckStateInPostApiDataWidget(
-                          state: checkCoponState,
-                          messageSuccess: 'تمت عملية التحقق من الكوبون بنجاح',
-                          functionSuccess: () {},
-                          hasMessageSuccess: true,
-                          bottonWidget: DefaultButtonWidget(
-                            text: 'تحقق',
-                            width: 58.w,
-                            textSize: 10.sp,
-                            height: 30.h,
-                            minFontSize: 6,
-                            background: AppColors.primaryColor,
-                            isLoading:
-                                checkCoponState.stateData == States.loading,
-                            onPressed: () {
-                              CheckCoponModel copon = CheckCoponModel(
-                                cartProducts: cartState.selectedProducts,
-                                codeCopon: noteController.text,
-                              );
-                              ref
-                                  .read(checkCoponProvider.notifier)
-                                  .getData(copon: copon);
-                            },
-                          )),
+
+                    GeneralDesignForOrderDetailsWidget(
+                      title: S.of(context).shippingMethod,
+                      child: ListOfShippingMethodsWidget(
+                        form: form,
+                      ),
                     ),
-                  ),
-                  4.h.verticalSpace,
-                  Visibility(
-                    visible: checkCoponState.stateData != States.loading,
-                    replacement: Column(
-                      children: cartState.selectedProducts.map((items) {
-                        return SkeletonizerWidget(
-                            child: OrderConfirmationProductCardWidget(
-                          data: items,
-                          isCheckCopon: true,
-                          productInCopon: true,
-                        ));
-                      }).toList(),
+                    RequiredInputsWidget(
+                      form: form,
+                      value: 'shipping_method_id',
+                      requiredText: S.of(context).pleaseChoseAShippingMethod,
                     ),
-                    child: Visibility(
-                      visible: checkCoponState.data.status == true,
+                    GeneralDesignForOrderDetailsWidget(
+                      title: S.of(context).haveACouponOrDiscountVoucher,
+                      child: TextFormFieldWidget(
+                        controller: noteController,
+                        textAlign: TextAlign.center,
+                        hintText: "xxx - xxx",
+                        fillColor: AppColors.scaffoldColor,
+                        suffixIcon: CheckStateInPostApiDataWidget(
+                            state: checkCoponState,
+                            messageSuccess: 'تمت عملية التحقق من الكوبون بنجاح',
+                            functionSuccess: () {},
+                            hasMessageSuccess: true,
+                            bottonWidget: DefaultButtonWidget(
+                              text: 'تحقق',
+                              width: 58.w,
+                              textSize: 10.sp,
+                              height: 30.h,
+                              minFontSize: 6,
+                              background: AppColors.primaryColor,
+                              isLoading:
+                                  checkCoponState.stateData == States.loading,
+                              onPressed: () {
+                                CheckCoponModel copon = CheckCoponModel(
+                                  cartProducts: cartState.selectedProducts,
+                                  codeCopon: noteController.text,
+                                );
+                                ref
+                                    .read(checkCoponProvider.notifier)
+                                    .getData(copon: copon);
+                              },
+                            )),
+                      ),
+                    ),
+                    4.h.verticalSpace,
+                    Visibility(
+                      visible: checkCoponState.stateData != States.loading,
                       replacement: Column(
                         children: cartState.selectedProducts.map((items) {
-                          return OrderConfirmationProductCardWidget(
+
+                          return SkeletonizerWidget(
+                              child: OrderConfirmationProductCardWidget(
                             data: items,
-                            isCheckCopon: false,
-                            productInCopon: false,
-                          );
+                            isCheckCopon: true,
+                            productInCopon: true,
+
+                          ));
                         }).toList(),
                       ),
-                      child: Column(
-                        children: checkCoponState.data.discountProductData!
-                            .map((items) {
-                          return OrderConfirmationProductCardWidget(
-                            data: items,
-                            isCheckCopon: checkCoponState.data.status ?? false,
-                            productInCopon: items.hasCopon ?? false,
-                          );
-                        }).toList(),
+                      child: Visibility(
+                        visible: checkCoponState.data.status == true,
+                        replacement: Column(
+                          children: cartState.selectedProducts.map((items) {
+                            final needs = (items.isPrintable ?? 0) != 0;
+
+                            return OrderConfirmationProductCardWidget(
+                              data: items,
+                              isCheckCopon: false,
+                              productInCopon: false,
+                              printableController: needs ? ref.read(printCtrlsProvider(items.id)) : null,
+                              // printableValidator: needs
+                              //     ? (v) {
+                              //   final t = (v ?? '').trim();
+                              //   if (t.isEmpty) return 'هذا الحقل مطلوب';
+                              //   if (t.length < 20) return 'الحد الأدنى 20 حرفًا';
+                              //   return null;
+                              // }
+                              //     : null,
+                            );
+                          }).toList(),
+                        ),
+                        child: Column(
+                          children: checkCoponState.data.discountProductData!
+                              .map((items) {
+                            return OrderConfirmationProductCardWidget(
+                              data: items,
+                              isCheckCopon: checkCoponState.data.status ?? false,
+                              // productInCopon: items.hasCopon ?? false,
+                              productInCopon:  false,
+
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
-                  ),
-                  Visibility(
-                    visible: checkCoponState.stateData != States.loading,
-                    replacement: SkeletonizerWidget(
-                      child: BillWidget(
-                        deliveryCost: formData == 2 ? 2000 : 800,
-                        total: cartState.calculateSelectedTotalPrice(),
-                        hasCopon: false,
-                        coponValue: 0,
-                        totalAfterDiscount: 0,
+                    Visibility(
+                      visible: checkCoponState.stateData != States.loading,
+                      replacement: SkeletonizerWidget(
+                        child: BillWidget(
+                          deliveryCost: formData == 2 ? 2000 : 800,
+                          total: cartState.calculateSelectedTotalPrice(),
+                          hasCopon: false,
+                          coponValue: 0,
+                          totalAfterDiscount: 0,
+                        ),
+                      ),
+                      child: Visibility(
+                        visible: checkCoponState.data.status == true,
+                        replacement: BillWidget(
+                          deliveryCost: formData == 2 ? 2000 : 800,
+                          hasCopon: false,
+                          total: cartState.calculateSelectedTotalPrice(),
+                          totalAfterDiscount:
+                              cartState.calculateSelectedTotalPrice() +
+                                  (formData == 2 ? 2000 : 800),
+                          coponValue: 0,
+                        ),
+                        child: BillWidget(
+                          hasCopon: true,
+                          deliveryCost: formData == 2 ? 2000 : 800,
+                          coponValue: double.tryParse(
+                              checkCoponState.data.discountTotal.toString())!,
+                          totalAfterDiscount: double.tryParse(checkCoponState
+                                  .data.orderTotalAfterDiscount
+                                  .toString()) ??
+                              cartState.calculateSelectedTotalPrice() +
+                                  (formData == 2 ? 2000 : 800),
+                          total: cartState.calculateSelectedTotalPrice(),
+                        ),
                       ),
                     ),
-                    child: Visibility(
-                      visible: checkCoponState.data.status == true,
-                      replacement: BillWidget(
-                        deliveryCost: formData == 2 ? 2000 : 800,
-                        hasCopon: false,
-                        total: cartState.calculateSelectedTotalPrice(),
-                        totalAfterDiscount:
-                            cartState.calculateSelectedTotalPrice() +
-                                (formData == 2 ? 2000 : 800),
-                        coponValue: 0,
-                      ),
-                      child: BillWidget(
-                        hasCopon: true,
-                        deliveryCost: formData == 2 ? 2000 : 800,
-                        coponValue: double.tryParse(
-                            checkCoponState.data.discountTotal.toString())!,
-                        totalAfterDiscount: double.tryParse(checkCoponState
-                                .data.orderTotalAfterDiscount
-                                .toString()) ??
-                            cartState.calculateSelectedTotalPrice() +
-                                (formData == 2 ? 2000 : 800),
-                        total: cartState.calculateSelectedTotalPrice(),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -199,13 +221,32 @@ class ConfirmOrderPage extends ConsumerWidget {
                   height: 41.h,
                   isLoading: confirmOrderState.stateData == States.loading,
                   onPressed: () {
-                    ref.read(confirmOrderProvider.notifier).confirmOrder(
-                          cart: cartState.selectedProducts,
-                          note: noteController.text,
-                          unitPrice: cartState
-                              .calculateSelectedTotalPrice()
-                              .toString(),
-                        );
+                    // if (!_formKey.currentState!.validate()) {
+                    //   ScaffoldMessenger.of(context).showSnackBar(
+                    //     const SnackBar(content: Text('أكمل أوصاف الطباعة المطلوبة (20+ حرف)')),
+                    //   );
+                    //   return;
+                    // }
+                    //
+                    // // جمع أوصاف الطباعة لإرسالها إن لزم
+                    // final ctrls = ref.read(printCtrlsProvider);
+                    // final printNotes = <int, String>{
+                    //   for (final p in cartState.selectedProducts.where((e) => (e.isPrintable ?? 0) != 0))
+                    //     p.id: (ctrls[p.id]?.text ?? '').trim(),
+                    // };
+                    final isValid = _formKey.currentState!.validate();
+
+                    if (isValid) {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      ref.read(confirmOrderProvider.notifier).confirmOrder(
+                        cart: cartState.selectedProducts,
+                        note: noteController.text,
+                        unitPrice: cartState
+                            .calculateSelectedTotalPrice()
+                            .toString(),
+                      );
+                    }
+
                   },
                 ),
               ),

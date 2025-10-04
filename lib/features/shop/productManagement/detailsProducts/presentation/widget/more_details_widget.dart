@@ -25,7 +25,7 @@ class MoreDetailsWidget extends StatelessWidget {
         showModalBottomSheetWidget(context: context, page: page);
       },
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 12.w).copyWith(bottom: 12.h),
+        margin: EdgeInsets.symmetric(horizontal: 12.w).copyWith(bottom: 8.h),
         padding: EdgeInsets.symmetric(horizontal: 8.w,vertical: 10.h),
         decoration: BoxDecoration(
           color: Colors.white,

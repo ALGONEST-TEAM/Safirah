@@ -11,7 +11,7 @@ class ConfirmOrderRemoteDataSource {
     final response = await RemoteRequest.getData(
       url: AppURL.getOrderDate,
     );
-    return ConfirmOrderDataModel.fromJson(response.data);
+    return ConfirmOrderDataModel.fromJson(response.data['data']);
   }
 
   Future<Unit> confirmOrder(ConfirmOrderModel confirmOrderModel) async {
@@ -28,6 +28,6 @@ class ConfirmOrderRemoteDataSource {
       path: AppURL.checkCoupon,
       data: checkCode.toJson(),
     );
-    return DiscountProductFromCoponModel.fromJson(response.data);
+    return DiscountProductFromCoponModel.fromJson(response.data['data']);
   }
 }

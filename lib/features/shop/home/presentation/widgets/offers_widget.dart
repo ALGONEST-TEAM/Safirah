@@ -1,11 +1,12 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/online_images_widget.dart';
+import '../../data/model/offers_model.dart';
 
 class OffersWidget extends StatelessWidget {
-  final List<dynamic> images;
+  final List<OffersModel> images;
 
   const OffersWidget({super.key, required this.images});
 
@@ -13,7 +14,7 @@ class OffersWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return CarouselSlider(
       options: CarouselOptions(
-        height: 114.h,
+        height: 126.h,
         autoPlay: images.length > 1,
         autoPlayInterval: const Duration(seconds: 5),
         autoPlayAnimationDuration: const Duration(milliseconds: 800),
@@ -31,9 +32,9 @@ class OffersWidget extends StatelessWidget {
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 3.w),
               child: OnlineImagesWidget(
-                imageUrl: imagePath,
+                imageUrl: imagePath.image,
                 fit: BoxFit.cover,
-                size: Size(double.infinity, 114.h),
+                size: Size(double.infinity, 126.h),
                 borderRadius: 8.r,
               ),
             );

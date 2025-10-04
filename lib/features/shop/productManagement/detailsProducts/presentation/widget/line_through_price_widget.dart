@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../core/theme/app_colors.dart';
+
 class LineThroughPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 2
+      ..color = AppColors.fontColor2
+      ..strokeWidth = 1.2
       ..style = PaintingStyle.stroke;
 
-    // رسم خط مائل من أعلى اليمين إلى أسفل اليسار
     canvas.drawLine(
       Offset(size.width, 0),
       Offset(0, size.height),
@@ -18,6 +19,6 @@ class LineThroughPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false; // لا حاجة لإعادة الرسم كل مرة
+    return false;
   }
 }

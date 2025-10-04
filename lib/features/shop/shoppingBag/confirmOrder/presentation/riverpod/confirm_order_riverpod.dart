@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/state/data_state.dart';
 import '../../../../../../core/state/state.dart';
@@ -112,3 +113,7 @@ class CheckCoponNotifier
     });
   }
 }
+
+
+final printCtrlsProvider =
+StateProvider.family<TextEditingController, int>((ref, idCategory) => TextEditingController(text: ''));

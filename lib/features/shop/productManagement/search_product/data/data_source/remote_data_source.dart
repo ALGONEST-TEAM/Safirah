@@ -11,7 +11,7 @@ class SearchRemoteDataSource {
       url: "/categories_by_name?search=$charcterSearch",
     );
 
-    return SearchData.fromJsonSearchList(response.data);
+    return SearchData.fromJsonSearchList(response.data['data']);
   }
 
   Future<CategoryAndProductData> getSearchInformation(
@@ -19,6 +19,6 @@ class SearchRemoteDataSource {
     final response = await RemoteRequest.getData(
       url: "/categories_search?search=$nameSearch&page=$page&perPage=6",
     );
-    return CategoryAndProductData.fromJson(response.data);
+    return CategoryAndProductData.fromJson(response.data['data']);
   }
 }

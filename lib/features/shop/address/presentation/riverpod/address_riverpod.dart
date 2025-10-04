@@ -106,6 +106,7 @@ class AddressController extends StateNotifier<DataState<Unit>> {
         nearestLandmark: formData['nearest_landmark'].toString(),
         lat: lat.toString(),
         lon: lng.toString(),
+        phoneNumber: formData['phone_number'].toString(),
       ),
     );
     data.fold((f) {

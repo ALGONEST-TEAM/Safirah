@@ -8,7 +8,9 @@ class OrderDataFormController {
         validators: [Validators.required],
       ),
       'district': FormControl<dynamic>(),
-
+      'city_name': FormControl<String>(
+        validators: [Validators.required],
+      ),
       'shipping_method_id': FormControl<int>(
         validators: [Validators.required],
       ),

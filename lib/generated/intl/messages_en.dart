@@ -30,14 +30,11 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "A new way to manage your favorite products! You can classify in your own way",
         ),
-    "accountNotFound": MessageLookupByLibrary.simpleMessage(
-      "Account not found",
+    "accountCreatedSuccessfully": MessageLookupByLibrary.simpleMessage(
+      "Account created successfully",
     ),
     "addANewAddress": MessageLookupByLibrary.simpleMessage("Add a new address"),
     "addGoods": MessageLookupByLibrary.simpleMessage("Add goods"),
-    "addMoreThanOneReviewOnOneProduct": MessageLookupByLibrary.simpleMessage(
-      "add more than one review on one product",
-    ),
     "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
     "addProducts": MessageLookupByLibrary.simpleMessage("Add products"),
     "addRating": MessageLookupByLibrary.simpleMessage("Add Rating"),
@@ -83,6 +80,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Can you leave your review?",
     ),
     "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+    "cancelPrinting": MessageLookupByLibrary.simpleMessage("Cancel printing"),
     "cannotReachServer": MessageLookupByLibrary.simpleMessage(
       "Unable to reach the server",
     ),
@@ -109,6 +107,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "color": MessageLookupByLibrary.simpleMessage("Color"),
     "colors": MessageLookupByLibrary.simpleMessage("Colors"),
+    "comments": MessageLookupByLibrary.simpleMessage("Comments"),
     "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
     "confirmAddress": MessageLookupByLibrary.simpleMessage("Confirm address"),
     "confirmOrder": MessageLookupByLibrary.simpleMessage("Confirm order"),
@@ -119,11 +118,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyToList": MessageLookupByLibrary.simpleMessage("Copy to list"),
     "createAList": MessageLookupByLibrary.simpleMessage("Create a list"),
     "createANewList": MessageLookupByLibrary.simpleMessage("Create a new list"),
-    "createAccount": MessageLookupByLibrary.simpleMessage(
-      "Create an account in Safirah",
-    ),
+    "createAccount": MessageLookupByLibrary.simpleMessage("Create account"),
     "createAccountDesc": MessageLookupByLibrary.simpleMessage(
       "Register a new account to enjoy all Safirah services",
+    ),
+    "createAccountS": MessageLookupByLibrary.simpleMessage(
+      "Create an account in Safirah",
     ),
     "currency": MessageLookupByLibrary.simpleMessage("Currency"),
     "dailyNew": MessageLookupByLibrary.simpleMessage("Daily new"),
@@ -184,19 +184,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "httpVersionNotSupported2": MessageLookupByLibrary.simpleMessage(
       "Please update the app to the latest version",
     ),
-    "ifYouWantToModifyTheProductGoToTheShoppingBag":
-        MessageLookupByLibrary.simpleMessage(
-          "If you want to modify the product, go to the shopping bag",
-        ),
-    "incorrectPassword": MessageLookupByLibrary.simpleMessage(
-      "Incorrect password",
-    ),
-    "incorrectVerificationCode": MessageLookupByLibrary.simpleMessage(
-      "Incorrect verification code",
-    ),
-    "incorrectVerificationCode2": MessageLookupByLibrary.simpleMessage(
-      "Please check the verification code",
-    ),
     "internalServerError": MessageLookupByLibrary.simpleMessage(
       "Internal server error",
     ),
@@ -218,6 +205,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "logIn": MessageLookupByLibrary.simpleMessage("Log in"),
     "loginRequired": MessageLookupByLibrary.simpleMessage("Login Required"),
     "loginSubTitle": MessageLookupByLibrary.simpleMessage("Using phone number"),
+    "loginSuccessful": MessageLookupByLibrary.simpleMessage(
+      "Logged in successfully",
+    ),
     "loginTitle": MessageLookupByLibrary.simpleMessage("Log in to Safirah"),
     "logoutSuccessfully": MessageLookupByLibrary.simpleMessage(
       "Logout successfully",
@@ -249,18 +239,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "notImplemented2": MessageLookupByLibrary.simpleMessage(
       "Make sure the app is updated or contact support",
     ),
+    "number": MessageLookupByLibrary.simpleMessage("Number"),
     "numberOfProducts": MessageLookupByLibrary.simpleMessage(
       "Number of Products",
     ),
+    "numbers": MessageLookupByLibrary.simpleMessage("Numbers"),
     "opinions": MessageLookupByLibrary.simpleMessage("Opinions"),
     "optional": MessageLookupByLibrary.simpleMessage("(Optional)"),
     "order": MessageLookupByLibrary.simpleMessage("Order"),
     "orderDetails": MessageLookupByLibrary.simpleMessage("Order Details"),
     "orderNumber": MessageLookupByLibrary.simpleMessage("Order number"),
     "orderStatus": MessageLookupByLibrary.simpleMessage("Order Status"),
-    "passwordIsSameUserPassword": MessageLookupByLibrary.simpleMessage(
-      "Password is same user password",
-    ),
     "payment": MessageLookupByLibrary.simpleMessage("Payment"),
     "paymentDetails": MessageLookupByLibrary.simpleMessage("Payment details:"),
     "paymentMethod": MessageLookupByLibrary.simpleMessage("Payment method"),
@@ -283,9 +272,6 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "pleaseAddAddress": MessageLookupByLibrary.simpleMessage(
       "Please add address.",
-    ),
-    "pleaseCheckThePhoneNumberOrEmail": MessageLookupByLibrary.simpleMessage(
-      "Please check the phone number or email",
     ),
     "pleaseChoseACity": MessageLookupByLibrary.simpleMessage(
       "Please chose a city",
@@ -314,24 +300,27 @@ class MessageLookup extends MessageLookupByLibrary {
     "pleaseLoginToContinue": MessageLookupByLibrary.simpleMessage(
       "Please login to continue",
     ),
+    "pleaseSelectANumber": MessageLookupByLibrary.simpleMessage(
+      "Please select a number",
+    ),
     "pleaseSelectASize": MessageLookupByLibrary.simpleMessage(
       "Please select a size",
-    ),
-    "pleaseSelectAUnit": MessageLookupByLibrary.simpleMessage(
-      "Please select a unit",
     ),
     "pleaseSelectTheProductsYouWishToPayFor":
         MessageLookupByLibrary.simpleMessage(
           "Please select the products you wish to pay for",
         ),
     "pleaseTryAgain": MessageLookupByLibrary.simpleMessage("Please try again"),
-    "pleaseVerifyTheAccount": MessageLookupByLibrary.simpleMessage(
-      "Please verify the account",
-    ),
     "price": MessageLookupByLibrary.simpleMessage("Price"),
     "priceHigh": MessageLookupByLibrary.simpleMessage("Highest price"),
     "priceLow": MessageLookupByLibrary.simpleMessage("Lowest price"),
+    "printingOnTheProduct": MessageLookupByLibrary.simpleMessage(
+      "Printing on the product",
+    ),
     "processing": MessageLookupByLibrary.simpleMessage("Processing"),
+    "productAddedToCartSuccessfully": MessageLookupByLibrary.simpleMessage(
+      "Product added to cart successfully",
+    ),
     "products": MessageLookupByLibrary.simpleMessage("Products"),
     "productsHaveBeenAddedToTheList": MessageLookupByLibrary.simpleMessage(
       "Products have been added to the list",
@@ -374,6 +363,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "returns": MessageLookupByLibrary.simpleMessage("Returns"),
     "review": MessageLookupByLibrary.simpleMessage("Review"),
     "save": MessageLookupByLibrary.simpleMessage("Save"),
+    "sections": MessageLookupByLibrary.simpleMessage("Sections"),
     "selectionOfProducts": MessageLookupByLibrary.simpleMessage(
       "Selection of products",
     ),
@@ -437,14 +427,8 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "The modification has been completed successfully",
         ),
-    "thePasswordDoesNotMeetTheConditions": MessageLookupByLibrary.simpleMessage(
-      "The password does not meet the conditions",
-    ),
     "thePasswordHasBeenChanged": MessageLookupByLibrary.simpleMessage(
       "The password has been changed",
-    ),
-    "theProductIsAlreadyInTheCart": MessageLookupByLibrary.simpleMessage(
-      "The product is already in the cart",
     ),
     "theTotal": MessageLookupByLibrary.simpleMessage("The total"),
     "thereAreNoLists": MessageLookupByLibrary.simpleMessage(
@@ -466,16 +450,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "transactionSuccessful": MessageLookupByLibrary.simpleMessage(
       "Transaction Successful",
     ),
+    "understood": MessageLookupByLibrary.simpleMessage("I understand"),
     "unpaid": MessageLookupByLibrary.simpleMessage("Unpaid"),
-    "userCannot": MessageLookupByLibrary.simpleMessage("User cannot"),
-    "verificationCodeExpired": MessageLookupByLibrary.simpleMessage(
-      "Verification code expired",
-    ),
-    "verificationCodeExpired2": MessageLookupByLibrary.simpleMessage(
-      "Please resend the verification code",
+    "verificationCode": MessageLookupByLibrary.simpleMessage(
+      "Verification code",
     ),
     "viewAll": MessageLookupByLibrary.simpleMessage("View All"),
     "viewMore": MessageLookupByLibrary.simpleMessage("View more"),
+    "welcome": MessageLookupByLibrary.simpleMessage("Welcome"),
     "wishlist": MessageLookupByLibrary.simpleMessage("Wishlist"),
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "youDontHaveAnyProductInMyWishlist": MessageLookupByLibrary.simpleMessage(

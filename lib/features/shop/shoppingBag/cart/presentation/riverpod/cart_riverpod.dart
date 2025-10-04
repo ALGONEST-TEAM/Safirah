@@ -25,14 +25,10 @@ class GetAllCartController extends StateNotifier<DataState<List<CartModel>>> {
     data.fold((f) {
       state = state.copyWith(state: States.error, exception: f);
     }, (data) {
-
       state = state.copyWith(state: States.loaded, data: data);
     });
   }
 }
-
-
-
 
 final cartProvider = StateNotifierProvider.autoDispose<CartController,
     DataState<CartProductModel>>(
@@ -53,7 +49,13 @@ class CartController extends StateNotifier<DataState<CartProductModel>> {
 
   double calculateSelectedTotalPrice() {
     return _selectedProducts.fold(0, (sum, product) {
-      return sum + (double.parse(product.price.toString()) * product.quantity!);
+      if (product.isPrintable == 1) {
+        return sum +
+            (product.productPriceAfterDiscount! * product.quantity!) +
+            (product.printingPrice! * product.quantity!);
+      } else {
+        return sum + (product.productPriceAfterDiscount! * product.quantity!);
+      }
     });
   }
 
@@ -103,6 +105,8 @@ class CartController extends StateNotifier<DataState<CartProductModel>> {
     required int sizeId,
     required dynamic price,
     required int quantity,
+    required int? numberId,
+    required int isPrintable,
   }) async {
     state = state.copyWith(state: States.loading);
     final data = await _controller.addToCart(
@@ -111,6 +115,8 @@ class CartController extends StateNotifier<DataState<CartProductModel>> {
       sizeId,
       price,
       quantity,
+      numberId,
+      isPrintable,
     );
     data.fold((f) {
       state = state.copyWith(state: States.error, exception: f);
@@ -126,10 +132,20 @@ class CartController extends StateNotifier<DataState<CartProductModel>> {
     required int sizeId,
     required dynamic price,
     required int quantity,
+    required int? numberId,
+    required int isPrintable,
   }) async {
     state = state.copyWith(state: States.loading);
     final data = await _controller.updateCart(
-        id, prodectId, colorId, sizeId, price, quantity);
+      id,
+      prodectId,
+      colorId,
+      sizeId,
+      price,
+      quantity,
+      numberId,
+      isPrintable,
+    );
     data.fold((f) {
       state = state.copyWith(state: States.error, exception: f);
     }, (data) {

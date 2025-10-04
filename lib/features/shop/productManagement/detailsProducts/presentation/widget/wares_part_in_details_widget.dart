@@ -11,10 +11,12 @@ import 'best_copon_widget.dart';
 import 'description_in_model_sheet_widget.dart';
 import 'image_slider_widget.dart';
 import 'list_of_colors_product_widget.dart';
+import 'list_of_number_product_widget.dart';
 import 'list_of_size_product_widget.dart';
 import 'more_details_widget.dart';
 import 'number_of_image_widget.dart';
 import 'price_with_discount_price_widget.dart';
+import 'printing_on_the_product_widget.dart';
 
 class WaresPartInDetailsWidget extends ConsumerWidget {
   const WaresPartInDetailsWidget({super.key, required this.productData});
@@ -23,7 +25,7 @@ class WaresPartInDetailsWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    var indexColorImage = ref.watch(changeIndexOfColorImageProvider);
+    var indexColorImage = ref.watch(changeIndexOfColorImageAndSizeProvider);
     var indexImage = ref.watch(showNumberOfScrollImageProvider);
     dynamic price = ref.watch(changePriceProvider(productData));
 
@@ -76,7 +78,7 @@ class WaresPartInDetailsWidget extends ConsumerWidget {
                   children: [
                     AutoSizeTextWidget(
                       text: formattedDescription,
-                      colorText: AppColors.fontColor3,
+                      colorText: AppColors.fontColor,
                       fontWeight: FontWeight.w400,
                       fontSize: 12.sp,
                       maxLines: 15,
@@ -111,59 +113,23 @@ class WaresPartInDetailsWidget extends ConsumerWidget {
                 ],
               ),
               8.verticalSpace,
-              // Visibility(
-              //   visible: productData.coponData!.isNotEmpty,
-              //   child: Padding(
-              //     padding: EdgeInsets.symmetric(vertical: 4.0.sp),
-              //     child: ShowDetailsOfCoponWidget(
-              //       discount: productData.discountModel == null
-              //           ? 0
-              //           : productData.discountModel!.discountType !=
-              //           'percent'
-              //           ? productData.discountModel!.discount
-              //           : price! *
-              //           (productData.discountModel!.discount! /
-              //               100),
-              //       coponData: productData.coponData ?? [],
-              //       inOrder: false,
-              //       basePrice: price,
-              //     ),
-              //   ),
-              // ),
-
               Visibility(
                 visible: productData.colorsProduct?.isNotEmpty == true,
-                child: Column(
-                  children: [
-                    AutoSizeTextWidget(
-                      text: S.of(context).colors,
-                      colorText: AppColors.fontColor,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12.5.sp,
-                    ),
-                    12.verticalSpace,
-                  ],
+                child: ListOfColorsProductWidget(
+                  colorsProduct: productData,
                 ),
               ),
-              ListOfColorsProductWidget(
-                colorsProduct: productData,
+              Visibility(
+                visible: productData.sizeProduct!.isNotEmpty,
+                child: ListOfSizeProductWidget(
+                  sizeProduct: productData,
+                ),
               ),
-              14.verticalSpace,
-              productData.sizeProduct!.isNotEmpty
-                  ? Column(
-                      children: [
-                        AutoSizeTextWidget(
-                          text: S.of(context).size,
-                          colorText: AppColors.fontColor,
-                          fontWeight: FontWeight.w400,
-                          fontSize: 12.5.sp,
-                        ),
-                        12.verticalSpace,
-                      ],
-                    )
-                  : const SizedBox(),
-              ListOfSizeProductWidget(
-                sizeProduct: productData,
+              Visibility(
+                visible: productData.numbersOfProduct!.isNotEmpty,
+                child: ListOfNumberProductWidget(
+                  product: productData,
+                ),
               ),
             ],
           ),
@@ -171,6 +137,17 @@ class WaresPartInDetailsWidget extends ConsumerWidget {
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Visibility(
+              visible: productData.isPrintable == true,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.w)
+                    .copyWith(bottom: 8.h),
+                child: PrintingOnTheProductWidget(
+                  stateKey: 'details:${productData.id}',
+                  printingPrice: productData.productPrintingPrice.toString(),
+                ),
+              ),
+            ),
             MoreDetailsWidget(
               page: DescriptionInModelSheetWidget(
                 detailsProduct: productData.detailsProduct ?? [],

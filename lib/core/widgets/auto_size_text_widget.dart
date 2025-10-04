@@ -11,7 +11,7 @@ class AutoSizeTextWidget extends StatelessWidget {
   final int? maxLines;
   final double? maxFontSize;
   final double? minFontSize;
-
+  final TextDecoration? decoration;
   const AutoSizeTextWidget({
     super.key,
     required this.text,
@@ -22,6 +22,7 @@ class AutoSizeTextWidget extends StatelessWidget {
     this.maxLines,
     this.maxFontSize,
     this.minFontSize,
+    this.decoration
   });
 
   @override
@@ -33,12 +34,14 @@ class AutoSizeTextWidget extends StatelessWidget {
         fontSize: fontSize ?? 14.sp,
         color: colorText ?? Colors.black,
         fontFamily: 'IBMPlexSansArabic',
+        decoration: decoration,
       ),
       maxLines: maxLines ?? 1,
       maxFontSize: maxFontSize ?? 24,
       minFontSize: minFontSize ?? 10,
       overflow: TextOverflow.ellipsis,
       textAlign: textAlign ?? TextAlign.start,
+
     );
   }
 }

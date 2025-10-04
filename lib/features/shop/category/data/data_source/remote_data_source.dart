@@ -10,9 +10,9 @@ class CategoryRemoteDataSource {
     idCategory == 0 ? id = '' : id = idCategory.toString();
 
     final response = await RemoteRequest.getData(
-      url: "/categories/$id?page=$page&perPage=10",
+      url: "/categories/$id?page=$page&perPage=10&filter=1",
     );
 
-    return CategoryAndProductData.fromJson(response.data);
+    return CategoryAndProductData.fromJson(response.data['data']);
   }
 }

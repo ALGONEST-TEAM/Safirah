@@ -31,6 +31,7 @@ class CartPage extends ConsumerWidget {
 
     return RefreshIndicator(
       color: AppColors.primaryColor,
+      backgroundColor: Colors.white,
       onRefresh: () async {
         ref.refresh(getAllCartProvider);
       },
@@ -40,6 +41,9 @@ class CartPage extends ConsumerWidget {
         ),
         body: CheckStateInGetApiDataWidget(
           state: state,
+          refresh: () {
+            ref.refresh(getAllCartProvider);
+          },
           widgetOfLoading: const ShimmerCardWidget(),
           widgetOfData: Column(
             children: [
@@ -63,77 +67,90 @@ class CartPage extends ConsumerWidget {
         bottomNavigationBar: state.stateData == States.loaded &&
                 state.data.isNotEmpty
             ? ButtonBottomNavigationBarDesignWidget(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Flexible(
-                      child: Row(
-                        children: [
-                          DefaultButtonWidget(
-                            text: S.of(context).payment,
-                            width: 96.w,
-                            height: 34.h,
-                            borderRadius: 8.r,
-                            textSize: 11.6.sp,
-                            background: AppColors.secondaryColor,
-                            onPressed: () {
-                              if (!Auth().loggedIn) {
-                                pressAgainToExit(
-                                  context: context,
-                                  text: S.of(context).loginRequired,
-                                );
-                              } else {
-                                if (cartStateNotifier
-                                    .selectedProducts.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(S
-                                          .of(context)
-                                          .pleaseSelectTheProductsYouWishToPayFor),
-                                      backgroundColor:
-                                          AppColors.dangerSwatch.shade500.withOpacity(.9),
-                                    ),
-                                  );
-                                } else {
-                                  ConfirmOrderController.form.reset();
-                                  navigateTo(context, ConfirmOrderPage());
-                                }
-                              }
-                            },
-                          ),
-                          10.w.horizontalSpace,
-                          Flexible(
-                            child: PriceAndCurrencyWidget(
-                              price: cartStateNotifier
-                                  .calculateSelectedTotalPrice()
-                                  .toString(),
-                              fontSize1: 14.sp,
-                              fontSize2: 11.8.sp,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 4.h),
+                            child: Row(
+                              children: [
+                                AutoSizeTextWidget(
+                                  text: "${S.of(context).theTotal}: ",
+                                  colorText: Colors.black,
+                                  fontSize: 13.8.sp,
+                                ),
+                                Flexible(
+                                  child: PriceAndCurrencyWidget(
+                                    price: cartStateNotifier
+                                        .calculateSelectedTotalPrice()
+                                        .toString(),
+                                    fontSize1: 12.8.sp,
+                                    fontSize2: 9.6.sp,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        AutoSizeTextWidget(
-                          text: S.of(context).all,
-                          colorText: Colors.black,
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w700,
                         ),
-                        2.w.horizontalSpace,
-                        CheckBoxForCartProductsWidget(
-                          value: cartStateNotifier
-                              .isAllProductsSelected(state.data),
-                          onChanged: (isChecked) {
-                            cartStateNotifier.toggleAllProductsSelection(
-                              isChecked ?? false,
-                              state.data,
-                            );
-                          },
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AutoSizeTextWidget(
+                              text: S.of(context).all,
+                              colorText: AppColors.mainColorFont,
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            2.w.horizontalSpace,
+                            CheckBoxForCartProductsWidget(
+                              value: cartStateNotifier
+                                  .isAllProductsSelected(state.data),
+                              onChanged: (isChecked) {
+                                cartStateNotifier.toggleAllProductsSelection(
+                                  isChecked ?? false,
+                                  state.data,
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ],
+                    ),
+                    4.h.verticalSpace,
+                    DefaultButtonWidget(
+                      text: S.of(context).payment,
+                      // width: 96.w,
+                      height: 36.h,
+                      textSize: 13.sp,
+                      background: AppColors.secondaryColor,
+                      onPressed: () {
+                        if (!Auth().loggedIn) {
+                          pressAgainToExit(
+                            context: context,
+                            text: S.of(context).loginRequired,
+                          );
+                        } else {
+                          if (cartStateNotifier.selectedProducts.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(S
+                                    .of(context)
+                                    .pleaseSelectTheProductsYouWishToPayFor),
+                                backgroundColor: AppColors.dangerSwatch.shade500
+                                    .withOpacity(.9),
+                              ),
+                            );
+                          } else {
+                            ConfirmOrderController.form.reset();
+                            navigateTo(context, ConfirmOrderPage());
+                          }
+                        }
+                      },
                     ),
                   ],
                 ),

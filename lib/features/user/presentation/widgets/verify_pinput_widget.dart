@@ -1,17 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pinput/pinput.dart';
 import '../../../../generated/l10n.dart';
 
-class VerifyPinputWidget extends StatelessWidget {
+class VerifyPinputWidget extends StatefulWidget {
   final TextEditingController verifyController;
 
   const VerifyPinputWidget({super.key, required this.verifyController});
 
   @override
+  State<VerifyPinputWidget> createState() => _VerifyPinputWidgetState();
+}
+
+class _VerifyPinputWidgetState extends State<VerifyPinputWidget>
+    with WidgetsBindingObserver {
+  late final FocusNode _focus;
+  bool _wasFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _focus = FocusNode();
+    _focus.addListener(() => _wasFocused = _focus.hasFocus);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _wasFocused && mounted) {
+      Future.microtask(() {
+        if (!mounted) return;
+        FocusScope.of(context).requestFocus(_focus);
+        SystemChannels.textInput.invokeMethod('TextInput.show');
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Pinput(
-      controller: verifyController,
+      controller: widget.verifyController,
+      focusNode: _focus,
+      autofocus: true,
       crossAxisAlignment: CrossAxisAlignment.center,
       length: 6,
       defaultPinTheme: PinTheme(
@@ -23,10 +61,10 @@ class VerifyPinputWidget extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xfff4f6f9),
           borderRadius: BorderRadius.circular(4.sp),
           border: Border.all(
-            color: Colors.black54,
+            color: Colors.black12,
           ),
         ),
       ),
@@ -34,17 +72,23 @@ class VerifyPinputWidget extends StatelessWidget {
         width: 62.w,
         height: 44.h,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xfff4f6f9),
           border: Border.all(
-            color: Colors.black38,
+            color: Colors.black12,
           ),
           borderRadius: BorderRadius.circular(4.sp),
         ),
       ),
       validator: (value) {
-        if (value == null || value.toString().isEmpty) {
+        final v = value?.trim() ?? '';
+        if (v.isEmpty) {
           return S.of(context).pleaseEnterTheVerificationCode;
         }
+        if (v.length != 6) {
+          return S.of(context).pleaseEnterTheVerificationCode;
+        }
+
+        return null;
       },
     );
   }

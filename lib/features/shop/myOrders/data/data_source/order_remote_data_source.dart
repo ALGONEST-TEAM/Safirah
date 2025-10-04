@@ -16,7 +16,7 @@ class OrderRemoteDataSource {
         'perPage': limit,
       },
     );
-    return OrdersModel.fromJson(response.data);
+    return OrdersModel.fromJson(response.data['data']);
   }
 
   Future<OrderDetailsModel> orderDetails({
@@ -25,6 +25,6 @@ class OrderRemoteDataSource {
     final response = await RemoteRequest.getData(
       url: "${AppURL.orderDetails}/$id",
     );
-    return OrderDetailsModel.fromJson(response.data);
+    return OrderDetailsModel.fromJson(response.data['data']);
   }
 }

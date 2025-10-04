@@ -15,21 +15,29 @@ class AddressRemoteDataSource {
     final response = await RemoteRequest.getData(
       url: AppURL.addresses,
     );
-    return AddressModel.fromJsonList(response.data);
+    return AddressModel.fromJsonList(response.data['data']);
   }
 
   Future<List<CityModel>> getCities() async {
     final response = await RemoteRequest.getData(
       url: AppURL.getCities,
     );
-    return CityModel.fromJsonList(response.data);
+    // final List<dynamic> items =
+    // (response.data is Map && response.data['data'] is List)
+    //     ? response.data['data'] as List
+    //     : const [];
+    return CityModel.fromJsonList(response.data['data'] );
   }
 
   Future<List<DistrictModel>> getDistricts() async {
     final response = await RemoteRequest.getData(
       url: AppURL.getDistricts,
     );
-    return DistrictModel.fromJsonList(response.data);
+    // final List<dynamic> items =
+    // (response.data is Map && response.data['data'] is List)
+    //     ? response.data['data'] as List
+    //     : const [];
+    return DistrictModel.fromJsonList(response.data['data'] );
   }
 
   Future<Unit> addOrUpdateAddress({

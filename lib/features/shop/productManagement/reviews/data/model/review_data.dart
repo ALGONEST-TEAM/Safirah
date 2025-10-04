@@ -9,7 +9,7 @@ class ReviewData {
   final int userId;
   final String userName;
   final int reviewLikeCount;
-  final List<LikeStatusModel> likeStatus;
+  final int likeStatus;
   final dynamic colorId;
   final String? colorName;
   final String? colorHex;
@@ -44,11 +44,12 @@ class ReviewData {
       userId: json['user_id'] ?? 0,
       userName: json['user_name'] ?? '',
       reviewLikeCount: json['review_like_count'] ?? 0,
-      likeStatus: List<LikeStatusModel>.from(
-        (json['like_status'] ?? List<LikeStatusModel>.empty).map(
-          (e) => LikeStatusModel.fromJson(e),
-        ),
-      ),
+      // likeStatus: List<LikeStatusModel>.from(
+      //   (json['like_status'] ?? List<LikeStatusModel>.empty).map(
+      //     (e) => LikeStatusModel.fromJson(e),
+      //   ),
+      // ),
+      likeStatus:json['like_status']??0 ,
       colorId: json['color_id'],
       colorHex: json['color_hex'] ?? '',
       colorName: json['color_name'] ?? '',
@@ -56,5 +57,7 @@ class ReviewData {
       sizeValue: json['measuring_value'] ?? '',
     );
   }
-
+  static List<ReviewData> fromJsonList(List<dynamic> json) {
+    return json.map((e) => ReviewData.fromJson(e)).toList();
+  }
 }

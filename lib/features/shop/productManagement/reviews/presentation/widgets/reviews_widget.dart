@@ -40,21 +40,21 @@ class ReviewsWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // EvaluationValueAndNumberOfRatingStarsWidget(
-          //   rates: state.data.rates,
-          //   total: state.data.total.toDouble(),
-          // ),
-          AutoSizeTextWidget(
-            text: tempRates.toString(),
-            fontSize: 23.sp,
-            maxFontSize: 30,
-            fontWeight: FontWeight.bold,
-          ),
-          6.h.verticalSpace,
-          RatingBarWidget(
-            evaluation: tempRates.toDouble(),
-            itemSize: 15.5.sp,
-          ),
+         Column(
+           children: [
+             AutoSizeTextWidget(
+               text: tempRates.toString(),
+               fontSize: 23.sp,
+               maxFontSize: 30,
+               fontWeight: FontWeight.bold,
+             ),
+             6.h.verticalSpace,
+             RatingBarWidget(
+               evaluation: tempRates.toDouble(),
+               itemSize: 15.5.sp,
+             ),
+           ],
+         ),
           Expanded(
             child: Column(
               children: List.generate(

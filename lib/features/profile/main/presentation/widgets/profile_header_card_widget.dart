@@ -53,11 +53,11 @@ class ProfileHeaderCardWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AutoSizeTextWidget(
-                        text: "رائد مسعود",
+                        text: Auth().name,
                       ),
                       4.h.verticalSpace,
                       AutoSizeTextWidget(
-                        text: Auth().email,
+                        text: Auth().phoneNumber,
                         colorText: AppColors.primaryColor,
                         fontSize: 11.sp,
                       ),

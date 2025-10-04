@@ -1,10 +1,11 @@
-import 'package:dartz/dartz.dart';
 import 'package:hive/hive.dart';
-
+import '../../../reviews/data/model/review_data.dart';
+import '../../../reviews/data/model/reviews_model.dart';
 import 'color_data.dart';
 import 'copon_data.dart';
 import 'details_product_data.dart';
 import 'discount_model.dart';
+import 'number_model.dart';
 import 'price_model.dart';
 import 'size_data.dart';
 
@@ -12,6 +13,7 @@ part 'product_data.g.dart';
 
 @HiveType(typeId: 5)
 class ProductData {
+  // الأساسيات
   @HiveField(0)
   final int? id;
   @HiveField(1)
@@ -20,88 +22,136 @@ class ProductData {
   final dynamic price;
   @HiveField(3)
   final int? categoryId;
-  @HiveField(4)
-  final String? discount;
   @HiveField(5)
   final String? description;
-  @HiveField(6)
-  final String? currency;
-  final int? sizeType;
-  final List<DetailsProductData>? detailsProduct;
-  final List<ColorOfProductData>? colorsProduct;
-  bool? favorite;
+  final bool? isPrintable;
+
+  // الصور
   @HiveField(9)
   final List<String>? mainImage;
-  final List<SizeData>? sizeProduct;
   final List<String>? allImage;
-  final List<dynamic>? priceOptionType;
-  final List<PriceData>? prices;
   final bool? colorHasImage;
-  final List<String>? measuringType;
 
-  final List<CoponData>? coponData;
+  //  الألوان والمقاسات والأرقام
+  final List<ColorOfProductData>? colorsProduct;
+  final int? productColorsCount;
+  final int? sizeType;
+  final List<SizeData>? sizeProduct;
+  final List<String>? measuringType;
+  final List<NumberModel>? numbersOfProduct;
+
+  // تفاصيل المنتج
+  final List<DetailsProductData>? detailsProduct;
+
+  // الأسعار والخصومات
+  @HiveField(4)
+  final String? discount;
   @HiveField(11)
-  final DiscountModel? discountModel;
+  final DiscountModel?  discountModel;
   @HiveField(12)
   final dynamic priceAfterDiscount;
   @HiveField(13)
   final dynamic coponPrice;
+  final List<dynamic>? priceOptionType;
+  final List<PriceData>? prices;
+  final String? productPrintingPrice;
+
+  // الكوبونات
+  final List<CoponData>? coponData;
+
+  // مفضلة
+  bool? favorite;
+
+  // التقييمات والتعليقات
+  final ReviewsModel? reviews;
+  final List<ReviewData>? productReviews;
 
   ProductData({
     this.id,
     this.name,
     this.price,
     this.categoryId,
-    this.discount,
     this.description,
-    this.currency,
-    this.sizeType,
-    this.detailsProduct,
-    this.colorsProduct,
-    this.sizeProduct,
-    this.allImage,
-    this.priceOptionType,
-    this.prices,
+    this.isPrintable,
     this.mainImage,
+    this.allImage,
     this.colorHasImage,
+    this.colorsProduct,
+    this.productColorsCount,
+    this.sizeType,
+    this.sizeProduct,
     this.measuringType,
-    this.favorite,
-    this.coponData,
+    this.numbersOfProduct,
+    this.detailsProduct,
+    this.discount,
     this.discountModel,
     this.priceAfterDiscount,
     this.coponPrice,
+    this.priceOptionType,
+    this.prices,
+    this.productPrintingPrice,
+    this.coponData,
+    this.favorite,
+    this.reviews,
+    this.productReviews,
   });
 
   factory ProductData.fromJson(Map<String, dynamic> json) {
     return ProductData(
+      // الأساسيات
       id: json['id'] ?? 0,
       name: json['name'] ?? "",
       price: json['base_price'] ?? 0.0,
       categoryId: json['category_id'] ?? 0,
-      discount: json['discount_price'] ?? "0",
       description: json['description'] ?? "",
-      currency: json['currency'] ?? "",
-      sizeType: json['size_type_id'] ?? 0,
-      favorite: json['favorite'],
-      detailsProduct: DetailsProductData.fromJsonDetailsProductList(
-          json['product_details'] ?? []),
-      colorsProduct:
-          ColorOfProductData.fromJsonColorList(json['product_colors'] ?? []),
-      sizeProduct: SizeData.fromJsonSizeList(json['size_type_details'] ?? []),
+      isPrintable: json['is_printable'] ?? false,
+
+      // الصور
       mainImage: List<String>.from(
           json['main_imags']?.map((item) => item['image']) ?? []),
       allImage: List<String>.from(
           json['all_images']?.map((item) => item['image']) ?? []),
-      priceOptionType: List<String>.from(json['price_options_type'] ?? []),
-      prices: PriceData.fromJsonPriceList(json['optionPrices'] ?? []),
       colorHasImage: json['color_has_imgs'],
+
+      // الألوان والمقاسات والأرقام
+      colorsProduct:
+          ColorOfProductData.fromJsonColorList(json['product_colors'] ?? []),
+      productColorsCount: json['product_colors_count'] ?? 0,
+      sizeType: json['size_type_id'] ?? 0,
+      sizeProduct: SizeData.fromJsonSizeList(json['size_type_details'] ?? []),
       measuringType: List<String>.from(json['measuring_type'] ?? []),
+      numbersOfProduct:
+          NumberModel.fromJsonNumbersList(json['number_of_product'] ?? []),
+
+      // تفاصيل المنتج
+      detailsProduct: DetailsProductData.fromJsonDetailsProductList(
+          json['product_details'] ?? []),
+
+      // الأسعار والخصومات
+      discount: json['discount_price'] ?? "0",
       discountModel: json['discount'] != null
           ? DiscountModel.fromJson(json['discount'])
           : null,
-      coponData: CoponData.fromJsonCoponData(json['coupons'] ?? []),
       priceAfterDiscount: json['base_price_after_discount'],
       coponPrice: json['coupon'] ?? 0,
+      priceOptionType: List<String>.from(json['price_options_type'] ?? []),
+      prices: PriceData.fromJsonPriceList(json['optionPrices'] ?? []),
+      productPrintingPrice: json['product_printing_price'] ?? '',
+
+      // الكوبونات
+      coponData: CoponData.fromJsonCoponData(json['coupons'] ?? []),
+
+      // مفضلة
+      favorite: json['favorite'],
+
+      // التقييمات والتعليقات
+      reviews: json['proportion_statistics'] == null
+          ? ReviewsModel.empty()
+          : ReviewsModel.fromJson(
+              json['proportion_statistics'] as Map<String, dynamic>,
+            ),
+      productReviews:
+      ReviewData.fromJsonList(json['product_reviews'] ?? []),
     );
   }
 
@@ -110,58 +160,10 @@ class ProductData {
   }
 
   factory ProductData.empty() => ProductData(
+        id: 0,
         name: "",
         price: 0,
-        id: 0,
         categoryId: 0,
         coponData: [],
       );
-
-  static final fakeProductData = List.filled(
-    6,
-    ProductData(
-      name: "فستان مشجر",
-      id: 0,
-      price: 1000,
-      mainImage: [
-        'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg',
-      ],
-      allImage: [
-        ' https://dash-jeeey.dev-station.com/storage/300/product-images-(4).jpg',
-      ],
-      measuringType: [''],
-      colorHasImage: false,
-      discount: '',
-      detailsProduct: [DetailsProductData(detailName: '', detailValue: '')],
-      sizeType: 0,
-      priceOptionType: [],
-      favorite: true,
-      categoryId: 1,
-      sizeProduct: [SizeData(id: 1, price: 100, sizeTypeName: 'l')],
-      prices: [],
-      colorsProduct: [
-        ColorOfProductData(
-            idColor: 1,
-            isMain: 0,
-            price: '',
-            colorName: '',
-            image: [
-              'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg'
-            ],
-            colorHex: '#ff9dfd'),
-        ColorOfProductData(
-          idColor: 1,
-          isMain: 0,
-          price: '',
-          colorName: '',
-          image: [
-            'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg'
-          ],
-          colorHex: '#ff9dfd',
-        )
-      ],
-      description: 'hh',
-      coponData: [],
-    ),
-  );
 }

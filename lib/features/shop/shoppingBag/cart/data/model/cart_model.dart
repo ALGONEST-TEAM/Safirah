@@ -4,7 +4,6 @@ class CartModel {
   final int id;
   final int? productId;
   final String? productName;
-  final dynamic price;
   int? quantity;
   dynamic colorId;
   final String? colorName;
@@ -12,36 +11,41 @@ class CartModel {
   final int? sizeId;
   final String? sizeName;
   final String? images;
-  final String? originalPrice;
-  final num? discountPerUnit;
-  final num? totalDiscount;
-  final num? finalPrice;
-  final bool? hasCopon;
+  final dynamic price;
+  final num? productPriceAfterDiscount;
+  final num? discount;
+  final int? numberId;
+  final String? numberName;
+  final int? productPrintingPrice;
+  final int? printingPrice;
+  final int? isPrintable;
 
-  CartModel(
-      {required this.id,
-      this.productId,
-      this.productName,
-      this.price,
-      this.quantity,
-      this.colorId,
-      this.colorName,
-      this.colorHex,
-      this.sizeId,
-      this.sizeName,
-      required this.images,
-      this.hasCopon,
-      this.originalPrice,
-      this.finalPrice,
-      this.totalDiscount,
-      this.discountPerUnit});
+  CartModel({
+    required this.id,
+    this.productId,
+    this.productName,
+    this.quantity,
+    this.colorId,
+    this.colorName,
+    this.colorHex,
+    this.sizeId,
+    this.sizeName,
+    required this.images,
+    this.price,
+    this.productPriceAfterDiscount,
+    this.discount,
+    this.numberId,
+    this.numberName,
+    this.productPrintingPrice,
+    this.printingPrice,
+    this.isPrintable,
+  });
 
   factory CartModel.fromJson(Map<String, dynamic> json) {
     return CartModel(
       id: json['id'] ?? 0,
       productId: json['product_id'] as int?,
       productName: json['product_name'] ?? '',
-      price: json['product_price'],
       quantity: json['quantity'] as int?,
       colorId: json['color_id'],
       colorName: json['color_name'] ?? '',
@@ -49,11 +53,14 @@ class CartModel {
       sizeId: json['parent_measuring_id'] as int?,
       sizeName: json['measuring_value'] ?? '',
       images: json['image'] ?? "",
-      discountPerUnit: json['discount_per_unit'] ?? 0,
-      finalPrice: json['final_price'] ?? 0,
-      originalPrice: json['original_price'] ?? '',
-      totalDiscount: json['total_discount'] ?? 0,
-      hasCopon: json['has_coupon'] ?? false,
+      price: json['product_price'],
+      productPriceAfterDiscount: json['product_price_after_discount'],
+      discount: json['discount'],
+      numberId: json['number_id'] as int?,
+      numberName: json['number_name'] ?? "",
+      productPrintingPrice: json['product_printing_price'],
+      printingPrice: json['printing_price'],
+      isPrintable: json['is_printable'],
     );
   }
 
@@ -66,14 +73,16 @@ class CartModel {
         colorHex: '',
         colorName: '',
         sizeName: '',
-        price: '',
         images: '',
-        discountPerUnit: 0,
-        finalPrice: 0,
-        hasCopon: false,
-        originalPrice: '',
+        price: '',
+        productPriceAfterDiscount: 0,
+        discount: null,
         productName: '',
-        totalDiscount: 0,
+        numberId: null,
+        isPrintable: 0,
+        numberName: '',
+        productPrintingPrice: 0,
+        printingPrice: 0,
       );
 
   static List<CartModel> fromJsonList(List json) {
@@ -96,28 +105,43 @@ class CartModel {
     int? id,
     int? productId,
     String? productName,
-    int? price,
     String? currency,
     int? quantity,
     String? images,
+    int? price,
+    num? productPriceAfterDiscount,
+    num? discount,
     String? colorName,
     String? colorHex,
     int? colorId,
     int? sizeId,
     String? sizeName,
+    int? numberId,
+    String? numberName,
+    int? isPrintable,
+    int? productPrintingPrice,
+    int? printingPrice,
   }) {
     return CartModel(
       id: id ?? this.id,
       productId: productId ?? this.productId,
       productName: productName ?? this.productName,
-      price: price ?? this.price,
       quantity: quantity ?? this.quantity,
       images: images ?? this.images,
+      price: price ?? this.price,
+      productPriceAfterDiscount:
+          productPriceAfterDiscount ?? this.productPriceAfterDiscount,
+      discount: discount ?? this.discount,
       colorName: colorName ?? this.colorName,
       colorHex: colorHex ?? this.colorHex,
       colorId: colorId ?? this.colorId,
       sizeId: sizeId ?? this.sizeId,
       sizeName: sizeName ?? this.sizeName,
+      numberId: numberId ?? this.numberId,
+      numberName: numberName ?? this.numberName,
+      isPrintable: isPrintable ?? this.isPrintable,
+      productPrintingPrice: productPrintingPrice ?? this.productPrintingPrice,
+      printingPrice: printingPrice ?? this.printingPrice,
     );
   }
 
@@ -128,6 +152,8 @@ class CartModel {
         productId: productId,
         productName: productName,
         price: updatedProduct.price,
+        productPriceAfterDiscount: updatedProduct.productPriceAfterDiscount,
+        discount: updatedProduct.discount,
         quantity: updatedProduct.quantity,
         colorId: updatedProduct.colorId,
         colorName: updatedProduct.colorName,
@@ -135,6 +161,11 @@ class CartModel {
         sizeId: updatedProduct.sizeId,
         sizeName: updatedProduct.sizeName,
         images: updatedProduct.image,
+        numberId: updatedProduct.numberId,
+        numberName: updatedProduct.numberName,
+        isPrintable: updatedProduct.isPrintable,
+        productPrintingPrice: updatedProduct.productPrintingPrice,
+        printingPrice: updatedProduct.printingPrice,
       );
     }
     return this;

@@ -197,6 +197,16 @@ class S {
     return Intl.message('Categories', name: 'categories', desc: '', args: []);
   }
 
+  /// `I understand`
+  String get understood {
+    return Intl.message('I understand', name: 'understood', desc: '', args: []);
+  }
+
+  /// `Welcome`
+  String get welcome {
+    return Intl.message('Welcome', name: 'welcome', desc: '', args: []);
+  }
+
   // skipped getter for the '--------bottombar-----------' key
 
   /// `Home`
@@ -298,6 +308,31 @@ class S {
     return Intl.message(
       'Return policy',
       name: 'return_policy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sections`
+  String get sections {
+    return Intl.message('Sections', name: 'sections', desc: '', args: []);
+  }
+
+  /// `Numbers`
+  String get numbers {
+    return Intl.message('Numbers', name: 'numbers', desc: '', args: []);
+  }
+
+  /// `Number`
+  String get number {
+    return Intl.message('Number', name: 'number', desc: '', args: []);
+  }
+
+  /// `Printing on the product`
+  String get printingOnTheProduct {
+    return Intl.message(
+      'Printing on the product',
+      name: 'printingOnTheProduct',
       desc: '',
       args: [],
     );
@@ -581,11 +616,21 @@ class S {
     );
   }
 
-  /// `Please select a unit`
-  String get pleaseSelectAUnit {
+  /// `Please select a number`
+  String get pleaseSelectANumber {
     return Intl.message(
-      'Please select a unit',
-      name: 'pleaseSelectAUnit',
+      'Please select a number',
+      name: 'pleaseSelectANumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel printing`
+  String get cancelPrinting {
+    return Intl.message(
+      'Cancel printing',
+      name: 'cancelPrinting',
       desc: '',
       args: [],
     );
@@ -1164,6 +1209,11 @@ class S {
     );
   }
 
+  /// `Comments`
+  String get comments {
+    return Intl.message('Comments', name: 'comments', desc: '', args: []);
+  }
+
   // skipped getter for the '--------profile-----------' key
 
   /// `Currency`
@@ -1333,6 +1383,26 @@ class S {
 
   // skipped getter for the '--------user-----------' key
 
+  /// `Create account`
+  String get createAccount {
+    return Intl.message(
+      'Create account',
+      name: 'createAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verification code`
+  String get verificationCode {
+    return Intl.message(
+      'Verification code',
+      name: 'verificationCode',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Log in`
   String get logIn {
     return Intl.message('Log in', name: 'logIn', desc: '', args: []);
@@ -1454,10 +1524,10 @@ class S {
   }
 
   /// `Create an account in Safirah`
-  String get createAccount {
+  String get createAccountS {
     return Intl.message(
       'Create an account in Safirah',
-      name: 'createAccount',
+      name: 'createAccountS',
       desc: '',
       args: [],
     );
@@ -1509,6 +1579,26 @@ class S {
   }
 
   // skipped getter for the '--------success-----------' key
+
+  /// `Account created successfully`
+  String get accountCreatedSuccessfully {
+    return Intl.message(
+      'Account created successfully',
+      name: 'accountCreatedSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Logged in successfully`
+  String get loginSuccessful {
+    return Intl.message(
+      'Logged in successfully',
+      name: 'loginSuccessful',
+      desc: '',
+      args: [],
+    );
+  }
 
   /// `The operation was completed successfully`
   String get successfully {
@@ -1595,6 +1685,16 @@ class S {
     return Intl.message(
       'A new list has been created successfully',
       name: 'aNewListHasBeenCreatedSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Product added to cart successfully`
+  String get productAddedToCartSuccessfully {
+    return Intl.message(
+      'Product added to cart successfully',
+      name: 'productAddedToCartSuccessfully',
       desc: '',
       args: [],
     );
@@ -1882,141 +1982,6 @@ class S {
     return Intl.message(
       'Check the server address (Base URL) and try again',
       name: 'invalidApiUrl2',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Incorrect verification code`
-  String get incorrectVerificationCode {
-    return Intl.message(
-      'Incorrect verification code',
-      name: 'incorrectVerificationCode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please check the verification code`
-  String get incorrectVerificationCode2 {
-    return Intl.message(
-      'Please check the verification code',
-      name: 'incorrectVerificationCode2',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Verification code expired`
-  String get verificationCodeExpired {
-    return Intl.message(
-      'Verification code expired',
-      name: 'verificationCodeExpired',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please resend the verification code`
-  String get verificationCodeExpired2 {
-    return Intl.message(
-      'Please resend the verification code',
-      name: 'verificationCodeExpired2',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please check the phone number or email`
-  String get pleaseCheckThePhoneNumberOrEmail {
-    return Intl.message(
-      'Please check the phone number or email',
-      name: 'pleaseCheckThePhoneNumberOrEmail',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Incorrect password`
-  String get incorrectPassword {
-    return Intl.message(
-      'Incorrect password',
-      name: 'incorrectPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Account not found`
-  String get accountNotFound {
-    return Intl.message(
-      'Account not found',
-      name: 'accountNotFound',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please verify the account`
-  String get pleaseVerifyTheAccount {
-    return Intl.message(
-      'Please verify the account',
-      name: 'pleaseVerifyTheAccount',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The password does not meet the conditions`
-  String get thePasswordDoesNotMeetTheConditions {
-    return Intl.message(
-      'The password does not meet the conditions',
-      name: 'thePasswordDoesNotMeetTheConditions',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Password is same user password`
-  String get passwordIsSameUserPassword {
-    return Intl.message(
-      'Password is same user password',
-      name: 'passwordIsSameUserPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The product is already in the cart`
-  String get theProductIsAlreadyInTheCart {
-    return Intl.message(
-      'The product is already in the cart',
-      name: 'theProductIsAlreadyInTheCart',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `If you want to modify the product, go to the shopping bag`
-  String get ifYouWantToModifyTheProductGoToTheShoppingBag {
-    return Intl.message(
-      'If you want to modify the product, go to the shopping bag',
-      name: 'ifYouWantToModifyTheProductGoToTheShoppingBag',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `User cannot`
-  String get userCannot {
-    return Intl.message('User cannot', name: 'userCannot', desc: '', args: []);
-  }
-
-  /// `add more than one review on one product`
-  String get addMoreThanOneReviewOnOneProduct {
-    return Intl.message(
-      'add more than one review on one product',
-      name: 'addMoreThanOneReviewOnOneProduct',
       desc: '',
       args: [],
     );

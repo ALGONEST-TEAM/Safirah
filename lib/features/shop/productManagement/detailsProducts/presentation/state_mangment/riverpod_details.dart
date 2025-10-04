@@ -1,11 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-
 import '../../../../../../core/state/data_state.dart';
 import '../../../../../../core/state/state.dart';
-import '../../data/model/color_data.dart';
 import '../../data/model/product_data.dart';
-import '../../data/model/size_data.dart';
 import '../../data/reposaitory/reposaitories.dart';
 
 final detailsProvider = StateNotifierProvider.family<
@@ -34,32 +30,17 @@ class DetailsProductNotifier extends StateNotifier<DataState<ProductData>> {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-class ChangeIndexOfColorImageNotifier extends StateNotifier<int?> {
-  ChangeIndexOfColorImageNotifier() : super(0);
+class ChangeIndexOfColorImageAndSizeNotifier extends StateNotifier<int?> {
+  ChangeIndexOfColorImageAndSizeNotifier() : super(0);
 
-  void setIndexColorImage(int index) {
+  void setIndexColor(int index) {
     state = index;
   }
 }
 
-final changeIndexOfColorImageProvider =
-    StateNotifierProvider.autoDispose<ChangeIndexOfColorImageNotifier, int?>(
-        (ref) {
-  return ChangeIndexOfColorImageNotifier();
-});
-
-//////////////////////////////////////////////////////////////////////////////////////
-class NameOfColorForChangePriceNotifier extends StateNotifier<String?> {
-  NameOfColorForChangePriceNotifier() : super("");
-
-  void setNameColor(String nameColor) {
-    state = nameColor;
-  }
-}
-
-final nameOfColorForChangePriceProvider = StateNotifierProvider.autoDispose<
-    NameOfColorForChangePriceNotifier, String?>((ref) {
-  return NameOfColorForChangePriceNotifier();
+final changeIndexOfColorImageAndSizeProvider = StateNotifierProvider
+    .autoDispose<ChangeIndexOfColorImageAndSizeNotifier, int?>((ref) {
+  return ChangeIndexOfColorImageAndSizeNotifier();
 });
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -77,29 +58,42 @@ final showNumberOfScrollImageProvider =
   return ShowNumberOfScrollImageNotifier();
 });
 
+//////////////////////////////////////////////////////
+final changeIndexOfSizeProvider =
+    StateProvider.autoDispose.family<int?, int>((ref, productId) {
+  return null;
+});
+
+//////////////////////////////////////////////////////////
+final activatePrintingOnTheProductProvider =
+    StateProvider.family<bool, String>((ref, productId) {
+  return false;
+});
+
+/////////////////////////////////////////////////////////////
 class ChangePriceNotifier extends StateNotifier<dynamic> {
   final ProductData productData;
 
-  int? selectedColor;
-  String? selectedSize;
+  int? selectedIdColor;
   String? colorName;
-
+  String? selectedSizeName;
   int? selectedIdSize;
+  String? selectedNumber;
+  int? selectedIdNumber;
 
   ChangePriceNotifier({
     required this.productData,
   }) : super(productData.price!);
 
   void setIdColor(int idColor) {
-    selectedColor = idColor;
+    selectedIdColor = idColor;
     updatePrice();
   }
 
   int getIdColor() {
-    return selectedColor ?? 0;
+    return selectedIdColor ?? 0;
   }
 
-  // تحديث اسم اللون
   void setNameColor(String nameColor) {
     colorName = nameColor;
   }
@@ -108,14 +102,13 @@ class ChangePriceNotifier extends StateNotifier<dynamic> {
     return colorName ?? '';
   }
 
-  // تحديث اسم القياس
   void setNameSize(String nameSize) {
-    selectedSize = nameSize;
+    selectedSizeName = nameSize;
     updatePrice();
   }
 
   dynamic getNameSize() {
-    return selectedSize ?? '';
+    return selectedSizeName ?? '';
   }
 
   void setIdSize(int idSize) {
@@ -126,20 +119,36 @@ class ChangePriceNotifier extends StateNotifier<dynamic> {
     return selectedIdSize ?? 0;
   }
 
+  void setIdNumber(int idSize) {
+    selectedIdNumber = idSize;
+  }
+
+  int getIdNumber() {
+    return selectedIdNumber ?? 0;
+  }
+
+  void setNumber(String number) {
+    selectedNumber = number;
+  }
+
+  dynamic getNumber() {
+    return selectedNumber ?? '';
+  }
+
   bool noElement = false;
 
   void updatePrice() {
     try {
       if (productData.priceOptionType![0] == 'by_color') {
         final colorVariant = productData.colorsProduct?.firstWhere(
-          (variant) => variant.idColor == selectedColor,
+          (variant) => variant.idColor == selectedIdColor,
         );
         state = (colorVariant!.price == null || colorVariant.price == 0
             ? productData.price
             : colorVariant.price)!;
       } else if (productData.priceOptionType![0] == 'by_measuring') {
         final sizeVariant = productData.sizeProduct?.firstWhere(
-          (variant) => variant.sizeTypeName == selectedSize,
+          (variant) => variant.sizeTypeName == selectedSizeName,
         );
         state = sizeVariant?.price == null || sizeVariant?.price == 0
             ? productData.price
@@ -147,8 +156,8 @@ class ChangePriceNotifier extends StateNotifier<dynamic> {
       } else {
         final combinedVariant = productData.prices?.firstWhere(
           (variant) =>
-              variant.colorId == selectedColor &&
-              variant.sizeTypeName == selectedSize,
+              variant.colorId == selectedIdColor &&
+              variant.sizeTypeName == selectedSizeName,
         );
 
         state = combinedVariant?.price == null || combinedVariant?.price == 0

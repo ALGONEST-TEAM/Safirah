@@ -67,53 +67,6 @@ class MessageOfErorrApi {
       case DioExceptionType.badResponse:
         final code = exception.response?.statusCode ?? -1;
         switch (code) {
-          case 440:
-            return [
-              S.current.incorrectVerificationCode,
-              S.current.incorrectVerificationCode2
-            ];
-          case 441:
-            return [
-              S.current.pleaseCheckThePhoneNumberOrEmail,
-              S.current.pleaseTryAgain
-            ];
-          case 442:
-            return [S.current.incorrectPassword, S.current.pleaseTryAgain];
-          case 443:
-            return [
-              S.current.accountNotFound,
-              S.current.pleaseVerifyTheAccount
-            ];
-          case 444:
-            return [
-              S.current.incorrectVerificationCode,
-              S.current.incorrectVerificationCode2
-            ];
-          case 445:
-            return [
-              S.current.verificationCodeExpired,
-              S.current.verificationCodeExpired2
-            ];
-          case 446:
-            return [
-              S.current.thePasswordDoesNotMeetTheConditions,
-              S.current.pleaseTryAgain
-            ];
-          case 447:
-            return [
-              S.current.passwordIsSameUserPassword,
-              S.current.pleaseTryAgain
-            ];
-          case 461:
-            return [
-              S.current.theProductIsAlreadyInTheCart,
-              S.current.ifYouWantToModifyTheProductGoToTheShoppingBag
-            ];
-          case 472:
-            return [
-              S.current.userCannot,
-              S.current.addMoreThanOneReviewOnOneProduct
-            ];
           case 500:
             return [
               S.current.internalServerError,
