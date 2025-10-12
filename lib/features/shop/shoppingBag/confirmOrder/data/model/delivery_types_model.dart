@@ -26,6 +26,10 @@ class DeliveryTypesModel {
     );
   }
 
+  static List<DeliveryTypesModel> fromJsonDeliveryList(List json) {
+    return json.map((e) => DeliveryTypesModel.fromJson(e)).toList();
+  }
+
   static DeliveryTypesModel empty() {
     return DeliveryTypesModel(
       id: 0,

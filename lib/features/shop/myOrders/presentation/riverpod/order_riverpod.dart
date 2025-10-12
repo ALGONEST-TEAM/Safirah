@@ -6,8 +6,9 @@ import '../../data/model/order_model.dart';
 import '../../data/repos/order_repo.dart';
 
 final getAllOrdersProvider = StateNotifierProvider.autoDispose<
-    GetAllOrdersController, DataState<OrdersModel>>(
-  (ref) {
+    GetAllOrdersController,
+    DataState<OrdersModel>>(
+      (ref) {
     return GetAllOrdersController();
   },
 );
@@ -36,10 +37,10 @@ class GetAllOrdersController extends StateNotifier<DataState<OrdersModel>> {
     final result = await _controller.getAllOrders(page: nextPage);
 
     result.fold(
-      (failure) {
+          (failure) {
         state = state.copyWith(state: States.error, exception: failure);
       },
-      (newData) {
+          (newData) {
         final updatedOrders = moreData
             ? [...state.data.orders, ...newData.orders]
             : newData.orders;
@@ -59,7 +60,7 @@ class GetAllOrdersController extends StateNotifier<DataState<OrdersModel>> {
 
 final orderDetailsProvider = StateNotifierProvider.autoDispose
     .family<OrderDetailsController, DataState<OrderDetailsModel>, int>(
-  (ref, int id) {
+      (ref, int id) {
     return OrderDetailsController(id);
   },
 );
@@ -79,10 +80,10 @@ class OrderDetailsController
     state = state.copyWith(state: States.loading);
     final data = await _controller.orderDetails(id: id);
     data.fold(
-      (failure) {
+          (failure) {
         state = state.copyWith(state: States.error, exception: failure);
       },
-      (orderDetailsData) {
+          (orderDetailsData) {
         state = state.copyWith(
           state: States.loaded,
           data: orderDetailsData,

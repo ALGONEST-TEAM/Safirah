@@ -2,28 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:safirah/core/extension/string.dart';
 import '../../../../../core/constants/app_icons.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/buttons/ink_well_button_widget.dart';
 import '../../../../../core/widgets/general_design_for_order_details_widget.dart';
 import '../../../../../generated/l10n.dart';
+import '../../data/model/order_details_model.dart';
+
 
 class OrderDetailsWidget extends StatelessWidget {
-  final String orderNumber;
-
-  // final String orderStatus;
-  // final Color orderStatusColor;
-  final String date;
+  // final String orderNumber;
+  //
+  // // final String orderStatus;
+  // // final Color orderStatusColor;
+  // final String date;
   final String numberOfItems;
-
+ final OrderDetailsModel data;
   const OrderDetailsWidget({
     super.key,
-    required this.orderNumber,
-    // required this.orderStatus,
-    // required this.orderStatusColor,
-    required this.date,
+    required this.data,
     required this.numberOfItems,
+
   });
 
   @override
@@ -35,9 +36,9 @@ class OrderDetailsWidget extends StatelessWidget {
           _buildInfoRow(
             icon: AppIcons.orderNumber,
             label: S.of(context).orderNumber,
-            value: orderNumber,
+            value: data.trxId,
             onCopy: () async {
-              await Clipboard.setData(ClipboardData(text: orderNumber));
+              await Clipboard.setData(ClipboardData(text: data.trxId));
             },
           ),
           _buildInfoRow(
@@ -46,11 +47,11 @@ class OrderDetailsWidget extends StatelessWidget {
             valueWidget: Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.5.h),
               decoration: BoxDecoration(
-                color: Colors.green,
+                color: data.status.color!.toColor(),
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: AutoSizeTextWidget(
-                text: "في الطريق اليك",
+                text: data.status.name.toString(),
                 fontSize: 10.sp,
                 colorText: Colors.white,
               ),
@@ -59,7 +60,7 @@ class OrderDetailsWidget extends StatelessWidget {
           _buildInfoRow(
             icon: AppIcons.date,
             label: S.of(context).date,
-            value: date,
+            value: data.date,
           ),
           _buildInfoRow(
             icon: AppIcons.numberOfProducts,

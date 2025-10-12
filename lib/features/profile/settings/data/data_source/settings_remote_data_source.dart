@@ -25,6 +25,6 @@ class SettingsRemoteDataSource {
     final response = await RemoteRequest.getData(
       url: AppURL.getAllCurrencies,
     );
-    return CurrencyModel.fromJsonList(response.data);
+    return CurrencyModel.fromJsonList(response.data['data']);
   }
 }

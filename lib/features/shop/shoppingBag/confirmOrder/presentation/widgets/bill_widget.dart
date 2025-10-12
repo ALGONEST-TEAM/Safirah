@@ -3,21 +3,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/bill_design_widget.dart';
 import '../../../../../../generated/l10n.dart';
+import '../../data/model/orders_bill_data.dart';
 
 class BillWidget extends StatelessWidget {
-  final double total;
-  final bool hasCopon;
-  final double totalAfterDiscount;
-  final double coponValue;
-  final double deliveryCost;
+  final OrdersBillData billData;
+  final num? deliveryCost;
 
-  const BillWidget(
-      {super.key,
-      required this.total,
-      required this.hasCopon,
-      required this.coponValue,
-      required this.deliveryCost,
-      required this.totalAfterDiscount});
+  const BillWidget({
+    super.key,
+    required this.billData,
+    required this.deliveryCost,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +25,7 @@ class BillWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.02),
+            color: Colors.black.withValues(alpha: 0.015),
             blurRadius: 1.r,
           ),
         ],
@@ -39,24 +35,28 @@ class BillWidget extends StatelessWidget {
         children: [
           BillDesignWidget(
             name: S.of(context).theTotal,
-            price: total,
+            price: billData.totalBeforeDiscount,
           ),
-          4.h.verticalSpace,
+          Visibility(
+            visible: billData.totalPrinting != 0,
+            child: BillDesignWidget(
+              name: S.of(context).printingPrice,
+              price: billData.totalPrinting,
+            ),
+          ),
           BillDesignWidget(
             name: S.of(context).deliveryCost,
-            price: deliveryCost,
+            price: deliveryCost ?? 0,
           ),
-          4.h.verticalSpace,
           BillDesignWidget(
             name: S.of(context).discountOnBill,
-            price: 0.0,
+            price: billData.productDiscount,
           ),
-          4.h.verticalSpace,
           Visibility(
-            visible: hasCopon,
+            visible: billData.couponDiscount != 0,
             child: BillDesignWidget(
-              name: 'خصم الكوبون',
-              price: coponValue,
+              name: S.of(context).couponDiscount,
+              price: billData.couponDiscount,
             ),
           ),
           4.h.verticalSpace,
@@ -67,10 +67,10 @@ class BillWidget extends StatelessWidget {
           8.h.verticalSpace,
           BillDesignWidget(
             name: S.of(context).total,
-            price: totalAfterDiscount,
+            price: billData.totalPayable + deliveryCost!,
             fontSize1: 12.8.sp,
             fontSize2: 12.4.sp,
-            color2: AppColors.primaryColor
+            color2: AppColors.primaryColor,
           ),
         ],
       ),

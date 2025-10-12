@@ -3,13 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import '../../../../../../core/theme/app_colors.dart';
+import '../../data/model/delivery_types_model.dart';
 import '../riverpod/confirm_order_riverpod.dart';
 import 'design_of_shipping_method_data_widget.dart';
 
 class ListOfShippingMethodsWidget extends ConsumerStatefulWidget {
+  final List<DeliveryTypesModel> deliveryTypes;
+
   final FormGroup form;
 
-  const ListOfShippingMethodsWidget({super.key, required this.form});
+  const ListOfShippingMethodsWidget({super.key,required this.deliveryTypes, required this.form});
 
   @override
   ConsumerState<ListOfShippingMethodsWidget> createState() =>
@@ -32,18 +35,17 @@ class _ListOfShippingMethodsWidgetState
 
   @override
   Widget build(BuildContext context) {
-    var state = ref.watch(getConfirmOrderDataProvider);
     final city = widget.form.control('city_name');
     final hasAddress = city.valid &&
         city.value != null &&
         city.value.toString().trim().isNotEmpty;
     final isSanaa = hasAddress ? _isSanaa(city.value.toString()) : false;
     final methods = hasAddress
-        ? state.data.deliveryTypes.where((m) {
+        ? widget.deliveryTypes.where((m) {
             final methodScope = (m.scope) == true;
             return isSanaa ? methodScope : !methodScope;
           }).toList()
-        : state.data.deliveryTypes;
+        : widget.deliveryTypes;
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
@@ -67,6 +69,8 @@ class _ListOfShippingMethodsWidgetState
             }
             setState(() {
               widget.form.control('shipping_method_id').value = item.id;
+              widget.form.control('shipping_price').value = item.cost;
+
               ref.refresh(confirmOrderProvider.notifier);
             });
           },

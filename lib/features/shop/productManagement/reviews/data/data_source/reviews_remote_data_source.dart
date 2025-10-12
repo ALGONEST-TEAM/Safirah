@@ -18,7 +18,7 @@ class ReviewsRemoteDataSource {
         'perPage': limit,
       },
     );
-    return ReviewsModel.fromJson(response.data);
+    return ReviewsModel.fromJson(response.data['data']);
   }
 
   Future<Unit> addReviews(

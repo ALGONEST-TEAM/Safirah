@@ -6,7 +6,7 @@ import 'price_and_currency_widget.dart';
 
 class BillDesignWidget extends StatelessWidget {
   final String name;
-  final double price;
+  final num price;
   final double? fontSize1;
   final double? fontSize2;
 

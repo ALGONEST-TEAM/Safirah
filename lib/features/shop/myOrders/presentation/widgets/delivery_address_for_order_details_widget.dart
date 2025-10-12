@@ -6,9 +6,11 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/general_design_for_order_details_widget.dart';
 import '../../../../../generated/l10n.dart';
+import '../../../address/data/model/address_model.dart';
 
 class DeliveryAddressForOrderDetailsWidget extends StatelessWidget {
-  const DeliveryAddressForOrderDetailsWidget({super.key});
+  final AddressModel address;
+  const DeliveryAddressForOrderDetailsWidget({super.key, required this.address});
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +30,13 @@ class DeliveryAddressForOrderDetailsWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 AutoSizeTextWidget(
-                  text: "المطار",
+                  text: address.address,
                   fontSize: 12.2.sp,
                   colorText: AppColors.fontColor,
                 ),
                 4.h.verticalSpace,
                 AutoSizeTextWidget(
-                  text: "صنعاء الدائري",
+                  text:"${address.city!.name} - ${address.district!.name}",
                   fontSize: 10.6.sp,
                   colorText: AppColors.fontColor2,
                   fontWeight: FontWeight.w400,

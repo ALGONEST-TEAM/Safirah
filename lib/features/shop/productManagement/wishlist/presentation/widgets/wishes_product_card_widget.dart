@@ -85,7 +85,7 @@ class _WishesProductCardWidgetState extends ConsumerState<WishesProductCardWidge
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(.0),
+              color: Colors.black.withValues(alpha: .01),
               blurRadius: 1.r,
             ),
           ],
@@ -175,7 +175,7 @@ class _WishesProductCardWidgetState extends ConsumerState<WishesProductCardWidge
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(8.sp),
+              padding: EdgeInsets.all(6.sp),
               child: Column(
                 children: [
                   Row(
@@ -206,7 +206,7 @@ class _WishesProductCardWidgetState extends ConsumerState<WishesProductCardWidge
                       ),
                     ],
                   ),
-                  4.h.verticalSpace,
+                  3.h.verticalSpace,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

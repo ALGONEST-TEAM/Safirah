@@ -7,14 +7,23 @@ import '../../../../../../core/constants/app_icons.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../../../generated/l10n.dart';
+import '../../../../address/data/model/address_model.dart';
+import '../../../cart/data/model/cart_model.dart';
 import 'bottom_sheet_design_for_order_confirmation_addresses_widget.dart';
 import '../../../../../../core/widgets/general_design_for_order_details_widget.dart';
 import 'required_inputs_widget.dart';
 
 class AddressToConfirmTheOrderWidget extends StatelessWidget {
+  final List<CartModel> products;
+  final List<AddressModel> address;
   final FormGroup form;
 
-  const AddressToConfirmTheOrderWidget({super.key, required this.form});
+  const AddressToConfirmTheOrderWidget({
+    super.key,
+    required this.products,
+    required this.address,
+    required this.form,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +78,8 @@ class AddressToConfirmTheOrderWidget extends StatelessWidget {
               context: context,
               title: S.of(context).yourAddress,
               page: BottomSheetDesignForOrderConfirmationAddressesWidget(
+                products: products,
+                address: address,
                 form: form,
               ),
             );

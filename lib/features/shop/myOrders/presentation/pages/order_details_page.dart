@@ -5,6 +5,7 @@ import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/general_design_for_order_details_widget.dart';
+import '../../../../../core/widgets/logo_shimmer_widget.dart';
 import '../../../../../core/widgets/online_images_widget.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../generated/l10n.dart';
@@ -28,9 +29,10 @@ class OrderDetailsPage extends ConsumerWidget {
       ),
       body: CheckStateInGetApiDataWidget(
         state: state,
-        refresh: (){
+        refresh: () {
           ref.refresh(orderDetailsProvider(orderId));
         },
+        widgetOfLoading: const LogoShimmerWidget(),
         widgetOfData: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: Column(
@@ -38,11 +40,13 @@ class OrderDetailsPage extends ConsumerWidget {
             spacing: 2.h,
             children: [
               OrderDetailsWidget(
-                orderNumber: state.data.trxId,
+                data: state.data,
                 numberOfItems: state.data.orderProducts.length.toString(),
-                date: state.data.date.toString(),
               ),
-              const DeliveryAddressForOrderDetailsWidget(),
+              if (state.data.address != null)
+                DeliveryAddressForOrderDetailsWidget(
+                  address: state.data.address!,
+                ),
               GeneralDesignForOrderDetailsWidget(
                 title: S.of(context).paymentMethod,
                 child: Row(
@@ -55,8 +59,8 @@ class OrderDetailsPage extends ConsumerWidget {
                     10.w.horizontalSpace,
                     Flexible(
                       child: AutoSizeTextWidget(
-                        text: "تمارا",
-                        fontSize: 12.2.sp,
+                        text: state.data.payMethod?.title ?? '',
+                        fontSize: 12.sp,
                         colorText: AppColors.fontColor,
                       ),
                     ),
@@ -66,7 +70,7 @@ class OrderDetailsPage extends ConsumerWidget {
               7.h.verticalSpace,
               AutoSizeTextWidget(
                 text: S.of(context).products,
-                fontSize:  11.6.sp,
+                fontSize: 11.6.sp,
                 fontWeight: FontWeight.w400,
                 colorText: AppColors.mainColorFont,
               ),

@@ -49,7 +49,9 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
       ref
-          .read(getAllReviewsProvider( widget.productId!)
+          .read(getAllReviewsProvider(widget.productId != null
+                  ? widget.productId!
+                  : widget.products.id)
               .notifier)
           .getData(
             moreData: true,
@@ -65,7 +67,9 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
 
   @override
   Widget build(BuildContext context) {
-    var state = ref.watch(getAllReviewsProvider( widget.productId!));
+    var state = ref.watch(getAllReviewsProvider(widget.productId != null
+        ? widget.productId!
+        : widget.products.id));
     return Scaffold(
       appBar: SecondaryAppBarWidget(
         title: S.of(context).evaluations,
@@ -75,7 +79,9 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
         color: AppColors.primaryColor,
         backgroundColor: Colors.white,
         onRefresh: () async {
-          ref.refresh(getAllReviewsProvider(widget.productId!));
+          ref.refresh(getAllReviewsProvider(widget.productId != null
+              ? widget.productId!
+              : widget.products.id));
         },
         child: SingleChildScrollView(
           controller: _scrollController,
@@ -83,7 +89,9 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
           child: CheckStateInGetApiDataWidget(
             state: state,
             refresh: () {
-              ref.refresh(getAllReviewsProvider( widget.productId!));
+              ref.refresh(getAllReviewsProvider(widget.productId != null
+                  ? widget.productId!
+                  : widget.products.id));
             },
             widgetOfLoading: const ShimmerForReviewsWidget(),
             widgetOfData: state.data.review.data.isNotEmpty

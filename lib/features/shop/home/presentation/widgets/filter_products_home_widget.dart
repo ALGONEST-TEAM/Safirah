@@ -39,7 +39,7 @@ class _FilterProductsHomeWidgetState
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.w).copyWith(top: 2.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w).copyWith(top: 2.h,bottom: 4.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

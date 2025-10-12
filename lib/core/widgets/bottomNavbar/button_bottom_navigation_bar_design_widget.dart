@@ -11,7 +11,7 @@ class ButtonBottomNavigationBarDesignWidget extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: 14.w,
-      ).copyWith(top: 2.h,bottom: 8.h),
+      ).copyWith(top: 6.h,bottom: 8.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -20,7 +20,7 @@ class ButtonBottomNavigationBarDesignWidget extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.04),
+            color: Colors.black.withValues(alpha: .06),
             blurRadius: 2.r,
           ),
         ],

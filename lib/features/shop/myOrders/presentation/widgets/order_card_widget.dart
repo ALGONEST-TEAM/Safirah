@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/core/extension/string.dart';
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
@@ -19,6 +20,7 @@ class OrderCardWidget extends ConsumerWidget {
     // var currencyState = ref.watch(currencyProvider);
     return GestureDetector(
       onTap: () {
+        print(data.id);
         navigateTo(context, OrderDetailsPage(orderId: data.id));
       },
       child: Container(
@@ -49,8 +51,9 @@ class OrderCardWidget extends ConsumerWidget {
                       children: [
                         8.h.verticalSpace,
                         AutoSizeTextWidget(
-                          text: "2025/8/20",
+                          text: formatDate(data.date.toString()),
                           fontSize: 10.4.sp,
+                          maxLines: 2,
                           colorText: AppColors.fontColor2,
                           fontWeight: FontWeight.w400,
                         ),

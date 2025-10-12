@@ -26,7 +26,7 @@ class _MyOrdersPageState extends ConsumerState<MyOrdersPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _scrollController.addListener(_onScroll);
   }
 
@@ -53,7 +53,7 @@ class _MyOrdersPageState extends ConsumerState<MyOrdersPage>
       body: !Auth().loggedIn
           ? const DesignPleaseLoginWidget()
           : DefaultTabController(
-              length: 6,
+              length: 5,
               child: Column(
                 children: [
                   TabBar(
@@ -82,9 +82,8 @@ class _MyOrdersPageState extends ConsumerState<MyOrdersPage>
                       Tab(text: S.of(context).allOrders),
                       Tab(text: S.of(context).unpaid),
                       Tab(text: S.of(context).processing),
-                      Tab(text: S.of(context).shipped),
-                      Tab(text: S.of(context).returns),
-                      Tab(text: S.of(context).review),
+                      Tab(text: S.of(context).onTheWay),
+                      Tab(text: S.of(context).delivered),
                     ],
                   ),
                   Expanded(
@@ -103,7 +102,7 @@ class _MyOrdersPageState extends ConsumerState<MyOrdersPage>
                         ),
                         ListForOrdersWidget(
                           scrollController: _scrollController,
-                          status: 4,
+                          status: 3,
                         ),
                         ListForOrdersWidget(
                           scrollController: _scrollController,
@@ -111,12 +110,9 @@ class _MyOrdersPageState extends ConsumerState<MyOrdersPage>
                         ),
                         ListForOrdersWidget(
                           scrollController: _scrollController,
-                          status: 3,
+                          status: 6,
                         ),
-                        ListForOrdersWidget(
-                          scrollController: _scrollController,
-                          status: 2,
-                        ),
+
                       ],
                     ),
                   ),

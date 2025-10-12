@@ -33,7 +33,9 @@ class ProductData {
   final bool? colorHasImage;
 
   //  الألوان والمقاسات والأرقام
+  @HiveField(14)
   final List<ColorOfProductData>? colorsProduct;
+  @HiveField(15)
   final int? productColorsCount;
   final int? sizeType;
   final List<SizeData>? sizeProduct;

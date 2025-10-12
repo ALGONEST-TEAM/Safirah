@@ -56,9 +56,10 @@ class AddToCartOrFavoritesWidget extends ConsumerWidget {
               height: details.data.favorite == true ? 24.h : 21.h,
               onPressed: () {
                 if (!Auth().loggedIn) {
-                  pressAgainToExit(
+                  showFlashBarError(
                     context: context,
-                    text: S.of(context).loginRequired,
+                    title: S.of(context).loginRequired,
+                    text: S.of(context).pleaseLoginToContinue,
                   );
                   return;
                 }
@@ -91,6 +92,14 @@ class AddToCartOrFavoritesWidget extends ConsumerWidget {
                 textSize: 12.4.sp,
                 isLoading: cartState.stateData == States.loading,
                 onPressed: () {
+                  if (!Auth().loggedIn) {
+                    showFlashBarError(
+                      context: context,
+                      title: S.of(context).loginRequired,
+                      text: S.of(context).pleaseLoginToContinue,
+                    );
+                    return;
+                  }
                   final notifier =
                       ref.read(changePriceProvider(details.data).notifier);
                   final price = ref.watch(changePriceProvider(details.data)) ??

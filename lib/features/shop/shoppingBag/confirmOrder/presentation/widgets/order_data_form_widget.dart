@@ -14,6 +14,7 @@ class OrderDataFormController {
       'shipping_method_id': FormControl<int>(
         validators: [Validators.required],
       ),
+      'shipping_price': FormControl<num>(),
       'payment_method': FormControl<int>(
         validators: [Validators.required],
       ),

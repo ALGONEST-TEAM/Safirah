@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../../core/constants/app_icons.dart';
+import '../../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../../core/helpers/navigateTo.dart';
 import '../../../../../../core/widgets/buttons/icon_button_widget.dart';
+import '../../../../../../generated/l10n.dart';
+import '../../../../../../services/auth/auth.dart';
 import '../../../../shoppingBag/cart/presentation/pages/cart_page.dart';
 
 class AppBarOfDetailsWidget extends StatelessWidget
@@ -52,6 +55,13 @@ class AppBarOfDetailsWidget extends StatelessWidget
                   icon: AppIcons.cart,
                   height: 21.h,
                   onPressed: () {
+                    if (!Auth().loggedIn) {
+                      pressAgainToExit(
+                        context: context,
+                        text: S.of(context).loginRequired,
+                      );
+                      return;
+                    }
                     navigateTo(context, const CartPage());
                   },
                 );

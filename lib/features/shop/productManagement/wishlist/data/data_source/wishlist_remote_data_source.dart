@@ -38,7 +38,7 @@ class WishlistRemoteDataSource {
     final response = await RemoteRequest.getData(
       url: AppURL.getAllList,
     );
-    return ListModel.fromJsonList(response.data);
+    return ListModel.fromJsonList(response.data['data']);
   }
 
   Future<Unit> createAnewListAndAddProducts(
@@ -89,7 +89,7 @@ class WishlistRemoteDataSource {
       url: AppURL.getProductsByList,
       query: {"list_id": listId},
     );
-    return ProductData.fromJsonProductList(response.data);
+    return ProductData.fromJsonProductList(response.data['data']);
   }
 
   Future<Unit> deleteListProducts(int listId, List<int> productsIds) async {

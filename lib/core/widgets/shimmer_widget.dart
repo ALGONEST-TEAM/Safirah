@@ -7,14 +7,15 @@ import '../theme/app_colors.dart';
 class ShimmerWidget extends StatelessWidget {
   final Widget child;
   final Color? baseColor;
+  final Color? highlightColor;
 
-  const ShimmerWidget({super.key, required this.child, this.baseColor});
+  const ShimmerWidget({super.key, required this.child, this.baseColor, this.highlightColor});
 
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppColors.greySwatch.shade100,
-      highlightColor: Colors.grey.shade100,
+      baseColor:baseColor?? AppColors.greySwatch.shade100,
+      highlightColor:highlightColor?? Colors.grey.shade100,
       direction: ShimmerDirection.rtl,
       child: child,
     );

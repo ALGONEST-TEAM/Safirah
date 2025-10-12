@@ -1,6 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+String formatDate(dynamic date) {
+  final s = date?.toString() ?? '';
+  if (s.isEmpty) return '';
+  try {
+    // Supports "YYYY-MM-DD hh:mm:ss" or ISO strings
+    final iso = s.contains('T') ? s : s.replaceFirst(' ', 'T');
+    final dt = DateTime.parse(iso);
+    return DateFormat('yyyy-MM-dd', 'en')
+        .format(dt); // change pattern if needed
+  } catch (_) {
+    // Fallback: take the part before the first space
+    return s.split(' ').first;
+  }
+}
+
 extension ParseStringTothousandsNumber on String {
   /// Convert a string to number or throw an exception if can't convert it.
   /// [removeComma] is used to remove the comma from the string before converting it to number.

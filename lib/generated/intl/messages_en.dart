@@ -116,6 +116,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "copy": MessageLookupByLibrary.simpleMessage("Copy"),
     "copyToList": MessageLookupByLibrary.simpleMessage("Copy to list"),
+    "couponDiscount": MessageLookupByLibrary.simpleMessage("Coupon discount"),
+    "couponVerificationSuccess": MessageLookupByLibrary.simpleMessage(
+      "Coupon verified successfully",
+    ),
     "createAList": MessageLookupByLibrary.simpleMessage("Create a list"),
     "createANewList": MessageLookupByLibrary.simpleMessage("Create a new list"),
     "createAccount": MessageLookupByLibrary.simpleMessage("Create account"),
@@ -140,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deletedSuccessfully": MessageLookupByLibrary.simpleMessage(
       "Deleted successfully",
     ),
+    "delivered": MessageLookupByLibrary.simpleMessage("Delivered"),
     "deliveryAddress": MessageLookupByLibrary.simpleMessage("Delivery address"),
     "deliveryCost": MessageLookupByLibrary.simpleMessage("Delivery cost"),
     "discountOnBill": MessageLookupByLibrary.simpleMessage("Discount"),
@@ -157,6 +162,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "enter": MessageLookupByLibrary.simpleMessage("Enter"),
     "enterPhoneNumber": MessageLookupByLibrary.simpleMessage(
       "Enter phone number",
+    ),
+    "enterProductPrintDescription": MessageLookupByLibrary.simpleMessage(
+      "Enter the print description for this product",
     ),
     "evaluations": MessageLookupByLibrary.simpleMessage("Evaluations"),
     "expectations": MessageLookupByLibrary.simpleMessage("Expectations"),
@@ -244,6 +252,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Number of Products",
     ),
     "numbers": MessageLookupByLibrary.simpleMessage("Numbers"),
+    "onTheWay": MessageLookupByLibrary.simpleMessage("On the way"),
     "opinions": MessageLookupByLibrary.simpleMessage("Opinions"),
     "optional": MessageLookupByLibrary.simpleMessage("(Optional)"),
     "order": MessageLookupByLibrary.simpleMessage("Order"),
@@ -288,6 +297,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "pleaseEnterPhoneNumber": MessageLookupByLibrary.simpleMessage(
       "Please enter phone number",
     ),
+    "pleaseEnterProductPrintDescription": MessageLookupByLibrary.simpleMessage(
+      "Please enter the print description for the product",
+    ),
     "pleaseEnterTheVerificationCode": MessageLookupByLibrary.simpleMessage(
       "Please enter the verification code",
     ),
@@ -317,6 +329,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "printingOnTheProduct": MessageLookupByLibrary.simpleMessage(
       "Printing on the product",
     ),
+    "printingPrice": MessageLookupByLibrary.simpleMessage("Printing price"),
     "processing": MessageLookupByLibrary.simpleMessage("Processing"),
     "productAddedToCartSuccessfully": MessageLookupByLibrary.simpleMessage(
       "Product added to cart successfully",
@@ -360,7 +373,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "resend": MessageLookupByLibrary.simpleMessage("Resend"),
     "resendCodeIN": MessageLookupByLibrary.simpleMessage("Resend code in"),
     "return_policy": MessageLookupByLibrary.simpleMessage("Return policy"),
-    "returns": MessageLookupByLibrary.simpleMessage("Returns"),
     "review": MessageLookupByLibrary.simpleMessage("Review"),
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "sections": MessageLookupByLibrary.simpleMessage("Sections"),
@@ -382,7 +394,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "shareMyCart": MessageLookupByLibrary.simpleMessage("Share My Cart"),
     "sharing": MessageLookupByLibrary.simpleMessage("Sharing"),
-    "shipped": MessageLookupByLibrary.simpleMessage("Shipped"),
     "shippingMethod": MessageLookupByLibrary.simpleMessage("Shipping method"),
     "shippingTime": MessageLookupByLibrary.simpleMessage("Shipping time"),
     "shipping_details": MessageLookupByLibrary.simpleMessage(
@@ -455,6 +466,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "verificationCode": MessageLookupByLibrary.simpleMessage(
       "Verification code",
     ),
+    "verify": MessageLookupByLibrary.simpleMessage("Verify"),
     "viewAll": MessageLookupByLibrary.simpleMessage("View All"),
     "viewMore": MessageLookupByLibrary.simpleMessage("View more"),
     "welcome": MessageLookupByLibrary.simpleMessage("Welcome"),

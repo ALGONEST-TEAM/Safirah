@@ -81,8 +81,6 @@ class AppURL {
 
   static String get getProductCopon => '/coupons';
 
-  static String get checkCoupon => '/coupons/check_coupon';
-
   static String get updateFCMToken => '/auth/store_fcm_token';
 
   static String get getCartId => '/carts/cart_id/by_fcm_token';

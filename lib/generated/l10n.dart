@@ -743,6 +743,51 @@ class S {
     );
   }
 
+  /// `Verify`
+  String get verify {
+    return Intl.message('Verify', name: 'verify', desc: '', args: []);
+  }
+
+  /// `Coupon discount`
+  String get couponDiscount {
+    return Intl.message(
+      'Coupon discount',
+      name: 'couponDiscount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Printing price`
+  String get printingPrice {
+    return Intl.message(
+      'Printing price',
+      name: 'printingPrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the print description for this product`
+  String get enterProductPrintDescription {
+    return Intl.message(
+      'Enter the print description for this product',
+      name: 'enterProductPrintDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enter the print description for the product`
+  String get pleaseEnterProductPrintDescription {
+    return Intl.message(
+      'Please enter the print description for the product',
+      name: 'pleaseEnterProductPrintDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Back to home`
   String get backToHome {
     return Intl.message('Back to home', name: 'backToHome', desc: '', args: []);
@@ -997,19 +1042,19 @@ class S {
     return Intl.message('Processing', name: 'processing', desc: '', args: []);
   }
 
+  /// `On the way`
+  String get onTheWay {
+    return Intl.message('On the way', name: 'onTheWay', desc: '', args: []);
+  }
+
+  /// `Delivered`
+  String get delivered {
+    return Intl.message('Delivered', name: 'delivered', desc: '', args: []);
+  }
+
   /// `Review`
   String get review {
     return Intl.message('Review', name: 'review', desc: '', args: []);
-  }
-
-  /// `Shipped`
-  String get shipped {
-    return Intl.message('Shipped', name: 'shipped', desc: '', args: []);
-  }
-
-  /// `Returns`
-  String get returns {
-    return Intl.message('Returns', name: 'returns', desc: '', args: []);
   }
 
   /// `Order Details`
@@ -1695,6 +1740,16 @@ class S {
     return Intl.message(
       'Product added to cart successfully',
       name: 'productAddedToCartSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Coupon verified successfully`
+  String get couponVerificationSuccess {
+    return Intl.message(
+      'Coupon verified successfully',
+      name: 'couponVerificationSuccess',
       desc: '',
       args: [],
     );

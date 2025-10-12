@@ -30,9 +30,4 @@ class DiscountModel {
   }
 
   factory DiscountModel.empty() => DiscountModel(discountType: '', discount: 0);
-
-// static final fakeProductData = List.filled(
-// 4,
-//     CoponData(
-// )
 }

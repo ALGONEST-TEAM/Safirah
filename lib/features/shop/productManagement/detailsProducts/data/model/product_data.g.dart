@@ -23,6 +23,8 @@ class ProductDataAdapter extends TypeAdapter<ProductData> {
       categoryId: fields[3] as int?,
       description: fields[5] as String?,
       mainImage: (fields[9] as List?)?.cast<String>(),
+      colorsProduct: (fields[14] as List?)?.cast<ColorOfProductData>(),
+      productColorsCount: fields[15] as int?,
       discount: fields[4] as String?,
       discountModel: fields[11] as DiscountModel?,
       priceAfterDiscount: fields[12] as dynamic,
@@ -33,7 +35,7 @@ class ProductDataAdapter extends TypeAdapter<ProductData> {
   @override
   void write(BinaryWriter writer, ProductData obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -46,6 +48,10 @@ class ProductDataAdapter extends TypeAdapter<ProductData> {
       ..write(obj.description)
       ..writeByte(9)
       ..write(obj.mainImage)
+      ..writeByte(14)
+      ..write(obj.colorsProduct)
+      ..writeByte(15)
+      ..write(obj.productColorsCount)
       ..writeByte(4)
       ..write(obj.discount)
       ..writeByte(11)

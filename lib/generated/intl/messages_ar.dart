@@ -108,6 +108,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "continueAsGuest": MessageLookupByLibrary.simpleMessage("المتابعة كزائر"),
     "copy": MessageLookupByLibrary.simpleMessage("نسخ"),
     "copyToList": MessageLookupByLibrary.simpleMessage("نسخ إلى القائمة"),
+    "couponDiscount": MessageLookupByLibrary.simpleMessage("خصم الكوبون"),
+    "couponVerificationSuccess": MessageLookupByLibrary.simpleMessage(
+      "تمت عملية التحقق من الكوبون بنجاح",
+    ),
     "createAList": MessageLookupByLibrary.simpleMessage("إنشاء قائمة"),
     "createANewList": MessageLookupByLibrary.simpleMessage("إنشاء قائمة جديدة"),
     "createAccount": MessageLookupByLibrary.simpleMessage("إنشاء حساب"),
@@ -132,6 +136,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deletedSuccessfully": MessageLookupByLibrary.simpleMessage(
       "تم الحذف بنجاح",
     ),
+    "delivered": MessageLookupByLibrary.simpleMessage("تم التسليم"),
     "deliveryAddress": MessageLookupByLibrary.simpleMessage("عنوان التوصيل"),
     "deliveryCost": MessageLookupByLibrary.simpleMessage("تكلفة التوصيل"),
     "discountOnBill": MessageLookupByLibrary.simpleMessage("الخصم"),
@@ -148,6 +153,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "editAddress": MessageLookupByLibrary.simpleMessage("تعديل العنوان"),
     "enter": MessageLookupByLibrary.simpleMessage("أدخل"),
     "enterPhoneNumber": MessageLookupByLibrary.simpleMessage("أدخل رقم الهاتف"),
+    "enterProductPrintDescription": MessageLookupByLibrary.simpleMessage(
+      "ادخل وصف الطباعة لهذا المنتج",
+    ),
     "evaluations": MessageLookupByLibrary.simpleMessage("التقييمات"),
     "expectations": MessageLookupByLibrary.simpleMessage("التوقعات"),
     "faq": MessageLookupByLibrary.simpleMessage("السياسات والأسئلة الشائعة"),
@@ -234,6 +242,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "number": MessageLookupByLibrary.simpleMessage("رقم"),
     "numberOfProducts": MessageLookupByLibrary.simpleMessage("عدد المنتجات"),
     "numbers": MessageLookupByLibrary.simpleMessage("الأرقام"),
+    "onTheWay": MessageLookupByLibrary.simpleMessage("في الطريق"),
     "opinions": MessageLookupByLibrary.simpleMessage("آراء"),
     "optional": MessageLookupByLibrary.simpleMessage("(اختياري)"),
     "order": MessageLookupByLibrary.simpleMessage("الطلب"),
@@ -276,6 +285,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "pleaseEnterPhoneNumber": MessageLookupByLibrary.simpleMessage(
       "يرجى ادخال رقم هاتف",
     ),
+    "pleaseEnterProductPrintDescription": MessageLookupByLibrary.simpleMessage(
+      "يرجى ادخال وصف الطباعة للمنتج",
+    ),
     "pleaseEnterTheVerificationCode": MessageLookupByLibrary.simpleMessage(
       "يرجى أدخال رمز التحقق",
     ),
@@ -307,6 +319,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "printingOnTheProduct": MessageLookupByLibrary.simpleMessage(
       "الطباعة على المنتج",
     ),
+    "printingPrice": MessageLookupByLibrary.simpleMessage("سعر الطباعة"),
     "processing": MessageLookupByLibrary.simpleMessage("قيد التجهيز"),
     "productAddedToCartSuccessfully": MessageLookupByLibrary.simpleMessage(
       "تمت اضافة المنتج الى السلة بنجاح",
@@ -350,7 +363,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "إعادة إرسال الرمز خلال",
     ),
     "return_policy": MessageLookupByLibrary.simpleMessage("سياسة الإرجاع"),
-    "returns": MessageLookupByLibrary.simpleMessage(" المسترجعة"),
     "review": MessageLookupByLibrary.simpleMessage(" التعليق"),
     "save": MessageLookupByLibrary.simpleMessage("حفظ"),
     "sections": MessageLookupByLibrary.simpleMessage("الأقسام"),
@@ -372,7 +384,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "settings": MessageLookupByLibrary.simpleMessage("الإعدادات"),
     "shareMyCart": MessageLookupByLibrary.simpleMessage("مشاركة عربة التسوق"),
     "sharing": MessageLookupByLibrary.simpleMessage("مشاركة"),
-    "shipped": MessageLookupByLibrary.simpleMessage("تم التجهيز"),
     "shippingMethod": MessageLookupByLibrary.simpleMessage("وسيلة الشحن"),
     "shippingTime": MessageLookupByLibrary.simpleMessage("وقت الشحن"),
     "shipping_details": MessageLookupByLibrary.simpleMessage("تفاصيل الشحن"),
@@ -431,6 +442,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "understood": MessageLookupByLibrary.simpleMessage("لقد فهمت"),
     "unpaid": MessageLookupByLibrary.simpleMessage("غير مدفوع"),
     "verificationCode": MessageLookupByLibrary.simpleMessage("رمز التحقق"),
+    "verify": MessageLookupByLibrary.simpleMessage("تحقق"),
     "viewAll": MessageLookupByLibrary.simpleMessage("عرض الكل"),
     "viewMore": MessageLookupByLibrary.simpleMessage("عرض المزيد"),
     "welcome": MessageLookupByLibrary.simpleMessage("مرحبًا بك"),

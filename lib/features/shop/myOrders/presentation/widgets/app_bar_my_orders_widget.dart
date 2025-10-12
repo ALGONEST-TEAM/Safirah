@@ -28,23 +28,23 @@ class AppBarMyOrdersWidget extends StatelessWidget
         fontSize: 14.8.sp,
         fontWeight: FontWeight.w600,
       ),
-      actions: [
-        12.w.horizontalSpace,
-        InkWellButtonWidget(
-          icon: AppIcons.cartActive,
-          height: 20.6.h,
-          onPressed: () {
-            navigateTo(context, const CartPage());
-          },
-        ),
-        // if (!Auth().loggedIn) 12.w.horizontalSpace,
-        // if (Auth().loggedIn)
-          IconButtonWidget(
-            icon: AppIcons.notification,
-            height: 20.h,
-            onPressed: () {},
-          ),
-      ],
+      actions: !Auth().loggedIn
+          ? []
+          : [
+              12.w.horizontalSpace,
+              InkWellButtonWidget(
+                icon: AppIcons.cartActive,
+                height: 20.6.h,
+                onPressed: () {
+                  navigateTo(context, const CartPage());
+                },
+              ),
+              IconButtonWidget(
+                icon: AppIcons.notification,
+                height: 20.h,
+                onPressed: () {},
+              ),
+            ],
     );
   }
 }

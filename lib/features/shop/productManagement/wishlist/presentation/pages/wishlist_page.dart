@@ -71,14 +71,14 @@ class _WishlistPageState extends ConsumerState<WishlistPage>
               unselectedLabelColor: AppColors.fontColor.withOpacity(.5),
               tabAlignment: TabAlignment.center,
               labelStyle: TextStyle(
-                fontSize: 11.sp,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
-                fontFamily: "ReadexPro",
+                fontFamily: "IBMPlexSansArabic",
               ),
               unselectedLabelStyle: TextStyle(
-                fontSize: 11.sp,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
-                fontFamily: "ReadexPro",
+                fontFamily: "IBMPlexSansArabic",
               ),
               indicator: UnderlineTabIndicator(
                 borderSide:

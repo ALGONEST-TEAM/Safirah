@@ -9,6 +9,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/bottomNavbar/button_bottom_navigation_bar_design_widget.dart';
 import '../../../../../core/widgets/buttons/default_button.dart';
+import '../../../../../core/widgets/logo_shimmer_widget.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../generated/l10n.dart';
 import '../../data/model/address_model.dart';
@@ -38,6 +39,8 @@ class ViewAllAddressPage extends ConsumerWidget {
           refresh: () {
             ref.refresh(getAllAddressesProvider);
           },
+          widgetOfLoading: const LogoShimmerWidget(),
+
           widgetOfData: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.all(12.sp),

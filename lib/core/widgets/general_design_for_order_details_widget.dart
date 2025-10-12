@@ -36,7 +36,7 @@ class GeneralDesignForOrderDetailsWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(8.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.02),
+                color: Colors.black.withValues(alpha: 0.015),
                 blurRadius: 1.r,
               ),
             ],

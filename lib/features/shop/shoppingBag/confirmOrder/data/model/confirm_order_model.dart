@@ -1,4 +1,3 @@
-
 import '../../../cart/data/model/cart_model.dart';
 
 class ConfirmOrderModel {
@@ -6,30 +5,30 @@ class ConfirmOrderModel {
   final int addressId;
   final int paymentId;
   final int deliveryTypeId;
-  final String? note;
-  final String unitPrice;
-  final String phoneNumber;
+  final String copon;
+  final Map<int, String> printNotesById;
 
   ConfirmOrderModel({
     required this.cartProducts,
     required this.addressId,
     required this.paymentId,
     required this.deliveryTypeId,
-    required this.note,
-    required this.unitPrice,
-    required this.phoneNumber,
+    required this.copon,
+    required this.printNotesById,
+
   });
 
   Map<String, dynamic> toJson() {
+    final productsBody = cartProducts.map((p) {
+      final note = (p.isPrintable ?? 0) != 0 ? (printNotesById[p.id] ?? '') : '';
+      return p.toJson(printNote: note);
+    }).toList();
     return {
-      'products': List<Map<String, dynamic>>.from(
-          cartProducts.map((cartProducts) => cartProducts.toJson())),
+      'products': productsBody,
       'address_id': addressId,
       'payment_id': paymentId,
       'delivery_type_id': deliveryTypeId,
-      // 'note': note ?? "",
-      // 'unit_price': unitPrice,
-      'phone_number': phoneNumber,
+      if (copon.isNotEmpty) 'coupon_code': copon,
     };
   }
 }
