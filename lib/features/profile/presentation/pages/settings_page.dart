@@ -5,21 +5,25 @@ import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../../generated/l10n.dart';
 import '../../../../../services/auth/auth.dart';
-import '../../../main/presentation/widgets/list_tile_profile_widget.dart';
-import 'change_currency_bottom_sheet.dart';
-import 'language_bottom_sheet.dart';
+import '../widgets/change_phone_number_widget.dart';
+import '../widgets/list_tile_profile_widget.dart';
+import '../widgets/change_currency_bottom_sheet.dart';
+import '../widgets/language_bottom_sheet.dart';
+import 'logout_or_delete_account_bottom_sheet.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final VoidCallback? onSuccess;
+
+  const SettingsPage({super.key, this.onSuccess});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  // void _refresh() {
-  //   setState(() {});
-  // }
+  void _refresh() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,19 +69,33 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: S.of(context).deleteAccount,
                     icon: AppIcons.trash,
                     onTap: () {
-                      // showModalBottomSheetWidget(
-                      //   context: context,
-                      //   page: LogoutOrDeleteAccountDialog(
-                      //     deleteAccount: true,
-                      //     onSuccess: _refresh,
-                      //   ),
-                      // );
+                      showModalBottomSheetWidget(
+                        context: context,
+                        page: LogoutOrDeleteAccountBottomSheet(
+                          deleteAccount: true,
+                          onSuccess: () {
+                            _refresh();
+                            widget.onSuccess?.call();
+                          },
+                        ),
+                      );
                     },
                   ),
                   ListTileProfileWidget(
                     title: S.of(context).changePhoneNumber,
                     icon: AppIcons.phone,
-                    onTap: () {},
+                    onTap: () {
+                      scrollShowModalBottomSheetWidget(
+                        title: S.of(context).changePhoneNumber,
+                        fontSize: 15.sp,
+                        context: context,
+                        page: ChangePhoneNumberWidget(
+                          phoneNumberOnSuccess: () {
+                            widget.onSuccess?.call();
+                          },
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

@@ -8,13 +8,14 @@ import '../../../../../core/widgets/buttons/icon_button_widget.dart';
 import '../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../../generated/l10n.dart';
 import '../../../../../services/auth/auth.dart';
-import '../../../../shop/address/presentation/pages/view_all_address_page.dart';
-import '../../../../shop/productManagement/wishlist/presentation/pages/wishlist_page.dart';
-import '../../../../shop/productManagement/wishlist/presentation/riverpod/wishlist_riverpod.dart';
-import '../../../settings/presentation/pages/settings_page.dart';
+import '../../../shop/address/presentation/pages/view_all_address_page.dart';
+import '../../../shop/productManagement/wishlist/presentation/pages/wishlist_page.dart';
+import '../../../shop/productManagement/wishlist/presentation/riverpod/wishlist_riverpod.dart';
+import 'settings_page.dart';
 import '../widgets/app_intro_card_widget.dart';
 import '../widgets/list_tile_profile_widget.dart';
 import '../widgets/profile_header_card_widget.dart';
+import 'edit_profile_page.dart';
 import 'support_channels_bottom_sheet.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -63,7 +64,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   ListTileProfileWidget(
                     title: S.of(context).personalInfo,
                     icon: AppIcons.personalInfo,
-                    onTap: () {},
+                    onTap: () {
+                      navigateTo(context, EditProfilePage(onSuccess: _refresh));
+                    },
                   ),
                   ListTileProfileWidget(
                     title: S.of(context).addressBook,
@@ -99,7 +102,7 @@ class _ProfilePageState extends State<ProfilePage> {
               title: S.of(context).settings,
               icon: AppIcons.settings,
               onTap: () {
-                navigateTo(context, const SettingsPage());
+                navigateTo(context, SettingsPage(onSuccess: _refresh));
               },
             ),
             ListTileProfileWidget(

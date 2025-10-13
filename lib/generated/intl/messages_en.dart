@@ -33,6 +33,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "accountCreatedSuccessfully": MessageLookupByLibrary.simpleMessage(
       "Account created successfully",
     ),
+    "accountDeletedSuccess": MessageLookupByLibrary.simpleMessage(
+      "Account deleted successfully.",
+    ),
     "addANewAddress": MessageLookupByLibrary.simpleMessage("Add a new address"),
     "addGoods": MessageLookupByLibrary.simpleMessage("Add goods"),
     "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
@@ -159,6 +162,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "done": MessageLookupByLibrary.simpleMessage("Done"),
     "editAddress": MessageLookupByLibrary.simpleMessage("Edit address"),
+    "editProfile": MessageLookupByLibrary.simpleMessage("Edit profile"),
     "enter": MessageLookupByLibrary.simpleMessage("Enter"),
     "enterPhoneNumber": MessageLookupByLibrary.simpleMessage(
       "Enter phone number",
@@ -272,6 +276,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Phone number must start with 7 (Yemen)",
     ),
     "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone number"),
+    "phoneNumberCurrent": MessageLookupByLibrary.simpleMessage(
+      "Current phone number",
+    ),
+    "phoneNumberNew": MessageLookupByLibrary.simpleMessage("New phone number"),
+    "phoneNumberUpdatedSuccess": MessageLookupByLibrary.simpleMessage(
+      "Phone number changed successfully.",
+    ),
     "pleaseAddAComment": MessageLookupByLibrary.simpleMessage(
       "Please add a comment",
     ),
@@ -342,6 +353,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Products list is empty",
     ),
     "profile": MessageLookupByLibrary.simpleMessage("Profile"),
+    "profileUpdatedSuccess": MessageLookupByLibrary.simpleMessage(
+      "Profile updated successfully",
+    ),
     "province": MessageLookupByLibrary.simpleMessage("Province"),
     "provinceIsRequired": MessageLookupByLibrary.simpleMessage(
       "Province is required",
@@ -375,6 +389,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "return_policy": MessageLookupByLibrary.simpleMessage("Return policy"),
     "review": MessageLookupByLibrary.simpleMessage("Review"),
     "save": MessageLookupByLibrary.simpleMessage("Save"),
+    "saveChanges": MessageLookupByLibrary.simpleMessage("Save changes"),
     "sections": MessageLookupByLibrary.simpleMessage("Sections"),
     "selectionOfProducts": MessageLookupByLibrary.simpleMessage(
       "Selection of products",

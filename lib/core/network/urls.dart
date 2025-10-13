@@ -17,7 +17,15 @@ class AppURL {
 
   static String get resendOtp => '/auth/update_otp';
 
+  static String get getProfileData => '/profile';
+
+  static String get editProfile => '/profile/update';
+
+  static String get deleteAccount => '/profile/delete_account';
+
   static String get logout => '/auth/logout';
+
+  static String get changePhoneNumber => '/profile/update_phone_number';
 
   static String get getDetailsOfProduct => '/products';
 

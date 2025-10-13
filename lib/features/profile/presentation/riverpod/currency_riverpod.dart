@@ -5,7 +5,7 @@ import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';
 import '../../../../../services/auth/auth.dart';
 import '../../data/model/currency_model.dart';
-import '../../data/repos/settings_repo.dart';
+import '../../data/repos/profile_repo.dart';
 
 final getAllCurrencies = StateNotifierProvider.autoDispose<GetAllCurrenciesController,
     DataState<List<CurrencyModel>>>(
@@ -21,7 +21,7 @@ class GetAllCurrenciesController
     getData();
   }
 
-  final _controller = SettingsReposaitory();
+  final _controller = ProfileReposaitory();
 
   Future<void> getData() async {
     state = state.copyWith(state: States.loading);

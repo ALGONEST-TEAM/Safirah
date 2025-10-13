@@ -11,7 +11,7 @@ import 'core/network/remote_request.dart';
 import 'core/state/app_restart_controller.dart';
 import 'package:safirah/injection.dart' as di;
 import 'core/theme/theme.dart';
-import 'features/profile/settings/presentation/riverpod/setting_riverpod.dart';
+import 'features/profile/presentation/riverpod/setting_riverpod.dart';
 import 'features/shop/category/data/model/category_data.dart';
 import 'features/shop/home/data/model/section_data.dart';
 import 'features/shop/home/data/model/section_with_product_data.dart';

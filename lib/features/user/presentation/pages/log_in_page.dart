@@ -117,7 +117,7 @@ class _LogInPageState extends ConsumerState<LogInPage> {
                               fontSize: 15.6.sp,
                               context: context,
                               page: VerifyCodePage(
-                                phoneNumberOrEmail: phoneNumberController.text,
+                                phoneNumber: phoneNumberController.text,
                               ),
                             );
                           },

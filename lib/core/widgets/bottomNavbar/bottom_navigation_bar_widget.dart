@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../../features/profile/main/presentation/pages/profile_page.dart';
+import '../../../features/profile/presentation/pages/profile_page.dart';
 import '../../../features/shop/home/presentation/pages/home_page.dart';
 import '../../../features/shop/myOrders/presentation/pages/my_orders_page.dart';
 import '../../../generated/l10n.dart';

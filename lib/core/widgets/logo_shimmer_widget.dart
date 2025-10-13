@@ -8,9 +8,8 @@ import '../theme/app_colors.dart';
 import 'shimmer_widget.dart';
 
 class LogoShimmerWidget extends StatelessWidget {
-  final double? width;
 
-  const LogoShimmerWidget({super.key, this.width});
+  const LogoShimmerWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +17,7 @@ class LogoShimmerWidget extends StatelessWidget {
       child: ShimmerWidget(
           baseColor: AppColors.greySwatch.shade200,
           highlightColor: Colors.grey.shade50,
-        child: SvgPicture.asset(AppIcons.logoText)
+        child: SvgPicture.asset(AppIcons.logoText,)
       ),
     );
   }

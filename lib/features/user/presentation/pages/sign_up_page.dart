@@ -26,7 +26,7 @@ class SignUpPage extends ConsumerStatefulWidget {
 
 class _SignUpPageState extends ConsumerState<SignUpPage> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  // final TextEditingController _emailController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
   @override
@@ -54,10 +54,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   padding: EdgeInsets.symmetric(horizontal: 14.w),
                   child: Column(
                     children: [
-                      NameAndEmailWidget(
-                        name: _nameController,
-                        email: _emailController,
-                      ),
+                      NameAndEmailWidget(name: _nameController),
                       const BirthDatePickerWidget(),
                       12.h.verticalSpace,
                       const GenderPickerWidget(),
@@ -98,11 +95,10 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                             FocusManager.instance.primaryFocus?.unfocus();
 
                             final selectedGender = ref.read(genderProvider);
-                            print( state.data.user.phoneNumber);
                             ref.read(signUpProvider.notifier).logInOrSignUp(
                                   phoneNumber: state.data.user.phoneNumber,
                                   name: _nameController.text,
-                                  email: _emailController.text,
+                                  // email: _emailController.text,
                                   gender: selectedGender.toString(),
                                   cityId: selectedCity!.id,
                                   dateOfBirth: birthDate,

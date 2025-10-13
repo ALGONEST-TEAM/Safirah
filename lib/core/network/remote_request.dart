@@ -20,13 +20,12 @@ class RemoteRequest {
     required String url,
     dynamic query,
     // String fcmToken = '',
-    String lang = 'ar',
   }) async {
     String currency = await Auth().getCurrency();
     dio.options.headers = {
       'Content-Type': 'application/json',
       'Currency-Code': currency,
-      'lang': lang,
+      'Accept-Language': await Auth().getLanguage(),
       // if (fcmToken.isNotEmpty) 'user-fcm-token': fcmToken,
       'Authorization': 'Bearer ${Auth().token}',
     };
@@ -47,13 +46,12 @@ class RemoteRequest {
     Map<String, dynamic>? query,
     dynamic data,
     // String fcmToken = '',
-    String lang = 'ar',
   }) async {
     String currency = await Auth().getCurrency();
     dio.options.headers = {
       'Content-Type': 'application/json',
       'Currency-Code': currency,
-      'lang': lang,
+      'Accept-Language': await Auth().getLanguage(),
       // if (fcmToken.isNotEmpty) 'user-fcm-token': fcmToken,
       'Authorization': 'Bearer ${Auth().token}',
     };
@@ -78,14 +76,13 @@ class RemoteRequest {
     required String path,
     Map<String, dynamic>? query,
     dynamic data,
-    String lang = 'ar',
   }) async {
     String currency = await Auth().getCurrency();
 
     dio.options.headers = {
       'Content-Type': 'application/json',
       'Currency-Code': currency,
-      'lang': lang,
+      'Accept-Language': await Auth().getLanguage(),
       'Authorization': 'Bearer ${Auth().token}',
     };
     final response = await dio.put(
@@ -109,14 +106,13 @@ class RemoteRequest {
     required String path,
     Map<String, dynamic>? query,
     dynamic data,
-    String lang = 'ar',
   }) async {
     String currency = await Auth().getCurrency();
 
     dio.options.headers = {
       'Content-Type': 'application/json',
       'Currency-Code': currency,
-      'lang': lang,
+      'Accept-Language': await Auth().getLanguage(),
       'Authorization': 'Bearer ${Auth().token}',
     };
     final response =

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../widgets/language_widget.dart';
+import '../../../../core/state/app_restart_controller.dart';
+import 'language_widget.dart';
 import '../riverpod/setting_riverpod.dart';
 
 class LanguageBottomSheet extends ConsumerWidget {
@@ -24,7 +25,7 @@ class LanguageBottomSheet extends ConsumerWidget {
             onPressed: () async {
               const newLanguage = 'ar';
               await languageController.changeLanguage(newLanguage);
-              Navigator.of(context).pop();
+              AppRestartController.restartApp(context);
             },
           ),
           6.h.verticalSpace,
@@ -35,7 +36,7 @@ class LanguageBottomSheet extends ConsumerWidget {
             onPressed: () async {
               const newLanguage = 'en';
               await languageController.changeLanguage(newLanguage);
-              Navigator.of(context).pop();
+              AppRestartController.restartApp(context);
             },
           ),
         ],

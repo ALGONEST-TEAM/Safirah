@@ -63,11 +63,13 @@ class LogoutOrDeleteAccountBottomSheet extends ConsumerWidget {
               Expanded(
                 child: CheckStateInPostApiDataWidget(
                   state: state,
-                  messageSuccess: S.of(context).logoutSuccessfully,
-                  functionSuccess: ()  {
-                     Auth().logout();
+                  messageSuccess: deleteAccount
+                      ? S.of(context).accountDeletedSuccess
+                      : S.of(context).logoutSuccessfully,
+                  functionSuccess: () {
+                    Auth().logout();
                     Navigator.of(context).pop();
-                     onSuccess?.call();
+                    onSuccess?.call();
                   },
                   bottonWidget: DefaultButtonWidget(
                     text: deleteAccount
@@ -82,6 +84,7 @@ class LogoutOrDeleteAccountBottomSheet extends ConsumerWidget {
                     isLoading: state.stateData == States.loading,
                     onPressed: () {
                       if (deleteAccount) {
+                        ref.read(logoutProvider.notifier).deleteAccount();
                       } else {
                         ref.read(logoutProvider.notifier).logout();
                       }

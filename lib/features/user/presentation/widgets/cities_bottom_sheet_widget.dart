@@ -27,7 +27,7 @@ class CitiesBottomSheetWidget extends ConsumerWidget {
       },
 
       widgetOfData: SizedBox(
-        height: 460.h,
+        height: 440.h,
         child: ListView.builder(
           padding: EdgeInsets.symmetric(vertical: 8.h),
           itemCount: cities.data.length,

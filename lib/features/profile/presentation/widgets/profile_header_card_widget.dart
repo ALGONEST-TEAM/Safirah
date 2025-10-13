@@ -8,7 +8,7 @@ import '../../../../../core/widgets/buttons/ink_well_button_widget.dart';
 import '../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../../generated/l10n.dart';
 import '../../../../../services/auth/auth.dart';
-import '../../../../user/presentation/pages/log_in_page.dart';
+import '../../../user/presentation/pages/log_in_page.dart';
 import '../pages/logout_or_delete_account_bottom_sheet.dart';
 
 class ProfileHeaderCardWidget extends StatelessWidget {

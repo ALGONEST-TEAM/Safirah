@@ -33,6 +33,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "accountCreatedSuccessfully": MessageLookupByLibrary.simpleMessage(
       "تم إنشاء حساب بنجاح",
     ),
+    "accountDeletedSuccess": MessageLookupByLibrary.simpleMessage(
+      "تم حذف الحساب بنجاح",
+    ),
     "addANewAddress": MessageLookupByLibrary.simpleMessage("أضافة عنوان جديد"),
     "addGoods": MessageLookupByLibrary.simpleMessage("إضافة البضائع"),
     "addPhotos": MessageLookupByLibrary.simpleMessage("إضافة صور"),
@@ -151,6 +154,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "done": MessageLookupByLibrary.simpleMessage("تم"),
     "editAddress": MessageLookupByLibrary.simpleMessage("تعديل العنوان"),
+    "editProfile": MessageLookupByLibrary.simpleMessage(
+      "تعديل البيانات الشخصية",
+    ),
     "enter": MessageLookupByLibrary.simpleMessage("أدخل"),
     "enterPhoneNumber": MessageLookupByLibrary.simpleMessage("أدخل رقم الهاتف"),
     "enterProductPrintDescription": MessageLookupByLibrary.simpleMessage(
@@ -260,6 +266,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "رقم الهاتف يجب أن يبدأ بـ 7 (اليمن)",
     ),
     "phoneNumber": MessageLookupByLibrary.simpleMessage("رقم الهاتف"),
+    "phoneNumberCurrent": MessageLookupByLibrary.simpleMessage(
+      "رقم الهاتف الحالي",
+    ),
+    "phoneNumberNew": MessageLookupByLibrary.simpleMessage("رقم الهاتف الجديد"),
+    "phoneNumberUpdatedSuccess": MessageLookupByLibrary.simpleMessage(
+      "تم تغيير رقم الهاتف بنجاح",
+    ),
     "pleaseAddAComment": MessageLookupByLibrary.simpleMessage(
       "الرجاء إضافة تعليق",
     ),
@@ -332,6 +345,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "منتجات القائمة فارغة",
     ),
     "profile": MessageLookupByLibrary.simpleMessage("حسابي"),
+    "profileUpdatedSuccess": MessageLookupByLibrary.simpleMessage(
+      "تم تعديل البيانات الشخصية بنجاح",
+    ),
     "province": MessageLookupByLibrary.simpleMessage("المنطقة"),
     "provinceIsRequired": MessageLookupByLibrary.simpleMessage(
       "المنطقة مطلوبة",
@@ -365,6 +381,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "return_policy": MessageLookupByLibrary.simpleMessage("سياسة الإرجاع"),
     "review": MessageLookupByLibrary.simpleMessage(" التعليق"),
     "save": MessageLookupByLibrary.simpleMessage("حفظ"),
+    "saveChanges": MessageLookupByLibrary.simpleMessage("حفظ التعديلات"),
     "sections": MessageLookupByLibrary.simpleMessage("الأقسام"),
     "selectionOfProducts": MessageLookupByLibrary.simpleMessage(
       "اختيار المنتجات",

@@ -19,7 +19,7 @@ class UserRemoteDataSource {
   Future<AuthModel> signUp(
     String phoneNumber,
     String name,
-    String email,
+    // String email,
     String gender,
     int cityId,
     DateTime? dateOfBirth,
@@ -29,7 +29,7 @@ class UserRemoteDataSource {
       data: {
         "phone": phoneNumber,
         "name": name,
-        if (email.isNotEmpty) 'email': email,
+        // if (email.isNotEmpty) 'email': email,
         "gender": gender,
         "city_id": cityId,
         if (dateOfBirth != null) "date_of_birth": dateOfBirth.toIso8601String(),

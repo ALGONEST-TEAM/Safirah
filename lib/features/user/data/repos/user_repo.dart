@@ -20,14 +20,14 @@ class UserReposaitory {
   Future<Either<DioException, AuthModel>> signUp(
     String phoneNumber,
     String name,
-    String email,
+    // String email,
     String gender,
     int cityId,
     DateTime? dateOfBirth,
   ) async {
     try {
       final remote = await _userRemoteDataSource
-          .signUp(phoneNumber, name, email, gender, cityId, dateOfBirth);
+          .signUp(phoneNumber, name, gender, cityId, dateOfBirth);
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);

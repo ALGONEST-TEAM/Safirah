@@ -1,10 +1,10 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';
 import '../../../../../services/auth/auth.dart';
-import '../../data/repos/settings_repo.dart';
+import '../../../user/data/model/auth_model.dart';
+import '../../data/repos/profile_repo.dart';
 
 final languageProvider =
     StateNotifierProvider<LanguageController, Locale>((ref) {
@@ -36,34 +36,31 @@ class LanguageController extends StateNotifier<Locale> {
   }
 }
 
-final manageMyAccountProvider = StateNotifierProvider.autoDispose<
-    ManageMyAccountController, DataState<Unit>>(
+final changePhoneNumberProvider = StateNotifierProvider.autoDispose<
+    ChangePhoneNumberController, DataState<AuthModel>>(
   (ref) {
-    return ManageMyAccountController();
+    return ChangePhoneNumberController();
   },
 );
 
-class ManageMyAccountController extends StateNotifier<DataState<Unit>> {
-  ManageMyAccountController() : super(DataState<Unit>.initial(unit));
-  final _controller = SettingsReposaitory();
+class ChangePhoneNumberController extends StateNotifier<DataState<AuthModel>> {
+  ChangePhoneNumberController() : super(DataState<AuthModel>.initial(AuthModel.empty()));
+  final _controller = ProfileReposaitory();
 
-  Future<void> changePassword({
-    required String oldPassword,
-    required String newPassword,
-    required String confirmPassword,
+  Future<void> changePhoneNumber({
+    required String phoneNumber,
+    required String otp,
   }) async {
     state = state.copyWith(state: States.loading);
 
-    final data = await _controller.changePassword(
-      oldPassword: oldPassword,
-      newPassword: newPassword,
-      confirmPassword: confirmPassword,
+    final data = await _controller.changePhoneNumber(
+      phoneNumber: phoneNumber,
+      otp: otp,
     );
     data.fold((f) {
       state = state.copyWith(state: States.error, exception: f);
     }, (data) {
-      state = state.copyWith(state: States.loaded);
+      state = state.copyWith(state: States.loaded,data: data);
     });
   }
 }
-

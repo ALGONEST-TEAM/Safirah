@@ -47,8 +47,6 @@ class Auth {
 
   String get phoneNumber => user.user.phoneNumber;
 
-  String get email => user.user.email;
-
   Future<void> login(AuthModel data) async {
     user = data;
     _writeToCache();
@@ -60,7 +58,7 @@ class Auth {
   }
 
   Future logout() async {
-    await secureStorage.delete(key: 'fcmToken');
+    // await secureStorage.delete(key: 'fcmToken');
     user = AuthModel.empty();
     await secureStorage.delete(key: _key);
   }

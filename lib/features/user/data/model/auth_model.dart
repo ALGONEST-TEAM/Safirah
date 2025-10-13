@@ -2,12 +2,12 @@ import 'user_model.dart';
 
 class AuthModel {
   final String token;
-  final bool status;
+  final bool? status;
   final UserModel user;
 
   AuthModel({
     required this.token,
-    required this.status,
+    this.status,
     required this.user,
   });
 
@@ -23,8 +23,11 @@ class AuthModel {
     return {
       'token': token,
       'user': user,
-      'status': status,
     };
+  }
+
+  static List<AuthModel> fromJsonList(List json) {
+    return json.map((e) => AuthModel.fromJson(e)).toList();
   }
 
   AuthModel copyWith({
@@ -32,7 +35,6 @@ class AuthModel {
   }) {
     return AuthModel(
       token: token,
-      status: status,
       user: user ?? this.user,
     );
   }

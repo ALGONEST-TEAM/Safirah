@@ -1426,6 +1426,46 @@ class S {
     );
   }
 
+  /// `Edit profile`
+  String get editProfile {
+    return Intl.message(
+      'Edit profile',
+      name: 'editProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save changes`
+  String get saveChanges {
+    return Intl.message(
+      'Save changes',
+      name: 'saveChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current phone number`
+  String get phoneNumberCurrent {
+    return Intl.message(
+      'Current phone number',
+      name: 'phoneNumberCurrent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New phone number`
+  String get phoneNumberNew {
+    return Intl.message(
+      'New phone number',
+      name: 'phoneNumberNew',
+      desc: '',
+      args: [],
+    );
+  }
+
   // skipped getter for the '--------user-----------' key
 
   /// `Create account`
@@ -1750,6 +1790,36 @@ class S {
     return Intl.message(
       'Coupon verified successfully',
       name: 'couponVerificationSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile updated successfully`
+  String get profileUpdatedSuccess {
+    return Intl.message(
+      'Profile updated successfully',
+      name: 'profileUpdatedSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Phone number changed successfully.`
+  String get phoneNumberUpdatedSuccess {
+    return Intl.message(
+      'Phone number changed successfully.',
+      name: 'phoneNumberUpdatedSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Account deleted successfully.`
+  String get accountDeletedSuccess {
+    return Intl.message(
+      'Account deleted successfully.',
+      name: 'accountDeletedSuccess',
       desc: '',
       args: [],
     );

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
-import '../../features/profile/settings/presentation/riverpod/currency_riverpod.dart';
+import '../../features/profile/presentation/riverpod/currency_riverpod.dart';
 import '../theme/app_colors.dart';
 import 'auto_size_text_widget.dart';
 

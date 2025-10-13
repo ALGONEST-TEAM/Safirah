@@ -30,7 +30,6 @@ class SignUpNotifier extends StateNotifier<DataState<AuthModel>> {
     final user = await _controller.signUp(
       phoneNumber,
       name,
-      email.toString(),
       gender,
       cityId,
       dateOfBirth,

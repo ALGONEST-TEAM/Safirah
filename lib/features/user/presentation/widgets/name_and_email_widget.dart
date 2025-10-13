@@ -10,12 +10,12 @@ import '../../../../generated/l10n.dart';
 
 class NameAndEmailWidget extends StatelessWidget {
   final TextEditingController name;
-  final TextEditingController email;
+  // final TextEditingController email;
 
   const NameAndEmailWidget({
     super.key,
     required this.name,
-    required this.email,
+    // required this.email,
   });
 
   @override
