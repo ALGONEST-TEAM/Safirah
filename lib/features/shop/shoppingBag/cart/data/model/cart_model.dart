@@ -15,8 +15,8 @@ class CartModel {
   final num? productPriceAfterDiscount;
   final num? discount;
   final num? couponDiscount;
-  final int? numberId;
-  final String? numberName;
+    final int? numberId;
+    final String? numberName;
   final int? productPrintingPrice;
   final int? printingPrice;
   final int? isPrintable;

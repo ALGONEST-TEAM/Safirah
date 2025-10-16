@@ -239,6 +239,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "تحقق من إتصالك بشبكة الانترنت",
     ),
     "no": MessageLookupByLibrary.simpleMessage("لا"),
+    "noReviewsForThisProduct": MessageLookupByLibrary.simpleMessage(
+      "لا توجد تقييمات لهذا المنتج",
+    ),
     "notImplemented": MessageLookupByLibrary.simpleMessage(
       "الميزة غير مدعومة على الخادم",
     ),

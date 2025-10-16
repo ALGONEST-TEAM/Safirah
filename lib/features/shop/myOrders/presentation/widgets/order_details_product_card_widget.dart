@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/extension/string.dart';
-import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/online_images_widget.dart';
 import '../../../../../core/widgets/price_and_currency_widget.dart';
 import '../../../../../generated/l10n.dart';
-import '../../../productManagement/reviews/presentation/pages/reviews_page.dart';
 import '../../data/model/product_order_details_model.dart';
+import 'order_product_name_and_reviews_row_widget.dart';
 
 class OrderDetailsProductCardWidget extends StatelessWidget {
   final ProductOrderDetailsModel orderProducts;
@@ -57,58 +56,16 @@ class OrderDetailsProductCardWidget extends StatelessWidget {
             size: Size(84.w, 90.h),
             fit: BoxFit.cover,
           ),
-          12.w.horizontalSpace,
+          6.w.horizontalSpace,
           Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 5.h,
+              spacing: 4.h,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Flexible(
-                      child: AutoSizeTextWidget(
-                        text: orderProducts.name.toString(),
-                        maxLines: 2,
-                        fontSize: 11.5.sp,
-                        minFontSize: 10,
-                        colorText: AppColors.mainColorFont,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    10.w.horizontalSpace,
-                    InkWell(
-
-                      onTap: () {
-                        navigateTo(
-                          context,
-                          ReviewsPage(
-                            products: orderProducts,
-                            orderId: orderId,
-                            status: status,
-                          ),
-                        );
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          AutoSizeTextWidget(
-                            text: S.of(context).opinions,
-                            fontSize: 10.sp,
-                            colorText: AppColors.primaryColor,
-                          ),
-                          Icon(
-                            Localizations.localeOf(context).languageCode == "ar"
-                                ? Icons.keyboard_arrow_left
-                                : Icons.keyboard_arrow_right,
-                            color: AppColors.primaryColor,
-                            size: 15.r,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                OrderProductNameAndReviewsRowWidget(
+                  orderProducts: orderProducts,
+                  status: status,
+                  orderId: orderId,
                 ),
                 Row(
                   children: [
@@ -140,7 +97,7 @@ class OrderDetailsProductCardWidget extends StatelessWidget {
                     ),
                     8.w.horizontalSpace,
                     PriceAndCurrencyWidget(
-                      price: orderProducts.price.toString(),
+                      price: orderProducts.unitPrice.toString(),
                       fontSize1: 10.8.sp,
                       fontSize2: 8.sp,
                       textWeight1: FontWeight.w500,
@@ -157,66 +114,96 @@ class OrderDetailsProductCardWidget extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (orderProducts.totalDiscountCopon != 0 ||
+                    orderProducts.totalDiscount != 0)
+                  Row(
+                    children: [
+                      if (orderProducts.totalDiscount != 0)
+                        Row(
+                          children: [
+                            AutoSizeTextWidget(
+                              text: "${S.of(context).discountOnBill}: ",
+                              fontSize: 10.8.sp,
+                              colorText: AppColors.fontColor2,
+                            ),
+                            PriceAndCurrencyWidget(
+                              price: orderProducts.totalDiscount.toString(),
+                              fontSize1: 10.sp,
+                              fontSize2: 6.sp,
+                              maxLines: 2,
+                            ),
+                            4.w.horizontalSpace,
+                          ],
+                        ),
+                      if (orderProducts.totalDiscountCopon != 0)
+                        Flexible(
+                          child: Row(
+                            children: [
+                              AutoSizeTextWidget(
+                                text: "${S.of(context).couponDiscount}: ",
+                                fontSize: 10.4.sp,
+                                maxLines: 2,
+                                colorText: AppColors.fontColor2,
+                              ),
+                              Flexible(
+                                child: PriceAndCurrencyWidget(
+                                  price: orderProducts.totalDiscountCopon
+                                      .toString(),
+                                  fontSize1: 10.sp,
+                                  fontSize2: 6.sp,
+                                  maxLines: 2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                 Row(
                   children: [
-                    if (orderProducts.totalDiscount != 0)
-                      Row(
-                        children: [
-                          AutoSizeTextWidget(
-                            text: "${S.of(context).discountOnBill}: ",
-                            fontSize: 10.8.sp,
-                            colorText: AppColors.fontColor2,
-                          ),
-                          PriceAndCurrencyWidget(
-                            price: orderProducts.totalDiscount.toString(),
-                            fontSize1: 10.sp,
-                            fontSize2: 6.sp,
-                            maxLines: 2,
-                          ),
-                          4.w.horizontalSpace,
-                        ],
-                      ),
-                    if (orderProducts.totalDiscountCopon != 0)
+                    if (orderProducts.printPrice != 0)
                       Flexible(
                         child: Row(
                           children: [
                             AutoSizeTextWidget(
-                              text: "${S.of(context).couponDiscount}: ",
+                              text: "${S.of(context).printingPrice}: ",
                               fontSize: 10.4.sp,
                               maxLines: 2,
                               colorText: AppColors.fontColor2,
                             ),
                             Flexible(
                               child: PriceAndCurrencyWidget(
-                                price:
-                                    orderProducts.totalDiscountCopon.toString(),
-                                fontSize1: 10.sp,
+                                price: orderProducts.printPrice.toString(),
+                                fontSize1: 10.4.sp,
                                 fontSize2: 6.sp,
-                                maxLines: 2,
                               ),
                             ),
+                            2.w.horizontalSpace,
                           ],
                         ),
                       ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    AutoSizeTextWidget(
-                      text: "${S.of(context).total}:",
-                      fontSize: 11.sp,
-                      colorText: AppColors.fontColor2,
-                    ),
-                    2.w.horizontalSpace,
                     Flexible(
-                      child: PriceAndCurrencyWidget(
-                        price: orderProducts.price.toString(),
-                        fontSize1: 11.2.sp,
-                        fontSize2: 8.2.sp,
-                        textWeight1: FontWeight.w500,
-                        textWeight2: FontWeight.w600,
-                        colorText1: AppColors.primaryColor,
-                        colorText2: AppColors.primaryColor,
+                      child: Row(
+                        children: [
+                          AutoSizeTextWidget(
+                            text: "${S.of(context).total}:",
+                            fontSize: 11.2.sp,
+                            colorText: AppColors.fontColor2,
+                          ),
+                          2.w.horizontalSpace,
+                          Flexible(
+                            child: PriceAndCurrencyWidget(
+                              price: orderProducts.price.toString(),
+                              fontSize1: 11.sp,
+                              fontSize2: 8.2.sp,
+                              textWeight1: FontWeight.w500,
+                              textWeight2: FontWeight.w600,
+                              colorText1: AppColors.primaryColor,
+                              colorText2: AppColors.primaryColor,
+                              maxLines: 2,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

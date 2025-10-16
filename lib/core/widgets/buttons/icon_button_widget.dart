@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import '../../constants/app_icons.dart';
 import '../../theme/app_colors.dart';
 
@@ -36,10 +34,13 @@ class IconButtonWidget extends StatelessWidget {
             Navigator.of(context).pop();
           },
       icon: SvgPicture.asset(
-        icon ?? AppIcons.arrowBack,
+        icon ??
+            (Directionality.of(context) == TextDirection.rtl
+                ? AppIcons.arrowBack
+                : AppIcons.arrowBackEn),
         height: height,
         width: width,
-        color: iconColor??AppColors.secondaryColor,
+        color: iconColor ?? AppColors.secondaryColor,
       ),
     );
   }

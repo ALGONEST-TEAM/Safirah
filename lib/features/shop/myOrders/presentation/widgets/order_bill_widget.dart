@@ -6,9 +6,9 @@ import '../../../../../generated/l10n.dart';
 import '../../data/model/order_details_model.dart';
 
 class OrderBillWidget extends StatelessWidget {
-  final OrderDetailsModel data;
+  final OrderDetailsModel billData;
 
-  const OrderBillWidget({super.key, required this.data});
+  const OrderBillWidget({super.key, required this.billData});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class OrderBillWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.02),
+            color: Colors.black.withValues(alpha: .02),
             blurRadius: 1.r,
           ),
         ],
@@ -31,28 +31,41 @@ class OrderBillWidget extends StatelessWidget {
         children: [
           BillDesignWidget(
             name: S.of(context).theTotal,
-            price: data.productsTotal.toDouble(),
+            price: billData.productsTotal,
           ),
-          4.h.verticalSpace,
+          Visibility(
+            visible: billData.totalPrinting != 0,
+            child: BillDesignWidget(
+              name: S.of(context).printingPrice,
+              price: billData.totalPrinting,
+            ),
+          ),
           BillDesignWidget(
             name: S.of(context).deliveryCost,
-            price: data.deliveryTotal.toDouble(),
+            price: billData.deliveryTotal,
           ),
-          4.h.verticalSpace,
           BillDesignWidget(
             name: S.of(context).discountOnBill,
-            price: data.discount.toDouble(),
+            price: billData.discount,
           ),
-          Divider(
-            color: AppColors.greySwatch.shade100,
-            height: 12.h,
+          Visibility(
+            visible: billData.couponDiscount != 0,
+            child: BillDesignWidget(
+              name: S.of(context).couponDiscount,
+              price: billData.couponDiscount,
+            ),
           ),
           4.h.verticalSpace,
+          Divider(
+            color: AppColors.greySwatch.shade200.withOpacity(.6),
+            height: 0,
+          ),
+          8.h.verticalSpace,
           BillDesignWidget(
             name: S.of(context).total,
-            price: data.total.toDouble(),
+            price: billData.totalPayable,
             fontSize1: 12.8.sp,
-            fontSize2: 12.8.sp,
+            fontSize2: 12.4.sp,
             color2: AppColors.primaryColor,
           ),
         ],

@@ -9,7 +9,7 @@ class FilterReposaitory {
       String? nameSearch,
       required int page,
       required int idCategory,
-      String? price,
+      int? sortOption,
       int? idSubCategory,
       var idColor}) async {
     try {
@@ -20,7 +20,7 @@ class FilterReposaitory {
         idCategory: idCategory,
         idColor: idColor,
         idSubCategory: idSubCategory,
-        price: price,
+        sortOption: sortOption,
       );
       return Right(data);
     } on DioException catch (erorr) {

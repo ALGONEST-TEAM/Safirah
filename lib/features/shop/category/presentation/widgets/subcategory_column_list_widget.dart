@@ -40,16 +40,17 @@ class SubcategoryColumnListWidget extends ConsumerWidget {
                 children: [
                   3.w.horizontalSpace,
                   oneOfSubCategoryHasChild == true
-                      ? CategoryCircleCardWidget(
+                      ?
+                  CategoryCircleCardWidget(
                           idCategory: category[index].id!,
                           circularRadius: 30.sp,
-                          name: category[index].name!,
-                          image: category[index].image!,
+                          name: category[index].name??"",
+                          image: category[index].image??"",
                         )
                       : CategoryRectCardWidget(
                           idCategory: category[index].id!,
-                          image: category[index].image!,
-                          name: category[index].name!,
+                          image: category[index].image??"",
+                          name: category[index].name??"",
                           parentIdCategory: parentIdCategory,
                           nameSearch: nameSearch,
                         ),

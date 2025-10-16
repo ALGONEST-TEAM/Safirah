@@ -245,6 +245,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Check your internet connection",
     ),
     "no": MessageLookupByLibrary.simpleMessage("No"),
+    "noReviewsForThisProduct": MessageLookupByLibrary.simpleMessage(
+      "No reviews for this product.",
+    ),
     "notImplemented": MessageLookupByLibrary.simpleMessage(
       "Feature not supported on the server",
     ),

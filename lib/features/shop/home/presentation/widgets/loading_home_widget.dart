@@ -44,23 +44,23 @@ class LoadingHomeWidget extends StatelessWidget {
             ),
           ),
           SizedBox(
-            height: 42.h,
+            height: 31.h,
             width: double.infinity,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: EdgeInsets.symmetric(horizontal: 12.w)
-                  .copyWith(bottom: 12.h, top: 2.h),
+                  .copyWith(bottom: 6.h),
               itemCount: 5,
               itemBuilder: (context, index) {
-                return ShimmerPlaceholderWidget(width: 70.w);
+                return ShimmerPlaceholderWidget(width: 74.w,borderRadius: 6.r,);
               },
-              separatorBuilder: (context, index) => 8.w.horizontalSpace,
+              separatorBuilder: (context, index) => 10.w.horizontalSpace,
             ),
           ),
           Column(
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -70,8 +70,8 @@ class LoadingHomeWidget extends StatelessWidget {
                       borderRadius: 4.r,
                     ),
                     ShimmerPlaceholderWidget(
-                      height: 14.h,
-                      width: 120.w,
+                      height: 18.h,
+                      width: 86.w,
                     ),
                   ],
                 ),

@@ -25,7 +25,7 @@ class CategoryWidget extends StatelessWidget {
       child: Consumer(builder: (context, ref, child) {
         if (state.stateData == States.loading) {
           return Padding(
-            padding:  EdgeInsets.only(top: 32.h),
+            padding:  EdgeInsets.only(top: 24.h),
             child: const LoadingHomeWidget(),
           );
         } else if (state.stateData == States.loaded ||

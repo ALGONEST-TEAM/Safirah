@@ -30,12 +30,15 @@ class ReviewsRemoteDataSource {
     double evaluation,
     int proportion,
     List<File> images,
+    int numberId,
   ) async {
     FormData formData = FormData();
     formData.fields.add(MapEntry('order_id', orderId.toString()));
     formData.fields.add(MapEntry('product_id', productId.toString()));
     formData.fields.add(MapEntry('color_id', colorId.toString()));
     formData.fields.add(MapEntry('parent_measuring_id', sizeId.toString()));
+    if (numberId != 0 && numberId != null)
+      formData.fields.add(MapEntry('number_id', numberId.toString()));
     formData.fields.add(MapEntry('comment', comment));
     formData.fields.add(MapEntry('value', evaluation.toString()));
     formData.fields.add(MapEntry('proportion', proportion.toString()));

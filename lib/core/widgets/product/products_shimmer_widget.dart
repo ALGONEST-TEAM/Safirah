@@ -58,14 +58,13 @@ class ProductsShimmerWidget extends StatelessWidget {
                       height: 12.h,
                       width: 130.w,
                     ),
-                    5.h.verticalSpace,
+                    4.h.verticalSpace,
                     ShimmerWidget(
                       child: RatingBarWidget(
                         evaluation: 5,
                         itemSize: 11.6.sp,
                       ),
                     ),
-                    3.h.verticalSpace,
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -85,7 +84,6 @@ class ProductsShimmerWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                    1.h.verticalSpace,
                   ],
                 ),
               ),

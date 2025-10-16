@@ -39,9 +39,11 @@ class ListTileProfileWidget extends StatelessWidget {
           trailing: Padding(
             padding: EdgeInsets.symmetric(horizontal: 3.w),
             child: SvgPicture.asset(
-              AppIcons.arrowLeft,
+              Directionality.of(context) == TextDirection.rtl
+                  ? AppIcons.arrowLeft
+                  : AppIcons.arrowRightEn,
               color: const Color(0xffbfc8c6),
-              height: 14.h,
+              height:   Directionality.of(context) == TextDirection.rtl? 14.h:17.h,
             ),
           ),
           titleAlignment: ListTileTitleAlignment.center,

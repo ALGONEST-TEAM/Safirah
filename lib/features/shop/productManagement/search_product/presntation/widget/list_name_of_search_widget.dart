@@ -50,7 +50,7 @@ class ListNameOfSearchWidget extends ConsumerWidget {
           ),
         ),
       ),
-      separatorBuilder: (context, index) => Divider(
+      separatorBuilder: (context, index) => const Divider(
         color: AppColors.fontColor2,
         thickness: 0.1,
       ),

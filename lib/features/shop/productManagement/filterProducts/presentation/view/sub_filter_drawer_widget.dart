@@ -130,15 +130,14 @@ class _SubFilterDrawerWidgetState extends ConsumerState<SubFilterDrawerWidget> {
                   .state = S.of(context).forYou;
               ref
                   .read(selectProductsSortOptionProvider(widget.idCategory)
-                      .notifier)
-                  .clear();
+                      .notifier).state=1;
               ref
                   .read(filterProductProvider(widget.idCategory).notifier)
                   .getProductOfFilter(
                 idSize:<int> [],
                 idColor:<int> [],
                 idSubCategory:null ,
-                sortOption:'',
+                sortOption:1,
                 nameSearch: '',
               );
             },

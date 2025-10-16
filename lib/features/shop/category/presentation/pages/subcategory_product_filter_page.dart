@@ -82,7 +82,7 @@ class _SubcategoryProductFilterPageState
       final hasFilters = selectedColors.isNotEmpty ||
           selectedSizes.isNotEmpty ||
           selectedCategory != null ||
-          selectedOption != null;
+          selectedOption != 1;
 
       if (hasFilters) {
         ref

@@ -9,7 +9,7 @@ class RemoteFilterDataSource {
     int? idSubCategory,
     required int page,
     String? nameSearch,
-    String? price,
+    int? sortOption,
   }) async {
     final sizeQuery = (idSize != null && idSize.isNotEmpty)
         ? '&size=${idSize.join(',')}'
@@ -28,10 +28,10 @@ class RemoteFilterDataSource {
     }
     final searchQuery =
         (nameSearch != null && nameSearch != '') ? '&search=$nameSearch' : '';
-    final priceQuery = (price != null && price != '') ? '&price=$price' : '';
+    final sortOptionQuery = (sortOption != null) ? '&filter=${1}' : '';
 
     final url =
-        "/product_filter/?page=$page&perPage=10$sizeQuery$colorQuery$categoryQuery$priceQuery$searchQuery";
+        "/product_filter/?page=$page&perPage=10$sizeQuery$colorQuery$categoryQuery$sortOptionQuery$searchQuery";
 
     final response = await RemoteRequest.getData(url: url);
     return PaginatedProductsList.fromJson(response.data);

@@ -2,7 +2,7 @@ class ProductOrderDetailsModel {
   final int id;
   final String? image;
   final String? name;
-  final dynamic price;
+  final num? price;
   final int? hasCopon;
   final int? quantity;
   final int? colorId;
@@ -16,6 +16,8 @@ class ProductOrderDetailsModel {
   final num? hasReview;
   final num? totalAfterCoupon;
   final num? totalDiscount;
+  final num? unitPrice;
+  final num? printPrice;
 
   ProductOrderDetailsModel({
     required this.id,
@@ -35,6 +37,8 @@ class ProductOrderDetailsModel {
     this.hasReview,
     this.totalAfterCoupon,
     this.totalDiscount,
+    this.unitPrice,
+    this.printPrice,
   });
 
   factory ProductOrderDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -42,7 +46,7 @@ class ProductOrderDetailsModel {
       id: json['id'],
       image: json['image'] ?? '',
       name: json['name'] ?? '',
-      price: json['price'],
+      price: json['total_payable'] ?? 0,
       quantity: json['quantity'] ?? 0,
       colorId: json['color_id'],
       colorHex: json['hex_code'] ?? '',
@@ -54,8 +58,10 @@ class ProductOrderDetailsModel {
       numberName: json['number_name'] ?? "",
       hasReview: json['has_review'] ?? 0,
       totalDiscountCopon: json['total_coupon_discount'],
-      totalAfterCoupon: json['total_after_coupon']??0,
-      totalDiscount: json['total_discount']??0,
+      totalAfterCoupon: json['total_after_coupon'] ?? 0,
+      totalDiscount: json['total_discount'] ?? 0,
+      unitPrice: json['unit_price'] ?? 0,
+      printPrice: json['total_print_price'] ?? 0,
     );
   }
 
@@ -79,5 +85,7 @@ class ProductOrderDetailsModel {
         hasReview: 0,
         totalAfterCoupon: 0,
         totalDiscount: 0,
+        unitPrice: 0,
+        printPrice: 0,
       );
 }

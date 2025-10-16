@@ -15,13 +15,14 @@ class CategoryData {
   final int? categoryLevel;
   final bool? hasChildren;
 
-  CategoryData(
-      {this.id,
-      this.name,
-      this.nameEn,
-      this.categoryLevel,
-      this.hasChildren,
-      this.image});
+  CategoryData({
+    this.id,
+    this.name,
+    this.nameEn,
+    this.categoryLevel,
+    this.hasChildren,
+    this.image,
+  });
 
   factory CategoryData.fromJson(Map<String, dynamic> json) {
     return CategoryData(
@@ -29,7 +30,7 @@ class CategoryData {
       name: json['name'] ?? "",
       categoryLevel: json['category_level'] ?? 0,
       hasChildren: json['has_children'] ?? false,
-      image: json['image'],
+      image: json['image'] ?? "",
     );
   }
 

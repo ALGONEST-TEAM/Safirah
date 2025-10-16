@@ -38,10 +38,10 @@ class ProductListWidget extends StatelessWidget {
                 id: product[index].id!,
                 image: product[index].mainImage ?? [],
                 name: product[index].name!,
-                rates: 4,
+                averageRate: product[index].averageRate ?? 0.0,
                 price: product[index].price!,
                 isFavorite: true,
-                productColorsCount:product[index].productColorsCount ,
+                productColorsCount: product[index].productColorsCount,
                 colorsOfProduct: product[index].colorsProduct,
                 discountData: product[index].discountModel,
               ),
@@ -49,7 +49,7 @@ class ProductListWidget extends StatelessWidget {
           },
         ),
         if (isLoadingMore)
-           Padding(
+          Padding(
             padding: EdgeInsets.all(8.sp).copyWith(bottom: 18.h),
             child: SizedBox(
               width: 24.w,
@@ -65,4 +65,3 @@ class ProductListWidget extends StatelessWidget {
     );
   }
 }
-

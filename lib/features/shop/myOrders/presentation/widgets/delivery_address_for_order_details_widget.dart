@@ -6,10 +6,9 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/general_design_for_order_details_widget.dart';
 import '../../../../../generated/l10n.dart';
-import '../../../address/data/model/address_model.dart';
 
 class DeliveryAddressForOrderDetailsWidget extends StatelessWidget {
-  final AddressModel address;
+  final String address;
   const DeliveryAddressForOrderDetailsWidget({super.key, required this.address});
 
   @override
@@ -25,23 +24,11 @@ class DeliveryAddressForOrderDetailsWidget extends StatelessWidget {
           ),
           12.w.horizontalSpace,
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                AutoSizeTextWidget(
-                  text: address.address,
-                  fontSize: 12.2.sp,
-                  colorText: AppColors.fontColor,
-                ),
-                4.h.verticalSpace,
-                AutoSizeTextWidget(
-                  text:"${address.city!.name} - ${address.district!.name}",
-                  fontSize: 10.6.sp,
-                  colorText: AppColors.fontColor2,
-                  fontWeight: FontWeight.w400,
-                ),
-              ],
+            child: AutoSizeTextWidget(
+              text: address,
+              fontSize: 11.6.sp,
+              maxLines: 2,
+              colorText: AppColors.fontColor,
             ),
           ),
         ],

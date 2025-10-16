@@ -72,6 +72,7 @@ dependencies:
   url_launcher:
   image_picker:
   like_button:
+  custom_refresh_indicator:
 
 dev_dependencies:
   flutter_test:

@@ -49,7 +49,7 @@ class ProductData {
   @HiveField(4)
   final String? discount;
   @HiveField(11)
-  final DiscountModel?  discountModel;
+  final DiscountModel? discountModel;
   @HiveField(12)
   final dynamic priceAfterDiscount;
   @HiveField(13)
@@ -67,6 +67,8 @@ class ProductData {
   // التقييمات والتعليقات
   final ReviewsModel? reviews;
   final List<ReviewData>? productReviews;
+  @HiveField(16)
+  final num? averageRate;
 
   ProductData({
     this.id,
@@ -96,6 +98,7 @@ class ProductData {
     this.favorite,
     this.reviews,
     this.productReviews,
+    this.averageRate,
   });
 
   factory ProductData.fromJson(Map<String, dynamic> json) {
@@ -152,8 +155,8 @@ class ProductData {
           : ReviewsModel.fromJson(
               json['proportion_statistics'] as Map<String, dynamic>,
             ),
-      productReviews:
-      ReviewData.fromJsonList(json['product_reviews'] ?? []),
+      averageRate: json['avrage_rate'] ?? 0.0,
+      productReviews: ReviewData.fromJsonList(json['product_reviews'] ?? []),
     );
   }
 

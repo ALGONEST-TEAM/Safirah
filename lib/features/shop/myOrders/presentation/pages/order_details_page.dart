@@ -60,7 +60,7 @@ class OrderDetailsPage extends ConsumerWidget {
                     Flexible(
                       child: AutoSizeTextWidget(
                         text: state.data.payMethod?.title ?? '',
-                        fontSize: 12.sp,
+                        fontSize: 11.6.sp,
                         colorText: AppColors.fontColor,
                       ),
                     ),
@@ -83,7 +83,7 @@ class OrderDetailsPage extends ConsumerWidget {
                   );
                 }).toList(),
               ),
-              OrderBillWidget(data: state.data),
+              OrderBillWidget(billData: state.data),
             ],
           ),
         ),

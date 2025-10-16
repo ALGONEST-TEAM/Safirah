@@ -90,6 +90,8 @@ class AddReviewsController extends StateNotifier<DataState<Unit>> {
     required double evaluation,
     required int proportion,
     required List<File> images,
+    required  int numberId,
+
   }) async {
     state = state.copyWith(state: States.loading);
     final data = await _controller.addReviews(
@@ -101,6 +103,7 @@ class AddReviewsController extends StateNotifier<DataState<Unit>> {
       evaluation,
       proportion,
       images,
+      numberId,
     );
     data.fold((f) {
       state = state.copyWith(state: States.error, exception: f);

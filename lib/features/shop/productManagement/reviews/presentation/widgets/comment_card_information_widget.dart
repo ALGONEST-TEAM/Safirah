@@ -21,9 +21,20 @@ class CommentCardInformationWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasColor = (reviews.colorHex?.isNotEmpty ?? false);
-    final colorName = reviews.colorName ?? '';
-    final sizeValue = reviews.sizeValue?.toString() ?? '';
-
+    // final colorName = reviews.colorName ?? '';
+    // final sizeValue = reviews.sizeValue?.toString() ?? '';
+    final parts = <String>[];
+    if (reviews.colorName?.isNotEmpty ?? false) {
+      parts.add(' ${reviews.colorName.toString()}');
+    }
+    final sizeLabel = S.of(context).size;
+    if ((reviews.sizeValue ?? '').isNotEmpty) {
+      parts.add('$sizeLabel ${reviews.sizeValue}');
+    }
+    final numLabel = S.of(context).number;
+    if ((reviews.numberName ?? '').isNotEmpty) {
+      parts.add('$numLabel ${reviews.numberName}');
+    }
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.w),
       child: Column(
@@ -63,12 +74,6 @@ class CommentCardInformationWidget extends StatelessWidget {
           Row(
             children: [
               if (hasColor)
-                AutoSizeTextWidget(
-                  text: "${S.of(context).color}: ",
-                  fontSize: 10.5.sp,
-                  colorText: AppColors.fontColor,
-                ),
-              if (hasColor)
                 Container(
                   height: 12.h,
                   width: 12.w,
@@ -79,8 +84,8 @@ class CommentCardInformationWidget extends StatelessWidget {
                 ),
               Flexible(
                 child: AutoSizeTextWidget(
-                  text:
-                      " $colorName${colorName.isNotEmpty ? "  -  " : ''}${S.of(context).size}: $sizeValue",
+                  text: parts.join(' / '),
+
                   fontSize: 10.5.sp,
                   colorText: AppColors.fontColor,
                 ),

@@ -1259,6 +1259,16 @@ class S {
     return Intl.message('Comments', name: 'comments', desc: '', args: []);
   }
 
+  /// `No reviews for this product.`
+  String get noReviewsForThisProduct {
+    return Intl.message(
+      'No reviews for this product.',
+      name: 'noReviewsForThisProduct',
+      desc: '',
+      args: [],
+    );
+  }
+
   // skipped getter for the '--------profile-----------' key
 
   /// `Currency`

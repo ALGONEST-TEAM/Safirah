@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../../core/state/state.dart';
+import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../shoppingBag/cart/presentation/pages/add_to_cart_page.dart';
 import '../../../../shoppingBag/cart/presentation/widgets/add_to_cart_or_favorites_widget.dart';
@@ -59,16 +60,23 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
           name: widget.name,
           image: widget.image!,
         ),
-        widgetOfData: SingleChildScrollView(
-          child: Column(
-            children: [
-              WaresPartInDetailsWidget(
-                key: contentKey,
-                productData: state.data,
-              ),
-              if (state.data.productReviews?.isNotEmpty == true)
-                ProductReviewsWidget(data: state.data),
-            ],
+        widgetOfData: RefreshIndicator(
+          color: AppColors.primaryColor,
+          backgroundColor: Colors.white,
+          onRefresh: () async {
+            ref.refresh(detailsProvider(widget.idProduct));
+          },
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                WaresPartInDetailsWidget(
+                  key: contentKey,
+                  productData: state.data,
+                ),
+                if (state.data.productReviews?.isNotEmpty == true)
+                  ProductReviewsWidget(data: state.data),
+              ],
+            ),
           ),
         ),
       ),

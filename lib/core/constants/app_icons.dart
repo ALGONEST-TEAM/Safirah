@@ -21,11 +21,13 @@ class AppIcons {
 
   // Arrow
   static const String arrowBack = '${_iconsPath}arrow_back.svg';
+  static const String arrowBackEn = '${_iconsPath}arrow_back_en.svg';
   static const String arrowUp = '${_iconsPath}arrow_up.svg';
   static const String arrowBottom = '${_iconsPath}arrow_bottom.svg';
   static const String arrowBottom2 = '${_iconsPath}arrow_bottom2.svg';
   static const String arrowLeft = '${_iconsPath}arrow_left.svg';
   static const String arrowRight = '${_iconsPath}arrow_right.svg';
+  static const String arrowRightEn = '${_iconsPath}arrow_right_en.svg';
 
   // Prodect details
   static const String printing = '${_iconsPath}printing.svg';

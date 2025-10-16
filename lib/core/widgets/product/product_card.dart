@@ -14,7 +14,7 @@ class ProductCard extends StatelessWidget {
   final int id;
   final List<String> image;
   final String name;
-  final double rates;
+  final num averageRate;
   final dynamic price;
   final DiscountModel? discountData;
   final bool isFavorite;
@@ -26,7 +26,7 @@ class ProductCard extends StatelessWidget {
     required this.id,
     required this.image,
     required this.name,
-    required this.rates,
+    required this.averageRate,
     required this.price,
     this.discountData,
     required this.isFavorite,
@@ -89,18 +89,17 @@ class ProductCard extends StatelessWidget {
                           minFontSize: 11,
                           colorText: AppColors.mainColorFont,
                         ),
-                        5.h.verticalSpace,
+                        3.6.h.verticalSpace,
                         RatingBarWidget(
-                          evaluation: 3,
+                          evaluation: averageRate.toDouble(),
                           itemSize: 11.6.sp,
                         ),
-                        3.h.verticalSpace,
                         ProductPriceRowWidget(
                           id: id,
                           price: price,
                           discountData: discountData,
                         ),
-                        2.h.verticalSpace,
+                        1.6.h.verticalSpace,
                       ],
                     ),
                   ),

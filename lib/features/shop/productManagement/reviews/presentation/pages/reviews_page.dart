@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../../core/state/state.dart';
 import '../../../../../../core/theme/app_colors.dart';
-import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/bottomNavbar/button_bottom_navigation_bar_design_widget.dart';
 import '../../../../../../core/widgets/buttons/default_button.dart';
 import '../../../../../../core/widgets/loading_widget.dart';
@@ -14,6 +13,7 @@ import '../../../../../../generated/l10n.dart';
 import '../../../../myOrders/data/model/product_order_details_model.dart';
 import '../riverpod/reviews_riverpod.dart';
 import '../widgets/card_for_comments_widget.dart';
+import '../widgets/reviews_are_empty_widget.dart';
 import '../widgets/reviews_widget.dart';
 import '../widgets/shimmer_for_reviews_widget.dart';
 import 'add_reviews_dialog.dart';
@@ -67,9 +67,8 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
 
   @override
   Widget build(BuildContext context) {
-    var state = ref.watch(getAllReviewsProvider(widget.productId != null
-        ? widget.productId!
-        : widget.products.id));
+    var state = ref.watch(getAllReviewsProvider(
+        widget.productId != null ? widget.productId! : widget.products.id));
     return Scaffold(
       appBar: SecondaryAppBarWidget(
         title: S.of(context).evaluations,
@@ -107,6 +106,9 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
                         children: state.data.review.data.map((items) {
                           return CardForCommentsWidget(
                             reviews: items,
+                            productId: widget.productId != null
+                                ? widget.productId!
+                                : widget.products.id,
                           );
                         }).toList(),
                       ),
@@ -118,43 +120,11 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
                         ),
                     ],
                   )
-                : Align(
-                    alignment: Alignment.center,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 80.h),
-                      child: AutoSizeTextWidget(
-                        text: "لاتوجد تقييمات لهذا المنتج",
-                        fontSize: 13.sp,
-                      ),
-                    ),
-                  ),
+                : const ReviewsAreEmptyWidget(),
           ),
         ),
       ),
-      // bottomNavigationBar: state.stateData == States.loaded
-      //     ? ButtonBottomNavigationBarDesignWidget(
-      //         child: DefaultButtonWidget(
-      //           text: S.of(context).addRating,
-      //           textSize: 13.sp,
-      //           onPressed: () {
-      //             print(widget.productId);
-      //             scrollShowModalBottomSheetWidget(
-      //               context: context,
-      //               title: S.of(context).canYouLeaveYourReview,
-      //               page: AddReviewsDialog(
-      //                 orderId: widget.orderId,
-      //                 productId: widget.products.id,
-      //                 colorId: widget.products.colorId,
-      //                 colorHex: widget.products.colorHex.toString(),
-      //                 colorName: widget.products.colorName.toString(),
-      //                 sizeId: widget.products.sizeId!,
-      //                 sizeValue: widget.products.sizeValue.toString(),
-      //               ),
-      //             );
-      //           },
-      //         ),
-      //       )
-      //     : null,
+
       bottomNavigationBar:
           state.stateData == States.loading || state.stateData == States.error
               ? null
@@ -175,6 +145,8 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
                               colorName: widget.products.colorName.toString(),
                               sizeId: widget.products.sizeId!,
                               sizeValue: widget.products.sizeValue.toString(),
+                              numberName: widget.products.numberName.toString(),
+                              numberId: widget.products.numberId,
                             ),
                           );
                         },

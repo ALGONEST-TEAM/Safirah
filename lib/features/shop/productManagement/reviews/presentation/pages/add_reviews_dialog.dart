@@ -9,6 +9,7 @@ import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/buttons/default_button.dart';
 import '../../../../../../generated/l10n.dart';
+import '../../../detailsProducts/presentation/state_mangment/riverpod_details.dart';
 import '../riverpod/reviews_riverpod.dart';
 import '../widgets/add_image_button_widget.dart';
 import '../widgets/add_rating_and_comment_widget.dart';
@@ -24,6 +25,8 @@ class AddReviewsDialog extends ConsumerStatefulWidget {
   final String colorName;
   final int sizeId;
   final String sizeValue;
+  final int? numberId;
+  final String? numberName;
 
   const AddReviewsDialog({
     super.key,
@@ -34,6 +37,8 @@ class AddReviewsDialog extends ConsumerStatefulWidget {
     required this.colorName,
     required this.sizeId,
     required this.sizeValue,
+    this.numberId,
+    this.numberName,
   });
 
   @override
@@ -51,6 +56,20 @@ class _AddReviewsDialogState extends ConsumerState<AddReviewsDialog> {
   @override
   Widget build(BuildContext context) {
     var state = ref.watch(addReviewsProvider);
+    final parts = <String>[];
+    final colorLabel = S.of(context).color;
+
+    if (widget.colorName.isNotEmpty ) {
+      parts.add(' $colorLabel ${widget.colorName.toString()}');
+    }
+    final sizeLabel = S.of(context).size;
+    if (widget.sizeValue.isNotEmpty) {
+      parts.add('$sizeLabel ${widget.sizeValue}');
+    }
+    final numLabel = S.of(context).number;
+    if ((widget.numberName ?? '').isNotEmpty) {
+      parts.add('$numLabel ${widget.numberName}');
+    }
     return Form(
       key: formKey,
       child: Column(
@@ -74,16 +93,17 @@ class _AddReviewsDialogState extends ConsumerState<AddReviewsDialog> {
                   ),
                   Row(
                     children: [
-                      if (widget.colorHex.isNotEmpty)
-                        AutoSizeTextWidget(
-                          text: "${S.of(context).color}: ",
-                          fontSize: 11.8.sp,
-                          colorText: AppColors.fontColor,
-                        ),
+                      // if (widget.colorHex.isNotEmpty)
+                      //   AutoSizeTextWidget(
+                      //     text: "${S.of(context).color}: ",
+                      //     fontSize: 11.8.sp,
+                      //     colorText: AppColors.fontColor,
+                      //   ),
                       if (widget.colorHex.isNotEmpty)
                         Container(
                           height: 12.h,
                           width: 12.w,
+
                           decoration: BoxDecoration(
                             color: widget.colorHex.toString().toColor(),
                             borderRadius: BorderRadius.circular(2.r),
@@ -91,8 +111,10 @@ class _AddReviewsDialogState extends ConsumerState<AddReviewsDialog> {
                         ),
                       Flexible(
                         child: AutoSizeTextWidget(
-                          text:
-                          " ${widget.colorName.toString()}${widget.colorName.isNotEmpty ? "  -  " : ''}${S.of(context).size}: ${widget.sizeValue.toString()}",
+                          text: parts.join('  /  '),
+
+                          // text:
+                              // " ${widget.colorName.toString()}${widget.colorName.isNotEmpty ? "  -  " : ''}${S.of(context).size}: ${widget.sizeValue.toString()}",
                           fontSize: 11.8.sp,
                           colorText: AppColors.fontColor,
                         ),
@@ -143,7 +165,6 @@ class _AddReviewsDialogState extends ConsumerState<AddReviewsDialog> {
                     fontSize: 12.sp,
                   ),
                   8.h.verticalSpace,
-
                   AddImageButtonWidget(
                     showImageSource: ShowImageSourceWidget(
                       images: _images,
@@ -156,8 +177,7 @@ class _AddReviewsDialogState extends ConsumerState<AddReviewsDialog> {
                   ),
                   _images.isEmpty
                       ? const SizedBox.shrink()
-                      : ListOfSelectedImagesToAddAReviewWidget(
-                          images: _images),
+                      : ListOfSelectedImagesToAddAReviewWidget(images: _images),
                 ],
               ),
             ),
@@ -169,6 +189,7 @@ class _AddReviewsDialogState extends ConsumerState<AddReviewsDialog> {
                 functionSuccess: () {
                   Navigator.of(context).pop();
                   ref.refresh(getAllReviewsProvider(widget.productId));
+                  ref.refresh(detailsProvider(widget.productId));
                 },
                 bottonWidget: DefaultButtonWidget(
                   text: S.of(context).confirm,
@@ -190,6 +211,7 @@ class _AddReviewsDialogState extends ConsumerState<AddReviewsDialog> {
                             evaluation: countEvaluation,
                             proportion: int.parse(tempSizeMethodGroupValue),
                             images: _images,
+                            numberId: widget.numberId ?? 0,
                           );
                     }
                   },

@@ -30,6 +30,7 @@ class ReviewsReposaitory {
     double evaluation,
     int proportion,
     List<File> images,
+    int numberId,
   ) async {
     try {
       final remote = await _reviewsRemoteDataSource.addReviews(
@@ -41,6 +42,7 @@ class ReviewsReposaitory {
         evaluation,
         proportion,
         images,
+        numberId,
       );
       return Right(remote);
     } on DioException catch (e) {

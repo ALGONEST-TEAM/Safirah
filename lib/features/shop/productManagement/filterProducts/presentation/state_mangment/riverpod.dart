@@ -76,19 +76,17 @@ final sortOptionTitleProvider =
     StateProvider.family<String?, int>((ref, idCategory) => S.current.forYou);
 
 final selectProductsSortOptionProvider = StateNotifierProvider.family<
-    SelectProductsSortOptionNotifier, String?, int>(
+    SelectProductsSortOptionNotifier, int?, int>(
   (ref, idCategory) => SelectProductsSortOptionNotifier(),
 );
 
-class SelectProductsSortOptionNotifier extends StateNotifier<String?> {
+class SelectProductsSortOptionNotifier extends StateNotifier<int?> {
   SelectProductsSortOptionNotifier() : super(null);
 
-  void selectOption(String option) {
-    if (state == option) {
-      state = null;
-    } else {
-      state = option;
-    }
+  void selectOption(int option) {
+    state = option;
+
+    print("OOOOOOOO $state");
   }
 
   void clear() {
@@ -111,14 +109,16 @@ class FilterProductNotifier
 
   final _controller = FilterReposaitory();
 
-  Future<void> getProductOfFilter(
-      {List<int>? idSize,
-      List<int>? idUnit,
-      var idColor,
-      bool moreData = false,
-      int? idSubCategory,
-      String? sortOption,
-      String? nameSearch}) async {
+  Future<void> getProductOfFilter({
+    List<int>? idSize,
+    List<int>? idUnit,
+    var idColor,
+    bool moreData = false,
+    int? idSubCategory,
+    String? nameSearch,
+    int? sortOption,
+
+  }) async {
     if (moreData) {
       state = state.copyWith(state: States.loadingMore);
     } else {
@@ -134,7 +134,7 @@ class FilterProductNotifier
       page: page,
       idSubCategory: idSubCategory,
       nameSearch: nameSearch,
-      price: sortOption,
+      sortOption: sortOption,
     );
 
     data.fold(

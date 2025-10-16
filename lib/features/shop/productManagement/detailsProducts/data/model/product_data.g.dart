@@ -29,13 +29,14 @@ class ProductDataAdapter extends TypeAdapter<ProductData> {
       discountModel: fields[11] as DiscountModel?,
       priceAfterDiscount: fields[12] as dynamic,
       coponPrice: fields[13] as dynamic,
+      averageRate: fields[16] as num?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ProductData obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -59,7 +60,9 @@ class ProductDataAdapter extends TypeAdapter<ProductData> {
       ..writeByte(12)
       ..write(obj.priceAfterDiscount)
       ..writeByte(13)
-      ..write(obj.coponPrice);
+      ..write(obj.coponPrice)
+      ..writeByte(16)
+      ..write(obj.averageRate);
   }
 
   @override
