@@ -57,60 +57,64 @@ class _WishlistPageState extends ConsumerState<WishlistPage>
             ? _hideIcon
             : _showIcon,
       ),
-      body: Column(
-        children: [
-          Container(
-            color: Colors.white,
-            child: TabBar(
-              controller: _tabController,
-              physics: const ClampingScrollPhysics(),
-              isScrollable: true,
-              labelPadding: EdgeInsets.symmetric(horizontal: 64.w),
-              dividerColor: Colors.black54,
-              labelColor: AppColors.secondaryColor,
-              unselectedLabelColor: AppColors.fontColor.withOpacity(.5),
-              tabAlignment: TabAlignment.center,
-              labelStyle: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                fontFamily: "IBMPlexSansArabic",
-              ),
-              unselectedLabelStyle: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                fontFamily: "IBMPlexSansArabic",
-              ),
-              indicator: UnderlineTabIndicator(
-                borderSide:
-                    BorderSide(width: 3.w, color: AppColors.primaryColor),
-                insets: EdgeInsets.symmetric(vertical: 4.h),
-              ),
-              dividerHeight: 0.12,
-              tabs: [
-                Tab(
-                  text: wishesProductsState.data.isNotEmpty
-                      ? "${S.of(context).products} (${wishesProductsState.data.length})"
-                      : S.of(context).products,
+      body: SafeArea(
+        top: false,
+
+        child: Column(
+          children: [
+            Container(
+              color: Colors.white,
+              child: TabBar(
+                controller: _tabController,
+                physics: const ClampingScrollPhysics(),
+                isScrollable: true,
+                labelPadding: EdgeInsets.symmetric(horizontal: 64.w),
+                dividerColor: Colors.black54,
+                labelColor: AppColors.secondaryColor,
+                unselectedLabelColor: AppColors.fontColor.withValues(alpha: .5),
+                tabAlignment: TabAlignment.center,
+                labelStyle: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: "IBMPlexSansArabic",
                 ),
-                Tab(
-                  text: wishlistState.data.isNotEmpty
-                      ? "${S.of(context).list} (${wishlistState.data.length})"
-                      : S.of(context).list,
+                unselectedLabelStyle: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: "IBMPlexSansArabic",
                 ),
-              ],
+                indicator: UnderlineTabIndicator(
+                  borderSide:
+                      BorderSide(width: 3.w, color: AppColors.primaryColor),
+                  insets: EdgeInsets.symmetric(vertical: 4.h),
+                ),
+                dividerHeight: 0.12,
+                tabs: [
+                  Tab(
+                    text: wishesProductsState.data.isNotEmpty
+                        ? "${S.of(context).products} (${wishesProductsState.data.length})"
+                        : S.of(context).products,
+                  ),
+                  Tab(
+                    text: wishlistState.data.isNotEmpty
+                        ? "${S.of(context).list} (${wishlistState.data.length})"
+                        : S.of(context).list,
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              physics: const BouncingScrollPhysics(),
-              children: const [
-                ListOfWishesProductsWidget(),
-                ListWidget(),
-              ],
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                physics: const BouncingScrollPhysics(),
+                children: const [
+                  ListOfWishesProductsWidget(),
+                  ListWidget(),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

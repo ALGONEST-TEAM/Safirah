@@ -68,7 +68,7 @@ dependencies:
   pinput:
   google_maps_flutter:
   geolocator: ^14.0.2
-  geocoding: ^3.0.0
+  geocoding: ^4.0.0
   url_launcher:
   image_picker:
   like_button:

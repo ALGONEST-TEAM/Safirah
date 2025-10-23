@@ -45,12 +45,12 @@ class DetailsOfCoponWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.05),
+                color: AppColors.primaryColor.withValues(alpha:0.05),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
                 children: [
-                  AutoSizeTextWidget(
+                  const AutoSizeTextWidget(
                     text: "السعر بعد الكوبون",
                     colorText: AppColors.primaryColor,
                   ),
@@ -75,8 +75,8 @@ class DetailsOfCoponWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                AutoSizeTextWidget(text: "السعر الأصلي", fontSize: 13),
-                Spacer(),
+                const AutoSizeTextWidget(text: "السعر الأصلي", fontSize: 13),
+                const Spacer(),
                 Expanded(
                   child: PriceAndCurrencyWidget(
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -99,9 +99,9 @@ class DetailsOfCoponWidget extends StatelessWidget {
                   width: double.infinity,
                   child: Row(
                     children: [
-                      AutoSizeTextWidget(
+                      const AutoSizeTextWidget(
                           text: "سعر التخفيض", fontSize: 13, colorText: Colors.red),
-                      Spacer(),
+                      const Spacer(),
                   PriceAndCurrencyWidget(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -123,9 +123,9 @@ class DetailsOfCoponWidget extends StatelessWidget {
               width: double.infinity,
               child: Row(
                 children: [
-                  AutoSizeTextWidget(
+                  const AutoSizeTextWidget(
                       text: "صفقة خصم", fontSize: 13, colorText: Colors.red),
-                  Spacer(),
+                  const Spacer(),
                   Visibility(
                     visible: typeCopon != 'percent',
                     replacement: AutoSizeTextWidget(
@@ -155,11 +155,11 @@ class DetailsOfCoponWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                AutoSizeTextWidget(
+                const AutoSizeTextWidget(
                   text: "السعر بعد الكوبون",
                   fontSize: 13,
                 ),
-                Spacer(),
+                const Spacer(),
                 Expanded(
                   child: PriceAndCurrencyWidget(
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -184,22 +184,6 @@ class DetailsOfCoponWidget extends StatelessWidget {
               text: "الخصومات المعروضة تقديرية وتخضع لقواعد كوبونات الخصم.",
               fontSize: 10.sp,
             ),
-            // 16.verticalSpace,
-            // Visibility(
-            //   visible: !inOrder!,
-            //   child: ListView.builder(
-            //     physics: const NeverScrollableScrollPhysics(),
-            //     shrinkWrap: true,
-            //     itemCount: coponData!.length,
-            //     itemBuilder: (context, index) => Padding(
-            //       padding: EdgeInsets.all(4.0.sp),
-            //       child: CardOfCoponWidget(
-            //         coponData: coponData![index],
-            //         showBottonShopping: true,
-            //       ),
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ),

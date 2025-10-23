@@ -57,7 +57,7 @@ class OrderBillWidget extends StatelessWidget {
           ),
           4.h.verticalSpace,
           Divider(
-            color: AppColors.greySwatch.shade200.withOpacity(.6),
+            color: AppColors.greySwatch.shade200.withValues(alpha:.6),
             height: 0,
           ),
           8.h.verticalSpace,

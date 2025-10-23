@@ -76,7 +76,7 @@ class NameDescriptionAndPriceOfTheProductWidget extends StatelessWidget {
                   4.w.horizontalSpace,
                   Container(
                     decoration: BoxDecoration(
-                      color: AppColors.primaryColor.withOpacity(.12),
+                      color: AppColors.primaryColor.withValues(alpha: .12),
                       borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Icon(

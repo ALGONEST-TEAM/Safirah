@@ -65,7 +65,7 @@ class _AddOrCopyToTheListDialogWidgetState
                         : S.of(context).copyToList,
                   ),
                   DesignCreateANewListWidget(
-                    backgroundColor: AppColors.fontColor.withOpacity(.1),
+                    backgroundColor: AppColors.fontColor.withValues(alpha: .1),
                     horizontal: 0,
                     vertical: 2.h,
                     fontSize: 10.4.sp,

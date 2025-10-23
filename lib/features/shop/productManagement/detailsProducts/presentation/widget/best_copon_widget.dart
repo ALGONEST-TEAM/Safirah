@@ -34,7 +34,7 @@ class BestCoponWidget extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(5.sp),
         decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.1),
+          color: AppColors.primaryColor.withValues(alpha:0.1),
         ),
         child: Row(
           children: [

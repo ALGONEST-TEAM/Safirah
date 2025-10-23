@@ -33,7 +33,7 @@ class OrderSuccessDialogWidget extends ConsumerWidget {
                   AppColors.secondaryColor,
                   AppColors.secondarySwatch.shade900,
                   AppColors.secondarySwatch.shade700,
-                  AppColors.secondarySwatch.shade600.withOpacity(.92),
+                  AppColors.secondarySwatch.shade600.withValues(alpha: .92),
                 ],
               ),
             ),

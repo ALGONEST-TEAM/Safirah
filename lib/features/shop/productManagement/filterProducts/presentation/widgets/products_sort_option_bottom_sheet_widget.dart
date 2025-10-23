@@ -50,9 +50,6 @@ class ProductsSortOptionBottomSheetWidget extends ConsumerWidget {
             ref
                 .read(selectProductsSortOptionProvider(idCategory).notifier)
                 .selectOption(index+1);
-            print(
-                "RRRRRRRRRRRRRRRRR ${ref.read(selectProductsSortOptionProvider(idCategory).notifier).state}");
-
             ref
                 .watch(filterProductProvider(idCategory).notifier)
                 .getProductOfFilter(

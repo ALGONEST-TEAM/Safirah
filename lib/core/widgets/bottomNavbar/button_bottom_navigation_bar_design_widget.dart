@@ -8,24 +8,27 @@ class ButtonBottomNavigationBarDesignWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 14.w,
-      ).copyWith(top: 6.h,bottom: 8.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(8.r),
-          topLeft: Radius.circular(8.r),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: .06),
-            blurRadius: 2.r,
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 14.w,
+        ).copyWith(top: 6.h,bottom: 8.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(8.r),
+            topLeft: Radius.circular(8.r),
           ),
-        ],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: .06),
+              blurRadius: 2.r,
+            ),
+          ],
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
 }

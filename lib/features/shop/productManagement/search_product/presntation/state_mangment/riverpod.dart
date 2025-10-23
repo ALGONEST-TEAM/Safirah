@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../../../../../core/state/data_state.dart';
 import '../../../../../../core/state/state.dart';
 import '../../../../category/data/model/category_and_product_data.dart';

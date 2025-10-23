@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:like_button/like_button.dart';
-import 'package:safirah/core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../../core/constants/app_icons.dart';
 import '../../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../../core/network/errors/remote_exception.dart';

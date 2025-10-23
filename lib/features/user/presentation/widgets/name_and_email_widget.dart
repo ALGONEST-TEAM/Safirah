@@ -10,6 +10,7 @@ import '../../../../generated/l10n.dart';
 
 class NameAndEmailWidget extends StatelessWidget {
   final TextEditingController name;
+
   // final TextEditingController email;
 
   const NameAndEmailWidget({
@@ -37,6 +38,7 @@ class NameAndEmailWidget extends StatelessWidget {
             if (value == null || value.toString().isEmpty) {
               return S.of(context).pleaseEnterYourName;
             }
+            return null;
           },
           prefix: Padding(
             padding: EdgeInsets.all(11.sp),
@@ -48,6 +50,8 @@ class NameAndEmailWidget extends StatelessWidget {
           ),
         ),
         12.h.verticalSpace,
+        // 773551738
+        // 111000
         // AutoSizeTextWidget(
         //   text: "${S.of(context).email} (اختياري)",
         //   fontSize: 11.sp,

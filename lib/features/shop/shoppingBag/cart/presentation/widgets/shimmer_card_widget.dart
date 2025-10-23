@@ -25,7 +25,7 @@ class ShimmerCardWidget extends ConsumerWidget {
             borderRadius: BorderRadius.circular(8.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.02),
+                color: Colors.black.withValues(alpha: .02),
                 blurRadius: 1.r,
               ),
             ],
@@ -42,7 +42,7 @@ class ShimmerCardWidget extends ConsumerWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: AppColors.fontColor2.withOpacity(.6),
+                      color: AppColors.fontColor2.withValues(alpha: .6),
                       width: 1.5,
                     ),
                   ),

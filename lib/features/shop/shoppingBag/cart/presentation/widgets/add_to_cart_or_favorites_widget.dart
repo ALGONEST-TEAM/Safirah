@@ -43,54 +43,19 @@ class AddToCartOrFavoritesWidget extends ConsumerWidget {
     final cartState = ref.watch(cartProvider);
     final wishlistState = ref.watch(wishlistProvider.notifier);
 
-    return Container(
-      color: Colors.white,
-      padding: EdgeInsets.symmetric(horizontal: 12.w,vertical: 4.h),
-      child: Row(
-        children: [
-          if (showWishlistIcon)
-            IconButtonWidget(
-              icon: details.data.favorite == true
-                  ? AppIcons.wishlistActive
-                  : AppIcons.wishlist,
-              height: details.data.favorite == true ? 24.h : 21.h,
-              onPressed: () {
-                if (!Auth().loggedIn) {
-                  showFlashBarError(
-                    context: context,
-                    title: S.of(context).loginRequired,
-                    text: S.of(context).pleaseLoginToContinue,
-                  );
-                  return;
-                }
-                onFavoriteLocalToggle();
-                if (details.data.favorite == true) {
-                  wishlistState.addWishlist(productId: productId);
-                } else {
-                  wishlistState.deleteWishlist(productsIds: [productId]);
-                }
-              },
-            ),
-          if (showWishlistIcon) 4.w.horizontalSpace,
-          Expanded(
-            child: CheckStateInPostApiDataWidget(
-              state: cartState,
-              messageSuccess: S.of(context).productAddedToCartSuccessfully,
-              functionSuccess: () {
-                if (isPrintable == true) {
-                  ref
-                      .read(activatePrintingOnTheProductProvider(
-                              'details:$productId')
-                          .notifier)
-                      .state = false;
-                }
-              },
-              bottonWidget: DefaultButtonWidget(
-                text: S.of(context).addToCart,
-                background: AppColors.secondaryColor,
-                height: 38.h,
-                textSize: 12.4.sp,
-                isLoading: cartState.stateData == States.loading,
+    return SafeArea(
+      top: false,
+      child: Container(
+        color: Colors.white,
+        padding: EdgeInsets.symmetric(horizontal: 12.w,vertical: 4.h),
+        child: Row(
+          children: [
+            if (showWishlistIcon)
+              IconButtonWidget(
+                icon: details.data.favorite == true
+                    ? AppIcons.wishlistActive
+                    : AppIcons.wishlist,
+                height: details.data.favorite == true ? 24.h : 21.h,
                 onPressed: () {
                   if (!Auth().loggedIn) {
                     showFlashBarError(
@@ -100,47 +65,85 @@ class AddToCartOrFavoritesWidget extends ConsumerWidget {
                     );
                     return;
                   }
-                  final notifier =
-                      ref.read(changePriceProvider(details.data).notifier);
-                  final price = ref.watch(changePriceProvider(details.data)) ??
-                      details.data.price!;
-                  final isPrintable = ref.watch(
-                      activatePrintingOnTheProductProvider(
-                          'details:$productId'));
-
-                  final idColor = notifier.getIdColor();
-                  final idSize = notifier.getIdSize();
-                  final numberId = notifier.getIdNumber();
-                  final needsSize = idSize == 0;
-                  final needsNumber =
-                      (details.data.numbersOfProduct?.isNotEmpty ?? false) &&
-                          numberId == 0;
-
-                  if (needsSize || needsNumber) {
-                    if (handleInvalidSelection != null &&
-                        handleInvalidSelection!(context, ref, details.data)) {
-                      return;
-                    }
-                    if (needsSize) markSizeInvalid?.call();
-                    if (needsNumber) markNumberInvalid?.call();
-                    return;
+                  onFavoriteLocalToggle();
+                  if (details.data.favorite == true) {
+                    wishlistState.addWishlist(productId: productId);
+                  } else {
+                    wishlistState.deleteWishlist(productsIds: [productId]);
                   }
-
-                  clearValidation?.call();
-                  ref.read(cartProvider.notifier).addToCart(
-                        prodectId: productId,
-                        colorId: idColor,
-                        sizeId: idSize,
-                        price: price,
-                        quantity: 1,
-                        numberId: numberId,
-                        isPrintable: isPrintable ? 1 : 0,
-                      );
                 },
               ),
+            if (showWishlistIcon) 4.w.horizontalSpace,
+            Expanded(
+              child: CheckStateInPostApiDataWidget(
+                state: cartState,
+                messageSuccess: S.of(context).productAddedToCartSuccessfully,
+                functionSuccess: () {
+                  if (isPrintable == true) {
+                    ref
+                        .read(activatePrintingOnTheProductProvider(
+                                'details:$productId')
+                            .notifier)
+                        .state = false;
+                  }
+                },
+                bottonWidget: DefaultButtonWidget(
+                  text: S.of(context).addToCart,
+                  background: AppColors.secondaryColor,
+                  height: 38.h,
+                  textSize: 12.4.sp,
+                  isLoading: cartState.stateData == States.loading,
+                  onPressed: () {
+                    if (!Auth().loggedIn) {
+                      showFlashBarError(
+                        context: context,
+                        title: S.of(context).loginRequired,
+                        text: S.of(context).pleaseLoginToContinue,
+                      );
+                      return;
+                    }
+                    final notifier =
+                        ref.read(changePriceProvider(details.data).notifier);
+                    final price = ref.watch(changePriceProvider(details.data)) ??
+                        details.data.price!;
+                    final isPrintable = ref.watch(
+                        activatePrintingOnTheProductProvider(
+                            'details:$productId'));
+
+                    final idColor = notifier.getIdColor();
+                    final idSize = notifier.getIdSize();
+                    final numberId = notifier.getIdNumber();
+                    final needsSize = idSize == 0;
+                    final needsNumber =
+                        (details.data.numbersOfProduct?.isNotEmpty ?? false) &&
+                            numberId == 0;
+
+                    if (needsSize || needsNumber) {
+                      if (handleInvalidSelection != null &&
+                          handleInvalidSelection!(context, ref, details.data)) {
+                        return;
+                      }
+                      if (needsSize) markSizeInvalid?.call();
+                      if (needsNumber) markNumberInvalid?.call();
+                      return;
+                    }
+
+                    clearValidation?.call();
+                    ref.read(cartProvider.notifier).addToCart(
+                          prodectId: productId,
+                          colorId: idColor,
+                          sizeId: idSize,
+                          price: price,
+                          quantity: 1,
+                          numberId: numberId,
+                          isPrintable: isPrintable ? 1 : 0,
+                        );
+                  },
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

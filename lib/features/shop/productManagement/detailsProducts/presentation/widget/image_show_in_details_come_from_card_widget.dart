@@ -16,7 +16,7 @@ class ImageShowInDetailsComeFromCardWidget extends StatefulWidget {
   });
 
   @override
-  _ImageShowInDetailsComeFromCardWidgetState createState() =>
+  State<ImageShowInDetailsComeFromCardWidget> createState() =>
       _ImageShowInDetailsComeFromCardWidgetState();
 }
 

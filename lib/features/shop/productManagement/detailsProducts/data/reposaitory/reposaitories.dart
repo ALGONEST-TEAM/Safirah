@@ -16,7 +16,6 @@ class DetailsProductReposaitories {
       final data = await ProductDetailsRemoteDataSource ().getDetailsOfProduct(idProduct);
       return Right(data);
     } on DioException catch (erorr) {
-      print(erorr.type.toString());
       return Left(erorr);
     }
   }

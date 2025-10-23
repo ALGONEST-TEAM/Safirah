@@ -22,21 +22,20 @@ class PriceAndCurrencyWidget extends ConsumerWidget {
   final CrossAxisAlignment? crossAxisAlignment;
   final MainAxisAlignment? mainAxisAlignment;
 
-  const PriceAndCurrencyWidget({
-    super.key,
-    required this.price,
-    this.fontSize1,
-    this.fontSize2,
-    this.colorText1,
-    this.colorText2,
-    this.textAlign1,
-    this.textAlign2,
-    this.maxLines,
-    this.crossAxisAlignment,
-    this.mainAxisAlignment,
-    this.textWeight1,
-    this.textWeight2
-  });
+  const PriceAndCurrencyWidget(
+      {super.key,
+      required this.price,
+      this.fontSize1,
+      this.fontSize2,
+      this.colorText1,
+      this.colorText2,
+      this.textAlign1,
+      this.textAlign2,
+      this.maxLines,
+      this.crossAxisAlignment,
+      this.mainAxisAlignment,
+      this.textWeight1,
+      this.textWeight2});
 
   @override
   Widget build(BuildContext context, ref) {
@@ -53,7 +52,7 @@ class PriceAndCurrencyWidget extends ConsumerWidget {
             text: formatter.format(double.tryParse(price.toString())),
             colorText: colorText1 ?? AppColors.primaryColor,
             fontSize: fontSize1 ?? 11.4.sp,
-            fontWeight:textWeight1?? FontWeight.w500,
+            fontWeight: textWeight1 ?? FontWeight.w500,
             textAlign: textAlign1 ?? TextAlign.start,
             minFontSize: 9,
             maxLines: maxLines ?? 1,
@@ -66,7 +65,7 @@ class PriceAndCurrencyWidget extends ConsumerWidget {
             text: currencyState.toString(),
             colorText: colorText2 ?? AppColors.primaryColor,
             fontSize: fontSize2 ?? 8.5.sp,
-            fontWeight:textWeight2?? FontWeight.w500,
+            fontWeight: textWeight2 ?? FontWeight.w500,
             minFontSize: 8,
             textAlign: textAlign2 ?? TextAlign.start,
           ),

@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';
 import '../../data/model/profile_data_model.dart';

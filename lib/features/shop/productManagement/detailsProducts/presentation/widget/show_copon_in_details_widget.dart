@@ -82,7 +82,7 @@ class ShowDetailsOfCoponWidget extends StatelessWidget {
           6.horizontalSpace,
           CircleAvatar(
             radius: 10,
-            backgroundColor: AppColors.primaryColor.withOpacity(0.05),
+            backgroundColor: AppColors.primaryColor.withValues(alpha: 0.05),
             child: Icon(
               Icons.arrow_forward_ios,
               color: AppColors.primaryColor,

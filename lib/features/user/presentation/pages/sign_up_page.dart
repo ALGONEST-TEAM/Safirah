@@ -45,71 +45,74 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         appBar: const SignUpAppBarWidget(),
         body: Form(
           key: formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SignUpHeaderWidget(),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 14.w),
-                  child: Column(
-                    children: [
-                      NameAndEmailWidget(name: _nameController),
-                      const BirthDatePickerWidget(),
-                      12.h.verticalSpace,
-                      const GenderPickerWidget(),
-                      const CityWidget(),
-                      26.h.verticalSpace,
-                      CheckStateInPostApiDataWidget(
-                        state: signUpState,
-                        messageSuccess:
-                            S.of(context).accountCreatedSuccessfully,
-                        functionSuccess: () {
-                          Auth().login(signUpState.data);
-                          navigateAndFinish(
-                              context, const BottomNavigationBarWidget());
-                        },
-                        bottonWidget: DefaultButtonWidget(
-                          text: S.of(context).createAccount,
-                          textSize: 13.6.sp,
-                          isLoading: signUpState.stateData == States.loading,
-                          onPressed: () {
-                            final isValid = formKey.currentState!.validate();
-                            final selectedCity = ref.read(selectedCityProvider);
-
-                            bool hasError = false;
-                            if (selectedCity == null) {
-                              ref
-                                  .read(selectedCityErrorProvider.notifier)
-                                  .state = S.of(context).pleaseChoseACity;
-                              hasError = true;
-                            } else {
-                              ref
-                                  .read(selectedCityErrorProvider.notifier)
-                                  .state = null;
-                            }
-
-                            if (!isValid || hasError) return;
-                            if (!isValid) return;
-
-                            FocusManager.instance.primaryFocus?.unfocus();
-
-                            final selectedGender = ref.read(genderProvider);
-                            ref.read(signUpProvider.notifier).logInOrSignUp(
-                                  phoneNumber: state.data.user.phoneNumber,
-                                  name: _nameController.text,
-                                  // email: _emailController.text,
-                                  gender: selectedGender.toString(),
-                                  cityId: selectedCity!.id,
-                                  dateOfBirth: birthDate,
-                                );
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SignUpHeaderWidget(),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 14.w),
+                    child: Column(
+                      children: [
+                        NameAndEmailWidget(name: _nameController),
+                        const BirthDatePickerWidget(),
+                        12.h.verticalSpace,
+                        const GenderPickerWidget(),
+                        const CityWidget(),
+                        26.h.verticalSpace,
+                        CheckStateInPostApiDataWidget(
+                          state: signUpState,
+                          messageSuccess:
+                              S.of(context).accountCreatedSuccessfully,
+                          functionSuccess: () {
+                            Auth().login(signUpState.data);
+                            navigateAndFinish(
+                                context, const BottomNavigationBarWidget());
                           },
+                          bottonWidget: DefaultButtonWidget(
+                            text: S.of(context).createAccount,
+                            textSize: 13.6.sp,
+                            isLoading: signUpState.stateData == States.loading,
+                            onPressed: () {
+                              final isValid = formKey.currentState!.validate();
+                              final selectedCity = ref.read(selectedCityProvider);
+
+                              bool hasError = false;
+                              if (selectedCity == null) {
+                                ref
+                                    .read(selectedCityErrorProvider.notifier)
+                                    .state = S.of(context).pleaseChoseACity;
+                                hasError = true;
+                              } else {
+                                ref
+                                    .read(selectedCityErrorProvider.notifier)
+                                    .state = null;
+                              }
+
+                              if (!isValid || hasError) return;
+                              if (!isValid) return;
+
+                              FocusManager.instance.primaryFocus?.unfocus();
+
+                              final selectedGender = ref.read(genderProvider);
+                              ref.read(signUpProvider.notifier).logInOrSignUp(
+                                    phoneNumber: state.data.user.phoneNumber,
+                                    name: _nameController.text,
+                                    // email: _emailController.text,
+                                    gender: selectedGender.toString(),
+                                    cityId: selectedCity!.id,
+                                    dateOfBirth: birthDate,
+                                  );
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

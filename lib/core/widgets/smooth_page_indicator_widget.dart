@@ -17,7 +17,7 @@ class SmoothPageIndicatorWidget extends StatelessWidget {
       child: SmoothPageIndicator(
         controller: PageController(initialPage: pageController),
         count: count,
-        effect: ExpandingDotsEffect(
+        effect: const ExpandingDotsEffect(
           activeDotColor: AppColors.whiteColor,
           dotColor: Colors.white54,
           dotHeight: 3,

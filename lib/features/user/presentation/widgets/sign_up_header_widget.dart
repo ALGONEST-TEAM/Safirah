@@ -45,7 +45,7 @@ class SignUpHeaderWidget extends StatelessWidget {
         color: AppColors.secondaryColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             spreadRadius: 0,
             blurRadius: 6,
             offset: const Offset(0, -3),

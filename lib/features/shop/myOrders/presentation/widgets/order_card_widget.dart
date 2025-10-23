@@ -20,7 +20,6 @@ class OrderCardWidget extends ConsumerWidget {
     // var currencyState = ref.watch(currencyProvider);
     return GestureDetector(
       onTap: () {
-        print(data.id);
         navigateTo(context, OrderDetailsPage(orderId: data.id));
       },
       child: Container(

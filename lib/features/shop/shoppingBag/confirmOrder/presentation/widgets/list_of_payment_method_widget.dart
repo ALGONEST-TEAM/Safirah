@@ -49,7 +49,7 @@ class _ListOfPaymentMethodWidgetState
         );
       },
       separatorBuilder: (context, index) => Divider(
-        color: AppColors.fontColor.withOpacity(.4),
+        color: AppColors.fontColor.withValues(alpha: .4),
         thickness: 0.7,
         height: 12.h,
       ),

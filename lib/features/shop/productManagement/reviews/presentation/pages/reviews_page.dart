@@ -85,46 +85,48 @@ class _ReviewsPageState extends ConsumerState<ReviewsPage> {
         child: SingleChildScrollView(
           controller: _scrollController,
           padding: EdgeInsets.symmetric(horizontal: 12.w),
-          child: CheckStateInGetApiDataWidget(
-            state: state,
-            refresh: () {
-              ref.refresh(getAllReviewsProvider(widget.productId != null
-                  ? widget.productId!
-                  : widget.products.id));
-            },
-            widgetOfLoading: const ShimmerForReviewsWidget(),
-            widgetOfData: state.data.review.data.isNotEmpty
-                ? Column(
-                    children: [
-                      ReviewsWidget(
-                        rates: state.data.rates,
-                        total: state.data.total.toDouble(),
-                        counter: state.data.counter,
-                      ),
-                      4.h.verticalSpace,
-                      Column(
-                        children: state.data.review.data.map((items) {
-                          return CardForCommentsWidget(
-                            reviews: items,
-                            productId: widget.productId != null
-                                ? widget.productId!
-                                : widget.products.id,
-                          );
-                        }).toList(),
-                      ),
-                      12.h.verticalSpace,
-                      if (state.stateData == States.loadingMore)
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          child: const CircularProgressIndicatorWidget(),
+          child: SafeArea(
+            top: false,
+            child: CheckStateInGetApiDataWidget(
+              state: state,
+              refresh: () {
+                ref.refresh(getAllReviewsProvider(widget.productId != null
+                    ? widget.productId!
+                    : widget.products.id));
+              },
+              widgetOfLoading: const ShimmerForReviewsWidget(),
+              widgetOfData: state.data.review.data.isNotEmpty
+                  ? Column(
+                      children: [
+                        ReviewsWidget(
+                          rates: state.data.rates,
+                          total: state.data.total.toDouble(),
+                          counter: state.data.counter,
                         ),
-                    ],
-                  )
-                : const ReviewsAreEmptyWidget(),
+                        4.h.verticalSpace,
+                        Column(
+                          children: state.data.review.data.map((items) {
+                            return CardForCommentsWidget(
+                              reviews: items,
+                              productId: widget.productId != null
+                                  ? widget.productId!
+                                  : widget.products.id,
+                            );
+                          }).toList(),
+                        ),
+                        12.h.verticalSpace,
+                        if (state.stateData == States.loadingMore)
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            child: const CircularProgressIndicatorWidget(),
+                          ),
+                      ],
+                    )
+                  : const ReviewsAreEmptyWidget(),
+            ),
           ),
         ),
       ),
-
       bottomNavigationBar:
           state.stateData == States.loading || state.stateData == States.error
               ? null

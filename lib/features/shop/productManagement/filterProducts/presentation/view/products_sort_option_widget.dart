@@ -68,7 +68,7 @@ class ProductsSortOptionWidget extends ConsumerWidget {
                   Icon(
                     Icons.keyboard_arrow_down_rounded,
                     size: 18.sp,
-                    color: AppColors.fontColor.withOpacity(.8),
+                    color: AppColors.fontColor.withValues(alpha: .8),
                   ),
                 ],
               ),

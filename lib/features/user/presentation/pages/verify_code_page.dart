@@ -15,20 +15,25 @@ import '../widgets/resend_code_widget.dart';
 import '../widgets/verify_pinput_widget.dart';
 import 'sign_up_page.dart';
 
-class VerifyCodePage extends ConsumerWidget {
+class VerifyCodePage extends ConsumerStatefulWidget {
   final String phoneNumber;
 
-  VerifyCodePage({
+  const VerifyCodePage({
     super.key,
     required this.phoneNumber,
   });
 
+  @override
+  ConsumerState<VerifyCodePage> createState() => _VerifyCodePageState();
+}
+
+class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
   final formKey = GlobalKey<FormState>();
 
   TextEditingController verifyController = TextEditingController();
 
   @override
-  Widget build(BuildContext context, ref) {
+  Widget build(BuildContext context) {
     var checkOTPState = ref.watch(checkOTPProvider);
 
     return Form(
@@ -39,7 +44,7 @@ class VerifyCodePage extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AutoSizeTextWidget(
-              text: "${S.of(context).codeHasBeenSendTo} $phoneNumber",
+              text: "${S.of(context).codeHasBeenSendTo} ${widget.phoneNumber}",
               fontSize: 11.4.sp,
               fontWeight: FontWeight.w600,
               colorText: AppColors.fontColor,
@@ -50,7 +55,7 @@ class VerifyCodePage extends ConsumerWidget {
             ),
             24.h.verticalSpace,
             ResendCodeWidget(
-              phoneNumberOrEmail: phoneNumber,
+              phoneNumberOrEmail: widget.phoneNumber,
             ),
             24.h.verticalSpace,
             CheckStateInPostApiDataWidget(
@@ -78,7 +83,7 @@ class VerifyCodePage extends ConsumerWidget {
                   if (isValid) {
                     FocusManager.instance.primaryFocus?.unfocus();
                     ref.read(checkOTPProvider.notifier).checkOTP(
-                          phoneNumber: phoneNumber,
+                          phoneNumber: widget.phoneNumber,
                           otp: verifyController.text,
                         );
                   }

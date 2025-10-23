@@ -35,56 +35,59 @@ class OrderDetailsPage extends ConsumerWidget {
         widgetOfLoading: const LogoShimmerWidget(),
         widgetOfData: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 12.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 2.h,
-            children: [
-              OrderDetailsWidget(
-                data: state.data,
-                numberOfItems: state.data.orderProducts.length.toString(),
-              ),
-              if (state.data.address != null)
-                DeliveryAddressForOrderDetailsWidget(
-                  address: state.data.address!,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 2.h,
+              children: [
+                OrderDetailsWidget(
+                  data: state.data,
+                  numberOfItems: state.data.orderProducts.length.toString(),
                 ),
-              GeneralDesignForOrderDetailsWidget(
-                title: S.of(context).paymentMethod,
-                child: Row(
-                  children: [
-                    OnlineImagesWidget(
-                      imageUrl: '',
-                      size: Size(60.w, 40.h),
-                      logoWidth: 20.w,
-                    ),
-                    10.w.horizontalSpace,
-                    Flexible(
-                      child: AutoSizeTextWidget(
-                        text: state.data.payMethod?.title ?? '',
-                        fontSize: 11.6.sp,
-                        colorText: AppColors.fontColor,
+                if (state.data.address != null)
+                  DeliveryAddressForOrderDetailsWidget(
+                    address: state.data.address!,
+                  ),
+                GeneralDesignForOrderDetailsWidget(
+                  title: S.of(context).paymentMethod,
+                  child: Row(
+                    children: [
+                      OnlineImagesWidget(
+                        imageUrl: '',
+                        size: Size(60.w, 40.h),
+                        logoWidth: 20.w,
                       ),
-                    ),
-                  ],
+                      10.w.horizontalSpace,
+                      Flexible(
+                        child: AutoSizeTextWidget(
+                          text: state.data.payMethod?.title ?? '',
+                          fontSize: 11.6.sp,
+                          colorText: AppColors.fontColor,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              7.h.verticalSpace,
-              AutoSizeTextWidget(
-                text: S.of(context).products,
-                fontSize: 11.6.sp,
-                fontWeight: FontWeight.w400,
-                colorText: AppColors.mainColorFont,
-              ),
-              Column(
-                children: state.data.orderProducts.map((items) {
-                  return OrderDetailsProductCardWidget(
-                    orderProducts: items,
-                    orderId: orderId,
-                    status: state.data.status.id!,
-                  );
-                }).toList(),
-              ),
-              OrderBillWidget(billData: state.data),
-            ],
+                7.h.verticalSpace,
+                AutoSizeTextWidget(
+                  text: S.of(context).products,
+                  fontSize: 11.6.sp,
+                  fontWeight: FontWeight.w400,
+                  colorText: AppColors.mainColorFont,
+                ),
+                Column(
+                  children: state.data.orderProducts.map((items) {
+                    return OrderDetailsProductCardWidget(
+                      orderProducts: items,
+                      orderId: orderId,
+                      status: state.data.status.id!,
+                    );
+                  }).toList(),
+                ),
+                OrderBillWidget(billData: state.data),
+              ],
+            ),
           ),
         ),
       ),

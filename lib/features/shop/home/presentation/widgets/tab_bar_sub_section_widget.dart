@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../data/model/section_data.dart';
-import '../../../category/presentation/widgets/home_categories_list_widget.dart';
 
 
 class TabBarSubSectionWidget extends StatefulWidget {

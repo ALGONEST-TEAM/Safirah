@@ -20,7 +20,7 @@ class ShimmerWishlistWidget extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.0),
+                color: Colors.black.withValues(alpha: .0),
                 blurRadius: 1.r,
               ),
             ],

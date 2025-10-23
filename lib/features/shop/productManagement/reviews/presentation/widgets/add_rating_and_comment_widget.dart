@@ -58,6 +58,7 @@ class AddRatingAndCommentWidget extends StatelessWidget {
             if (value == null || value.toString().isEmpty) {
               return S.of(context).pleaseAddAComment;
             }
+            return null;
           },
         ),
         16.h.verticalSpace,

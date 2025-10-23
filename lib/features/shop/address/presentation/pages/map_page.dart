@@ -31,9 +31,10 @@ class MapPage extends ConsumerStatefulWidget {
 
 class _MapPageState extends ConsumerState<MapPage> {
   bool showError = false;
-
+  String _city = '';
+  String _district = '';
   final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+  Completer<GoogleMapController>();
 
   getCurrentLocation({
     required LatLng latLng,
@@ -57,12 +58,10 @@ class _MapPageState extends ConsumerState<MapPage> {
     var controller = ref.watch(mapProvider);
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar:  SecondaryAppBarWidget(
+      appBar: SecondaryAppBarWidget(
         isLogo: true,
         backgroundColor: AppColors.scaffoldColor,
         fromHeight: 60.h,
-
       ),
       body: Stack(
         alignment: Alignment.bottomCenter,
@@ -116,25 +115,59 @@ class _MapPageState extends ConsumerState<MapPage> {
               ),
             ),
           ),
+          Visibility(
+            visible: _city.isNotEmpty,
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                margin: EdgeInsets.all(12.sp),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8.w,
+                  children: [
+                    SvgPicture.asset(AppIcons.address),
+                    AutoSizeTextWidget(
+                      text:
+                      "$_city ${_district.isNotEmpty ? '-' : ''} $_district",
+                      fontSize: 10.6.sp,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           ButtonBottomNavigationBarDesignWidget(
-            child: ref.read(mapProvider.notifier).checkForLocationChanges ==
-                    false
+            child: ref
+                .read(mapProvider.notifier)
+                .checkForLocationChanges ==
+                false
                 ? DefaultButtonWidget(
-                    text: S.of(context).confirmAddress,
-                    height: 43.h,
-                    textSize: 13.5.sp,
-                    background: AppColors.secondaryColor.withOpacity(.6),
-                  )
+              text: S
+                  .of(context)
+                  .confirmAddress,
+              height: 43.h,
+              textSize: 13.5.sp,
+              background: AppColors.secondaryColor.withValues(alpha: .6),
+            )
                 : DefaultButtonWidget(
-                    text: S.of(context).confirmAddress,
-                    height: 43.h,
-                    textSize: 13.5.sp,
-                    onPressed: () async {
-                      ref.read(mapProvider.notifier).confirmLocation();
-                      ref.read(mapProvider.notifier).locationIsEmpty = false;
-                      Navigator.pop(context);
-                    },
-                  ),
+              text: S
+                  .of(context)
+                  .confirmAddress,
+              height: 43.h,
+              textSize: 13.5.sp,
+              onPressed: () async {
+                ref.read(mapProvider.notifier).confirmLocation();
+                ref
+                    .read(mapProvider.notifier)
+                    .locationIsEmpty = false;
+                Navigator.pop(context);
+              },
+            ),
           ),
         ],
       ),
@@ -150,7 +183,8 @@ class _MapPageState extends ConsumerState<MapPage> {
           ),
           onPressed: () async {
             Position position =
-                await requestLocationPermissionAndGetCurrentLocation();
+            await requestLocationPermissionAndGetCurrentLocation();
+
             getCurrentLocation(
               latLng: LatLng(position.latitude, position.longitude),
               ref: ref,
@@ -161,11 +195,17 @@ class _MapPageState extends ConsumerState<MapPage> {
     );
   }
 
+
   String normalizeText(String text) {
-    String normalized =
-        text.replaceAll(RegExp(r'[\u200E\u200F\u202A-\u202E]'), '');
-    normalized = normalized.trim();
-    normalized = normalized.toLowerCase();
+    final bidi = RegExp(r'[\u200E\u200F\u202A-\u202E]');
+    final punctuation = RegExp(
+        r'[^\p{L}\p{N}\s]', unicode: true); // يشيل , . - … إلخ
+    String normalized = text
+        .replaceAll(bidi, '')
+        .replaceAll(punctuation, ' ') // نحول الرموز لمسافة
+        .toLowerCase()
+        .trim();
+    normalized = normalized.replaceAll(RegExp(r'\s+'), ' '); // توحيد المسافات
     return normalized;
   }
 
@@ -175,7 +215,7 @@ class _MapPageState extends ConsumerState<MapPage> {
     var citiesState = ref.watch(citiesProvider);
 
     List<String> normalizedYemenCities =
-        citiesState.data.map((city) => normalizeText(city.name)).toList();
+    citiesState.data.map((city) => normalizeText(city.name)).toList();
     if (normalizedYemenCities.contains(normalizedCityName)) {
       tempId = citiesState.data
           .firstWhere((city) => normalizeText(city.name) == normalizedCityName)
@@ -189,24 +229,41 @@ class _MapPageState extends ConsumerState<MapPage> {
         widget.form.patchValue({'district_name': null});
         showError = false;
         ref.read(mapProvider.notifier).changeLocation(latLng);
-        ref.read(mapProvider.notifier).checkForLocationChanges = true;
+        ref
+            .read(mapProvider.notifier)
+            .checkForLocationChanges = true;
       });
     } else {
       setState(() {
         showError = true;
-        ref.read(mapProvider.notifier).checkForLocationChanges = false;
+        ref
+            .read(mapProvider.notifier)
+            .checkForLocationChanges = false;
       });
     }
   }
 
   Future<void> _getCityName(LatLng latLng) async {
     try {
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(latLng.latitude, latLng.longitude);
+      final lang = Localizations
+          .localeOf(context)
+          .languageCode;
+      setLocaleIdentifier(lang);
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        latLng.latitude,
+        latLng.longitude,
+      );
       if (placemarks.isNotEmpty) {
         String? city = placemarks.first.locality;
+        String? district = placemarks.first.subLocality;
+
         if (city != null) {
           _compareCity(city, latLng);
+          setState(() {
+            _city = normalizeText(city);
+            _district = normalizeText(district ?? '');
+          });
         }
       }
     } catch (e) {

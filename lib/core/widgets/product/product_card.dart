@@ -39,7 +39,6 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        print(id.toString() + "-------------------");
         navigateTo(
           context,
           DetailsPage(

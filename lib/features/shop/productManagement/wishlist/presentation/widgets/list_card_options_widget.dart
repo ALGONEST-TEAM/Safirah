@@ -40,7 +40,7 @@ class ListCardOptionsWidget extends ConsumerWidget {
             height: 44.h,
             textSize: 10.2.sp,
             background: Colors.white,
-            textColor: Colors.black87.withOpacity(.8),
+            textColor: Colors.black87.withValues(alpha: .8),
             onPressed: () {
               showModalBottomSheetWidget(
                 context: context,
@@ -102,7 +102,7 @@ class ListCardOptionsWidget extends ConsumerWidget {
           height: 44.h,
           textSize: 10.2.sp,
           background: Colors.white,
-          textColor: Colors.black87.withOpacity(.8),
+          textColor: Colors.black87.withValues(alpha: .8),
           onPressed: () {
             Navigator.of(context).pop();
           },

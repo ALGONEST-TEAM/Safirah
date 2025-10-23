@@ -56,7 +56,7 @@ class DesignCreateANewListWidget extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.12),
+                    color: Colors.grey.withValues(alpha: 0.12),
                     spreadRadius: 1,
                     blurRadius: 1,
                   ),

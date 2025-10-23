@@ -229,7 +229,7 @@ class _WishesProductCardWidgetState extends ConsumerState<WishesProductCardWidge
                               child: Icon(
                                 Icons.more_horiz,
                                 size: 18.r,
-                                color: AppColors.secondaryColor.withOpacity(.6),
+                                color: AppColors.secondaryColor.withValues(alpha: .6),
                               ),
                             ),
                     ],

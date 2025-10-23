@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../../../../../core/state/data_state.dart';
 import '../../../../../../core/state/state.dart';
 import '../../../cart/data/model/cart_model.dart';
@@ -14,7 +15,7 @@ final fetchOrderConfirmationDataProvider = StateNotifierProvider.autoDispose<
   (ref) => FetchOrderConfirmationDataController(),
 );
 
-enum FetchMode { confirm, coupon,refresh }
+enum FetchMode { confirm, coupon, refresh }
 
 class FetchOrderConfirmationDataController
     extends StateNotifier<DataState<ConfirmOrderDataModel>> {

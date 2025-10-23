@@ -4,7 +4,6 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../../../core/constants/app_icons.dart';
-import '../../../../../../core/constants/app_images.dart';
 import '../../../../../../core/widgets/shimmer_widget.dart';
 
 class ShimmerWishProductsWidget extends StatelessWidget {
@@ -27,7 +26,7 @@ class ShimmerWishProductsWidget extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.0),
+                color: Colors.black.withValues(alpha: .0),
                 blurRadius: 1.r,
               ),
             ],

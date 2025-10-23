@@ -121,7 +121,7 @@ class AddOrUpdateAddressPage extends ConsumerWidget {
                   background:
                       ref.read(mapProvider.notifier).locationIsEmpty == false
                           ? AppColors.secondaryColor
-                          : AppColors.secondaryColor.withOpacity(.6),
+                          : AppColors.secondaryColor.withValues(alpha:.6),
                   onPressed:
                       ref.read(mapProvider.notifier).locationIsEmpty == false
                           ? () {

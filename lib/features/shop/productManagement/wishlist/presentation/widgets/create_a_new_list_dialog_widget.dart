@@ -65,6 +65,7 @@ class CreateANewListDialogWidget extends ConsumerWidget {
                 if (value == null || value.toString().isEmpty) {
                   return S.of(context).pleaseEnterAListName;
                 }
+                return null;
               },
             ),
             Divider(
@@ -93,7 +94,7 @@ class CreateANewListDialogWidget extends ConsumerWidget {
                   if (isValid) {
                     FocusManager.instance.primaryFocus?.unfocus();
                     if (listId == null) {
-                      if ( navigateToProductSelectionPage==false) {
+                      if (navigateToProductSelectionPage == false) {
                         wishlistStateNotifier.createAnewListAndAddProducts(
                           listId: 0,
                           listName: listNameController.text,

@@ -28,7 +28,7 @@ class SplachScreenImageWidget extends StatelessWidget {
                 Colors.black12,
                 Colors.black26,
                 Colors.black54,
-                Colors.black.withOpacity(.8),
+                Colors.black.withValues(alpha: .8),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,

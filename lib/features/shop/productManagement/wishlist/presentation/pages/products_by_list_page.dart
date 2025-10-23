@@ -50,48 +50,51 @@ class ProductsByListPage extends ConsumerWidget {
         onRefresh: () async {
           ref.refresh(getProductsByListProvider(listId));
         },
-        child: CheckStateInGetApiDataWidget(
-          state: state,
-          widgetOfLoading: const LogoShimmerWidget(),
-          widgetOfData: Column(
-            children: [
-              Divider(
-                color: AppColors.greySwatch.shade200,
-                height: 0.6.h,
-              ),
-              8.h.verticalSpace,
-              state.data.isEmpty
-                  ? ProductsByListIsEmptyWidget(listId: listId)
-                  : Expanded(
-                      child: Column(
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              wishlistStateNotifier.selectedWishlist.clear();
-                              wishlistStateNotifier.selectedWishlist.addAll(
-                                state.data.map((product) => product.id!),
-                              );
-                              navigateTo(
-                                context,
-                                SelectProductsPage(
-                                  listId: listId,
-                                  addGoods: true,
-                                ),
-                              );
-                            },
-                            child: AddGoodsWidget(
-                                numberOfGoods: state.data.length),
-                          ),
-                          4.h.verticalSpace,
-                          Expanded(
-                            child: MasonryGridViewForProductsByListWidget(
-                              listId: listId,
+        child: SafeArea(
+          top: false,
+          child: CheckStateInGetApiDataWidget(
+            state: state,
+            widgetOfLoading: const LogoShimmerWidget(),
+            widgetOfData: Column(
+              children: [
+                Divider(
+                  color: AppColors.greySwatch.shade200,
+                  height: 0.6.h,
+                ),
+                8.h.verticalSpace,
+                state.data.isEmpty
+                    ? ProductsByListIsEmptyWidget(listId: listId)
+                    : Expanded(
+                        child: Column(
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                wishlistStateNotifier.selectedWishlist.clear();
+                                wishlistStateNotifier.selectedWishlist.addAll(
+                                  state.data.map((product) => product.id!),
+                                );
+                                navigateTo(
+                                  context,
+                                  SelectProductsPage(
+                                    listId: listId,
+                                    addGoods: true,
+                                  ),
+                                );
+                              },
+                              child: AddGoodsWidget(
+                                  numberOfGoods: state.data.length),
                             ),
-                          ),
-                        ],
+                            4.h.verticalSpace,
+                            Expanded(
+                              child: MasonryGridViewForProductsByListWidget(
+                                listId: listId,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

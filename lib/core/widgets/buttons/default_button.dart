@@ -6,27 +6,27 @@ import '../../theme/app_colors.dart';
 import '../auto_size_text_widget.dart';
 
 class DefaultButtonWidget extends StatelessWidget {
-  double? width = double.infinity;
-  double? height;
+  final double? width ;
+  final double? height;
   final Color? background;
   final Function()? onPressed;
   final String text;
-  double? textSize;
-  Color? textColor;
-  double? borderRadius;
-  double? maxFontSize;
-  double? minFontSize;
-  FontWeight? fontWeight;
-  bool? isLoading;
+  final double? textSize;
+  final Color? textColor;
+  final double? borderRadius;
+  final double? maxFontSize;
+  final double? minFontSize;
+  final FontWeight? fontWeight;
+  final bool? isLoading;
   final Border? border;
-  bool? withIcon = false;
-  String? icon;
+  final bool? withIcon ;
+  final String? icon;
   final Color? iconColor;
   final double? iconHeight;
 
-  DefaultButtonWidget({
+  const DefaultButtonWidget({
     super.key,
-    this.width,
+    this.width= double.infinity,
     this.height,
     this.background,
     this.onPressed,
@@ -39,7 +39,7 @@ class DefaultButtonWidget extends StatelessWidget {
     this.minFontSize,
     this.isLoading,
     this.border,
-    this.withIcon,
+    this.withIcon= false,
     this.icon,
     this.iconColor,
     this.iconHeight,

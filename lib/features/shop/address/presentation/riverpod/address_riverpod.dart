@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:dartz/dartz.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';

@@ -28,7 +28,7 @@ class DescriptionInModelSheetWidget extends StatelessWidget {
               children: detailsProduct.map((item) {
                 return Padding(
                   padding:
-                      EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [

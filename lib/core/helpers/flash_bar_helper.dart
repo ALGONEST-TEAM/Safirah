@@ -25,7 +25,7 @@ void showFlashBarSuccess({
     ),
     margin: EdgeInsets.symmetric(horizontal: 40.w, vertical: 18.h),
     padding: EdgeInsets.all(12.sp),
-    backgroundColor: AppColors.successSwatch.shade800.withOpacity(.9),
+    backgroundColor: AppColors.successSwatch.shade800.withValues(alpha: .9),
     borderRadius: BorderRadius.circular(8.r),
     flushbarPosition: FlushbarPosition.TOP,
     flushbarStyle: FlushbarStyle.FLOATING,
@@ -94,7 +94,7 @@ void pressAgainToExit({
         ),
       ),
       behavior: SnackBarBehavior.floating,
-      backgroundColor: Colors.black54.withOpacity(.8),
+      backgroundColor: Colors.black54.withValues(alpha: .8),
     ),
   );
 }

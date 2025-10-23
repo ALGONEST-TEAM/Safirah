@@ -14,10 +14,13 @@ void showModalBottomSheetWidget({
     context: context,
     isScrollControlled: true,
     backgroundColor: backgroundColor ?? Colors.white,
-    builder: (context) => Padding(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: page,
+    builder: (context) => SafeArea(
+      top: false,
+      child: Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: page,
+      ),
     ),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -40,42 +43,45 @@ void scrollShowModalBottomSheetWidget({
     context: context,
     isScrollControlled: true,
     backgroundColor: backgroundColor ?? Colors.white,
-    builder: (context) => Padding(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40.w,
-            height: 4.h,
-            margin: EdgeInsets.only(bottom: 4.h, top: 8.h),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE9E6F3),
-              borderRadius: BorderRadius.circular(2.r),
+    builder: (context) => SafeArea(
+      top: false,
+      child: Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40.w,
+              height: 4.h,
+              margin: EdgeInsets.only(bottom: 4.h, top: 8.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE9E6F3),
+                borderRadius: BorderRadius.circular(2.r),
+              ),
             ),
-          ),
-          Row(
-            children: [
-              12.w.horizontalSpace,
-              AutoSizeTextWidget(
-                text: title,
-                colorText: AppColors.fontColor,
-                fontSize:fontSize??14.sp ,
-              ),
-              const Spacer(),
-              IconButtonWidget(
-                icon: AppIcons.close,
-                height: 15.h,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-              4.w.horizontalSpace,
-            ],
-          ),
-          Flexible(child: page),
-        ],
+            Row(
+              children: [
+                12.w.horizontalSpace,
+                AutoSizeTextWidget(
+                  text: title,
+                  colorText: AppColors.fontColor,
+                  fontSize:fontSize??14.sp ,
+                ),
+                const Spacer(),
+                IconButtonWidget(
+                  icon: AppIcons.close,
+                  height: 15.h,
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                4.w.horizontalSpace,
+              ],
+            ),
+            Flexible(child: page),
+          ],
+        ),
       ),
     ),
   );

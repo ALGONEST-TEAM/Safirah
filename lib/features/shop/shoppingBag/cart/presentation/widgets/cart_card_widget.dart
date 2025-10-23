@@ -43,7 +43,7 @@ class CartCardWidget extends ConsumerWidget {
         borderRadius: BorderRadius.circular(8.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.02),
+            color: Colors.black.withValues(alpha: .02),
             blurRadius: 1.r,
           ),
         ],

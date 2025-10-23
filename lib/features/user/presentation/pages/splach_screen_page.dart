@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/constants/app_images.dart';
 import '../../data/model/on_boarding_model.dart';
 import '../widgets/splach_screen_image_widget.dart';
 import '../widgets/splach_screen_widget.dart';
