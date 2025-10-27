@@ -43,6 +43,8 @@
   "priceLow": "الأقل سعرًا",
   "price": "السعر",
   "filter": "تصنيف",
+  "--------prediction-----------": "---------prediction----------",
+
   "--------details-----------": "---------details----------",
   "size_details": "تفاصيل القياس",
   "shipping_details": "تفاصيل الشحن",

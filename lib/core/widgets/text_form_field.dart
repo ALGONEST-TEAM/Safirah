@@ -9,6 +9,7 @@ class TextFormFieldWidget extends StatefulWidget {
   final TextInputType? type;
   final Color? fillColor;
   final bool? isPassword;
+  final double? fontSizeText;
   final String? label;
   final String? hintText;
   final Color? hintTextColor;
@@ -33,12 +34,15 @@ class TextFormFieldWidget extends StatefulWidget {
   final EdgeInsetsGeometry? contentPadding;
   final FocusNode? focusNode;
   final bool preserveFocusOnResume;
+  final bool underlineInputBorder;
+  final bool? buildCounter;
 
   const TextFormFieldWidget({
     super.key,
     required this.controller,
     this.type,
     this.fillColor,
+    this.fontSizeText,
     this.hintText,
     this.hintTextColor,
     this.hintFontSize,
@@ -64,14 +68,19 @@ class TextFormFieldWidget extends StatefulWidget {
     this.counterColor,
     this.focusNode,
     this.preserveFocusOnResume = true,
+    this.underlineInputBorder = false,
+    this.buildCounter = true,
+
   });
 
   @override
   State<TextFormFieldWidget> createState() => _TextFormFieldWidgetState();
 }
 
-class _TextFormFieldWidgetState extends State<TextFormFieldWidget>  with WidgetsBindingObserver {
+class _TextFormFieldWidgetState extends State<TextFormFieldWidget>
+    with WidgetsBindingObserver {
   FocusNode? _internalFocus;
+
   FocusNode get _focus => widget.focusNode ?? _internalFocus!;
 
   bool _wasFocused = false;
@@ -87,6 +96,7 @@ class _TextFormFieldWidgetState extends State<TextFormFieldWidget>  with Widgets
       _wasFocused = _focus.hasFocus;
     });
   }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!widget.preserveFocusOnResume) return;
@@ -109,12 +119,23 @@ class _TextFormFieldWidgetState extends State<TextFormFieldWidget>  with Widgets
     }
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       focusNode: _focus,
       maxLines: widget.maxLine ?? 1,
       maxLength: widget.maxLength,
+      buildCounter: widget.buildCounter == true
+          ? null
+          : (
+          BuildContext context, {
+            required int currentLength,
+            required int? maxLength,
+            required bool isFocused,
+          }) {
+        return null;
+      },
       controller: widget.controller,
       keyboardType: widget.type ?? TextInputType.text,
       validator: widget.fieldValidator,
@@ -124,7 +145,10 @@ class _TextFormFieldWidgetState extends State<TextFormFieldWidget>  with Widgets
       onTap: widget.onTap,
       onChanged: widget.onChanged,
       cursorColor: widget.cursorColor ?? AppColors.primaryColor,
-      style: TextStyle(fontSize: 12.5.sp, fontFamily: "IBMPlexSansArabic"),
+      style: TextStyle(
+        fontSize: widget.fontSizeText ?? 12.5.sp,
+        fontFamily: "IBMPlexSansArabic",
+      ),
       decoration: InputDecoration(
         fillColor: widget.fillColor ?? Colors.white,
         filled: true,
@@ -146,23 +170,43 @@ class _TextFormFieldWidgetState extends State<TextFormFieldWidget>  with Widgets
           fontWeight: FontWeight.w400,
           fontFamily: "IBMPlexSansArabic",
         ),
-        border: InputBorder.none,
-        errorBorder: OutlineInputBorder(
-          borderSide: widget.borderSideError ?? BorderSide.none,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: widget.borderSideError ?? BorderSide.none,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: widget.borderSide ?? BorderSide.none,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: widget.borderSide ?? BorderSide.none,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
+        border: widget.underlineInputBorder
+            ? UnderlineInputBorder(
+                borderSide: BorderSide(color: AppColors.secondaryColor),
+              )
+            : InputBorder.none,
+        errorBorder: widget.underlineInputBorder
+            ? UnderlineInputBorder(
+                borderSide: BorderSide(color: AppColors.dangerColor),
+              )
+            : OutlineInputBorder(
+                borderSide: widget.borderSideError ?? BorderSide.none,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+        focusedErrorBorder: widget.underlineInputBorder
+            ? UnderlineInputBorder(
+                borderSide: BorderSide(color: AppColors.dangerColor),
+              )
+            : OutlineInputBorder(
+                borderSide: widget.borderSideError ?? BorderSide.none,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+        focusedBorder: widget.underlineInputBorder
+            ? UnderlineInputBorder(
+                borderSide: BorderSide(color: AppColors.secondaryColor),
+              )
+            : OutlineInputBorder(
+                borderSide: widget.borderSide ?? BorderSide.none,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+        enabledBorder: widget.underlineInputBorder
+            ? UnderlineInputBorder(
+                borderSide: BorderSide(color: AppColors.secondaryColor),
+              )
+            : OutlineInputBorder(
+                borderSide: widget.borderSide ?? BorderSide.none,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
         prefixIcon: widget.prefix,
         suffixIcon: widget.suffixIcon,
         contentPadding: widget.contentPadding ?? EdgeInsets.all(11.sp),

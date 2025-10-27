@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../../features/prediction/presentation/pages/prediction_page.dart';
 import '../../../features/profile/presentation/pages/profile_page.dart';
 import '../../../features/shop/home/presentation/pages/home_page.dart';
 import '../../../features/shop/myOrders/presentation/pages/my_orders_page.dart';
@@ -26,7 +27,7 @@ class _BottomNavigationBarWidgetState
     extends ConsumerState<BottomNavigationBarWidget> {
   final List<Widget> _pages = [
     const ExitFromAppWidget(child: HomePage()),
-    const ExitFromAppWidget(child: Scaffold()),
+    const ExitFromAppWidget(child: PredictionPage()),
     const ExitFromAppWidget(child: MyOrdersPage()),
     const ExitFromAppWidget(child: ProfilePage()),
   ];
@@ -48,7 +49,7 @@ class _BottomNavigationBarWidgetState
       child: Scaffold(
         body: _pages[activeIndex],
         floatingActionButton: SizedBox(
-          height: 60.h,
+          height: 57.h,
           child: FloatingActionButton.large(
             onPressed: () {},
             backgroundColor: AppColors.whiteColor,

@@ -52,6 +52,10 @@ class AppIcons {
   static const String numberOfProducts = '${_iconsPath}number_of_products.svg';
   static const String copy = '${_iconsPath}copy.svg';
 
+  // Prediction
+  static const String players = '${_iconsPath}players.svg';
+  static const String dateEdit = '${_iconsPath}date_edit.svg';
+
   // Reviews
   static const String like = '${_iconsPath}like.svg';
   static const String disLike = '${_iconsPath}dis_like.svg';
