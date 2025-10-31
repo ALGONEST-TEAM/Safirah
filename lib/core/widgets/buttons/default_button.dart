@@ -6,7 +6,8 @@ import '../../theme/app_colors.dart';
 import '../auto_size_text_widget.dart';
 
 class DefaultButtonWidget extends StatelessWidget {
-  final double? width ;
+  final double? width;
+
   final double? height;
   final Color? background;
   final Function()? onPressed;
@@ -19,14 +20,15 @@ class DefaultButtonWidget extends StatelessWidget {
   final FontWeight? fontWeight;
   final bool? isLoading;
   final Border? border;
-  final bool? withIcon ;
+  final bool? withIcon;
+
   final String? icon;
   final Color? iconColor;
   final double? iconHeight;
 
   const DefaultButtonWidget({
     super.key,
-    this.width= double.infinity,
+    this.width = double.infinity,
     this.height,
     this.background,
     this.onPressed,
@@ -39,7 +41,7 @@ class DefaultButtonWidget extends StatelessWidget {
     this.minFontSize,
     this.isLoading,
     this.border,
-    this.withIcon= false,
+    this.withIcon = false,
     this.icon,
     this.iconColor,
     this.iconHeight,
@@ -65,7 +67,7 @@ class DefaultButtonWidget extends StatelessWidget {
           child: MaterialButton(
             height: height ?? 42.h,
             minWidth: double.infinity,
-            onPressed: onPressed,
+            onPressed: isLoading == true ? null : onPressed,
             child: isLoading == true
                 ? SpinKitCircle(
                     color: textColor ?? AppColors.whiteColor,

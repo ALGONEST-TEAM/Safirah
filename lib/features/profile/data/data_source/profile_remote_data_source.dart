@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-
 import '../../../../../core/network/remote_request.dart';
 import '../../../../../core/network/urls.dart';
 import '../../../user/data/model/auth_model.dart';
@@ -52,15 +51,7 @@ class ProfileRemoteDataSource {
         if (otp.isNotEmpty) "otp": otp,
       },
     );
-    // final payload = response.data['data'];
-    //
-    // if (payload is Map<String, dynamic>) {
-    //   // استجابة نجاح حقيقية: {} -> AuthModel
-    //   return AuthModel.fromJson(payload);
-    // }
     return AuthModel.fromJson(response.data['data']);
-
-    // return AuthModel.fromJson(response.data['data']);
   }
 
   Future<List<CurrencyModel>> getAllCurrencies() async {

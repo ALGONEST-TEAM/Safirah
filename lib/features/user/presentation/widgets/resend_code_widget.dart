@@ -82,19 +82,18 @@ class _ResendCodeWidgetState extends ConsumerState<ResendCodeWidget> {
             ? state.stateData == States.loading
                 ? SpinKitThreeBounce(
                     color: AppColors.primaryColor,
-                    size: 17.sp,
+                    size: 14.sp,
                   )
                 : CheckStateInPostApiDataWidget(
                     state: state,
-                    hasMessageSuccess: false,
                     functionSuccess: () {
                       resend();
                     },
                     bottonWidget: InkWell(
                       onTap: () {
-                        // ref.read(userProvider.notifier).resendOTP(
-                        //       phoneNumberOrEmail: widget.phoneNumberOrEmail,
-                        //     );
+                        ref.read(userProvider.notifier).resendOTP(
+                              phoneNumberOrEmail: widget.phoneNumberOrEmail,
+                            );
                       },
                       child: Text(
                         S.of(context).resend,

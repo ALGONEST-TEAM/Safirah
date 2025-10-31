@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pinput/pinput.dart';
-import '../../../../generated/l10n.dart';
 
 class VerifyPinputWidget extends StatefulWidget {
   final TextEditingController verifyController;
 
-  const VerifyPinputWidget({super.key, required this.verifyController});
+  const VerifyPinputWidget({
+    super.key,
+    required this.verifyController,
+  });
 
   @override
   State<VerifyPinputWidget> createState() => _VerifyPinputWidgetState();
@@ -50,8 +52,10 @@ class _VerifyPinputWidgetState extends State<VerifyPinputWidget>
       controller: widget.verifyController,
       focusNode: _focus,
       autofocus: true,
-      crossAxisAlignment: CrossAxisAlignment.center,
       length: 6,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      autofillHints: const [AutofillHints.oneTimeCode],
       defaultPinTheme: PinTheme(
         width: 62.w,
         height: 44.h,
@@ -63,9 +67,7 @@ class _VerifyPinputWidgetState extends State<VerifyPinputWidget>
         decoration: BoxDecoration(
           color: const Color(0xfff4f6f9),
           borderRadius: BorderRadius.circular(4.sp),
-          border: Border.all(
-            color: Colors.black12,
-          ),
+          border: Border.all(color: Colors.black12),
         ),
       ),
       focusedPinTheme: PinTheme(
@@ -73,23 +75,10 @@ class _VerifyPinputWidgetState extends State<VerifyPinputWidget>
         height: 44.h,
         decoration: BoxDecoration(
           color: const Color(0xfff4f6f9),
-          border: Border.all(
-            color: Colors.black12,
-          ),
+          border: Border.all(color: Colors.black12),
           borderRadius: BorderRadius.circular(4.sp),
         ),
       ),
-      validator: (value) {
-        final v = value?.trim() ?? '';
-        if (v.isEmpty) {
-          return S.of(context).pleaseEnterTheVerificationCode;
-        }
-        if (v.length != 6) {
-          return S.of(context).pleaseEnterTheVerificationCode;
-        }
-
-        return null;
-      },
     );
   }
 }
