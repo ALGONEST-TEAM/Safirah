@@ -39,6 +39,7 @@ class AppBarOfDetailsWidget extends StatelessWidget
       leading: IconButtonWidget(height: 21.h),
       leadingWidth: 54.w,
       centerTitle: true,
+      automaticallyImplyLeading: false,
       title: SvgPicture.asset(AppIcons.logo,height: 42.h,),
       actions: [
         Row(

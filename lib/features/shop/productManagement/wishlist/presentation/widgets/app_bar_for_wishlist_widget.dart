@@ -94,14 +94,10 @@ class AppBarForWishlistWidget extends StatelessWidget
                   );
                 },
               ),
-              Consumer(
-                builder: (context, ref, child) {
-                  return IconButtonWidget(
-                    icon: AppIcons.cartActive,
-                    onPressed: () {
-                      navigateTo(context, const CartPage());
-                    },
-                  );
+              IconButtonWidget(
+                icon: AppIcons.cartActive,
+                onPressed: () {
+                  navigateTo(context, const CartPage());
                 },
               ),
             ],

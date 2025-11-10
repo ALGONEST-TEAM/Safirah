@@ -207,6 +207,21 @@ class S {
     return Intl.message('Welcome', name: 'welcome', desc: '', args: []);
   }
 
+  /// `Empty`
+  String get empty {
+    return Intl.message('Empty', name: 'empty', desc: '', args: []);
+  }
+
+  /// `Notifications`
+  String get notificationsTitle {
+    return Intl.message(
+      'Notifications',
+      name: 'notificationsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
   // skipped getter for the '--------bottombar-----------' key
 
   /// `Home`

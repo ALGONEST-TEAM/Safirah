@@ -157,6 +157,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editProfile": MessageLookupByLibrary.simpleMessage(
       "تعديل البيانات الشخصية",
     ),
+    "empty": MessageLookupByLibrary.simpleMessage("فارغة"),
     "enter": MessageLookupByLibrary.simpleMessage("أدخل"),
     "enterPhoneNumber": MessageLookupByLibrary.simpleMessage("أدخل رقم الهاتف"),
     "enterProductPrintDescription": MessageLookupByLibrary.simpleMessage(
@@ -248,6 +249,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notImplemented2": MessageLookupByLibrary.simpleMessage(
       "تأكد من تحديث التطبيق أو التواصل مع الدعم",
     ),
+    "notificationsTitle": MessageLookupByLibrary.simpleMessage("الإشعارات"),
     "number": MessageLookupByLibrary.simpleMessage("رقم"),
     "numberOfProducts": MessageLookupByLibrary.simpleMessage("عدد المنتجات"),
     "numbers": MessageLookupByLibrary.simpleMessage("الأرقام"),

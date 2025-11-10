@@ -77,7 +77,7 @@ class ProductPriceRowWidget extends StatelessWidget {
         ),
         InkWellButtonWidget(
           icon: AppIcons.cartActive,
-          height: 22.6.h,
+          height: 22.h,
           onPressed: () {
             showModalBottomSheetWidget(
               backgroundColor: Colors.transparent,

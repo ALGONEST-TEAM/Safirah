@@ -59,7 +59,6 @@ void showFlashBarError({
         color: Colors.white,
         fontSize: 12.8.sp,
         fontWeight: FontWeight.w500,
-
         fontFamily: 'IBMPlexSansArabic',
       ),
     ),

@@ -3,11 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/constants/app_icons.dart';
 import '../../../../../core/helpers/navigateTo.dart';
-import '../../../../../core/widgets/auto_size_text_widget.dart';
-import '../../../../../core/widgets/buttons/icon_button_widget.dart';
 import '../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../../generated/l10n.dart';
 import '../../../../../services/auth/auth.dart';
+import '../../../../core/widgets/main_app_bar_widget.dart';
 import '../../../shop/address/presentation/pages/view_all_address_page.dart';
 import '../../../shop/productManagement/wishlist/presentation/pages/wishlist_page.dart';
 import '../../../shop/productManagement/wishlist/presentation/riverpod/wishlist_riverpod.dart';
@@ -33,22 +32,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: AutoSizeTextWidget(
-          text: S.of(context).profile,
-          fontSize: 14.8.sp,
-          fontWeight: FontWeight.w600,
-        ),
-        actions: [
-          IconButtonWidget(
-            icon: AppIcons.notification,
-            height: 20.h,
-            onPressed: () {},
-          ),
-        ],
-      ),
+      appBar: MainAppBarWidget(title: S.of(context).profile),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(12.sp),
         child: Column(

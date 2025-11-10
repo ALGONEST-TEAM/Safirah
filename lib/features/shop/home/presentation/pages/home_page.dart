@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
-import '../../../../../core/constants/app_icons.dart';
-import '../../../../../core/helpers/flash_bar_helper.dart';
-import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
-import '../../../../../core/state/state.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../generated/l10n.dart';
-import '../../../../../services/auth/auth.dart';
-import '../../../shoppingBag/cart/presentation/pages/cart_page.dart';
 import '../riverpod/home_riverpod.dart';
 import '../widgets/app_bar_home_widget.dart';
 import '../widgets/loading_home_widget.dart';
@@ -77,7 +70,7 @@ class _HomePageState extends ConsumerState<HomePage>
                       if(state.data.offers!.isNotEmpty)
                       SliverToBoxAdapter(
                         child: OffersWidget(
-                          images: state.data.offers ?? [],
+                          offers: state.data.offers ?? [],
                         ),
                       ),
                       SliverToBoxAdapter(
@@ -126,43 +119,7 @@ class _HomePageState extends ConsumerState<HomePage>
               );
             },
           )),
-      floatingActionButton: state.stateData == States.loaded
-          ? Padding(
-              padding: EdgeInsets.only(bottom: 24.h),
-              child: SizedBox(
-                height: 42.h,
-                width: 44.w,
-                child: FloatingActionButton(
-                  onPressed: () {
-                    if (!Auth().loggedIn) {
-                      showFlashBarError(
-                        context: context,
-                        title: S.of(context).loginRequired,
-                        text: S.of(context).pleaseLoginToContinue,
-                      );
-                      return;
-                    }
-                    navigateTo(context, const CartPage());
-                  },
-                  backgroundColor: AppColors.whiteColor,
-                  elevation: 0,
-                  splashColor: AppColors.primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50.r),
-                    side: BorderSide(
-                      color: AppColors.secondaryColor,
-                      width: 0.8.r,
-                    ),
-                  ),
-                  child: SvgPicture.asset(
-                    AppIcons.cartActive,
-                    height: 20.h,
-                    color: AppColors.secondaryColor,
-                  ),
-                ),
-              ),
-            )
-          : null,
+
     );
   }
 }

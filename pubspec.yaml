@@ -74,6 +74,11 @@ dependencies:
   custom_refresh_indicator:
   pinput:
   sms_autofill: ^2.4.1
+  firebase_core:
+#  flutter_local_notifications:
+  awesome_notifications:
+  firebase_messaging:
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

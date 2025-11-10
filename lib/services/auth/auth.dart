@@ -63,6 +63,15 @@ class Auth {
     await secureStorage.delete(key: _key);
   }
 
+  Future<void> setFcmToken(String fcmToken) async {
+    await secureStorage.write(key: "fcm_token", value: fcmToken);
+  }
+
+  Future<String> getFcmToken() async {
+    final fcmToken = await secureStorage.read(key: "fcm_token");
+    return fcmToken ?? "";
+  }
+
   Future<void> setCurrency(String currencyCode) async {
     await secureStorage.write(key: "CURRENCY", value: currencyCode);
   }

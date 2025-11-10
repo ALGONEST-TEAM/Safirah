@@ -23,6 +23,7 @@ class UserRemoteDataSource {
     String gender,
     int cityId,
     DateTime? dateOfBirth,
+    String fcmToken,
   ) async {
     final response = await RemoteRequest.postData(
       path: AppURL.signUp,
@@ -33,17 +34,23 @@ class UserRemoteDataSource {
         "gender": gender,
         "city_id": cityId,
         if (dateOfBirth != null) "date_of_birth": dateOfBirth.toIso8601String(),
+        "fcm_token": fcmToken,
       },
     );
     return AuthModel.fromJson(response.data['data']);
   }
 
-  Future<AuthModel> checkOTP(String phoneNumber, String otp) async {
+  Future<AuthModel> checkOTP(
+    String phoneNumber,
+    String otp,
+    String fcmToken,
+  ) async {
     final response = await RemoteRequest.postData(
       path: AppURL.checkOtp,
       data: {
         "login": phoneNumber,
         "otp": otp,
+        "fcm_token": fcmToken,
       },
     );
     return AuthModel.fromJson(response.data['data']);

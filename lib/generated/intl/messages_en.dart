@@ -163,6 +163,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "done": MessageLookupByLibrary.simpleMessage("Done"),
     "editAddress": MessageLookupByLibrary.simpleMessage("Edit address"),
     "editProfile": MessageLookupByLibrary.simpleMessage("Edit profile"),
+    "empty": MessageLookupByLibrary.simpleMessage("Empty"),
     "enter": MessageLookupByLibrary.simpleMessage("Enter"),
     "enterPhoneNumber": MessageLookupByLibrary.simpleMessage(
       "Enter phone number",
@@ -254,6 +255,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notImplemented2": MessageLookupByLibrary.simpleMessage(
       "Make sure the app is updated or contact support",
     ),
+    "notificationsTitle": MessageLookupByLibrary.simpleMessage("Notifications"),
     "number": MessageLookupByLibrary.simpleMessage("Number"),
     "numberOfProducts": MessageLookupByLibrary.simpleMessage(
       "Number of Products",

@@ -2,11 +2,13 @@ class OffersModel {
   final int id;
   final String? title;
   final String image;
+  final List<int>? productsIds;
 
   OffersModel({
     required this.id,
     this.title,
     required this.image,
+    this.productsIds,
   });
 
   factory OffersModel.fromJson(Map<String, dynamic> json) {
@@ -14,6 +16,7 @@ class OffersModel {
       id: json['id'] ?? 0,
       title: json['title'] ?? '',
       image: json['image_url'] ?? '',
+      productsIds: List<int>.from(json['products'] ?? []),
     );
   }
 
@@ -26,6 +29,7 @@ class OffersModel {
       id: 0,
       title: '',
       image: '',
+      productsIds: <int>[],
     );
   }
 }

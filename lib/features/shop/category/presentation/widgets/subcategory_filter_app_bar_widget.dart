@@ -7,6 +7,8 @@ import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/buttons/icon_button_widget.dart';
+import '../../../../../services/auth/auth.dart';
+import '../../../../user/presentation/pages/log_in_page.dart';
 import '../../../productManagement/search_product/presntation/page/search_page.dart';
 
 SliverAppBar subcategoryFilterAppBarWidget(
@@ -71,7 +73,11 @@ SliverAppBar subcategoryFilterAppBarWidget(
         icon: AppIcons.cartActive,
         height: 21.h,
         onPressed: () {
-          navigateTo(context, const CartPage());
+          if (!Auth().loggedIn) {
+            navigateTo(context, const LogInPage());
+          } else {
+            navigateTo(context, const CartPage());
+          }
         },
       ),
     ],
@@ -103,7 +109,11 @@ class SubcategoryStatusAppBar extends StatelessWidget
           icon: AppIcons.cartActive,
           height: 21.h,
           onPressed: () {
-            navigateTo(context, const CartPage());
+            if (!Auth().loggedIn) {
+              navigateTo(context, const LogInPage());
+            } else {
+              navigateTo(context, const CartPage());
+            }
           },
         ),
       ],

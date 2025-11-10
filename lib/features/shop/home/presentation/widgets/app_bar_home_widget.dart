@@ -9,6 +9,8 @@ import '../../../../../core/widgets/buttons/icon_button_widget.dart';
 import '../../../../../core/widgets/buttons/ink_well_button_widget.dart';
 import '../../../../../generated/l10n.dart';
 import '../../../../../services/auth/auth.dart';
+import '../../../../notifications/presentation/pages/notifications_page.dart';
+import '../../../../notifications/presentation/state_mangment/notifications_riverpod.dart';
 import '../../../../user/presentation/pages/log_in_page.dart';
 import '../../../productManagement/search_product/presntation/page/search_page.dart';
 import '../../../productManagement/wishlist/presentation/pages/wishlist_page.dart';
@@ -44,35 +46,70 @@ AppBar appBarHomeWidget({required BuildContext context}) {
         12.w.horizontalSpace,
       ],
     ),
-    leading: Consumer(builder:(context, ref, child) {
-      return IconButtonWidget(
-        icon: AppIcons.wishlist,
-        height: 18.h,
-        onPressed: () {
-          if (!Auth().loggedIn) {
-            navigateTo(context, const LogInPage());
-          } else {
-            ref.refresh(getAllWishesProductsProvider);
-            ref.refresh(getAllListProvider);
-            navigateTo(context, const WishlistPage());
-          }
-        },
-      );
-    }, ),
+    leading: Consumer(
+      builder: (context, ref, child) {
+        return IconButtonWidget(
+          icon: AppIcons.wishlist,
+          height: 18.h,
+          onPressed: () {
+            if (!Auth().loggedIn) {
+              navigateTo(context, const LogInPage());
+            } else {
+              ref.refresh(getAllWishesProductsProvider);
+              ref.refresh(getAllListProvider);
+              navigateTo(context, const WishlistPage());
+            }
+          },
+        );
+      },
+    ),
     actions: [
       InkWellButtonWidget(
         icon: AppIcons.search,
         height: 18.5.h,
         onPressed: () {
           navigateTo(context, SearchPage(hintTextSearch: ""));
-
         },
       ),
-      IconButtonWidget(
-        icon: AppIcons.notification,
-        height: 19.h,
-        onPressed: () {},
-      ),
+      Consumer(builder: (context, ref, _) {
+        final unread = ref.watch(unreadCountProvider);
+
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            IconButtonWidget(
+              icon: AppIcons.notification,
+              height: 20.h,
+              onPressed: () async {
+                if (!Auth().loggedIn) {
+                  navigateTo(context, const LogInPage());
+                } else {
+                  navigateTo(context, const NotificationsPage());
+                  ref.read(unreadCountProvider.notifier).refresh();
+                }
+              },
+            ),
+            if (unread > 0)
+              Positioned(
+                left: 4.w,
+                top: 1,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.dangerColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: AutoSizeTextWidget(
+                    text: unread > 99 ? '99+' : ' $unread ',
+                    colorText: Colors.white,
+                    fontSize: 8.sp,
+                    minFontSize: 6,
+                  ),
+                ),
+              ),
+          ],
+        );
+      }),
     ],
   );
 }

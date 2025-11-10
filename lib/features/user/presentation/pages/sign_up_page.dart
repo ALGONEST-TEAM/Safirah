@@ -10,6 +10,7 @@ import '../../../../core/widgets/bottomNavbar/bottom_navigation_bar_widget.dart'
 import '../../../../core/widgets/buttons/default_button.dart';
 import '../../../../generated/l10n.dart';
 import '../../../../services/auth/auth.dart';
+import '../../../notifications/presentation/state_mangment/notifications_riverpod.dart';
 import '../riverpod/user_riverpod.dart';
 import '../widgets/birth_date_picker_widget.dart';
 import '../widgets/city_widget.dart';
@@ -26,6 +27,7 @@ class SignUpPage extends ConsumerStatefulWidget {
 
 class _SignUpPageState extends ConsumerState<SignUpPage> {
   final TextEditingController _nameController = TextEditingController();
+
   // final TextEditingController _emailController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
@@ -70,14 +72,16 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                             Auth().login(signUpState.data);
                             navigateAndFinish(
                                 context, const BottomNavigationBarWidget());
+                            ref.read(unreadCountProvider.notifier).refresh();
                           },
                           bottonWidget: DefaultButtonWidget(
                             text: S.of(context).createAccount,
                             textSize: 13.6.sp,
                             isLoading: signUpState.stateData == States.loading,
-                            onPressed: () {
+                            onPressed: () async {
                               final isValid = formKey.currentState!.validate();
-                              final selectedCity = ref.read(selectedCityProvider);
+                              final selectedCity =
+                                  ref.read(selectedCityProvider);
 
                               bool hasError = false;
                               if (selectedCity == null) {
@@ -104,6 +108,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                                     gender: selectedGender.toString(),
                                     cityId: selectedCity!.id,
                                     dateOfBirth: birthDate,
+                                    fcmToken: await Auth().getFcmToken(),
                                   );
                             },
                           ),

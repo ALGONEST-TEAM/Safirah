@@ -4,11 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../../features/prediction/presentation/pages/prediction_page.dart';
+import 'package:safirah/core/helpers/navigateTo.dart';
+import 'package:safirah/features/shop/shoppingBag/cart/presentation/pages/cart_page.dart';
 import '../../../features/profile/presentation/pages/profile_page.dart';
 import '../../../features/shop/home/presentation/pages/home_page.dart';
 import '../../../features/shop/myOrders/presentation/pages/my_orders_page.dart';
+import '../../../features/user/presentation/pages/log_in_page.dart';
 import '../../../generated/l10n.dart';
+import '../../../services/auth/auth.dart';
 import '../../constants/app_icons.dart';
 import '../../helpers/exit_from_the_app.dart';
 import '../../theme/app_colors.dart';
@@ -27,8 +30,8 @@ class _BottomNavigationBarWidgetState
     extends ConsumerState<BottomNavigationBarWidget> {
   final List<Widget> _pages = [
     const ExitFromAppWidget(child: HomePage()),
-    const ExitFromAppWidget(child: PredictionPage()),
     const ExitFromAppWidget(child: MyOrdersPage()),
+    const ExitFromAppWidget(child: CartPage()),
     const ExitFromAppWidget(child: ProfilePage()),
   ];
 
@@ -70,7 +73,7 @@ class _BottomNavigationBarWidgetState
         bottomNavigationBar: SafeArea(
           top: false,
           child: Container(
-            padding: EdgeInsets.only(bottom: 4.h, top: 6.h),
+            padding: EdgeInsets.only(bottom: 4.h, top: 8.h),
             decoration: BoxDecoration(
                 color: AppColors.whiteColor,
                 borderRadius: BorderRadius.only(
@@ -88,9 +91,9 @@ class _BottomNavigationBarWidgetState
                   activeIndex,
                 ),
                 _buildNavItem(
-                  AppIcons.expectations,
-                  AppIcons.expectationsActive,
-                  S.of(context).expectations,
+                  AppIcons.myOrders,
+                  AppIcons.myOrdersActive,
+                  S.of(context).myOrders,
                   1,
                   activeIndex,
                 ),
@@ -99,9 +102,9 @@ class _BottomNavigationBarWidgetState
                   width: 40.w,
                 ),
                 _buildNavItem(
-                  AppIcons.myOrders,
-                  AppIcons.myOrdersActive,
-                  S.of(context).myOrders,
+                  AppIcons.cart,
+                  AppIcons.cartActive,
+                  S.of(context).cart,
                   2,
                   activeIndex,
                 ),
@@ -127,7 +130,17 @@ class _BottomNavigationBarWidgetState
       activeIcon: activeIcon,
       label: label,
       active: activeIndex == index,
-      onTap: () => ref.read(activeIndexProvider.notifier).state = index,
+      onTap: () {
+        if (index == 2) {
+          if (!Auth().loggedIn) {
+            navigateTo(context, const LogInPage());
+          } else {
+            navigateTo(context, const CartPage());
+          }
+        } else {
+          ref.read(activeIndexProvider.notifier).state = index;
+        }
+      },
     );
   }
 }

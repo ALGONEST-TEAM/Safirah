@@ -8,9 +8,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:safirah/core/widgets/bottomNavbar/bottom_navigation_bar_widget.dart';
 import 'core/network/remote_request.dart';
+import 'core/notifications/firebase_messaging_service.dart';
+import 'core/notifications/notification_bootstrap.dart';
 import 'core/state/app_restart_controller.dart';
 import 'package:safirah/injection.dart' as di;
 import 'core/theme/theme.dart';
+import 'features/notifications/presentation/state_mangment/notifications_riverpod.dart';
 import 'features/profile/presentation/riverpod/setting_riverpod.dart';
 import 'features/shop/category/data/model/category_data.dart';
 import 'features/shop/home/data/model/section_data.dart';
@@ -28,6 +31,7 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+  await NotificationBootstrap.I.init(debug: kDebugMode);
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.dumpErrorToConsole(details);
@@ -65,6 +69,27 @@ class MyApp extends ConsumerStatefulWidget {
 }
 
 class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  void initState() {
+    FirebaseMessagingService.I.getDeviceToken().then((t) {
+      if (t != null) {
+        print('Device Token: $t');
+        Auth().setFcmToken(t);
+      }
+    });
+    FirebaseMessagingService.I.onRefreshUnread = () {
+      // استخدم ref لأن MyApp هو ConsumerStatefulWidget
+      ref.read(unreadCountProvider.notifier).refresh();
+    };
+    FirebaseMessagingService.I.onSetUnread = (c) {
+      ref.read(unreadCountProvider.notifier).set(c);
+    };
+
+    // مبدئيًا: اجلب العدد عند التشغيل
+    Future.microtask(() => ref.read(unreadCountProvider.notifier).refresh());
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final locale = ref.watch(languageProvider);

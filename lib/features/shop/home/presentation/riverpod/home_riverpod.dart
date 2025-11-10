@@ -6,17 +6,18 @@ import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';
 import '../../../home/data/model/section_with_product_data.dart';
 import '../../../productManagement/detailsProducts/data/model/paginated_products_list_data.dart';
+import '../../data/model/offer_products_model.dart';
 import '../../data/model/sections_and_offers_data.dart';
 import '../../data/reposaitory/reposaitories.dart';
 
-final sectionProvider = StateNotifierProvider<SectionNotifier,
-    DataState<SectionsAndOffersData>>((ref) => SectionNotifier());
+final sectionProvider =
+    StateNotifierProvider<SectionNotifier, DataState<SectionsAndOffersData>>(
+        (ref) => SectionNotifier());
 
-class SectionNotifier
-    extends StateNotifier<DataState<SectionsAndOffersData>> {
+class SectionNotifier extends StateNotifier<DataState<SectionsAndOffersData>> {
   SectionNotifier()
       : super(DataState<SectionsAndOffersData>.initial(
-      SectionsAndOffersData.empty())) {
+            SectionsAndOffersData.empty())) {
     getAllSectionAndAllOffers();
   }
 
@@ -37,7 +38,7 @@ class SectionNotifier
 
 final subSectionProvider = StateNotifierProvider.family<SubSectionNotifier,
     DataState<SectionAndProductData>, Tuple2<int, int>>(
-      (ref, params) => SubSectionNotifier(
+  (ref, params) => SubSectionNotifier(
     ref,
     params.value1,
     params.value2,
@@ -48,7 +49,7 @@ class SubSectionNotifier
     extends StateNotifier<DataState<SectionAndProductData>> {
   SubSectionNotifier(this.ref, this.idSection, this.idFilter)
       : super(DataState<SectionAndProductData>.initial(
-      SectionAndProductData.empty())) {
+            SectionAndProductData.empty())) {
     getSubSectionData();
   }
 
@@ -71,7 +72,7 @@ class SubSectionNotifier
     int page = isRefresh ? 1 : state.data.product!.currentPage + 1;
 
     final data =
-    await _controller.getSectionData(idSection, page, isRefresh, idFilter);
+        await _controller.getSectionData(idSection, page, isRefresh, idFilter);
     data.fold((f) {
       state = state.copyWith(state: States.error, exception: f);
     }, (section) {
@@ -108,15 +109,45 @@ class SubSectionNotifier
 }
 
 final getSectionFilterTypeProvider =
-StateNotifierProvider.family<GetSectionFilterTypeNotifier, int?, int?>(
+    StateNotifierProvider.family<GetSectionFilterTypeNotifier, int?, int?>(
         (ref, idSection) {
-      return GetSectionFilterTypeNotifier();
-    });
+  return GetSectionFilterTypeNotifier();
+});
 
 class GetSectionFilterTypeNotifier extends StateNotifier<int?> {
   GetSectionFilterTypeNotifier() : super(null);
 
   void setSectionFilterNumber(int numberFilter) {
     state = numberFilter;
+  }
+}
+
+final getOfferProductsProvider = StateNotifierProvider.autoDispose
+    .family<GetOfferProductsController, DataState<OfferProductsModel>, int>(
+  (ref, int offerId) {
+    return GetOfferProductsController(offerId);
+  },
+);
+
+class GetOfferProductsController
+    extends StateNotifier<DataState<OfferProductsModel>> {
+  final int offerId;
+
+  GetOfferProductsController(this.offerId)
+      : super(
+            DataState<OfferProductsModel>.initial(OfferProductsModel.empty())) {
+    getData();
+  }
+
+  final _controller = SectionReposaitory();
+
+  Future<void> getData() async {
+    state = state.copyWith(state: States.loading);
+    final data = await _controller.getOfferProducts(offerId);
+    data.fold((f) {
+      state = state.copyWith(state: States.error, exception: f);
+    }, (data) {
+      state = state.copyWith(state: States.loaded, data: data);
+    });
   }
 }

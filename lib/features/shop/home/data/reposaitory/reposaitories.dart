@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import '../data_source/local_data_source.dart';
 import '../data_source/remote_data_source.dart';
+import '../model/offer_products_model.dart';
 import '../model/sections_and_offers_data.dart';
 import '../model/section_with_product_data.dart';
 
@@ -9,7 +10,7 @@ class SectionReposaitory {
   SectionReposaitory();
 
   Future<Either<DioException, SectionsAndOffersData>>
-  getAllSectionAndAllOffersData() async {
+      getAllSectionAndAllOffersData() async {
     try {
       final data =
           await SectionsRemoteDataSource().getAllSectionAndAllOffersData();
@@ -55,6 +56,16 @@ class SectionReposaitory {
           return Right(data);
         }
       }
+    } on DioException catch (error) {
+      return Left(error);
+    }
+  }
+
+  Future<Either<DioException, OfferProductsModel>> getOfferProducts(
+      int offerId) async {
+    try {
+      final data = await SectionsRemoteDataSource().getOfferProducts(offerId);
+      return Right(data);
     } on DioException catch (error) {
       return Left(error);
     }
