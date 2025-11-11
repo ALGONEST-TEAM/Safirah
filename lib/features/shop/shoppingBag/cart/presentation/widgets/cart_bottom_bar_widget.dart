@@ -10,7 +10,6 @@ import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/price_and_currency_widget.dart';
 import '../../../../../../core/widgets/buttons/default_button.dart';
 import '../../../../../../generated/l10n.dart';
-import '../../../../../../services/auth/auth.dart';
 import '../../../confirmOrder/presentation/pages/confirm_order_page.dart';
 import '../../../confirmOrder/presentation/riverpod/confirm_order_riverpod.dart';
 
@@ -33,11 +32,10 @@ class CartBottomBarWidget extends ConsumerWidget {
 
     return SafeArea(
       top: false,
-
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: 14.w,
-        ).copyWith(top: 4.h,bottom: 8.h),
+        ).copyWith(top: 4.h, bottom: 8.h),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -70,7 +68,8 @@ class CartBottomBarWidget extends ConsumerWidget {
                         ),
                         Flexible(
                           child: PriceAndCurrencyWidget(
-                            price: cart.calculateSelectedTotalPrice().toString(),
+                            price:
+                                cart.calculateSelectedTotalPrice().toString(),
                             fontSize1: 12.8.sp,
                             fontSize2: 9.6.sp,
                           ),
@@ -132,27 +131,17 @@ class CartBottomBarWidget extends ConsumerWidget {
                     background: AppColors.secondaryColor,
                     isLoading: isConfirmLoading,
                     onPressed: () {
-                      if (!Auth().loggedIn) {
-                        pressAgainToExit(
+                      if (cart.selectedProducts.isEmpty) {
+                        showFlashBarWarring(
                           context: context,
-                          text: S.of(context).loginRequired,
+                          message: S
+                              .of(context)
+                              .pleaseSelectTheProductsYouWishToPayFor,
                         );
                       } else {
-                        if (cart.selectedProducts.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(S
-                                  .of(context)
-                                  .pleaseSelectTheProductsYouWishToPayFor),
-                              backgroundColor: AppColors.dangerSwatch.shade500
-                                  .withValues(alpha: 0.9),
-                            ),
-                          );
-                        } else {
-                          ctrl.getData(
-                              products: cart.selectedProducts,
-                              mode: FetchMode.confirm);
-                        }
+                        ctrl.getData(
+                            products: cart.selectedProducts,
+                            mode: FetchMode.confirm);
                       }
                     },
                   ),

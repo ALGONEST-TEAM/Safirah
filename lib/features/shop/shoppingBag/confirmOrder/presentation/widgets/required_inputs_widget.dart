@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
+import '../../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 
@@ -29,6 +31,7 @@ class RequiredInputsWidget extends StatelessWidget {
             stream: form.control(value).touchChanges,
             builder: (context, snapshot) {
               if (snapshot.data == true) {
+
                 return Padding(
                   padding: EdgeInsets.only(top: 8.h, left: 12.w, right: 12.w),
                   child: AutoSizeTextWidget(
@@ -45,3 +48,11 @@ class RequiredInputsWidget extends StatelessWidget {
     );
   }
 }
+
+
+// SchedulerBinding.instance.addPostFrameCallback((_) {
+// showFlashBarWarring(
+// context: context,
+// message: requiredText,
+// );
+// });

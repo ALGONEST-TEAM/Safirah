@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import '../../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../../core/state/check_state_in_post_api_data_widget.dart';
 import '../../../../../../core/state/state.dart';
 import '../../../../../../core/theme/app_colors.dart';
@@ -149,14 +150,22 @@ class ConfirmOrderPage extends ConsumerWidget {
             height: 41.h,
             isLoading: confirmOrderState.stateData == States.loading,
             onPressed: () {
-              final isValid = _formKey.currentState!.validate();
-              if (isValid) {
-                FocusManager.instance.primaryFocus?.unfocus();
+              final notifier = ref.read(confirmOrderProvider.notifier);
 
-                ref.read(confirmOrderProvider.notifier).confirmOrder(
-                      cart: state.data.products,
-                      copon: couponCodeController.text,
-                    );
+              if (!notifier.validateAndNotify(context)) return;
+
+              final isValid = _formKey.currentState!.validate();
+              if (!isValid) {
+                showFlashBarWarring(
+                    context: context,
+                    message: S.of(context).pleaseEnterProductPrintDescription);
+              } else {
+                FocusManager.instance.primaryFocus?.unfocus();
+                notifier.confirmOrder(
+                  context: context,
+                  cart: state.data.products,
+                  copon: couponCodeController.text,
+                );
               }
             },
           ),

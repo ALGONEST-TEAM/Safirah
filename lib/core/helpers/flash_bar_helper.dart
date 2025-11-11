@@ -71,6 +71,34 @@ void showFlashBarError({
   ).show(context);
 }
 
+// Warring
+void showFlashBarWarring({
+  required BuildContext context,
+  required String message,
+}) {
+  Flushbar(
+    duration: const Duration(seconds: 3),
+    message: message,
+    messageText: Text(
+      message,
+      textAlign: TextAlign.center,
+      maxLines: 4,
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 11.8.sp,
+        fontWeight: FontWeight.w500,
+        fontFamily: 'IBMPlexSansArabic',
+      ),
+    ),
+    margin: EdgeInsets.symmetric(horizontal: 40.w, vertical: 18.h),
+    padding: EdgeInsets.all(12.sp),
+    backgroundColor: AppColors.dangerColor,
+    borderRadius: BorderRadius.circular(8.r),
+    flushbarPosition: FlushbarPosition.TOP,
+    flushbarStyle: FlushbarStyle.FLOATING,
+  ).show(context);
+}
+
 /// Exit ///
 void pressAgainToExit({
   required BuildContext context,

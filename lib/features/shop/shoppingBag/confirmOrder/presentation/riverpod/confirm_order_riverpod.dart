@@ -2,8 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import '../../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../../core/state/data_state.dart';
 import '../../../../../../core/state/state.dart';
+import '../../../../../../generated/l10n.dart';
 import '../../../cart/data/model/cart_model.dart';
 import '../../data/model/confirm_order_data_model.dart';
 import '../../data/model/confirm_order_model.dart';
@@ -65,16 +67,40 @@ class ConfirmOrderController extends StateNotifier<DataState<Unit>> {
   final _controller = ConfirmOrderReposaitory();
   static OrderDataFormController form = OrderDataFormController();
 
-  bool isValid() {
+  String? buildValidationMessage(BuildContext context) {
+    final parts = <String>[];
+
+    if (form.group.control('address').invalid) {
+      parts.add(S.of(context).addressIsRequired);
+    }
+    if (form.group.control('payment_method').invalid) {
+      parts.add(S.of(context).pleaseChoseAPaymentMethod);
+    }
+    if (form.group.control('shipping_method_id').invalid) {
+      parts.add(S.of(context).pleaseChoseAShippingMethod);
+    }
+
+    if (parts.isEmpty) return null;
+    return parts.join('، ');
+  }
+
+  bool validateAndNotify(BuildContext context) {
     form.group.markAllAsTouched();
-    return form.group.valid;
+    final msg = buildValidationMessage(context);
+    if (msg != null) {
+      showFlashBarWarring(context: context, message: msg);
+      return false;
+    }
+    return true;
   }
 
   Future<void> confirmOrder({
+    required BuildContext context,
     required List<CartModel> cart,
     required String copon,
   }) async {
-    if (!isValid()) return;
+    if (!validateAndNotify(context)) return;
+
     final printNotes = <int, String>{
       for (final p in cart)
         p.id: ((p.isPrintable ?? 0) != 0)

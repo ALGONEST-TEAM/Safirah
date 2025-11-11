@@ -45,104 +45,107 @@ class _SubFilterDrawerWidgetState extends ConsumerState<SubFilterDrawerWidget> {
     final selectedColors = ref.watch(selectedColorsProvider(widget.idCategory));
     final selectedCategory =
         ref.watch(selectedCategoryProvider(widget.idCategory));
-    return Drawer(
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-      child: Column(
-        children: [
-          28.h.verticalSpace,
-          AutoSizeTextWidget(
-            text: S.of(context).filter,
-            fontSize: 16.5.sp,
-            fontWeight: FontWeight.w600,
-          ),
-          6.h.verticalSpace,
-          Divider(
-            color: AppColors.fontColor,
-            thickness: 0.2.sp,
-            height: 0,
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(8.sp),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CardOfSubFilterDrawerWidget(
-                    isOpenToRead: selectedColors.isNotEmpty ? true : false,
-                    title: S.of(context).color,
-                    child: ListOfColorInFilterWidget(
-                      colorFilter: widget.colorFilterList,
-                      idCategory: widget.idCategory,
-                      nameSearch: widget.nameSearch,
-                      isSearchFilter: widget.isSearchFilter,
+    return SafeArea(
+      top: false,
+      child: Drawer(
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
+        child: Column(
+          children: [
+            28.h.verticalSpace,
+            AutoSizeTextWidget(
+              text: S.of(context).filter,
+              fontSize: 16.5.sp,
+              fontWeight: FontWeight.w600,
+            ),
+            6.h.verticalSpace,
+            Divider(
+              color: AppColors.fontColor,
+              thickness: 0.2.sp,
+              height: 0,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(8.sp),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CardOfSubFilterDrawerWidget(
+                      isOpenToRead: selectedColors.isNotEmpty ? true : false,
+                      title: S.of(context).color,
+                      child: ListOfColorInFilterWidget(
+                        colorFilter: widget.colorFilterList,
+                        idCategory: widget.idCategory,
+                        nameSearch: widget.nameSearch,
+                        isSearchFilter: widget.isSearchFilter,
+                      ),
                     ),
-                  ),
-                  CardOfSubFilterDrawerWidget(
-                    isOpenToRead: selectedSizes.isNotEmpty ? true : false,
-                    title: S.of(context).size2,
-                    child: ListOfSizeInFilterWidget(
-                      size: widget.sizeFilterList,
-                      idCategory: widget.idCategory,
-                      nameSearch: widget.nameSearch,
-                      isSearchFilter: widget.isSearchFilter,
+                    CardOfSubFilterDrawerWidget(
+                      isOpenToRead: selectedSizes.isNotEmpty ? true : false,
+                      title: S.of(context).size2,
+                      child: ListOfSizeInFilterWidget(
+                        size: widget.sizeFilterList,
+                        idCategory: widget.idCategory,
+                        nameSearch: widget.nameSearch,
+                        isSearchFilter: widget.isSearchFilter,
+                      ),
                     ),
-                  ),
-                  CardOfSubFilterDrawerWidget(
-                    isOpenToRead: selectedCategory != null ? true : false,
-                    title: S.of(context).categories,
-                    child: ListOfFilterCategoryWidget(
-                      categoryFilter: widget.categoryFilterList,
-                      idCategory: widget.idCategory,
-                      nameSearch: widget.nameSearch,
-                      isSearchFilter: widget.isSearchFilter,
+                    CardOfSubFilterDrawerWidget(
+                      isOpenToRead: selectedCategory != null ? true : false,
+                      title: S.of(context).categories,
+                      child: ListOfFilterCategoryWidget(
+                        categoryFilter: widget.categoryFilterList,
+                        idCategory: widget.idCategory,
+                        nameSearch: widget.nameSearch,
+                        isSearchFilter: widget.isSearchFilter,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          Divider(
-            color: AppColors.fontColor,
-            thickness: 0.2.sp,
-            height: 0,
-          ),
-          ClearButtonAndDone(
-            idCategory: widget.idCategory,
-            height: 29.h,
-            doneOnTap: () {
-              Navigator.pop(context);
-            },
-            clearOnTap: () {
-              ref
-                  .read(selectedColorsProvider(widget.idCategory).notifier)
-                  .clear();
-              ref
-                  .read(selectedSizesProvider(widget.idCategory).notifier)
-                  .clear();
-              ref
-                  .read(selectedCategoryProvider(widget.idCategory).notifier)
-                  .clear();
-              ref
-                  .read(sortOptionTitleProvider(widget.idCategory).notifier)
-                  .state = S.of(context).forYou;
-              ref
-                  .read(selectProductsSortOptionProvider(widget.idCategory)
-                      .notifier).state=1;
-              ref
-                  .read(filterProductProvider(widget.idCategory).notifier)
-                  .getProductOfFilter(
-                idSize:<int> [],
-                idColor:<int> [],
-                idSubCategory:null ,
-                sortOption:1,
-                nameSearch: '',
-              );
-            },
-          ),
-        ],
+            Divider(
+              color: AppColors.fontColor,
+              thickness: 0.2.sp,
+              height: 0,
+            ),
+            ClearButtonAndDone(
+              idCategory: widget.idCategory,
+              height: 29.h,
+              doneOnTap: () {
+                Navigator.pop(context);
+              },
+              clearOnTap: () {
+                ref
+                    .read(selectedColorsProvider(widget.idCategory).notifier)
+                    .clear();
+                ref
+                    .read(selectedSizesProvider(widget.idCategory).notifier)
+                    .clear();
+                ref
+                    .read(selectedCategoryProvider(widget.idCategory).notifier)
+                    .clear();
+                ref
+                    .read(sortOptionTitleProvider(widget.idCategory).notifier)
+                    .state = S.of(context).forYou;
+                ref
+                    .read(selectProductsSortOptionProvider(widget.idCategory)
+                        .notifier).state=1;
+                ref
+                    .read(filterProductProvider(widget.idCategory).notifier)
+                    .getProductOfFilter(
+                  idSize:<int> [],
+                  idColor:<int> [],
+                  idSubCategory:null ,
+                  sortOption:1,
+                  nameSearch: '',
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import '../../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../data/model/delivery_types_model.dart';
 import '../riverpod/confirm_order_riverpod.dart';
@@ -12,7 +13,8 @@ class ListOfShippingMethodsWidget extends ConsumerStatefulWidget {
 
   final FormGroup form;
 
-  const ListOfShippingMethodsWidget({super.key,required this.deliveryTypes, required this.form});
+  const ListOfShippingMethodsWidget(
+      {super.key, required this.deliveryTypes, required this.form});
 
   @override
   ConsumerState<ListOfShippingMethodsWidget> createState() =>
@@ -59,12 +61,9 @@ class _ListOfShippingMethodsWidgetState
               widget.form.control('shipping_method_id').value.toString(),
           onPressed: () {
             if (!hasAddress) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('يرجى تحديد العنوان لتحديد وسيلة الشحن'),
-                  backgroundColor: AppColors.dangerSwatch.shade500,
-                ),
-              );
+              showFlashBarWarring(
+                  context: context,
+                  message: 'يرجى تحديد العنوان لتحديد وسيلة الشحن');
               return;
             }
             setState(() {
