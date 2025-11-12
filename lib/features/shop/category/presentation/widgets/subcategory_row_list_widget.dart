@@ -38,9 +38,7 @@ class SubcategoryRowListWidget extends StatelessWidget {
                       parentIdCategory: parentIdCategory,
                       nameSearch: nameSearch,
                     ),
-                    category[index].hasChildren == true
-                        ? 0.horizontalSpace
-                        : 6.w.horizontalSpace,
+                   6.w.horizontalSpace,
                   ],
                 );
               },

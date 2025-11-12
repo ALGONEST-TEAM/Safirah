@@ -10,6 +10,7 @@ import '../../../../core/widgets/buttons/default_button.dart';
 import '../../../../generated/l10n.dart';
 import '../../../../services/auth/auth.dart';
 import '../../../notifications/presentation/state_mangment/notifications_riverpod.dart';
+import '../../../shop/shoppingBag/cart/presentation/riverpod/cart_riverpod.dart';
 import '../riverpod/user_riverpod.dart';
 import '../widgets/resend_code_widget.dart';
 import '../widgets/verify_pinput_widget.dart';
@@ -102,6 +103,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage>
                 Auth().login(checkOTPState.data);
                 navigateAndFinish(context, const BottomNavigationBarWidget());
                 ref.read(unreadCountProvider.notifier).refresh();
+                ref.read(getCartCountProvider.notifier).refresh();
               } else {
                 Navigator.of(context).pop();
                 navigateTo(context, const SignUpPage());

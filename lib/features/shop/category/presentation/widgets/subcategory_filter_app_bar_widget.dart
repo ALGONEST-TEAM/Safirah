@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:safirah/features/shop/shoppingBag/cart/presentation/pages/cart_page.dart';
 import '../../../../../core/constants/app_icons.dart';
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/buttons/icon_button_widget.dart';
-import '../../../../../services/auth/auth.dart';
-import '../../../../user/presentation/pages/log_in_page.dart';
+import '../../../../../core/widgets/cart_badge_icon_widget.dart';
 import '../../../productManagement/search_product/presntation/page/search_page.dart';
 
 SliverAppBar subcategoryFilterAppBarWidget(
@@ -69,17 +67,7 @@ SliverAppBar subcategoryFilterAppBarWidget(
     ),
     actions: [
       4.w.horizontalSpace,
-      IconButtonWidget(
-        icon: AppIcons.cartActive,
-        height: 21.h,
-        onPressed: () {
-          if (!Auth().loggedIn) {
-            navigateTo(context, const LogInPage());
-          } else {
-            navigateTo(context, const CartPage());
-          }
-        },
-      ),
+      const CartBadgeIconWidget(),
     ],
     bottom: bottom,
     flexibleSpace: FlexibleSpaceBar(
@@ -105,17 +93,7 @@ class SubcategoryStatusAppBar extends StatelessWidget
       leading: const IconButtonWidget(),
       actions: [
         4.w.horizontalSpace,
-        IconButtonWidget(
-          icon: AppIcons.cartActive,
-          height: 21.h,
-          onPressed: () {
-            if (!Auth().loggedIn) {
-              navigateTo(context, const LogInPage());
-            } else {
-              navigateTo(context, const CartPage());
-            }
-          },
-        ),
+        const CartBadgeIconWidget(),
       ],
     );
   }

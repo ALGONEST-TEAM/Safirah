@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../../core/widgets/cart_badge_icon_widget.dart';
 import '../../../../../core/widgets/logo_shimmer_widget.dart';
 import '../../../../../core/widgets/product/product_list_widget.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
@@ -25,7 +26,9 @@ class _OffersPageState extends ConsumerState<OffersPage> {
       appBar: SecondaryAppBarWidget(
         isLogo: true,
         fromHeight: 54.h,
-        logoHeight: 44.h,
+        actions: const [
+          CartBadgeIconWidget(),
+        ],
       ),
       body: SafeArea(
         top: false,
@@ -40,7 +43,7 @@ class _OffersPageState extends ConsumerState<OffersPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                   child: AutoSizeTextWidget(
                     text: state.data.offer.title.toString(),
                     fontSize: 14.8.sp,

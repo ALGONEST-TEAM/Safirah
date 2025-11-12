@@ -5,9 +5,6 @@ import '../../../../../../core/network/urls.dart';
 import '../model/cart_model.dart';
 import '../model/cart_product_model.dart';
 
-String fcmToken =
-    "eqSHD0jlRqO6ja7V_2g7AK:APA91bE2Z1UTPQPFtQoNwqxGSxztrCXogiwhTWlTJ_5D20IKWK6cKjwdghuq1nkTDmlNq30Z9N8eXKP_qt4Oz8CYGY1cuw_unwAslv6pOz1mlL-XDdLKGQ8";
-
 class CartRemoteDataSource {
   CartRemoteDataSource();
 
@@ -20,6 +17,11 @@ class CartRemoteDataSource {
             ? response.data['data'] as List
             : const [];
     return CartModel.fromJsonList(items);
+  }
+
+  Future<int> getCartCount() async {
+    final res = await RemoteRequest.getData(url: AppURL.getCartCount);
+    return (res.data['data'] as num?)?.toInt() ?? 0;
   }
 
   Future<Unit> addToCart(

@@ -50,18 +50,19 @@ class MainAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
               ),
               if (unread > 0)
                 Positioned(
-                  left: 4.w,
+                  left: unread >= 10 ? 4.w : 6.w,
                   top: 1,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                    padding: EdgeInsets.all(unread >= 10 ? 1.6.sp : 2.sp),
                     decoration: BoxDecoration(
                       color: AppColors.dangerColor,
                       shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white),
                     ),
                     child: AutoSizeTextWidget(
                       text: unread > 99 ? '99+' : ' $unread ',
                       colorText: Colors.white,
-                      fontSize: 8.sp,
+                      fontSize: 7.2.sp,
                       minFontSize: 6,
                     ),
                   ),
@@ -69,17 +70,6 @@ class MainAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
             ],
           );
         }),
-        // IconButtonWidget(
-        //   icon: AppIcons.notification,
-        //   height: 20.h,
-        //   onPressed: () {
-        //     if (!Auth().loggedIn) {
-        //       navigateTo(context, const LogInPage());
-        //     } else {
-        //       navigateTo(context, const NotificationsPage());
-        //     }
-        //   },
-        // ),
       ],
     );
   }

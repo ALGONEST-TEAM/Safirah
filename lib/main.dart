@@ -22,6 +22,7 @@ import 'features/shop/productManagement/detailsProducts/data/model/color_data.da
 import 'features/shop/productManagement/detailsProducts/data/model/discount_model.dart';
 import 'features/shop/productManagement/detailsProducts/data/model/paginated_products_list_data.dart';
 import 'features/shop/productManagement/detailsProducts/data/model/product_data.dart';
+import 'features/shop/shoppingBag/cart/presentation/riverpod/cart_riverpod.dart';
 import 'generated/l10n.dart';
 import 'services/auth/auth.dart';
 
@@ -51,7 +52,7 @@ void main() async {
       Hive.registerAdapter(ColorOfProductDataAdapter());
       Hive.registerAdapter(DiscountModelAdapter());
       await di.init();
-      Auth();
+      await Auth().onInit();
       runApp(const AppRestartController(child: MyApp()));
     },
     (error, stackTrace) {
@@ -73,20 +74,24 @@ class _MyAppState extends ConsumerState<MyApp> {
   void initState() {
     FirebaseMessagingService.I.getDeviceToken().then((t) {
       if (t != null) {
-        print('Device Token: $t');
+        debugPrint('Device Token: $t');
         Auth().setFcmToken(t);
       }
     });
-    FirebaseMessagingService.I.onRefreshUnread = () {
-      // استخدم ref لأن MyApp هو ConsumerStatefulWidget
-      ref.read(unreadCountProvider.notifier).refresh();
-    };
-    FirebaseMessagingService.I.onSetUnread = (c) {
-      ref.read(unreadCountProvider.notifier).set(c);
-    };
+    if (Auth().loggedIn) {
+      FirebaseMessagingService.I.onRefreshUnread = () {
+        ref.read(unreadCountProvider.notifier).refresh();
+      };
+      FirebaseMessagingService.I.onSetUnread = (c) {
+        ref.read(unreadCountProvider.notifier).set(c);
+      };
+      Future.microtask(() => ref.read(unreadCountProvider.notifier).refresh());
+      Future.microtask(() => ref.read(getCartCountProvider.notifier).refresh());
+    } else {
+      FirebaseMessagingService.I.onRefreshUnread = null;
+      FirebaseMessagingService.I.onSetUnread = null;
+    }
 
-    // مبدئيًا: اجلب العدد عند التشغيل
-    Future.microtask(() => ref.read(unreadCountProvider.notifier).refresh());
     super.initState();
   }
 

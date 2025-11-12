@@ -31,6 +31,25 @@ class GetAllCartController extends StateNotifier<DataState<List<CartModel>>> {
   }
 }
 
+final getCartCountProvider =
+    StateNotifierProvider.autoDispose<GetCartCountNotifier, int>(
+        (ref) => GetCartCountNotifier());
+
+class GetCartCountNotifier extends StateNotifier<int> {
+  GetCartCountNotifier() : super(0);
+
+  final _repo = CartReposaitory();
+
+  Future<void> refresh() async {
+    final res = await _repo.getCartCount();
+    res.fold((_) {}, (count) => state = count);
+  }
+
+  void set(int value) => state = value;
+
+  void clear() => state = 0;
+}
+
 final cartProvider = StateNotifierProvider.autoDispose<CartController,
     DataState<CartProductModel>>(
   (ref) {

@@ -86,6 +86,7 @@ class AddToCartOrFavoritesWidget extends ConsumerWidget {
                             .notifier)
                         .state = false;
                   }
+                  ref.read(getCartCountProvider.notifier).refresh();
                 },
                 bottonWidget: DefaultButtonWidget(
                   text: S.of(context).addToCart,

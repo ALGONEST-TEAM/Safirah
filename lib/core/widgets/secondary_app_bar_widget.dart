@@ -15,6 +15,7 @@ class SecondaryAppBarWidget extends StatelessWidget
   final bool isLogo;
   final double? fromHeight;
   final double? logoHeight;
+  final List<Widget>? actions;
 
   const SecondaryAppBarWidget({
     super.key,
@@ -26,6 +27,7 @@ class SecondaryAppBarWidget extends StatelessWidget
     this.isLogo = false,
     this.fromHeight,
     this.logoHeight,
+    this.actions,
   });
 
   @override
@@ -51,6 +53,7 @@ class SecondaryAppBarWidget extends StatelessWidget
               fontWeight: fontWeight ?? FontWeight.w600,
             ),
       leading: const IconButtonWidget(),
+      actions: actions,
     );
   }
 }

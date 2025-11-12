@@ -11,6 +11,8 @@ class Auth {
     return _instance!;
   }
 
+  static Auth? _instance;
+
   final String _key = 'user';
   final WingsSecureStorage secureStorage = sl<WingsSecureStorage>();
 
@@ -18,7 +20,7 @@ class Auth {
     onInit();
   }
 
-  void onInit() async {
+  Future<void> onInit() async {
     try {
       var read = await secureStorage.read(
         key: _key,
@@ -34,8 +36,6 @@ class Auth {
       throw '$ex';
     }
   }
-
-  static Auth? _instance;
 
   AuthModel user = AuthModel.empty();
 

@@ -9,7 +9,6 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (message.notification == null) {
     await AwesomeNotificationService.I.showFromRemote(message);
   }
-  // لا تنشئ قنوات هنا. فقط اعرض باستخدام القنوات المسجّلة مسبقًا.
 }
 
 class FirebaseMessagingService {

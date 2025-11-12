@@ -22,41 +22,38 @@ class DesignForBottomNavigationBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        splashColor: Colors.transparent,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return ScaleTransition(
-                  scale: animation,
-                  child: child,
-                );
-              },
-              child: SvgPicture.asset(
-                active ? activeIcon ?? icon : icon,
-                key: ValueKey<String>(active ? activeIcon ?? icon : icon),
-              ),
+    return InkWell(
+      onTap: onTap,
+      splashColor: Colors.transparent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return ScaleTransition(
+                scale: animation,
+                child: child,
+              );
+            },
+            child: SvgPicture.asset(
+              active ? activeIcon ?? icon : icon,
+              key: ValueKey<String>(active ? activeIcon ?? icon : icon),
             ),
-            2.5.h.verticalSpace,
-            Text(
-              label,
-              style: TextStyle(
-                color:
-                    active ? AppColors.secondaryColor :AppColors.fontColor2 ,
-                fontSize: 9.6.sp,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'IBMPlexSansArabic',
-              ),
-              textAlign: TextAlign.left,
+          ),
+          2.5.h.verticalSpace,
+          Text(
+            label,
+            style: TextStyle(
+              color: active ? AppColors.secondaryColor : AppColors.fontColor2,
+              fontSize: 9.6.sp,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'IBMPlexSansArabic',
             ),
-          ],
-        ),
+            textAlign: TextAlign.left,
+          ),
+        ],
       ),
     );
   }

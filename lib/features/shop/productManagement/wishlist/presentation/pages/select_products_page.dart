@@ -124,13 +124,12 @@ class _SelectProductsPageState extends ConsumerState<SelectProductsPage> {
               bottonWidget: DefaultButtonWidget(
                 text: S.of(context).addToList,
                 width: 120.w,
-                height: 28.h,
+                height: 30.h,
                 textSize: 9.4.sp,
                 minFontSize: 6,
-                borderRadius: 2.r,
                 background: wishlistStateNotifier.selectedWishlist.isEmpty
                     ? AppColors.greySwatch.shade400
-                    : AppColors.primaryColor,
+                    : AppColors.secondaryColor,
                 isLoading: wishlistState.stateData == States.loading,
                 onPressed: wishlistStateNotifier.selectedWishlist.isEmpty
                     ? null

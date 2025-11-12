@@ -64,6 +64,7 @@ class OnlineImagesWidget extends StatelessWidget {
                   ? CircleAvatar(
                       backgroundImage: imageProvider,
                       radius: circularRadius ?? 35.sp,
+                      backgroundColor: Colors.transparent,
                     )
                   : Container(
                       decoration: BoxDecoration(

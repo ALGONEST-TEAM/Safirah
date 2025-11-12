@@ -7,6 +7,7 @@ import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/buttons/icon_button_widget.dart';
 import '../../../../../../core/widgets/buttons/ink_well_button_widget.dart';
+import '../../../../../../core/widgets/cart_badge_icon_widget.dart';
 import '../../../../../../generated/l10n.dart';
 import '../../../../shoppingBag/cart/presentation/pages/cart_page.dart';
 import '../pages/select_items_from_the_wishlist_page.dart';
@@ -94,12 +95,7 @@ class AppBarForWishlistWidget extends StatelessWidget
                   );
                 },
               ),
-              IconButtonWidget(
-                icon: AppIcons.cartActive,
-                onPressed: () {
-                  navigateTo(context, const CartPage());
-                },
-              ),
+              const CartBadgeIconWidget(),
             ],
     );
   }

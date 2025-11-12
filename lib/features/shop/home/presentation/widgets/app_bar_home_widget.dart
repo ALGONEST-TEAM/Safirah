@@ -91,18 +91,19 @@ AppBar appBarHomeWidget({required BuildContext context}) {
             ),
             if (unread > 0)
               Positioned(
-                left: 4.w,
                 top: 1,
+                left: unread >= 10 ? 4.w : 6.w,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                  padding: EdgeInsets.all(unread >= 10 ? 1.6.sp : 2.sp),
                   decoration: BoxDecoration(
                     color: AppColors.dangerColor,
                     shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white),
                   ),
                   child: AutoSizeTextWidget(
                     text: unread > 99 ? '99+' : ' $unread ',
                     colorText: Colors.white,
-                    fontSize: 8.sp,
+                    fontSize: 7.2.sp,
                     minFontSize: 6,
                   ),
                 ),

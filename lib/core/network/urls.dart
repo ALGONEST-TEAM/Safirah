@@ -45,6 +45,8 @@ class AppURL {
 
   static String get getAllCart => '/carts';
 
+  static String get getCartCount => '/carts/count';
+
   static String get addToCart => '/carts/store';
 
   static String get updateCart => '/carts/update';

@@ -16,6 +16,7 @@ class NotificationsRemoteDataSource {
         await RemoteRequest.getData(url: AppURL.unreadNotificationCount);
     return (res.data['data']['counts'] as num?)?.toInt() ?? 0;
   }
+
   Future<void> markAsRead({required String id}) async {
     await RemoteRequest.postData(
       path: AppURL.markNotificationAsRead,

@@ -9,12 +9,14 @@ import 'package:safirah/features/shop/shoppingBag/cart/presentation/pages/cart_p
 import '../../../features/profile/presentation/pages/profile_page.dart';
 import '../../../features/shop/home/presentation/pages/home_page.dart';
 import '../../../features/shop/myOrders/presentation/pages/my_orders_page.dart';
+import '../../../features/shop/shoppingBag/cart/presentation/riverpod/cart_riverpod.dart';
 import '../../../features/user/presentation/pages/log_in_page.dart';
 import '../../../generated/l10n.dart';
 import '../../../services/auth/auth.dart';
 import '../../constants/app_icons.dart';
 import '../../helpers/exit_from_the_app.dart';
 import '../../theme/app_colors.dart';
+import '../auto_size_text_widget.dart';
 import 'design_for_bottom_navigation_bar_widget.dart';
 
 final activeIndexProvider = StateProvider<int>((ref) => 0);
@@ -83,37 +85,78 @@ class _BottomNavigationBarWidgetState
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(
-                  AppIcons.home,
-                  AppIcons.homeActive,
-                  S.of(context).home,
-                  0,
-                  activeIndex,
+                Expanded(
+                  child: _buildNavItem(
+                    AppIcons.home,
+                    AppIcons.homeActive,
+                    S.of(context).home,
+                    0,
+                    activeIndex,
+                  ),
                 ),
-                _buildNavItem(
-                  AppIcons.myOrders,
-                  AppIcons.myOrdersActive,
-                  S.of(context).myOrders,
-                  1,
-                  activeIndex,
+                Expanded(
+                  child: _buildNavItem(
+                    AppIcons.myOrders,
+                    AppIcons.myOrdersActive,
+                    S.of(context).myOrders,
+                    1,
+                    activeIndex,
+                  ),
                 ),
                 SizedBox(
                   height: 20.h,
-                  width: 40.w,
+                  width: 50.w,
                 ),
-                _buildNavItem(
-                  AppIcons.cart,
-                  AppIcons.cartActive,
-                  S.of(context).cart,
-                  2,
-                  activeIndex,
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Consumer(builder: (context, ref, _) {
+                        final cartCount = ref.watch(getCartCountProvider);
+
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            _buildNavItem(
+                              AppIcons.cart,
+                              AppIcons.cartActive,
+                              S.of(context).cart,
+                              2,
+                              activeIndex,
+                            ),
+                            if (cartCount > 0)
+                              Positioned(
+                                left: -5,
+                                top: -8,
+                                child: Container(
+                                  padding: EdgeInsets.all(1.6.sp),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.dangerColor,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white),
+                                  ),
+                                  child: AutoSizeTextWidget(
+                                    text: ' $cartCount ',
+                                    colorText: Colors.white,
+                                    fontSize: 7.5.sp,
+                                    minFontSize: 6,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      }),
+                    ],
+                  ),
                 ),
-                _buildNavItem(
-                  AppIcons.profile,
-                  AppIcons.profileActive,
-                  S.of(context).profile,
-                  3,
-                  activeIndex,
+                Expanded(
+                  child: _buildNavItem(
+                    AppIcons.profile,
+                    AppIcons.profileActive,
+                    S.of(context).profile,
+                    3,
+                    activeIndex,
+                  ),
                 ),
               ],
             ),
