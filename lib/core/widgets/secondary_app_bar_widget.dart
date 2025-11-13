@@ -16,6 +16,7 @@ class SecondaryAppBarWidget extends StatelessWidget
   final double? fromHeight;
   final double? logoHeight;
   final List<Widget>? actions;
+  final VoidCallback? onPressed;
 
   const SecondaryAppBarWidget({
     super.key,
@@ -28,6 +29,7 @@ class SecondaryAppBarWidget extends StatelessWidget
     this.fromHeight,
     this.logoHeight,
     this.actions,
+    this.onPressed,
   });
 
   @override
@@ -52,7 +54,12 @@ class SecondaryAppBarWidget extends StatelessWidget
               fontSize: fontSize ?? 14.4.sp,
               fontWeight: fontWeight ?? FontWeight.w600,
             ),
-      leading: const IconButtonWidget(),
+      leading: IconButtonWidget(
+        onPressed: onPressed ??
+            () {
+              Navigator.of(context).pop();
+            },
+      ),
       actions: actions,
     );
   }

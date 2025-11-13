@@ -1035,6 +1035,46 @@ class S {
     );
   }
 
+  /// `Confirm leaving the page`
+  String get confirmLeavePageTitle {
+    return Intl.message(
+      'Confirm leaving the page',
+      name: 'confirmLeavePageTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you leave this page now, any data you have entered will be lost. Do you want to continue?`
+  String get confirmLeavePageDescription {
+    return Intl.message(
+      'If you leave this page now, any data you have entered will be lost. Do you want to continue?',
+      name: 'confirmLeavePageDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue adding`
+  String get confirmLeavePageContinue {
+    return Intl.message(
+      'Continue adding',
+      name: 'confirmLeavePageContinue',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Back`
+  String get confirmLeavePageBack {
+    return Intl.message(
+      'Back',
+      name: 'confirmLeavePageBack',
+      desc: '',
+      args: [],
+    );
+  }
+
   // skipped getter for the '--------myOrder-----------' key
 
   /// `Order`

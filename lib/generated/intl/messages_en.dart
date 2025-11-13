@@ -113,6 +113,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "comments": MessageLookupByLibrary.simpleMessage("Comments"),
     "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
     "confirmAddress": MessageLookupByLibrary.simpleMessage("Confirm address"),
+    "confirmLeavePageBack": MessageLookupByLibrary.simpleMessage("Back"),
+    "confirmLeavePageContinue": MessageLookupByLibrary.simpleMessage(
+      "Continue adding",
+    ),
+    "confirmLeavePageDescription": MessageLookupByLibrary.simpleMessage(
+      "If you leave this page now, any data you have entered will be lost. Do you want to continue?",
+    ),
+    "confirmLeavePageTitle": MessageLookupByLibrary.simpleMessage(
+      "Confirm leaving the page",
+    ),
     "confirmOrder": MessageLookupByLibrary.simpleMessage("Confirm order"),
     "continueAsGuest": MessageLookupByLibrary.simpleMessage(
       "Continue as guest",

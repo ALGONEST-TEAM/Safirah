@@ -31,7 +31,6 @@ class _ListForCartWidgetState extends ConsumerState<ListForCartWidget> {
         setState(() {
           if (delete) {
             delete = false;
-            ref.read(getCartCountProvider.notifier).refresh();
           } else {
             ref.read(cartProductProvider(loadingId).notifier).updateProduct(
                   ref

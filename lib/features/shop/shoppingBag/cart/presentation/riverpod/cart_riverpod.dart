@@ -189,6 +189,7 @@ class CartController extends StateNotifier<DataState<CartProductModel>> {
           .state
           .data
           .removeWhere((item) => item.id == id);
+      ref.read(getCartCountProvider.notifier).refresh();
       state = state.copyWith(state: States.loaded);
     });
   }

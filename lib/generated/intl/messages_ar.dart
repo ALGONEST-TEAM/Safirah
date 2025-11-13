@@ -107,6 +107,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "comments": MessageLookupByLibrary.simpleMessage("التعليقات"),
     "confirm": MessageLookupByLibrary.simpleMessage("تأكيد"),
     "confirmAddress": MessageLookupByLibrary.simpleMessage("تأكيد العنوان"),
+    "confirmLeavePageBack": MessageLookupByLibrary.simpleMessage("الرجوع"),
+    "confirmLeavePageContinue": MessageLookupByLibrary.simpleMessage(
+      "متابعة الإضافة",
+    ),
+    "confirmLeavePageDescription": MessageLookupByLibrary.simpleMessage(
+      "في حال مغادرة هذه الصفحة الآن، سيتم فقدان البيانات التي قمت بإدخالها. هل ترغب في المتابعة؟",
+    ),
+    "confirmLeavePageTitle": MessageLookupByLibrary.simpleMessage(
+      "تأكيد مغادرة الصفحة",
+    ),
     "confirmOrder": MessageLookupByLibrary.simpleMessage("تأكيد الطلب"),
     "continueAsGuest": MessageLookupByLibrary.simpleMessage("المتابعة كزائر"),
     "copy": MessageLookupByLibrary.simpleMessage("نسخ"),
