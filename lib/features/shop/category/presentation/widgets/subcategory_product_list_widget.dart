@@ -34,8 +34,12 @@ class SubcategoryProductListWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final noFilters = _noFiltersSelected(ref);
 
-    final isLoading = stateFilter.stateData == States.loading;
-    final isLoadingMore = stateFilter.stateData == States.loadingMore;
+    final isLoading = noFilters
+        ? state.stateData == States.loading
+        : stateFilter.stateData == States.loading;
+    final isLoadingMore = noFilters
+        ? state.stateData == States.loadingMore
+        : state.stateData == States.loadingMore;
 
     final products = noFilters
         ? state.data.product?.data ?? []
@@ -43,9 +47,8 @@ class SubcategoryProductListWidget extends ConsumerWidget {
 
     return SliverToBoxAdapter(
       child: isLoading
-          ?               const ProductsShimmerWidget()
-
-        : ProductListWidget(
+          ? const ProductsShimmerWidget()
+          : ProductListWidget(
               product: products,
               isLoadingMore: isLoadingMore,
             ),

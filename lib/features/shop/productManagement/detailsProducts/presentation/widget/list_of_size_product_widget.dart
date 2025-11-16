@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../generated/l10n.dart';
@@ -21,16 +22,18 @@ class ListOfSizeProductWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ListOfSizeProductWidget> createState() => _ListOfSizeProductWidgetState();
+  ConsumerState<ListOfSizeProductWidget> createState() =>
+      _ListOfSizeProductWidgetState();
 }
 
-class _ListOfSizeProductWidgetState extends ConsumerState<ListOfSizeProductWidget> {
-
+class _ListOfSizeProductWidgetState
+    extends ConsumerState<ListOfSizeProductWidget> {
   @override
   void initState() {
     super.initState();
     // أجّل أي تعديل للمزوّد لما بعد أول إطار
-    WidgetsBinding.instance.addPostFrameCallback((_) => _applyInitialSelection());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _applyInitialSelection());
   }
 
   @override
@@ -40,7 +43,8 @@ class _ListOfSizeProductWidgetState extends ConsumerState<ListOfSizeProductWidge
     if (oldWidget.sizeIdOfTheCart != widget.sizeIdOfTheCart ||
         oldWidget.sizeNameOfTheCart != widget.sizeNameOfTheCart ||
         oldWidget.sizeProduct.id != widget.sizeProduct.id) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _applyInitialSelection());
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _applyInitialSelection());
     }
   }
 
@@ -49,11 +53,10 @@ class _ListOfSizeProductWidgetState extends ConsumerState<ListOfSizeProductWidge
 
     final notifier = ref.read(changePriceProvider(widget.sizeProduct).notifier);
 
-      if (widget.sizeProduct.sizeProduct!.isNotEmpty &&
-          widget.sizeProduct.sizeProduct!.length == 1 &&
+    if (widget.sizeProduct.sizeProduct!.isNotEmpty &&
+        widget.sizeProduct.sizeProduct!.length == 1 &&
         widget.sizeIdOfTheCart == null &&
-        widget.sizeNameOfTheCart == null)
-  {
+        widget.sizeNameOfTheCart == null) {
       final only = widget.sizeProduct.sizeProduct!.first;
       notifier
         ..setIdSize(only.id!)
@@ -62,7 +65,9 @@ class _ListOfSizeProductWidgetState extends ConsumerState<ListOfSizeProductWidge
       if ((widget.sizeProduct.numbersOfProduct?.isNotEmpty ?? false)) {
         Future.microtask(() {
           if (!mounted) return;
-          ref.read(changeIndexOfSizeProvider(widget.sizeProduct.id!).notifier).state = 0;
+          ref
+              .read(changeIndexOfSizeProvider(widget.sizeProduct.id!).notifier)
+              .state = 0;
         });
       }
       setState(() {});
@@ -78,7 +83,8 @@ class _ListOfSizeProductWidgetState extends ConsumerState<ListOfSizeProductWidge
   }
 
   List<SizeData> _resolveSizes(int? indexColor) {
-    if ((widget.sizeProduct.colorsProduct?.isNotEmpty ?? false) && indexColor != null) {
+    if ((widget.sizeProduct.colorsProduct?.isNotEmpty ?? false) &&
+        indexColor != null) {
       return widget.sizeProduct.colorsProduct![indexColor].sizeData ?? [];
     }
     return widget.sizeProduct.sizeProduct ?? const [];
@@ -90,8 +96,6 @@ class _ListOfSizeProductWidgetState extends ConsumerState<ListOfSizeProductWidge
     ref.watch(detailsProvider(widget.sizeProduct.id!));
     final indexColor = ref.watch(changeIndexOfColorImageAndSizeProvider);
     final sizes = _resolveSizes(indexColor);
-    // var stateNotifier =
-    //     ref.watch(changePriceProvider(widget.sizeProduct));
     final selectedSize = ref
         .read(changePriceProvider(widget.sizeProduct).notifier)
         .getNameSize();
@@ -116,20 +120,34 @@ class _ListOfSizeProductWidgetState extends ConsumerState<ListOfSizeProductWidge
 
             return GestureDetector(
               onTap: () {
-                final priceNotifier = ref.read(changePriceProvider(widget.sizeProduct).notifier);
+                if (item.numberData!.isEmpty) {
+                  if (item.stockStatus == false) {
+                    showFlashBarWarring(
+                      context: context,
+                      message: item.stock ?? '',
+                    );
+                    return;
+                  }
+                }
+                final priceNotifier =
+                    ref.read(changePriceProvider(widget.sizeProduct).notifier);
 
-                if ((widget.sizeProduct.numbersOfProduct?.isNotEmpty ?? false)) {
+                if ((widget.sizeProduct.numbersOfProduct?.isNotEmpty ??
+                    false)) {
                   priceNotifier
                     ..setNumber('')
                     ..setIdNumber(0);
-                  ref.read(changeIndexOfSizeProvider(widget.sizeProduct.id!).notifier).state = index;
+                  ref
+                      .read(changeIndexOfSizeProvider(widget.sizeProduct.id!)
+                          .notifier)
+                      .state = index;
                 }
 
                 priceNotifier
                   ..setNameSize(item.sizeTypeName)
                   ..setIdSize(item.id!);
 
-                setState(() {}); // لتحديث الـ UI فقط
+                setState(() {});
               },
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 7.h),
@@ -141,7 +159,8 @@ class _ListOfSizeProductWidgetState extends ConsumerState<ListOfSizeProductWidge
                 child: Text(
                   item.sizeTypeName.toString(),
                   style: TextStyle(
-                    color: isSelected ? AppColors.whiteColor : AppColors.fontColor,
+                    color:
+                        isSelected ? AppColors.whiteColor : AppColors.fontColor,
                     fontSize: 12.sp,
                     fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
                   ),

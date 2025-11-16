@@ -41,7 +41,7 @@ class _SubcategoryProductFilterPageState
   bool pinCategoriesToTop = false;
   Timer? _debounceTimer;
 
-  int get _categoryId => widget.idCategory ?? 1;
+  int get _categoryId => widget.idCategory ?? 00;
 
   @override
   void initState() {
@@ -82,7 +82,7 @@ class _SubcategoryProductFilterPageState
       final hasFilters = selectedColors.isNotEmpty ||
           selectedSizes.isNotEmpty ||
           selectedCategory != null ||
-          selectedOption != 1;
+          selectedOption != null;
 
       if (hasFilters) {
         ref
@@ -96,6 +96,7 @@ class _SubcategoryProductFilterPageState
                   widget.isSearchPage ? widget.nameCategoryForHintSearch : '',
               moreData: true,
             );
+
       } else {
         widget.isSearchPage
             ? ref
@@ -120,31 +121,37 @@ class _SubcategoryProductFilterPageState
           state.stateData == States.loading || state.stateData == States.error
               ? const SubcategoryStatusAppBar()
               : null,
-      body: CheckStateInGetApiDataWidget(
-        state: state,
-        widgetOfLoading: const ShimmerSubCategoryWidget(),
-        refresh: () {
-          ref.refresh(categoryProvider(_categoryId));
-        },
-        widgetOfData: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            _buildSliverAppBar(state, widget.nameCategoryForHintSearch),
-            _buildMainFilterWidget(state),
-            SliverToBoxAdapter(
-              child: ProductsSortOptionWidget(
-                idCategory: _categoryId,
-                nameSearch: widget.isSearchPage == false
-                    ? ''
-                    : widget.nameCategoryForHintSearch,
+      body: SafeArea(
+        top: false,
+        child: CheckStateInGetApiDataWidget(
+          state: state,
+          widgetOfLoading: const ShimmerSubCategoryWidget(),
+          refresh: () {
+            widget.isSearchPage
+                ? ref.invalidate(
+                    informationSearchProvider(widget.nameSearch ?? ''))
+                : ref.invalidate(categoryProvider(_categoryId));
+          },
+          widgetOfData: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              _buildSliverAppBar(state, widget.nameCategoryForHintSearch),
+              _buildMainFilterWidget(state),
+              SliverToBoxAdapter(
+                child: ProductsSortOptionWidget(
+                  idCategory: _categoryId,
+                  nameSearch: widget.isSearchPage == false
+                      ? ''
+                      : widget.nameCategoryForHintSearch,
+                ),
               ),
-            ),
-            SubcategoryProductListWidget(
-              state: state,
-              stateFilter: stateFilter,
-              categoryId: _categoryId,
-            ),
-          ],
+              SubcategoryProductListWidget(
+                state: state,
+                stateFilter: stateFilter,
+                categoryId: _categoryId,
+              ),
+            ],
+          ),
         ),
       ),
       endDrawer: SubFilterDrawerWidget(
@@ -158,7 +165,7 @@ class _SubcategoryProductFilterPageState
     );
   }
 
-  // ===================== APPBAR =====================
+  // ===================== APP BAR =====================
   SliverAppBar _buildSliverAppBar(state, String hintTextSearch) {
     return subcategoryFilterAppBarWidget(
       idCategory: widget.idCategory ?? 0,

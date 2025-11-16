@@ -50,6 +50,13 @@ class GetCartCountNotifier extends StateNotifier<int> {
   void clear() => state = 0;
 }
 
+enum CartOperation {
+  none,
+  add,
+  update,
+  delete,
+}
+
 final cartProvider = StateNotifierProvider.autoDispose<CartController,
     DataState<CartProductModel>>(
   (ref) {
@@ -62,6 +69,10 @@ class CartController extends StateNotifier<DataState<CartProductModel>> {
       : super(DataState<CartProductModel>.initial(CartProductModel.empty()));
 
   final _controller = CartReposaitory();
+
+  CartOperation _lastOperation = CartOperation.none;
+
+  CartOperation get lastOperation => _lastOperation;
 
   final List<CartModel> _selectedProducts = [];
 
@@ -128,6 +139,7 @@ class CartController extends StateNotifier<DataState<CartProductModel>> {
     required int? numberId,
     required int isPrintable,
   }) async {
+    _lastOperation = CartOperation.add;
     state = state.copyWith(state: States.loading);
     final data = await _controller.addToCart(
       prodectId,
@@ -155,6 +167,8 @@ class CartController extends StateNotifier<DataState<CartProductModel>> {
     required int? numberId,
     required int isPrintable,
   }) async {
+    _lastOperation = CartOperation.update;
+
     state = state.copyWith(state: States.loading);
     final data = await _controller.updateCart(
       id,
@@ -178,6 +192,8 @@ class CartController extends StateNotifier<DataState<CartProductModel>> {
     required int id,
     required WidgetRef ref,
   }) async {
+    _lastOperation = CartOperation.delete;
+
     state = state.copyWith(state: States.loading);
     final data = await _controller.deleteAProductFromTheCart(id);
     data.fold((f) {

@@ -25,7 +25,7 @@ class ChangeCurrencyBottomSheet extends ConsumerWidget {
           strokeWidth: 2.8.w,
         ),
         refresh: () {
-          ref.refresh(getAllCurrencies);
+          ref.invalidate(getAllCurrencies);
         },
         widgetOfData: Column(
           mainAxisSize: MainAxisSize.min,

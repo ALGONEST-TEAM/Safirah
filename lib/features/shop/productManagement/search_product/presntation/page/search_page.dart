@@ -10,7 +10,10 @@ import '../widget/list_name_of_search_widget.dart';
 import '../widget/list_of_last_search_widget.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
-  SearchPage({super.key, required this.hintTextSearch,});
+  SearchPage({
+    super.key,
+    required this.hintTextSearch,
+  });
 
   String hintTextSearch;
 
@@ -74,13 +77,20 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         state.isEmpty
-                            ? const SizedBox()
+                            ? const SizedBox.shrink()
                             : DeleteSearchModeWidget(
                                 deleteSearchMode: deleteSearchMode,
                                 onTapIconDelete: () {
                                   setState(() {
                                     deleteSearchMode = true;
                                   });
+                                },
+                                onTapCancel: () {
+                                  if (deleteSearchMode == true) {
+                                    setState(() {
+                                      deleteSearchMode = false;
+                                    });
+                                  }
                                 },
                               ),
                         10.verticalSpace,

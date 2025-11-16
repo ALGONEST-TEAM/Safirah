@@ -35,7 +35,7 @@ class _OffersPageState extends ConsumerState<OffersPage> {
         child: CheckStateInGetApiDataWidget(
           state: state,
           refresh: () {
-            ref.refresh(getOfferProductsProvider(widget.offerId));
+            ref.invalidate(getOfferProductsProvider(widget.offerId));
           },
           widgetOfLoading: const LogoShimmerWidget(),
           widgetOfData: SingleChildScrollView(

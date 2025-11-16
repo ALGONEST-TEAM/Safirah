@@ -33,7 +33,7 @@ class ListCardOptionsWidget extends ConsumerWidget {
           hasMessageSuccess: false,
           functionSuccess: () {
             Navigator.of(context).pop();
-            ref.refresh(getAllListProvider);
+            ref.invalidate(getAllListProvider);
           },
           bottonWidget: DefaultButtonWidget(
             text: S.of(context).rename,
@@ -78,7 +78,7 @@ class ListCardOptionsWidget extends ConsumerWidget {
                       wishlistStateNotifier.deleteList(listId: listId);
                     },
                     functionSuccess: () {
-                      ref.refresh(getAllListProvider);
+                      ref.invalidate(getAllListProvider);
                       Navigator.of(context).pop();
                       Future.delayed(const Duration(milliseconds: 50), () {
                         if (context.mounted) {

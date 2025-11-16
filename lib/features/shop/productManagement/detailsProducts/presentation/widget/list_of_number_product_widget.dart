@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../generated/l10n.dart';
@@ -53,6 +54,7 @@ class _ListOfNumberProductWidgetState
       return widget
           .product.colorsProduct![indexColor].sizeData![indexSize].numberData!;
     }
+
     return [];
   }
 
@@ -65,6 +67,7 @@ class _ListOfNumberProductWidgetState
       stateNotifier.setIdNumber(widget.numberIdOfTheCart!);
       stateNotifier.setNumber(widget.numberOfTheCart!);
     }
+    setState(() {});
   }
 
   @override
@@ -90,46 +93,52 @@ class _ListOfNumberProductWidgetState
         Wrap(
           spacing: 10.0.w,
           runSpacing: 6.0,
-          children: numbers
-              .map(
-                (item) => Consumer(builder: (context, ref, child) {
-                  return GestureDetector(
-                    onTap: () {
-                      ref.read(changePriceProvider(widget.product).notifier)
-                        ..setNumber(item.number!)
-                        ..setIdNumber(item.id!);
-                      setState(() {});
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 13.w,
-                        vertical: 7.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: currentNumber == item.number
-                            ? AppColors.secondaryColor
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(8.r),
-                        border:
-                            Border.all(color: AppColors.greySwatch.shade200),
-                      ),
-                      child: Text(
-                        item.number.toString(),
-                        style: TextStyle(
-                          color: currentNumber == item.number
-                              ? AppColors.whiteColor
-                              : AppColors.fontColor,
-                          fontSize: 12.sp,
-                          fontWeight: currentNumber == item.number
-                              ? FontWeight.w500
-                              : FontWeight.w400,
-                        ),
-                      ),
+          children: numbers.asMap().entries.map((entry) {
+            final item = entry.value;
+            return Consumer(builder: (context, ref, child) {
+              return GestureDetector(
+                onTap: () {
+                  if (item.stockStatus ==
+                      false) {
+                    showFlashBarWarring(
+                      context: context,
+                      message: item.stock ?? '',
+                    );
+                    return;
+                  }
+                  ref.read(changePriceProvider(widget.product).notifier)
+                    ..setNumber(item.number!)
+                    ..setIdNumber(item.id!);
+                  setState(() {});
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 13.w,
+                    vertical: 7.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: currentNumber == item.number
+                        ? AppColors.secondaryColor
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(color: AppColors.greySwatch.shade200),
+                  ),
+                  child: Text(
+                    item.number.toString(),
+                    style: TextStyle(
+                      color: currentNumber == item.number
+                          ? AppColors.whiteColor
+                          : AppColors.fontColor,
+                      fontSize: 12.sp,
+                      fontWeight: currentNumber == item.number
+                          ? FontWeight.w500
+                          : FontWeight.w400,
                     ),
-                  );
-                }),
-              )
-              .toList(),
+                  ),
+                ),
+              );
+            });
+          }).toList(),
         ),
       ],
     );

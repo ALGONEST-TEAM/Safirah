@@ -18,7 +18,7 @@ void showFlashBarSuccess({
       textAlign: TextAlign.center,
       style: TextStyle(
         color: Colors.white,
-        fontSize: 13.sp,
+        fontSize: 12.6.sp,
         fontWeight: FontWeight.w600,
         fontFamily: 'IBMPlexSansArabic',
       ),

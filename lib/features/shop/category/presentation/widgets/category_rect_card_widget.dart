@@ -57,7 +57,7 @@ class CategoryRectCardWidget extends ConsumerWidget {
               height: double.infinity,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.black26.withValues(alpha: 0.35),
+                color: Colors.black26.withValues(alpha: 0.26),
                 border: isSelected == true
                     ? Border.all(color: AppColors.primaryColor, width: 1.2)
                     : Border.all(color: Colors.transparent),

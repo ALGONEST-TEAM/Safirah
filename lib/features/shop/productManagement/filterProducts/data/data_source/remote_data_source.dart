@@ -28,10 +28,10 @@ class RemoteFilterDataSource {
     }
     final searchQuery =
         (nameSearch != null && nameSearch != '') ? '&search=$nameSearch' : '';
-    final sortOptionQuery = (sortOption != null) ? '&filter=${1}' : '';
+    final sortOptionQuery = (sortOption != null) ? '&sort=$sortOption' : '';
 
     final url =
-        "/product_filter/?page=$page&perPage=10$sizeQuery$colorQuery$categoryQuery$sortOptionQuery$searchQuery";
+        "/product_filter/?page=$page&perPage=8$sizeQuery$colorQuery$categoryQuery$sortOptionQuery$searchQuery";
 
     final response = await RemoteRequest.getData(url: url);
     return PaginatedProductsList.fromJson(response.data);

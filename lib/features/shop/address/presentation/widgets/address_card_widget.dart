@@ -58,7 +58,7 @@ class AddressCardWidget extends ConsumerWidget {
                     AddOrUpdateAddressPage(
                       address: address,
                       onSuccess: () {
-                        ref.refresh(getAllAddressesProvider);
+                        ref.invalidate(getAllAddressesProvider);
                         Navigator.of(context).pop();
                       },
                     ),

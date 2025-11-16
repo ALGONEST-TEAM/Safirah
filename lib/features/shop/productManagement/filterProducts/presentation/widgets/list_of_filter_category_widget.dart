@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../../../core/helpers/dropdown_helper.dart';
+import '../../../../../../core/helpers/navigateTo.dart';
 import '../../../../../../core/state/state.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../category/data/model/category_data.dart';
+import '../../../../category/presentation/pages/subcategory_product_filter_page.dart';
 import '../state_mangment/riverpod.dart';
 
 class ListOfFilterCategoryWidget extends ConsumerWidget {
-  const ListOfFilterCategoryWidget(
-      {super.key,
-      required this.categoryFilter,
-      required this.idCategory,
-      required this.nameSearch,
-      required this.isSearchFilter});
+  const ListOfFilterCategoryWidget({
+    super.key,
+    required this.categoryFilter,
+    required this.idCategory,
+    required this.nameSearch,
+    required this.isSearchFilter,
+  });
 
   final List<CategoryData> categoryFilter;
   final int idCategory;
@@ -33,36 +37,50 @@ class ListOfFilterCategoryWidget extends ConsumerWidget {
 
         return InkWell(
           onTap: () {
-            if (stateFilter.stateData != States.loading) {
-              ref
-                  .read(selectedCategoryProvider(idCategory).notifier)
-                  .selectCategory(item.id!);
+            if (item.hasChildren == true) {
+              DropdownHelper().overlayEntry!.remove();
+              DropdownHelper().overlayEntry = null;
+              navigateTo(
+                context,
+                SubcategoryProductFilterPage(
+                  idCategory: item.id,
+                  nameCategoryForHintSearch: item.name??'',
+                  isSearchPage: false,
+                ),
+              );
+            } else {
+              if (stateFilter.stateData != States.loading) {
+                ref
+                    .read(selectedCategoryProvider(idCategory).notifier)
+                    .selectCategory(item.id!);
 
-              ref.read(filterProductProvider(idCategory).notifier).getProductOfFilter(
-                    idSize: ref.read(selectedSizesProvider(idCategory)),
-                    idColor: ref.read(selectedColorsProvider(idCategory)),
-                    idSubCategory:
-                        ref.read(selectedCategoryProvider(idCategory)) ??
-                            idCategory,
-                sortOption: ref.read(selectProductsSortOptionProvider(idCategory)),
-                    nameSearch: isSearchFilter ? nameSearch : '',
-                  );
+                ref
+                    .read(filterProductProvider(idCategory).notifier)
+                    .getProductOfFilter(
+                      idSize: ref.read(selectedSizesProvider(idCategory)),
+                      idColor: ref.read(selectedColorsProvider(idCategory)),
+                      idSubCategory:
+                          ref.read(selectedCategoryProvider(idCategory)) ??
+                              idCategory,
+                      sortOption: ref
+                          .read(selectProductsSortOptionProvider(idCategory)),
+                      nameSearch: isSearchFilter ? nameSearch : '',
+                    );
+              }
             }
           },
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? AppColors.primaryColor.withOpacity(0.2)
-                  : AppColors.whiteColor,
-              border: Border.all(
-                color:
-                    isSelected ? AppColors.primaryColor : AppColors.fontColor,
-                width: isSelected ? 1.2.r : 0.2.r,
-              ),
-                borderRadius: BorderRadius.circular(6.r)
-
-            ),
+                color: isSelected
+                    ? AppColors.primaryColor.withValues(alpha: 0.2)
+                    : AppColors.whiteColor,
+                border: Border.all(
+                  color:
+                      isSelected ? AppColors.primaryColor : AppColors.fontColor,
+                  width: isSelected ? 1.2.r : 0.2.r,
+                ),
+                borderRadius: BorderRadius.circular(6.r)),
             child: AutoSizeTextWidget(
               text: item.name!,
               colorText:

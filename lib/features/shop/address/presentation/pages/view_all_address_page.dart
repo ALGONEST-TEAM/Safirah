@@ -32,12 +32,12 @@ class ViewAllAddressPage extends ConsumerWidget {
         color: AppColors.primaryColor,
         backgroundColor: Colors.white,
         onRefresh: () async {
-          ref.refresh(getAllAddressesProvider);
+          ref.invalidate(getAllAddressesProvider);
         },
         child: CheckStateInGetApiDataWidget(
           state: controller,
           refresh: () {
-            ref.refresh(getAllAddressesProvider);
+            ref.invalidate(getAllAddressesProvider);
           },
           widgetOfLoading: const LogoShimmerWidget(),
 
@@ -102,7 +102,7 @@ class ViewAllAddressPage extends ConsumerWidget {
                     AddOrUpdateAddressPage(
                       address: AddressModel.empty(),
                       onSuccess: () {
-                        ref.refresh(getAllAddressesProvider);
+                        ref.invalidate(getAllAddressesProvider);
                         Navigator.of(context).pop();
                       },
                       locationIsEmpty: true,

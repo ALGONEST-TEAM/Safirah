@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../../../../../../core/constants/app_icons.dart';
 import '../../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../../core/state/state.dart';
 import '../../../../../../core/theme/app_colors.dart';
@@ -24,7 +26,7 @@ class CartPage extends ConsumerWidget {
       color: AppColors.primaryColor,
       backgroundColor: Colors.white,
       onRefresh: () async {
-        ref.refresh(getAllCartProvider);
+        ref.invalidate(getAllCartProvider);
       },
       child: Scaffold(
         appBar: SecondaryAppBarWidget(
@@ -33,7 +35,7 @@ class CartPage extends ConsumerWidget {
         body: CheckStateInGetApiDataWidget(
           state: state,
           refresh: () {
-            ref.refresh(getAllCartProvider);
+            ref.invalidate(getAllCartProvider);
           },
           widgetOfLoading: const ShimmerCardWidget(),
           widgetOfData: Column(
@@ -41,23 +43,35 @@ class CartPage extends ConsumerWidget {
               if (state.data.isNotEmpty)
                 const Expanded(child: ListForCartWidget())
               else
-                Container(
+                SizedBox(
+                  height: 280.h,
                   width: double.infinity,
-                  alignment: Alignment.center,
-                  margin: EdgeInsets.symmetric(vertical: 20.h),
-                  child: const AutoSizeTextWidget(
-                    text: "السلة فارغة",
-                    colorText: Colors.black87,
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w600,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    spacing: 16.h,
+                    children: [
+                      SvgPicture.asset(
+                        AppIcons.cartActive,
+                        color: AppColors.primaryColor,
+                        height: 50.h,
+                      ),
+                      AutoSizeTextWidget(
+                        text: "${S.of(context).cart} ${S.of(context).empty}",
+                        colorText: Colors.black87,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ],
                   ),
                 ),
             ],
           ),
         ),
-        bottomNavigationBar: state.stateData == States.loaded && state.data.isNotEmpty
-            ? CartBottomBarWidget(items: state.data)
-            : null,
+        bottomNavigationBar:
+            state.stateData == States.loaded && state.data.isNotEmpty
+                ? CartBottomBarWidget(items: state.data)
+                : null,
       ),
     );
   }

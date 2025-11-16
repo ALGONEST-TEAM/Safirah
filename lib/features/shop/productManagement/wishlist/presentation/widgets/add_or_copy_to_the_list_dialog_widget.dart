@@ -81,7 +81,7 @@ class _AddOrCopyToTheListDialogWidgetState
                     messageSuccess:
                         S.of(context).productsHaveBeenAddedToTheList,
                     functionSuccess: () {
-                      ref.refresh(getAllListProvider);
+                      ref.invalidate(getAllListProvider);
                       Navigator.pop(context);
                     },
                     bottonWidget: Column(

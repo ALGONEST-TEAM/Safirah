@@ -25,7 +25,7 @@ class NotificationsPage extends ConsumerWidget {
         child: CheckStateInGetApiDataWidget(
           state: state,
           refresh: () {
-            ref.refresh(notificationProvider);
+            ref.invalidate(notificationProvider);
           },
           widgetOfData: state.data.isEmpty
               ? SizedBox(

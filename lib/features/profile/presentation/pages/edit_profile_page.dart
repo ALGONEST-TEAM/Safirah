@@ -114,7 +114,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       body: CheckStateInGetApiDataWidget(
         state: state,
         refresh: (){
-          ref.refresh(getProfileDataProvider);
+          ref.invalidate(getProfileDataProvider);
         },
         widgetOfLoading: const LogoShimmerWidget(),
         widgetOfData: Form(

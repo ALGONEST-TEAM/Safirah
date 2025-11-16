@@ -32,13 +32,13 @@ class ListForOrdersWidget extends ConsumerWidget {
       color: AppColors.primaryColor,
       backgroundColor: Colors.white,
       onRefresh: () async {
-        ref.refresh(getAllOrdersProvider);
+        ref.invalidate(getAllOrdersProvider);
       },
       child: CheckStateInGetApiDataWidget(
         state: state,
         widgetOfLoading: const ShimmerOrderCardWidget(),
         refresh: () {
-          ref.refresh(getAllOrdersProvider);
+          ref.invalidate(getAllOrdersProvider);
         },
         widgetOfData:
             filteredOrders.isEmpty && state.stateData != States.loading

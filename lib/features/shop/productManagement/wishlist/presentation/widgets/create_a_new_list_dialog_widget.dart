@@ -79,7 +79,7 @@ class CreateANewListDialogWidget extends ConsumerWidget {
                   ? S.of(context).aNewListHasBeenCreatedSuccessfully
                   : S.of(context).theModificationHasBeenCompletedSuccessfully,
               functionSuccess: () {
-                ref.refresh(getAllListProvider);
+                ref.invalidate(getAllListProvider);
                 Navigator.of(context).pop();
               },
               bottonWidget: DefaultButtonWidget(

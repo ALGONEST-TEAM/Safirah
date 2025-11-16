@@ -9,14 +9,14 @@ import '../../../../category/presentation/pages/subcategory_product_filter_page.
 import '../state_mangment/riverpod.dart';
 
 class ListOfLastSearchWidget extends ConsumerWidget {
-  const ListOfLastSearchWidget({super.key, required this.isDeleteMode,required this.historySearch});
+  const ListOfLastSearchWidget(
+      {super.key, required this.isDeleteMode, required this.historySearch});
 
   final List<String> historySearch;
   final bool isDeleteMode;
 
   @override
   Widget build(BuildContext context, ref) {
-
     return Wrap(
       spacing: 6.0.w,
       runSpacing: 6.0.h,
@@ -33,20 +33,20 @@ class ListOfLastSearchWidget extends ConsumerWidget {
                       alignment: AlignmentDirectional.topEnd,
                       children: [
                         Padding(
-                          padding: EdgeInsets.all(6.0.sp),
-                          child: const Icon(
+                          padding: EdgeInsets.all(4.6.sp),
+                          child: Icon(
                             Icons.close,
-                            size: 10,
-                            color: AppColors.primaryColor,
+                            size: 11.r,
+                            color: AppColors.dangerColor,
                           ),
                         ),
                         Container(
                           padding: EdgeInsets.symmetric(
                               horizontal: 12.sp, vertical: 10.sp),
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14.r),
-                              border:
-                                  Border.all(color: const Color(0xffE1E1E1))),
+                            borderRadius: BorderRadius.circular(14.r),
+                            border: Border.all(color: const Color(0xffE1E1E1)),
+                          ),
                           child: AutoSizeTextWidget(
                             text: item,
                             colorText: Colors.black,
@@ -57,19 +57,22 @@ class ListOfLastSearchWidget extends ConsumerWidget {
                     ),
                   )
                 : InkWell(
-              onTap: (){
-                navigateTo(context, SubcategoryProductFilterPage(
-                  isSearchPage: true,
-                  nameCategoryForHintSearch:item,
-                  nameSearch:item ,
-                ));
-              },
-                  child: Container(
+                    onTap: () {
+                      navigateTo(
+                        context,
+                        SubcategoryProductFilterPage(
+                          isSearchPage: true,
+                          nameCategoryForHintSearch: item,
+                          nameSearch: item,
+                        ),
+                      );
+                    },
+                    child: Container(
                       padding: EdgeInsets.symmetric(
                           horizontal: 12.sp, vertical: 10.sp),
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14.r),
-                          border: Border.all(color: const Color(0xffE1E1E1))
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(color: const Color(0xffE1E1E1)),
                       ),
                       child: AutoSizeTextWidget(
                         text: item,
@@ -77,7 +80,7 @@ class ListOfLastSearchWidget extends ConsumerWidget {
                         fontSize: 12,
                       ),
                     ),
-                ),
+                  ),
           )
           .toList(),
     );

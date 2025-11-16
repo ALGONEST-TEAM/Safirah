@@ -39,7 +39,7 @@ class _HomePageState extends ConsumerState<HomePage>
       body: CheckStateInGetApiDataWidget(
           state: state,
           refresh: () {
-            ref.refresh(sectionProvider);
+            ref.invalidate(sectionProvider);
           },
           widgetOfLoading: const LoadingHomeWidget(subSection: false),
           widgetOfData: Builder(

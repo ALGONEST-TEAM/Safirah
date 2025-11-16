@@ -62,19 +62,19 @@ class DeleteSelectedProductsButtonWidget extends ConsumerWidget {
                       },
                       functionSuccess: () {
                         if (selectProductsByList) {
-                          ref.refresh(
+                          ref.invalidate(
                             getProductsByListProvider(listId!),
                           );
                         } else {
-                          ref.refresh(getAllWishesProductsProvider);
+                          ref.invalidate(getAllWishesProductsProvider);
                           for (int i = 0;
                               i < wishlistStateNotifier.selectedWishlist.length;
                               i++) {
-                            ref.refresh(detailsProvider(
+                            ref.invalidate(detailsProvider(
                                 wishlistStateNotifier.selectedWishlist[i]));
                           }
                         }
-                        ref.refresh(getAllListProvider);
+                        ref.invalidate(getAllListProvider);
                         Navigator.of(context).pop();
                         Navigator.of(context).pop();
                       },

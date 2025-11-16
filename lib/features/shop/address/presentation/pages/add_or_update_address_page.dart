@@ -79,8 +79,8 @@ class AddOrUpdateAddressPage extends ConsumerWidget {
                             citiesState.exception!)
                         .last,
                     onPressed: () {
-                      ref.refresh(citiesProvider);
-                      ref.refresh(districtsProvider);
+                      ref.invalidate(citiesProvider);
+                      ref.invalidate(districtsProvider);
                     },
                   ),
                 )

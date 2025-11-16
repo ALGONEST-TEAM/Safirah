@@ -48,7 +48,7 @@ class ProductsByListPage extends ConsumerWidget {
       body: RefreshIndicator(
         color: AppColors.primaryColor,
         onRefresh: () async {
-          ref.refresh(getProductsByListProvider(listId));
+          ref.invalidate(getProductsByListProvider(listId));
         },
         child: SafeArea(
           top: false,

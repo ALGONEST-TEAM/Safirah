@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../../../core/state/data_state.dart';
@@ -75,8 +77,8 @@ final selectedSortIndexProvider =
 final sortOptionTitleProvider =
     StateProvider.family<String?, int>((ref, idCategory) => S.current.forYou);
 
-final selectProductsSortOptionProvider = StateNotifierProvider.family<
-    SelectProductsSortOptionNotifier, int?, int>(
+final selectProductsSortOptionProvider =
+    StateNotifierProvider.family<SelectProductsSortOptionNotifier, int?, int>(
   (ref, idCategory) => SelectProductsSortOptionNotifier(),
 );
 
@@ -85,15 +87,10 @@ class SelectProductsSortOptionNotifier extends StateNotifier<int?> {
 
   void selectOption(int option) {
     state = option;
-
-    print("OOOOOOOO $state");
-  }
-
-  void clear() {
-    state = null;
   }
 }
 
+///////////// Filters Products  ///////////////////////
 final filterProductProvider = StateNotifierProvider.family<
     FilterProductNotifier,
     DataState<PaginatedProductsList>,
@@ -111,13 +108,11 @@ class FilterProductNotifier
 
   Future<void> getProductOfFilter({
     List<int>? idSize,
-    List<int>? idUnit,
     var idColor,
     bool moreData = false,
     int? idSubCategory,
     String? nameSearch,
     int? sortOption,
-
   }) async {
     if (moreData) {
       state = state.copyWith(state: States.loadingMore);
@@ -154,4 +149,32 @@ class FilterProductNotifier
       },
     );
   }
+}
+
+///////////// Clear Product Filters ///////////////////////
+void clearProductFilters({
+  required BuildContext context,
+  required WidgetRef ref,
+  required int categoryId,
+}) {
+  ref.read(selectedColorsProvider(categoryId).notifier).clear();
+  ref.read(selectedSizesProvider(categoryId).notifier).clear();
+  ref.read(selectedCategoryProvider(categoryId).notifier).clear();
+
+  ref.read(sortOptionTitleProvider(categoryId).notifier).state =
+      S.of(context).forYou;
+
+  ref.read(selectedSortIndexProvider(categoryId).notifier).state = 0;
+
+  ref
+      .read(selectProductsSortOptionProvider(categoryId).notifier)
+      .selectOption(1);
+
+  ref.read(filterProductProvider(categoryId).notifier).getProductOfFilter(
+    idSize: <int>[],
+    idColor: <int>[],
+    idSubCategory: null,
+    sortOption: 1,
+    nameSearch: '',
+  );
 }

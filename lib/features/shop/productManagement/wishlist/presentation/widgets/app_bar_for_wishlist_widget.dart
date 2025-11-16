@@ -9,7 +9,6 @@ import '../../../../../../core/widgets/buttons/icon_button_widget.dart';
 import '../../../../../../core/widgets/buttons/ink_well_button_widget.dart';
 import '../../../../../../core/widgets/cart_badge_icon_widget.dart';
 import '../../../../../../generated/l10n.dart';
-import '../../../../shoppingBag/cart/presentation/pages/cart_page.dart';
 import '../pages/select_items_from_the_wishlist_page.dart';
 import '../riverpod/wishlist_riverpod.dart';
 

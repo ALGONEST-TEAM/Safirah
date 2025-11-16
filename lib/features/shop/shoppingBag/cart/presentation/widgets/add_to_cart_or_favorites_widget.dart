@@ -47,7 +47,7 @@ class AddToCartOrFavoritesWidget extends ConsumerWidget {
       top: false,
       child: Container(
         color: Colors.white,
-        padding: EdgeInsets.symmetric(horizontal: 12.w,vertical: 4.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
         child: Row(
           children: [
             if (showWishlistIcon)
@@ -77,6 +77,9 @@ class AddToCartOrFavoritesWidget extends ConsumerWidget {
             Expanded(
               child: CheckStateInPostApiDataWidget(
                 state: cartState,
+                hasMessageSuccess:
+                    ref.read(cartProvider.notifier).lastOperation ==
+                        CartOperation.add,
                 messageSuccess: S.of(context).productAddedToCartSuccessfully,
                 functionSuccess: () {
                   if (isPrintable == true) {
@@ -105,8 +108,9 @@ class AddToCartOrFavoritesWidget extends ConsumerWidget {
                     }
                     final notifier =
                         ref.read(changePriceProvider(details.data).notifier);
-                    final price = ref.watch(changePriceProvider(details.data)) ??
-                        details.data.price!;
+                    final price =
+                        ref.watch(changePriceProvider(details.data)) ??
+                            details.data.price!;
                     final isPrintable = ref.watch(
                         activatePrintingOnTheProductProvider(
                             'details:$productId'));

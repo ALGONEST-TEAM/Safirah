@@ -65,8 +65,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         title: S.of(context).favorites,
                         icon: AppIcons.wishlist,
                         onTap: () {
-                          ref.refresh(getAllWishesProductsProvider);
-                          ref.refresh(getAllListProvider);
+                          ref.invalidate(getAllWishesProductsProvider);
+                          ref.invalidate(getAllListProvider);
                           navigateTo(context, const WishlistPage());
                         },
                       );

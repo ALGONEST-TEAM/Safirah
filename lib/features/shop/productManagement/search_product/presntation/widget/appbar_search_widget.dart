@@ -41,6 +41,11 @@ AppBar appBarSearchWidget({
                   nameSearch: value,
                 ));
             ref.read(searchHistoryProvider.notifier).addSearchHistory(value);
+            // clearProductFilters(
+            //   context: context,
+            //   ref: ref,
+            //   categoryId: widget.idCategory,
+            // );
           },
           contentPadding:
               EdgeInsets.only(bottom: 10.sp, left: 10.sp, right: 10.sp),

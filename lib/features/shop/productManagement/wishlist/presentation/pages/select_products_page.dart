@@ -116,9 +116,9 @@ class _SelectProductsPageState extends ConsumerState<SelectProductsPage> {
                   : S.of(context).aNewListHasBeenCreatedSuccessfully,
               functionSuccess: () {
                 if (widget.addGoods) {
-                  ref.refresh(getProductsByListProvider(widget.listId!));
+                  ref.invalidate(getProductsByListProvider(widget.listId!));
                 }
-                ref.refresh(getAllListProvider);
+                ref.invalidate(getAllListProvider);
                 Navigator.of(context).pop();
               },
               bottonWidget: DefaultButtonWidget(

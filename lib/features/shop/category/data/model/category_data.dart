@@ -12,14 +12,12 @@ class CategoryData {
   final String? nameEn;
   @HiveField(3)
   final String? image;
-  final int? categoryLevel;
   final bool? hasChildren;
 
   CategoryData({
     this.id,
     this.name,
     this.nameEn,
-    this.categoryLevel,
     this.hasChildren,
     this.image,
   });
@@ -28,14 +26,9 @@ class CategoryData {
     return CategoryData(
       id: json['id'] ?? 0,
       name: json['name'] ?? "",
-      categoryLevel: json['category_level'] ?? 0,
       hasChildren: json['has_children'] ?? false,
       image: json['image'] ?? "",
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {};
   }
 
   static List<CategoryData> fromJsonCategoryList(List<dynamic> json) {
@@ -44,14 +37,6 @@ class CategoryData {
 
   factory CategoryData.empty() => CategoryData(
         name: "",
-        categoryLevel: 0,
         id: 0,
       );
-  static final fakeCategoriesData = List.filled(
-    20,
-    CategoryData(
-      name: "",
-      id: 0,
-    ),
-  );
 }

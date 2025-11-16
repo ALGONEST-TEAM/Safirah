@@ -21,12 +21,13 @@ class ListNameOfSearchWidget extends ConsumerWidget {
       itemBuilder: (context, index) => InkWell(
         onTap: () {
           navigateTo(
-              context,
-              SubcategoryProductFilterPage(
-                isSearchPage: true,
-                nameCategoryForHintSearch: namesSearch[index].name!,
-                nameSearch: namesSearch[index].name!,
-              ));
+            context,
+            SubcategoryProductFilterPage(
+              isSearchPage: true,
+              nameCategoryForHintSearch: namesSearch[index].name!,
+              nameSearch: namesSearch[index].name!,
+            ),
+          );
           ref
               .read(searchHistoryProvider.notifier)
               .addSearchHistory(namesSearch[index].name!);

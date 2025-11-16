@@ -124,36 +124,6 @@ class _MyOrdersPageState extends ConsumerState<MyOrdersPage>
                         ),
                     ],
                   ),
-                  // TabBar(
-                  //   controller: _tabController,
-                  //   physics: const ClampingScrollPhysics(),
-                  //   isScrollable: true,
-                  //   padding: EdgeInsets.symmetric(horizontal: 5.w),
-                  //   dividerColor: Colors.transparent,
-                  //   unselectedLabelColor: AppColors.fontColor,
-                  //   labelColor: AppColors.secondaryColor,
-                  //   labelStyle: const TextStyle(
-                  //     fontWeight: FontWeight.w600,
-                  //     fontFamily: "IBMPlexSansArabic",
-                  //   ),
-                  //   unselectedLabelStyle: const TextStyle(
-                  //     fontWeight: FontWeight.w500,
-                  //     fontFamily: "IBMPlexSansArabic",
-                  //   ),
-                  //   indicatorSize: TabBarIndicatorSize.label,
-                  //   indicator: UnderlineTabIndicator(
-                  //     borderSide:
-                  //         BorderSide(width: 2.w, color: AppColors.primaryColor),
-                  //     insets: EdgeInsets.symmetric(vertical: 4.h),
-                  //   ),
-                  //   tabs: [
-                  //     Tab(text: S.of(context).allOrders),
-                  //     Tab(text: S.of(context).unpaid),
-                  //     Tab(text: S.of(context).processing),
-                  //     Tab(text: S.of(context).onTheWay),
-                  //     Tab(text: S.of(context).delivered),
-                  //   ],
-                  // ),
                   Expanded(
                     child: TabBarView(
                       controller: _tabController,

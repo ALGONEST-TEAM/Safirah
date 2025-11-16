@@ -137,13 +137,13 @@ class _WishesProductCardWidgetState extends ConsumerState<WishesProductCardWidge
                           messageSuccess: S.of(context).deletedSuccessfully,
                           functionSuccess: () {
                             if (widget.deleteProductFromTheList) {
-                              ref.refresh(
+                              ref.invalidate(
                                   getProductsByListProvider(widget.listId!));
-                              ref.refresh(getAllListProvider);
+                              ref.invalidate(getAllListProvider);
                             } else {
-                              ref.refresh(getAllWishesProductsProvider);
-                              ref.refresh(getAllListProvider);
-                              ref.refresh(detailsProvider(widget.productId));
+                              ref.invalidate(getAllWishesProductsProvider);
+                              ref.invalidate(getAllListProvider);
+                              ref.invalidate(detailsProvider(widget.productId));
                             }
                           },
                           bottonWidget: DefaultButtonWidget(

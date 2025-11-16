@@ -21,7 +21,7 @@ class CitiesBottomSheetWidget extends ConsumerWidget {
       state: cities,
 
       refresh: (){
-        ref.refresh(citiesProvider);
+        ref.invalidate(citiesProvider);
         Navigator.of(context).pop();
 
       },

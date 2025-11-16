@@ -38,7 +38,6 @@ class SubFilterDrawerWidget extends ConsumerStatefulWidget {
 }
 
 class _SubFilterDrawerWidgetState extends ConsumerState<SubFilterDrawerWidget> {
-
   @override
   Widget build(BuildContext context) {
     final selectedSizes = ref.watch(selectedSizesProvider(widget.idCategory));
@@ -118,29 +117,10 @@ class _SubFilterDrawerWidgetState extends ConsumerState<SubFilterDrawerWidget> {
                 Navigator.pop(context);
               },
               clearOnTap: () {
-                ref
-                    .read(selectedColorsProvider(widget.idCategory).notifier)
-                    .clear();
-                ref
-                    .read(selectedSizesProvider(widget.idCategory).notifier)
-                    .clear();
-                ref
-                    .read(selectedCategoryProvider(widget.idCategory).notifier)
-                    .clear();
-                ref
-                    .read(sortOptionTitleProvider(widget.idCategory).notifier)
-                    .state = S.of(context).forYou;
-                ref
-                    .read(selectProductsSortOptionProvider(widget.idCategory)
-                        .notifier).state=1;
-                ref
-                    .read(filterProductProvider(widget.idCategory).notifier)
-                    .getProductOfFilter(
-                  idSize:<int> [],
-                  idColor:<int> [],
-                  idSubCategory:null ,
-                  sortOption:1,
-                  nameSearch: '',
+                clearProductFilters(
+                  context: context,
+                  ref: ref,
+                  categoryId: widget.idCategory,
                 );
               },
             ),

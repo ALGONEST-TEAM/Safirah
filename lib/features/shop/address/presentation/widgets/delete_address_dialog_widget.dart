@@ -51,7 +51,7 @@ class DeleteAddressDialogWidget extends ConsumerWidget {
                   messageSuccess: S.of(context).deletedAddressSuccessfully,
                   functionSuccess: () {
                     Navigator.pop(context);
-                    ref.refresh(getAllAddressesProvider);
+                    ref.invalidate(getAllAddressesProvider);
                   },
                   bottonWidget: DefaultButtonWidget(
                     text: S.of(context).yes,

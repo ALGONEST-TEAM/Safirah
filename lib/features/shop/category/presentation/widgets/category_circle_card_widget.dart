@@ -48,7 +48,7 @@ class CategoryCircleCardWidget extends ConsumerWidget {
               height: double.infinity,
               width: double.infinity,
               decoration: BoxDecoration(
-                  color: Colors.black26.withValues(alpha: 0.35),
+                  color: Colors.black26.withValues(alpha: 0.26),
                   shape: BoxShape.circle),
               alignment: Alignment.center,
               child: AutoSizeTextWidget(

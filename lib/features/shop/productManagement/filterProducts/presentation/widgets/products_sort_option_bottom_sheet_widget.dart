@@ -28,8 +28,8 @@ class ProductsSortOptionBottomSheetWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final selectedIndex = ref.watch(selectedSortIndexProvider(idCategory));
-    final selectOption =
-        ref.watch(selectProductsSortOptionProvider(idCategory));
+
+    ref.watch(selectProductsSortOptionProvider(idCategory));
 
     return ListView.separated(
       shrinkWrap: true,
@@ -43,13 +43,11 @@ class ProductsSortOptionBottomSheetWidget extends ConsumerWidget {
           onTap: () {
             ref.read(sortOptionTitleProvider(idCategory).notifier).state =
                 options[index];
-
-            // ref
-            //     .read(selectProductsSortOptionProvider(idCategory).notifier)
-            //     .state = index + 1;
+            ref.read(selectedSortIndexProvider(idCategory).notifier).state =
+                index;
             ref
                 .read(selectProductsSortOptionProvider(idCategory).notifier)
-                .selectOption(index+1);
+                .selectOption(index + 1);
             ref
                 .watch(filterProductProvider(idCategory).notifier)
                 .getProductOfFilter(
@@ -57,33 +55,10 @@ class ProductsSortOptionBottomSheetWidget extends ConsumerWidget {
                   idSize: ref.read(selectedSizesProvider(idCategory)),
                   idColor: ref.read(selectedColorsProvider(idCategory)),
                   idSubCategory: ref.read(selectedCategoryProvider(idCategory)),
-                  sortOption: ref
-                      .read(
-                          selectProductsSortOptionProvider(idCategory)),
+                  sortOption:
+                      ref.read(selectProductsSortOptionProvider(idCategory)),
                 );
             Navigator.of(context).pop();
-            // if(index==3||index==4){
-            //   ref
-            //       .read(selectProductsSortOptionProvider(idCategory).notifier)
-            //       .selectOption(index == 3 ? 'max' : 'min');
-            //   ref.watch(filterProductProvider(idCategory).notifier).getProductOfFilter(
-            //       nameSearch: nameSearch,
-            //       idSize: ref.read(selectedSizesProvider(idCategory)),
-            //       idColor: ref.read(selectedColorsProvider(idCategory)),
-            //       idSubCategory: ref.read(selectedCategoryProvider(idCategory)),
-            //       sortOption:
-            //       ref.read(selectProductsSortOptionProvider(idCategory)),
-            //
-            //   );
-            // }else{
-            //   ref.watch(filterProductProvider(idCategory).notifier).getProductOfFilter(
-            //       nameSearch: nameSearch,
-            //       idSize: ref.read(selectedSizesProvider(idCategory)),
-            //       idColor: ref.read(selectedColorsProvider(idCategory)),
-            //       idSubCategory: ref.read(selectedCategoryProvider(idCategory)),
-            //       sortOption:'',
-            //   );
-            // }
           },
           child: Container(
             height: 46.h,

@@ -19,7 +19,7 @@ class ListWidget extends ConsumerWidget {
       color: AppColors.primaryColor,
       backgroundColor: Colors.white,
       onRefresh: () async {
-        ref.refresh(getAllListProvider);
+        ref.invalidate(getAllListProvider);
       },
       child: SingleChildScrollView(
         child: CheckStateInGetApiDataWidget(

@@ -17,7 +17,7 @@ class SearchRemoteDataSource {
   Future<CategoryAndProductData> getSearchInformation(
       String nameSearch, int page) async {
     final response = await RemoteRequest.getData(
-      url: "/categories_search?search=$nameSearch&page=$page&perPage=6",
+      url: "/categories_search?search=$nameSearch&page=$page&perPage=8",
     );
     return CategoryAndProductData.fromJson(response.data['data']);
   }

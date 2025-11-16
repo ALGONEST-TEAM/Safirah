@@ -21,7 +21,7 @@ class ListOfWishesProductsWidget extends ConsumerWidget {
       color: AppColors.primaryColor,
       backgroundColor: Colors.white,
       onRefresh: () async {
-        ref.refresh(getAllWishesProductsProvider);
+        ref.invalidate(getAllWishesProductsProvider);
       },
       child: CheckStateInGetApiDataWidget(
         state: state,

@@ -6,6 +6,7 @@ class SizeData {
   final dynamic price;
   final bool? hasNumbers;
   final String? stock;
+  final bool? stockStatus;
   final List<NumberModel>? numberData;
 
   SizeData({
@@ -14,6 +15,7 @@ class SizeData {
     this.id,
     this.hasNumbers,
     this.stock,
+    this.stockStatus,
     this.numberData,
   });
 
@@ -24,7 +26,9 @@ class SizeData {
       price: json['price'] ?? 0,
       hasNumbers: json['has_children'] ?? false,
       stock: json['stock'] ?? "",
-      numberData: NumberModel.fromJsonNumbersList(json['cheldren_number'] ?? []),
+      stockStatus: json['stock_status'] ?? true,
+      numberData:
+          NumberModel.fromJsonNumbersList(json['cheldren_number'] ?? []),
     );
   }
 
@@ -38,6 +42,7 @@ class SizeData {
         price: 0,
         hasNumbers: false,
         stock: '',
+        stockStatus: true,
         numberData: <NumberModel>[],
       );
 }
