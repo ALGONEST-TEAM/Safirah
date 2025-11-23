@@ -21,8 +21,6 @@ class CommentCardInformationWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasColor = (reviews.colorHex?.isNotEmpty ?? false);
-    // final colorName = reviews.colorName ?? '';
-    // final sizeValue = reviews.sizeValue?.toString() ?? '';
     final parts = <String>[];
     if (reviews.colorName?.isNotEmpty ?? false) {
       parts.add(' ${reviews.colorName.toString()}');

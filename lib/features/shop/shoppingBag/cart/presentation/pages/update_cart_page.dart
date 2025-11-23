@@ -51,6 +51,7 @@ class UpdateCartPage extends ConsumerStatefulWidget {
 
 class _UpdateCartPageState extends ConsumerState<UpdateCartPage> {
   bool isMainInitialized = false;
+  bool isMainInitialized2 = false;
   bool isSizeIdValid = false;
   bool isNumberIdValid = false;
 
@@ -64,6 +65,18 @@ class _UpdateCartPageState extends ConsumerState<UpdateCartPage> {
         ref
             .read(changeIndexOfColorImageAndSizeProvider.notifier)
             .setIndexColor(mainIndex);
+      });
+    }
+  }
+
+  void _initializeSize(data) {
+    if (!isMainInitialized2 && data.sizeProduct!.isNotEmpty) {
+      final mainIndex =
+          data.sizeProduct!.indexWhere((size) => size.id == widget.sizeId);
+      isMainInitialized2 = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(changeIndexOfSizeProvider(widget.productId).notifier).state =
+            mainIndex;
       });
     }
   }
@@ -101,6 +114,7 @@ class _UpdateCartPageState extends ConsumerState<UpdateCartPage> {
         widgetOfData: Consumer(
           builder: (context, ref, child) {
             _initializeImage(state.data);
+            _initializeSize(state.data);
             var price = ref.watch(changePriceProvider(state.data));
             var indexColorImage =
                 ref.watch(changeIndexOfColorImageAndSizeProvider);
@@ -135,7 +149,6 @@ class _UpdateCartPageState extends ConsumerState<UpdateCartPage> {
                               price: price ?? state.data.price!,
                               updateCart: true,
                               discountModel: state.data.discountModel,
-
                             ),
                             Visibility(
                               visible:

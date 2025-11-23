@@ -29,17 +29,22 @@ class _ListOfColorsProductWidgetState
     extends ConsumerState<ListOfColorsProductWidget> {
   @override
   void initState() {
-    ref.read(changePriceProvider(widget.colorsProduct).notifier).setIdColor(
-        widget.colorsProduct.colorsProduct!.isEmpty
-            ? 0
-            : widget.colorIdOfTheCart ??
-                widget.colorsProduct.colorsProduct![0].idColor!);
-    ref.read(changePriceProvider(widget.colorsProduct).notifier).setNameColor(
-        widget.colorsProduct.colorsProduct!.isEmpty
-            ? ''
-            : widget.colorNameOfTheCart ??
-                widget.colorsProduct.colorsProduct![0].colorName!);
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(changePriceProvider(widget.colorsProduct).notifier).setIdColor(
+          widget.colorsProduct.colorsProduct!.isEmpty
+              ? 0
+              : widget.colorIdOfTheCart ??
+                  widget.colorsProduct.colorsProduct![0].idColor!);
+      ref.read(changePriceProvider(widget.colorsProduct).notifier).setNameColor(
+          widget.colorsProduct.colorsProduct!.isEmpty
+              ? ''
+              : widget.colorNameOfTheCart ??
+                  widget.colorsProduct.colorsProduct![0].colorName!);
+      setState(() {});
+    });
   }
 
   @override
@@ -93,8 +98,9 @@ class _ListOfColorsProductWidgetState
                                         .notifier)
                                     .selectedSizeName ??
                                 '';
-                            if (sizeName.isNotEmpty&&widget.colorsProduct.sizeProduct!.isNotEmpty &&
-                            widget.colorsProduct.sizeProduct!.length != 1 ) {
+                            if (sizeName.isNotEmpty &&
+                                widget.colorsProduct.sizeProduct!.isNotEmpty &&
+                                widget.colorsProduct.sizeProduct!.length != 1) {
                               ref.read(changePriceProvider(widget.colorsProduct)
                                   .notifier)
                                 ..setNameSize('')

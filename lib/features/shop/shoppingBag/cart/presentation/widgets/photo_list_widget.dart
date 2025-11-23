@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../../core/widgets/online_images_widget.dart';
 import '../../../../../../core/widgets/photo_view_dialog_widget.dart';
 
-
 class PhotoListWidget extends ConsumerWidget {
   final List<dynamic> image;
 
@@ -17,13 +16,14 @@ class PhotoListWidget extends ConsumerWidget {
       child: ListView.separated(
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 12.w,vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         itemBuilder: (context, index) {
           return InkWell(
             onTap: () {
               PhotoViewDialogWidget.show(
                 context,
-                image[index].toString(),
+                images: List<String>.from(image),
+                initialIndex: index
               );
             },
             child: OnlineImagesWidget(

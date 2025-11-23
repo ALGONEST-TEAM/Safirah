@@ -41,7 +41,7 @@ void main() async {
     }
   };
   runZonedGuarded(
-    () async {
+        () async {
       RemoteRequest.initDio();
       await Hive.initFlutter();
       Hive.registerAdapter(SectionAndProductDataAdapter());
@@ -55,7 +55,7 @@ void main() async {
       await Auth().onInit();
       runApp(const AppRestartController(child: MyApp()));
     },
-    (error, stackTrace) {
+        (error, stackTrace) {
       debugPrint("Caught error in release mode: $error");
       debugPrint("Stack trace: $stackTrace");
     },

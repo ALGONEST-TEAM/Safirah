@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../../core/widgets/online_images_widget.dart';
+import '../../../../../../core/widgets/photo_view_dialog_widget.dart';
 
 class ReviewImagesStripWidget extends StatelessWidget {
   final List<String> images;
@@ -18,10 +19,19 @@ class ReviewImagesStripWidget extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.all(12.sp),
         itemBuilder: (context, index) {
-          return OnlineImagesWidget(
-            imageUrl: images[index],
-            size: Size(110.w, double.infinity),
-            borderRadius: 4.r,
+          return InkWell(
+            onTap: (){
+              PhotoViewDialogWidget.show(
+                context,
+                images: images,
+                initialIndex: index,
+              );
+            },
+            child: OnlineImagesWidget(
+              imageUrl: images[index],
+              size: Size(110.w, double.infinity),
+              borderRadius: 4.r,
+            ),
           );
         },
         separatorBuilder: (context, index) => SizedBox(width: 6.w),
