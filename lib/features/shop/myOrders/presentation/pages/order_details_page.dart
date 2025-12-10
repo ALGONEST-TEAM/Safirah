@@ -30,7 +30,7 @@ class OrderDetailsPage extends ConsumerWidget {
       body: CheckStateInGetApiDataWidget(
         state: state,
         refresh: () {
-          ref.refresh(orderDetailsProvider(orderId));
+          ref.invalidate(orderDetailsProvider(orderId));
         },
         widgetOfLoading: const LogoShimmerWidget(),
         widgetOfData: SingleChildScrollView(

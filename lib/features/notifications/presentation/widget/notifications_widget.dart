@@ -12,6 +12,7 @@ class NotificationsWidget extends ConsumerWidget {
   final String date;
   final String? readAt;
   final int index;
+
   const NotificationsWidget({
     super.key,
     required this.title,
@@ -19,17 +20,15 @@ class NotificationsWidget extends ConsumerWidget {
     required this.date,
     required this.readAt,
     required this.index,
-
   });
 
   @override
-  Widget build(BuildContext context,WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isRead = readAt != null;
 
     return InkWell(
-      onTap: (){
-         ref.read(notificationProvider.notifier).markAsRead(index: index);
-
+      onTap: () {
+        ref.read(notificationProvider.notifier).markAsRead(index: index);
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 10.h),
@@ -47,7 +46,8 @@ class NotificationsWidget extends ConsumerWidget {
                   width: 40.w,
                   height: 35.h,
                   decoration: BoxDecoration(
-                    color:  isRead ? Colors.grey.shade300 : AppColors.primaryColor,
+                    color:
+                        isRead ? Colors.grey.shade300 : AppColors.primaryColor,
                     borderRadius: BorderRadius.circular(12.sp),
                   ),
                   child: Icon(

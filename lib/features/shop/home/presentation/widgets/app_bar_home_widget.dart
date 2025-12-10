@@ -55,8 +55,8 @@ AppBar appBarHomeWidget({required BuildContext context}) {
             if (!Auth().loggedIn) {
               navigateTo(context, const LogInPage());
             } else {
-              ref.refresh(getAllWishesProductsProvider);
-              ref.refresh(getAllListProvider);
+              ref.invalidate(getAllWishesProductsProvider);
+              ref.invalidate(getAllListProvider);
               navigateTo(context, const WishlistPage());
             }
           },
