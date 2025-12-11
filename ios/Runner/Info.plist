@@ -45,5 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>IBMPlexSansArabic-Regular.ttf</string>
+		<string>IBMPlexSansArabic-Bold.ttf</string>
+		<string>IBMPlexSansArabic-SemiBold.ttf</string>
+		<string>IBMPlexSansArabic-Medium.ttf</string>
+		<string>IBMPlexSansArabic-Light.ttf</string>
+		<string>IBMPlexSansArabic-ExtraLight.ttf</string>
+		<string>IBMPlexSansArabic-Thin.ttf</string>
+	</array>
 </dict>
 </plist>

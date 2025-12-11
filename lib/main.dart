@@ -25,6 +25,7 @@ import 'features/shop/productManagement/detailsProducts/data/model/product_data.
 import 'features/shop/shoppingBag/cart/presentation/riverpod/cart_riverpod.dart';
 import 'generated/l10n.dart';
 import 'services/auth/auth.dart';
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -104,6 +105,8 @@ class _MyAppState extends ConsumerState<MyApp> {
       minTextAdapt: false,
       splitScreenMode: false,
       child: MaterialApp(
+        navigatorKey: appNavigatorKey,
+
         debugShowCheckedModeBanner: false,
         locale: locale,
         localizationsDelegates: const [

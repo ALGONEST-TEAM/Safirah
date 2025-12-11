@@ -31,7 +31,7 @@ class AutoSizeTextWidget extends StatelessWidget {
       text,
       style: TextStyle(
         fontWeight: fontWeight ?? FontWeight.w500,
-        fontSize: fontSize ?? 14.sp,
+        fontSize: fontSize ?? 12.sp,
         color: colorText ?? Colors.black,
         fontFamily: 'IBMPlexSansArabic',
         decoration: decoration,

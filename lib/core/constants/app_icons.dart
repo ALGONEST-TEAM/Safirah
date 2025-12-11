@@ -107,4 +107,15 @@ class AppIcons {
   static const String profile = '${_iconsPath}bottombar/profile.svg';
   static const String profileActive =
       '${_iconsPath}bottombar/profile_active.svg';
+
+  static const String ball =
+      '${_iconsPath}ball.svg';
+  static const String redWarring =
+      '${_iconsPath}red_warring.svg';
+
+  static const String substitutionPlayer =
+      '${_iconsPath}substitution.svg';
+
+  static const String editPlayer =
+      '${_iconsPath}edit_event.svg';
 }

@@ -11,12 +11,14 @@ ThemeData lightTheme = ThemeData(
     backgroundColor: Colors.transparent,
     surfaceTintColor: Colors.transparent,
     elevation: 0.0,
+
     systemOverlayStyle: SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
+
+      statusBarIconBrightness: Brightness.light,
       systemNavigationBarColor: Colors.transparent,
       systemNavigationBarDividerColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.dark,
+      systemNavigationBarIconBrightness: Brightness.light,
     ),
   ),
   tabBarTheme: TabBarThemeData(

@@ -33,11 +33,12 @@ void showFlashBarSuccess({
 }
 
 /// Error ///
-void showFlashBarError({
+ showFlashBarError({
   required BuildContext context,
   required String title,
   required String text,
 }) {
+
   Flushbar(
     duration: const Duration(seconds: 3),
     title: title,
