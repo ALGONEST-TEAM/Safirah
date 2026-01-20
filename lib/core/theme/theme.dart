@@ -5,17 +5,15 @@ import 'app_colors.dart';
 ThemeData lightTheme = ThemeData(
   scaffoldBackgroundColor: AppColors.scaffoldColor,
   primarySwatch: AppColors.primarySwatch,
-  splashColor: AppColors.primaryColor.withValues(alpha:.1),
-  highlightColor: AppColors.primaryColor.withValues(alpha:.1),
+  splashColor: AppColors.primaryColor.withValues(alpha: .1),
+  highlightColor: AppColors.primaryColor.withValues(alpha: .1),
   appBarTheme: const AppBarTheme(
     backgroundColor: Colors.transparent,
     surfaceTintColor: Colors.transparent,
     elevation: 0.0,
-
     systemOverlayStyle: SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-
-      statusBarIconBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark,
       systemNavigationBarColor: Colors.transparent,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.light,
@@ -29,7 +27,7 @@ ThemeData lightTheme = ThemeData(
     indicatorColor: Colors.black,
     overlayColor: MaterialStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) {
-        return AppColors.primaryColor.withValues(alpha:0.1);
+        return AppColors.primaryColor.withValues(alpha: 0.1);
       },
     ),
     unselectedLabelStyle: const TextStyle(fontFamily: "IBMPlexSansArabic"),

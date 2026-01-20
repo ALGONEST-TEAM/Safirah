@@ -89,10 +89,13 @@ class AppURL {
 
   static String get getAllCurrencies => '/currencies';
 
-
   static String get notification => '/notifications';
 
   static const String unreadNotificationCount = '/notifications/count';
 
   static const String markNotificationAsRead = '/notifications/mark_as_read';
+
+  static const String getAllMatches = '/predictions/fixtures/current';
+
+  static const String prediction = '/predictions';
 }

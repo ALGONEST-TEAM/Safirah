@@ -10,6 +10,8 @@ import '../../data/model/offer_products_model.dart';
 import '../../data/model/sections_and_offers_data.dart';
 import '../../data/reposaitory/reposaitories.dart';
 
+final homeTabIndexProvider = StateProvider<int>((ref) => 0);
+
 final sectionProvider =
     StateNotifierProvider<SectionNotifier, DataState<SectionsAndOffersData>>(
         (ref) => SectionNotifier());

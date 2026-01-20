@@ -21,7 +21,6 @@ class ProductListWidget extends StatelessWidget {
     return Column(
       children: [
         MasonryGridView.builder(
-          key: ValueKey(product.length),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           primary: false,
@@ -34,6 +33,7 @@ class ProductListWidget extends StatelessWidget {
           itemCount: product.length,
           itemBuilder: (context, index) {
             return RepaintBoundary(
+              key: ValueKey(product[index].id),
               child: ProductCard(
                 id: product[index].id!,
                 image: product[index].mainImage ?? [],
@@ -60,7 +60,7 @@ class ProductListWidget extends StatelessWidget {
               ),
             ),
           ),
-        28.h.verticalSpace,
+        34.h.verticalSpace,
       ],
     );
   }

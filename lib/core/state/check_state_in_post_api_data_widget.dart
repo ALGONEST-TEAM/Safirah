@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import '../../generated/l10n.dart';
 import '../helpers/flash_bar_helper.dart';
 import '../network/errors/remote_exception.dart';
 import '../state/state.dart';
@@ -31,7 +32,7 @@ class CheckStateInPostApiDataWidget extends StatelessWidget {
         hasMessageSuccess
             ? showFlashBarSuccess(
                 context: context,
-                message: messageSuccess ?? " تم اكمال العملية بنجاح",
+                message: messageSuccess ?? S.of(context).successfully,
               )
             : const SizedBox.shrink();
         state.stateData = States.initial;

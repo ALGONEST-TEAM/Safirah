@@ -1,37 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/core/state/check_state_in_get_api_data_widget.dart';
+import 'package:safirah/core/theme/app_colors.dart';
 
 import '../../../../core/widgets/auto_size_text_widget.dart';
+import '../riverpod/prediction_riverpod.dart';
 import 'match_card_widget.dart';
+import 'shimmer_matches_widget.dart';
 
-class MatchesWidget extends StatelessWidget {
+class MatchesWidget extends ConsumerWidget {
   const MatchesWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
-      itemCount: sections.length,
-      itemBuilder: (context, index) {
-        final section = sections[index];
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (index == 0)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4.w),
-                child: AutoSizeTextWidget(
-                  text: "السبت 15 يناير 2025",
-                  fontSize: 10.6.sp,
-                ),
-              ),
-            Padding(
-              padding: EdgeInsets.only(top: 6.h),
-              child: MatchCardWidget(section: section),
-            ),
-          ],
-        );
+  Widget build(BuildContext context, WidgetRef ref) {
+    var state = ref.watch(getAllMatchesProvider);
+
+    return CheckStateInGetApiDataWidget(
+      state: state,
+      refresh: () {
+        ref.invalidate(getAllMatchesProvider);
       },
+      widgetOfLoading: const ShimmerMatchesWidget(),
+      widgetOfData: RefreshIndicator(
+        backgroundColor: Colors.white,
+        color: AppColors.primaryColor,
+        onRefresh: () async {
+          ref.invalidate(getAllMatchesProvider);
+        },
+        child: ListView.builder(
+          padding:
+              EdgeInsets.symmetric(horizontal: 12.w).copyWith(bottom: 38.h),
+          itemCount: state.data.length,
+          itemBuilder: (context, dayIndex) {
+            final day = state.data[dayIndex];
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 4.w).copyWith(top: 12.h),
+                  child: AutoSizeTextWidget(
+                    text: day.date,
+                    fontSize: 10.6.sp,
+                  ),
+                ),
+                ...day.leagues.map(
+                  (league) => Padding(
+                    padding: EdgeInsets.only(top: 6.h),
+                    child: MatchCardWidget(
+                      data: league,
+                      date: day.date,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 }

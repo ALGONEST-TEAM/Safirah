@@ -44,7 +44,8 @@ class CheckStateInGetApiDataWidget extends StatelessWidget {
         return Center(
           child: ErrorsWidget(
             title: MessageOfErorrApi.getExeptionMessage(state.exception!).first,
-            subTitle: MessageOfErorrApi.getExeptionMessage(state.exception!).last,
+            subTitle:
+                MessageOfErorrApi.getExeptionMessage(state.exception!).last,
             onPressed: refresh,
           ),
         );

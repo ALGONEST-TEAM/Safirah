@@ -77,12 +77,11 @@ dependencies:
   path_provider:
   path:
   custom_refresh_indicator:
-
   sms_autofill: ^2.4.1
   firebase_core:
-#  flutter_local_notifications:
   awesome_notifications:
   firebase_messaging:
+  extended_nested_scroll_view: ^6.2.1
 
 dev_dependencies:
   flutter_test:

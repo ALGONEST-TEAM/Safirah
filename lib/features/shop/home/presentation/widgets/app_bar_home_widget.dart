@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/features/shop/home/presentation/widgets/tap_bar_widget.dart';
 import '../../../../../core/constants/app_icons.dart';
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -15,6 +16,8 @@ import '../../../../user/presentation/pages/log_in_page.dart';
 import '../../../productManagement/search_product/presntation/page/search_page.dart';
 import '../../../productManagement/wishlist/presentation/pages/wishlist_page.dart';
 import '../../../productManagement/wishlist/presentation/riverpod/wishlist_riverpod.dart';
+import '../../data/model/offers_model.dart';
+import 'offers_widget.dart';
 
 AppBar appBarHomeWidget({required BuildContext context}) {
   return AppBar(
@@ -114,3 +117,4 @@ AppBar appBarHomeWidget({required BuildContext context}) {
     ],
   );
 }
+

@@ -40,24 +40,25 @@ class _SectionOfCategoryInHomePageState
     super.dispose();
   }
 
+  bool _pagingLock = false;
+
   void _loadMoreData(int? numberFilter) async {
-    if (!mounted) return;
+    if (!mounted || _pagingLock) return;
+    _pagingLock = true;
 
     setState(() => isLoadingMore = true);
-
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () async {
-      try {
-        await ref
-            .read(
-                subSectionProvider(Tuple2(widget.idSection, numberFilter ?? 1))
-                    .notifier)
-            .getSubSectionData(moreData: true);
-      } finally {
-        if (mounted) setState(() => isLoadingMore = false);
-      }
-    });
+    try {
+      await ref
+          .read(subSectionProvider(Tuple2(widget.idSection, numberFilter ?? 1))
+              .notifier)
+          .getSubSectionData(moreData: true);
+    } finally {
+      if (mounted) setState(() => isLoadingMore = false);
+      _pagingLock = false;
+    }
   }
+
+  double _lastPixels = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +66,15 @@ class _SectionOfCategoryInHomePageState
     var numberFilter =
         ref.watch(getSectionFilterTypeProvider(widget.idSection));
     var state = ref.watch(subSectionProvider(Tuple2(widget.idSection, 1)));
-
+    final hasMore = ref.watch(
+      subSectionProvider(Tuple2(widget.idSection, numberFilter ?? 1))
+          .select((s) {
+        final p = s.data.product;
+        if (p == null) return true;
+        if (p.lastPage != null) return p.currentPage < p.lastPage!;
+        return (p.data.isNotEmpty);
+      }),
+    );
     return CustomRefreshIndicator(
       offsetToArmed: 40.h,
       autoRebuild: true,
@@ -88,7 +97,7 @@ class _SectionOfCategoryInHomePageState
             ),
             if (visible)
               Positioned(
-                top: 28.h,
+                top: -20.h,
                 left: 0,
                 right: 0,
                 child: ShimmerWidget(
@@ -100,23 +109,33 @@ class _SectionOfCategoryInHomePageState
         );
       },
       child: NotificationListener<ScrollNotification>(
-        onNotification: (scrollNotification) {
-          if (scrollNotification is ScrollUpdateNotification) {
-            final m = scrollNotification.metrics;
-            final bool nearEnd = m.extentAfter < 0.4; // px متبقية قليلة
+        onNotification: (n) {
+          if (n.metrics.axis != Axis.vertical) return false;
+          if (n is ScrollUpdateNotification) {
+            final m = n.metrics;
+            // فقط لو المستخدم ينزل لتحت
+            final goingDown = m.pixels > _lastPixels;
+            _lastPixels = m.pixels;
 
-            if (nearEnd && !isLoadingMore && m.maxScrollExtent > 0) {
+            final endThreshold = MediaQuery.of(context).size.height * 0.02;
+
+            final atEnd = m.pixels >= (m.maxScrollExtent - endThreshold);
+
+            if (goingDown &&
+                !isLoadingMore &&
+                !_pagingLock &&
+                atEnd &&
+                m.maxScrollExtent > 5 &&
+                hasMore) {
               _loadMoreData(numberFilter);
             }
           }
           return false;
         },
         child: CustomScrollView(
+          key: PageStorageKey('section_${widget.idSection}'),
           physics: const ClampingScrollPhysics(),
           slivers: [
-            SliverOverlapInjector(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-            ),
             CategoryWidget(
               state: state,
               refresh: () async {
@@ -127,30 +146,29 @@ class _SectionOfCategoryInHomePageState
                     .getSubSectionData(isRefresh: true, moreData: false);
               },
             ),
-            if (state.stateData != States.error)
+            if (state.stateData != States.error) ...[
               SliverToBoxAdapter(
                 child: FilterProductsHomeWidget(
                   idSection: widget.idSection,
                 ),
               ),
-            SliverToBoxAdapter(
-              child: Consumer(
-                builder: (context, ref, child) {
-                  if (numberFilter != 1) {
-                    state = ref.watch(subSectionProvider(
-                        Tuple2(widget.idSection, numberFilter ?? 1)));
-                  }
-                  return state.stateData == States.loading
-                      ? const ProductsShimmerWidget()
-                      : state.stateData == States.error
-                          ? const SizedBox.shrink()
-                          : ProductListWidget(
-                              isLoadingMore: isLoadingMore,
-                              product: state.data.product?.data ?? [],
-                            );
-                },
+              SliverToBoxAdapter(
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    if (numberFilter != 1) {
+                      state = ref.watch(subSectionProvider(
+                          Tuple2(widget.idSection, numberFilter ?? 1)));
+                    }
+                    return state.stateData == States.loading
+                        ? const ProductsShimmerWidget()
+                        : ProductListWidget(
+                            isLoadingMore: isLoadingMore,
+                            product: state.data.product?.data ?? [],
+                          );
+                  },
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),

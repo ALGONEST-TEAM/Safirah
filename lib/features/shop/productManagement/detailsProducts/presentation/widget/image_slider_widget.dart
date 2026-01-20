@@ -58,7 +58,7 @@ class _ImageSliderWidgetState extends State<ImageSliderWidget> {
           return true;
         },
         child: SizedBox(
-          height: 320.h,
+          height: 420.h,
           child: ListView.builder(
             controller: _scrollController,
             scrollDirection: Axis.horizontal,
@@ -73,7 +73,7 @@ class _ImageSliderWidgetState extends State<ImageSliderWidget> {
                   imageUrl: widget.productData.colorHasImage == false
                       ? allImage[index]
                       : imagesByColor[index],
-                  size: Size(double.infinity, 320.h),
+                  size: Size(double.infinity, 420.h),
                   borderRadius: 0,
                 ),
               );

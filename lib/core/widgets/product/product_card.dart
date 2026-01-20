@@ -71,6 +71,7 @@ class ProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ProductPhotosWidget(
+                    productId: id,
                     height: 200.h,
                     image: image,
                     colorsOfProduct: colorsOfProduct ?? [],

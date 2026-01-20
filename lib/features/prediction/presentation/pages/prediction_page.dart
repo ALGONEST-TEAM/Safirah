@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../core/constants/app_icons.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/buttons/icon_button_widget.dart';
 import '../../../../core/widgets/design_please_login_widget.dart';
+import '../../../../core/widgets/main_app_bar_widget.dart';
+import '../../../../generated/l10n.dart';
 import '../../../../services/auth/auth.dart';
 import '../widgets/leader_board_widget.dart';
 import '../widgets/matches_widget.dart';
@@ -40,19 +40,7 @@ class _PredictionPageState extends State<PredictionPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0.0,
-        automaticallyImplyLeading: false,
-        actions: !Auth().loggedIn
-            ? []
-            : [
-                IconButtonWidget(
-                  icon: AppIcons.notification,
-                  height: 20.h,
-                  onPressed: () {},
-                ),
-              ],
-      ),
+      appBar:  MainAppBarWidget(title: S.of(context).expectations),
       body: !Auth().loggedIn
           ? const DesignPleaseLoginWidget()
           : DefaultTabController(
@@ -62,6 +50,7 @@ class _PredictionPageState extends State<PredictionPage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    2.h.verticalSpace,
                     TabBar(
                       controller: _tabController,
                       isScrollable: true,
@@ -93,9 +82,10 @@ class _PredictionPageState extends State<PredictionPage>
                                   selectness)!;
 
                               return Container(
-                                  height: 36.h,
+                                  height: 34.h,
                                   width: 102.w,
-                                  margin: EdgeInsets.symmetric(horizontal: 6.4.w),
+                                  margin:
+                                      EdgeInsets.symmetric(horizontal: 6.4.w),
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 14.w, vertical: 8.h),
                                   decoration: BoxDecoration(
@@ -124,7 +114,7 @@ class _PredictionPageState extends State<PredictionPage>
                       child: TabBarView(
                         controller: _tabController,
                         physics: const BouncingScrollPhysics(),
-                        children: [
+                        children:const [
                           MatchesWidget(),
                           PredictionWidget(),
                           LeaderboardWidget(),

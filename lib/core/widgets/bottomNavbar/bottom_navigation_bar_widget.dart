@@ -4,10 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../../features/shop/home/presentation/pages/home_page.dart';
 import 'package:safirah/core/helpers/navigateTo.dart';
 import 'package:safirah/features/shop/shoppingBag/cart/presentation/pages/cart_page.dart';
+import '../../../features/prediction/presentation/pages/prediction_page.dart';
 import '../../../features/profile/presentation/pages/profile_page.dart';
+import '../../../features/shop/home/presentation/pages/home_page.dart';
 import '../../../features/shop/myOrders/presentation/pages/my_orders_page.dart';
 import '../../../features/shop/shoppingBag/cart/presentation/riverpod/cart_riverpod.dart';
 import '../../../features/user/presentation/pages/log_in_page.dart';
@@ -19,7 +20,7 @@ import '../../theme/app_colors.dart';
 import '../auto_size_text_widget.dart';
 import 'design_for_bottom_navigation_bar_widget.dart';
 
-final activeIndexProvider = StateProvider<int>((ref) => 0);
+final activeIndexShopProvider = StateProvider<int>((ref) => 0);
 
 class BottomNavigationBarWidget extends ConsumerStatefulWidget {
   const BottomNavigationBarWidget({super.key});
@@ -35,17 +36,18 @@ class _BottomNavigationBarWidgetState
     const ExitFromAppWidget(child: MyOrdersPage()),
     const ExitFromAppWidget(child: CartPage()),
     const ExitFromAppWidget(child: ProfilePage()),
+    const ExitFromAppWidget(child: PredictionPage()), // 👈 جديد
+
   ];
 
   @override
   Widget build(BuildContext context) {
-    final activeIndex = ref.watch(activeIndexProvider);
+    final activeIndex = ref.watch(activeIndexShopProvider);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
+      value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness:
-            activeIndex == 0 ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness: Brightness.dark,
         systemNavigationBarColor: Colors.white,
         systemNavigationBarDividerColor: Colors.white,
         systemNavigationBarIconBrightness: Brightness.dark,
@@ -56,7 +58,10 @@ class _BottomNavigationBarWidgetState
         floatingActionButton: SizedBox(
           height: 57.h,
           child: FloatingActionButton.large(
-            onPressed: () {},
+            onPressed: () {
+              ref.read(activeIndexShopProvider.notifier).state = 4;
+
+            },
             backgroundColor: AppColors.whiteColor,
             splashColor: AppColors.primaryColor,
             elevation: 0,
@@ -72,45 +77,94 @@ class _BottomNavigationBarWidgetState
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: Container(
-          color: AppColors.whiteColor,
-          padding: EdgeInsets.only(bottom: 4.h, top: 6.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(
-                AppIcons.home,
-                AppIcons.homeActive,
-                S.of(context).home,
-                0,
-                activeIndex,
-              ),
-              _buildNavItem(
-                AppIcons.expectations,
-                AppIcons.expectationsActive,
-                S.of(context).expectations,
-                1,
-                activeIndex,
-              ),
-              SizedBox(
-                height: 20.h,
-                width: 40.w,
-              ),
-              _buildNavItem(
-                AppIcons.myOrders,
-                AppIcons.myOrdersActive,
-                S.of(context).myOrders,
-                2,
-                activeIndex,
-              ),
-              _buildNavItem(
-                AppIcons.profile,
-                AppIcons.profileActive,
-                S.of(context).profile,
-                3,
-                activeIndex,
-              ),
-            ],
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Container(
+            padding: EdgeInsets.only(bottom: 4.h, top: 8.h),
+            decoration: BoxDecoration(
+                color: AppColors.whiteColor,
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(8.r),
+                  topLeft: Radius.circular(8.r),
+                )),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Expanded(
+                  child: _buildNavItem(
+                    AppIcons.home,
+                    AppIcons.homeActive,
+                    S.of(context).home,
+                    0,
+                    activeIndex,
+                  ),
+                ),
+                Expanded(
+                  child: _buildNavItem(
+                    AppIcons.myOrders,
+                    AppIcons.myOrdersActive,
+                    S.of(context).myOrders,
+                    1,
+                    activeIndex,
+                  ),
+                ),
+                SizedBox(
+                  height: 20.h,
+                  width: 50.w,
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Consumer(builder: (context, ref, _) {
+                        final cartCount = ref.watch(getCartCountProvider);
+
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            _buildNavItem(
+                              AppIcons.cart,
+                              AppIcons.cartActive,
+                              S.of(context).cart,
+                              2,
+                              activeIndex,
+                            ),
+                            if (cartCount > 0)
+                              Positioned(
+                                left: -5,
+                                top: -8,
+                                child: Container(
+                                  padding: EdgeInsets.all(1.6.sp),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.dangerColor,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white),
+                                  ),
+                                  child: AutoSizeTextWidget(
+                                    text: ' $cartCount ',
+                                    colorText: Colors.white,
+                                    fontSize: 7.5.sp,
+                                    minFontSize: 6,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: _buildNavItem(
+                    AppIcons.profile,
+                    AppIcons.profileActive,
+                    S.of(context).profile,
+                    3,
+                    activeIndex,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -132,7 +186,7 @@ class _BottomNavigationBarWidgetState
             navigateTo(context, const CartPage());
           }
         } else {
-          ref.read(activeIndexProvider.notifier).state = index;
+          ref.read(activeIndexShopProvider.notifier).state = index;
         }
       },
     );

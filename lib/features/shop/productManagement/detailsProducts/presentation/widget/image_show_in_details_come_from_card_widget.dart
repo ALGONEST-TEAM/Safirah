@@ -54,7 +54,7 @@ class _ImageShowInDetailsComeFromCardWidgetState
           return true;
         },
         child: SizedBox(
-          height: 320.h,
+          height: 420.h,
           child: ListView.builder(
             controller: _scrollController,
             scrollDirection: Axis.horizontal,
@@ -65,7 +65,7 @@ class _ImageShowInDetailsComeFromCardWidgetState
                 width: MediaQuery.of(context).size.width,
                 child: OnlineImagesWidget(
                   imageUrl: widget.productData[index],
-                  size: Size(double.infinity, 320.h),
+                  size: Size(double.infinity, 420.h),
                   borderRadius: 0,
                 ),
               );

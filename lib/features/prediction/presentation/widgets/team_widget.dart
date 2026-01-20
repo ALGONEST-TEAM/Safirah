@@ -10,7 +10,8 @@ class TeamWidget extends StatelessWidget {
   final bool alignRight;
   final Size? sizeImage;
   final double? fontSize;
-  final double?width;
+  final double? width;
+
   const TeamWidget({
     super.key,
     required this.name,
@@ -24,39 +25,42 @@ class TeamWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width:width?? 110.w,
+      width: width ?? 110.w,
       color: Colors.transparent,
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
         mainAxisAlignment:
-        alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,
+            alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!alignRight) ...[
             OnlineImagesWidget(
               imageUrl: image,
               backgroundColor: Colors.white,
-              size:sizeImage?? Size(18.w, 18.h),
+              size: sizeImage ?? Size(20.w, 20.h),
             ),
             6.w.horizontalSpace,
             Flexible(
               child: AutoSizeTextWidget(
                 text: name,
-                fontSize:fontSize?? 11.sp,
+                fontSize: fontSize ?? 11.sp,
                 maxLines: 2,
+                textAlign: TextAlign.start,
               ),
             ),
           ] else ...[
             Flexible(
               child: AutoSizeTextWidget(
                 text: name,
-                fontSize:fontSize?? 11.sp,
+                fontSize: fontSize ?? 11.sp,
                 maxLines: 2,
+                textAlign: TextAlign.end,
+
               ),
             ),
             6.w.horizontalSpace,
             OnlineImagesWidget(
               imageUrl: image,
-              size:sizeImage?? Size(18.w, 18.h),
+              size: sizeImage ?? Size(20.w, 20.h),
             ),
           ]
         ],

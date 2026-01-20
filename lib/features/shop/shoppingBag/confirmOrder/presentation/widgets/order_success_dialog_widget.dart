@@ -67,7 +67,7 @@ class OrderSuccessDialogWidget extends ConsumerWidget {
             height: 38.h,
             textSize: 11.4.sp,
             onPressed: () {
-              ref.read(activeIndexProvider.notifier).state = 0;
+              ref.read(activeIndexShopProvider.notifier).state = 0;
               navigateAndFinish(context, const BottomNavigationBarWidget());
             },
           ),
@@ -90,7 +90,7 @@ class CompleteOrder {
         );
       },
     ).then((v) {
-      ref.read(activeIndexProvider.notifier).state = 0;
+      ref.read(activeIndexShopProvider.notifier).state = 0;
       navigateAndFinish(context, const BottomNavigationBarWidget());
     });
   }

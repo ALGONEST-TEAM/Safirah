@@ -74,6 +74,7 @@ class SortBottomSheetWidget extends StatelessWidget {
                 AutoSizeTextWidget(
                   text: S.of(context).title,
                   colorText: AppColors.fontColor,
+                  fontSize: 14.sp,
                 ),
                 const Spacer(),
                 IconButtonWidget(
@@ -87,38 +88,40 @@ class SortBottomSheetWidget extends StatelessWidget {
               ],
             ),
             8.h.verticalSpace,
-            ListView.separated(
-              shrinkWrap: true,
-              itemCount: options.length,
-              separatorBuilder: (_, __) => SizedBox(height: 10.h),
-              itemBuilder: (context, index) {
-                final bool selected = index == initialIndex;
-                return InkWell(
-                  borderRadius: BorderRadius.circular(12.r),
-                  onTap: () => Navigator.pop(context, index),
-                  child: Container(
-                    height: 46.h,
-                    decoration: BoxDecoration(
-                      color: AppColors.scaffoldColor, // بنفسجي فاتح بالصورة
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 14.w),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: AutoSizeTextWidget(
-                            text: options[index],
-                            fontSize: 12.sp,
-                            colorText: const Color(0xFF4F4A59),
+            Flexible(
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                itemCount: options.length,
+                separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                itemBuilder: (context, index) {
+                  final bool selected = index == initialIndex;
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(12.r),
+                    onTap: () => Navigator.pop(context, index),
+                    child: Container(
+                      height: 46.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.scaffoldColor, // بنفسجي فاتح بالصورة
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: AutoSizeTextWidget(
+                              text: options[index],
+                              fontSize: 12.sp,
+                              colorText: const Color(0xFF4F4A59),
+                            ),
                           ),
-                        ),
-                        RadioWidget(selected: selected),
-                      ],
+                          RadioWidget(selected: selected),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ],
         ),

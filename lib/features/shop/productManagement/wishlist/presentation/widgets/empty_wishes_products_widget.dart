@@ -45,7 +45,7 @@ class EmptyWishesProductsWidget extends StatelessWidget {
                 textSize: 11.sp,
                 borderRadius: 2.r,
                 onPressed: () {
-                  ref.read(activeIndexProvider.notifier).state = 0;
+                  ref.read(activeIndexShopProvider.notifier).state = 0;
                   navigateAndFinish(context, const BottomNavigationBarWidget());
                 },
               );
