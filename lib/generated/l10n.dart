@@ -296,6 +296,48 @@ class S {
     return Intl.message('Filter', name: 'filter', desc: '', args: []);
   }
 
+  // skipped getter for the '--------prediction-----------' key
+
+  /// `Matches`
+  String get matches {
+    return Intl.message('Matches', name: 'matches', desc: '', args: []);
+  }
+
+  /// `My predictions`
+  String get my_predictions {
+    return Intl.message(
+      'My predictions',
+      name: 'my_predictions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Standings`
+  String get standings {
+    return Intl.message('Standings', name: 'standings', desc: '', args: []);
+  }
+
+  /// `Finished`
+  String get finished {
+    return Intl.message('Finished', name: 'finished', desc: '', args: []);
+  }
+
+  /// `Live`
+  String get live {
+    return Intl.message('Live', name: 'live', desc: '', args: []);
+  }
+
+  /// `Edit prediction`
+  String get edit_prediction {
+    return Intl.message(
+      'Edit prediction',
+      name: 'edit_prediction',
+      desc: '',
+      args: [],
+    );
+  }
+
   // skipped getter for the '--------details-----------' key
 
   /// `Size details`

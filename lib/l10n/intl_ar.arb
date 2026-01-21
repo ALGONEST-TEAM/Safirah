@@ -46,7 +46,12 @@
   "price": "السعر",
   "filter": "تصنيف",
   "--------prediction-----------": "---------prediction----------",
-
+  "matches": "المباريات",
+  "my_predictions": "توقعاتي",
+  "standings": "الترتيب",
+  "finished": "إنتهت",
+  "live": "مباشر",
+  "edit_prediction": "تعديل التوقع",
   "--------details-----------": "---------details----------",
   "size_details": "تفاصيل القياس",
   "shipping_details": "تفاصيل الشحن",

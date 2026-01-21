@@ -17,8 +17,9 @@ class PredictionReposaitory {
       return Left(e);
     }
   }
+
   Future<Either<DioException, PaginationModel<LeaguesContainerModel>>>
-  getAllPredictions(int page) async {
+      getAllPredictions(int page) async {
     try {
       final remote = await _predictionRemoteDataSource.getAllPredictions(page);
       return Right(remote);
@@ -26,6 +27,7 @@ class PredictionReposaitory {
       return Left(e);
     }
   }
+
   Future<Either<DioException, Unit>> sendPrediction(
     int matchId,
     int homeScore,
@@ -34,6 +36,23 @@ class PredictionReposaitory {
     try {
       final remote = await _predictionRemoteDataSource.sendPrediction(
         matchId,
+        homeScore,
+        awayScore,
+      );
+      return Right(remote);
+    } on DioException catch (e) {
+      return Left(e);
+    }
+  }
+
+  Future<Either<DioException, Unit>> editPrediction(
+    int productionId,
+    int homeScore,
+    int awayScore,
+  ) async {
+    try {
+      final remote = await _predictionRemoteDataSource.editPrediction(
+        productionId,
         homeScore,
         awayScore,
       );

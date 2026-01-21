@@ -54,7 +54,6 @@ class TeamWidget extends StatelessWidget {
                 fontSize: fontSize ?? 11.sp,
                 maxLines: 2,
                 textAlign: TextAlign.end,
-
               ),
             ),
             6.w.horizontalSpace,

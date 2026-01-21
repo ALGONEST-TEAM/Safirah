@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/state/data_state.dart';
@@ -104,4 +105,63 @@ class SendPredictionNotifier extends StateNotifier<DataState<Unit>> {
       );
     });
   }
+
 }
+final editPredictionProvider =
+StateNotifierProvider.autoDispose<EditPredictionNotifier, DataState<Unit>>(
+        (ref) => EditPredictionNotifier());
+
+class EditPredictionNotifier extends StateNotifier<DataState<Unit>> {
+  EditPredictionNotifier() : super(DataState<Unit>.initial(unit));
+  final _controller = PredictionReposaitory();
+
+  Future<void> edit({
+    required int productionId,
+    required int homeScore,
+    required int awayScore,
+  }) async {
+    state = state.copyWith(state: States.loading);
+    final user = await _controller.editPrediction(
+      productionId,
+      homeScore,
+      awayScore,
+    );
+    user.fold((f) {
+      state = state.copyWith(state: States.error, exception: f);
+    }, (_) {
+      state = state.copyWith(
+        state: States.loaded,
+      );
+    });
+  }
+}
+// ===================== Match Status Helpers (Riverpod) =====================
+
+const Set<int> _notStartedStatuses = {1, 13, 26};
+const Set<int> _liveStatuses = {2, 3, 4, 6, 9, 21, 22, 23, 25};
+const Set<int> _finishedStatuses = {5, 7, 8, 14, 17};
+
+class MatchStatusHelper {
+  const MatchStatusHelper();
+
+  int? _toInt(num? status) => status?.toInt();
+
+  bool isNotStarted(num? status) {
+    final s = _toInt(status);
+    return s != null && _notStartedStatuses.contains(s);
+  }
+
+  bool isLive(num? status) {
+    final s = _toInt(status);
+    return s != null && _liveStatuses.contains(s);
+  }
+
+  bool isFinished(num? status) {
+    final s = _toInt(status);
+    return s != null && _finishedStatuses.contains(s);
+  }
+}
+
+final matchStatusHelperProvider = Provider<MatchStatusHelper>(
+  (ref) => const MatchStatusHelper(),
+);

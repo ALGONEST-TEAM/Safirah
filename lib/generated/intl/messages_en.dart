@@ -173,6 +173,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "done": MessageLookupByLibrary.simpleMessage("Done"),
     "editAddress": MessageLookupByLibrary.simpleMessage("Edit address"),
     "editProfile": MessageLookupByLibrary.simpleMessage("Edit profile"),
+    "edit_prediction": MessageLookupByLibrary.simpleMessage("Edit prediction"),
     "empty": MessageLookupByLibrary.simpleMessage("Empty"),
     "enter": MessageLookupByLibrary.simpleMessage("Enter"),
     "enterPhoneNumber": MessageLookupByLibrary.simpleMessage(
@@ -187,6 +188,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "favorites": MessageLookupByLibrary.simpleMessage("Favorites"),
     "female": MessageLookupByLibrary.simpleMessage("Female"),
     "filter": MessageLookupByLibrary.simpleMessage("Filter"),
+    "finished": MessageLookupByLibrary.simpleMessage("Finished"),
     "following": MessageLookupByLibrary.simpleMessage("Following"),
     "forUnitPrice": MessageLookupByLibrary.simpleMessage("For unit price"),
     "forYou": MessageLookupByLibrary.simpleMessage("For you"),
@@ -225,6 +227,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "language": MessageLookupByLibrary.simpleMessage("Language"),
     "list": MessageLookupByLibrary.simpleMessage("List"),
     "listName": MessageLookupByLibrary.simpleMessage("List name"),
+    "live": MessageLookupByLibrary.simpleMessage("Live"),
     "logIn": MessageLookupByLibrary.simpleMessage("Log in"),
     "loginRequired": MessageLookupByLibrary.simpleMessage("Login Required"),
     "loginSubTitle": MessageLookupByLibrary.simpleMessage("Using phone number"),
@@ -239,11 +242,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "manageMyAccount": MessageLookupByLibrary.simpleMessage(
       "Manage My Account",
     ),
+    "matches": MessageLookupByLibrary.simpleMessage("Matches"),
     "moreDetails": MessageLookupByLibrary.simpleMessage("More details"),
     "mostSold": MessageLookupByLibrary.simpleMessage("Best sellers"),
     "myAddresses": MessageLookupByLibrary.simpleMessage("My Addresses"),
     "myLeagues": MessageLookupByLibrary.simpleMessage("My Leagues"),
     "myOrders": MessageLookupByLibrary.simpleMessage("My orders"),
+    "my_predictions": MessageLookupByLibrary.simpleMessage("My predictions"),
     "name": MessageLookupByLibrary.simpleMessage("Name"),
     "nearestLandmark": MessageLookupByLibrary.simpleMessage("Nearest landmark"),
     "nearestLandmarkIsRequired": MessageLookupByLibrary.simpleMessage(
@@ -444,6 +449,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "sslError2": MessageLookupByLibrary.simpleMessage(
       "Ensure your certificate is configured or try again later",
     ),
+    "standings": MessageLookupByLibrary.simpleMessage("Standings"),
     "successfully": MessageLookupByLibrary.simpleMessage(
       "The operation was completed successfully",
     ),

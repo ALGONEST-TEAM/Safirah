@@ -2,33 +2,33 @@ class MatchesPredictionsModel {
   final int matchId;
   final String matchDate;
   final String matchTime;
-  final int? stateId;
-  final dynamic status;
+  final num? status;
   final String? statusColor;
   final String? resultInfo;
-  final bool? isPredictionOpen;
+  final bool? hasPrediction;
   final bool? isSpecialMatch;
   final TeamModel homeTeam;
   final TeamModel awayTeam;
   final num? homeScore;
   final num? awayScore;
   final num? pointsEarned;
+  final int? productionId;
 
   MatchesPredictionsModel({
     required this.matchId,
     required this.matchDate,
     required this.matchTime,
-    this.stateId,
-    required this.status,
+    this.status,
     this.statusColor,
     this.resultInfo,
-    this.isPredictionOpen,
+    this.hasPrediction,
     this.isSpecialMatch,
     required this.homeTeam,
     required this.awayTeam,
     this.pointsEarned,
     this.homeScore,
     this.awayScore,
+    this.productionId,
   });
 
   factory MatchesPredictionsModel.fromJson(Map<String, dynamic> json) {
@@ -38,10 +38,9 @@ class MatchesPredictionsModel {
       matchId: json['match_id'],
       matchDate: json['match_date'] ?? '',
       matchTime: json['match_time'] ?? '',
-      stateId: json['state_id'],
-      status: json['status'],
-      resultInfo: json['result_info'],
-      isPredictionOpen: json['is_prediction_open'] ?? false,
+      status: json['state_id'] ?? 0,
+      resultInfo: json['result_info'] ?? '',
+      hasPrediction: json['has_prediction'] ?? false,
       isSpecialMatch: json['is_special_match'] ?? false,
       homeTeam: TeamModel.fromJson(json['home_team']),
       awayTeam: TeamModel.fromJson(json['away_team']),
@@ -49,6 +48,7 @@ class MatchesPredictionsModel {
       pointsEarned: json['points_earned'] ?? 0,
       homeScore: prediction?['home_score'] ?? 0,
       awayScore: prediction?['away_score'] ?? 0,
+      productionId: json['id']??0,
     );
   }
 

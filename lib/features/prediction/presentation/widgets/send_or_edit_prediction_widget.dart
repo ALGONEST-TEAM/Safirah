@@ -13,31 +13,73 @@ import '../riverpod/prediction_riverpod.dart';
 import 'prediction_fields_widget.dart';
 import 'team_widget.dart';
 
-class SendPredictionWidget extends ConsumerStatefulWidget {
+class SendOrEditPredictionWidget extends ConsumerStatefulWidget {
   final String league;
   final String date;
-
+  final bool isEdit;
   final MatchesPredictionsModel matches;
 
-  const SendPredictionWidget({
+  const SendOrEditPredictionWidget({
     super.key,
     required this.league,
     required this.date,
     required this.matches,
+    this.isEdit = false,
   });
 
   @override
-  ConsumerState<SendPredictionWidget> createState() =>
-      _SendPredictionWidgetState();
+  ConsumerState<SendOrEditPredictionWidget> createState() =>
+      _SendOrEditPredictionWidgetState();
 }
 
-class _SendPredictionWidgetState extends ConsumerState<SendPredictionWidget> {
+class _SendOrEditPredictionWidgetState
+    extends ConsumerState<SendOrEditPredictionWidget> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _homeController = TextEditingController();
-  final TextEditingController _awayController = TextEditingController();
+  late final TextEditingController _homeController;
+  late final TextEditingController _awayController;
+  String _initialHome = '';
+  String _initialAway = '';
+  bool _canEdit = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _homeController = TextEditingController();
+    _awayController = TextEditingController();
+
+    if (widget.isEdit) {
+      _initialHome = widget.matches.homeScore.toString();
+      _initialAway = widget.matches.awayScore.toString();
+
+      _homeController.text = _initialHome;
+      _awayController.text = _initialAway;
+
+      // أول ما يفتح: لا تعديل
+      _canEdit = false;
+
+      _homeController.addListener(_checkChanged);
+      _awayController.addListener(_checkChanged);
+    } else {
+      _canEdit = true; // في الإضافة زر التأكيد شغال طبيعي
+    }
+  }
+
+  void _checkChanged() {
+    final currentHome = _homeController.text.trim();
+    final currentAway = _awayController.text.trim();
+
+    final changed = currentHome != _initialHome || currentAway != _initialAway;
+
+    if (changed != _canEdit) {
+      setState(() => _canEdit = changed);
+    }
+  }
 
   @override
   void dispose() {
+    _homeController.removeListener(_checkChanged);
+    _awayController.removeListener(_checkChanged);
     _homeController.dispose();
     _awayController.dispose();
     super.dispose();
@@ -45,7 +87,8 @@ class _SendPredictionWidgetState extends ConsumerState<SendPredictionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var state = ref.watch(sendPredictionProvider);
+    var state = ref
+        .watch(widget.isEdit ? editPredictionProvider : sendPredictionProvider);
 
     return Form(
       key: _formKey,
@@ -114,23 +157,40 @@ class _SendPredictionWidgetState extends ConsumerState<SendPredictionWidget> {
                     state: state,
                     functionSuccess: () {
                       Navigator.pop(context);
-                      ref.invalidate(getAllMatchesProvider);
+                      if (widget.isEdit == false) {
+                        ref.invalidate(getAllMatchesProvider);
+                      }
                       ref.invalidate(getAllPredictionsProvider);
                     },
                     bottonWidget: DefaultButtonWidget(
-                      text: S.of(context).confirm,
+                      text: widget.isEdit
+                          ? S.of(context).edit_prediction
+                          : S.of(context).confirm,
                       height: 38.h,
                       borderRadius: 12.sp,
                       textSize: 12.sp,
                       isLoading: state.stateData == States.loading,
-                      onPressed: () {
-                        if (!_formKey.currentState!.validate()) return;
-                        ref.read(sendPredictionProvider.notifier).send(
-                              matchId: widget.matches.matchId,
-                              homeScore: _homeController.text.toInt(),
-                              awayScore: _awayController.text.toInt(),
-                            );
-                      },
+                      background: (widget.isEdit && !_canEdit)
+                          ? AppColors.secondaryColor.withValues(alpha: 0.6)
+                          : AppColors.secondaryColor,
+                      onPressed: (widget.isEdit && !_canEdit)
+                          ? null
+                          : () {
+                              if (!_formKey.currentState!.validate()) return;
+                              if (widget.isEdit) {
+                                ref.read(editPredictionProvider.notifier).edit(
+                                      productionId:
+                                          widget.matches.productionId ?? 0,
+                                      homeScore: _homeController.text.toInt(),
+                                      awayScore: _awayController.text.toInt(),
+                                    );
+                              }
+                              ref.read(sendPredictionProvider.notifier).send(
+                                    matchId: widget.matches.matchId,
+                                    homeScore: _homeController.text.toInt(),
+                                    awayScore: _awayController.text.toInt(),
+                                  );
+                            },
                     ),
                   ),
                 ),

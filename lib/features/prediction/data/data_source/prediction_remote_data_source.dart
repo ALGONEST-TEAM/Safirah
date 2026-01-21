@@ -13,15 +13,15 @@ class PredictionRemoteDataSource {
     return LeaguesContainerModel.fromJsonList(response.data['data']);
   }
 
-  Future<PaginationModel<LeaguesContainerModel>> getAllPredictions(int page) async {
+  Future<PaginationModel<LeaguesContainerModel>> getAllPredictions(
+      int page) async {
     final response = await RemoteRequest.getData(
       url: AppURL.prediction,
       query: {'page': page},
     );
-    // return LeaguesContainerModel.fromJsonList(response.data['data']);
     return PaginationModel<LeaguesContainerModel>.fromJson(
       response.data['data'] ?? response.data,
-          (book) {
+      (book) {
         return LeaguesContainerModel.fromJson(book);
       },
     );
@@ -36,6 +36,21 @@ class PredictionRemoteDataSource {
       path: AppURL.prediction,
       data: {
         'match_id': matchId,
+        'home_score': homeScore,
+        'away_score': awayScore,
+      },
+    );
+    return Future.value(unit);
+  }
+
+  Future<Unit> editPrediction(
+    int productionId,
+    int homeScore,
+    int awayScore,
+  ) async {
+    await RemoteRequest.putData(
+      path: "${AppURL.prediction}/$productionId",
+      data: {
         'home_score': homeScore,
         'away_score': awayScore,
       },

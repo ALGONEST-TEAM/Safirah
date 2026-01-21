@@ -29,6 +29,7 @@ class MatchesWidget extends ConsumerWidget {
           ref.invalidate(getAllMatchesProvider);
         },
         child: ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding:
               EdgeInsets.symmetric(horizontal: 12.w).copyWith(bottom: 38.h),
           itemCount: state.data.length,

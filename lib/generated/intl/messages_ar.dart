@@ -167,6 +167,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editProfile": MessageLookupByLibrary.simpleMessage(
       "تعديل البيانات الشخصية",
     ),
+    "edit_prediction": MessageLookupByLibrary.simpleMessage("تعديل التوقع"),
     "empty": MessageLookupByLibrary.simpleMessage("فارغة"),
     "enter": MessageLookupByLibrary.simpleMessage("أدخل"),
     "enterPhoneNumber": MessageLookupByLibrary.simpleMessage("أدخل رقم الهاتف"),
@@ -179,6 +180,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "favorites": MessageLookupByLibrary.simpleMessage("المفضلة"),
     "female": MessageLookupByLibrary.simpleMessage("أنثى"),
     "filter": MessageLookupByLibrary.simpleMessage("تصنيف"),
+    "finished": MessageLookupByLibrary.simpleMessage("إنتهت"),
     "following": MessageLookupByLibrary.simpleMessage("متابعة"),
     "forUnitPrice": MessageLookupByLibrary.simpleMessage("لسعر الوحدة"),
     "forYou": MessageLookupByLibrary.simpleMessage("المقترح لك"),
@@ -219,6 +221,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "language": MessageLookupByLibrary.simpleMessage("اللغة"),
     "list": MessageLookupByLibrary.simpleMessage("قائمة"),
     "listName": MessageLookupByLibrary.simpleMessage("أسم القائمة"),
+    "live": MessageLookupByLibrary.simpleMessage("مباشر"),
     "logIn": MessageLookupByLibrary.simpleMessage("تسجيل الدخول"),
     "loginRequired": MessageLookupByLibrary.simpleMessage("تسجيل الدخول مطلوب"),
     "loginSubTitle": MessageLookupByLibrary.simpleMessage(
@@ -233,11 +236,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "male": MessageLookupByLibrary.simpleMessage("ذكر"),
     "manageMyAccount": MessageLookupByLibrary.simpleMessage("إدارة حسابي"),
+    "matches": MessageLookupByLibrary.simpleMessage("المباريات"),
     "moreDetails": MessageLookupByLibrary.simpleMessage("تفاصيل أكثر"),
     "mostSold": MessageLookupByLibrary.simpleMessage("الأكثر مبيعًا"),
     "myAddresses": MessageLookupByLibrary.simpleMessage("العناوين الخاصة بي"),
     "myLeagues": MessageLookupByLibrary.simpleMessage("دورياتي"),
     "myOrders": MessageLookupByLibrary.simpleMessage("طلباتي"),
+    "my_predictions": MessageLookupByLibrary.simpleMessage("توقعاتي"),
     "name": MessageLookupByLibrary.simpleMessage("الأسم"),
     "nearestLandmark": MessageLookupByLibrary.simpleMessage("أقرب معلم"),
     "nearestLandmarkIsRequired": MessageLookupByLibrary.simpleMessage(
@@ -432,6 +437,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "sslError2": MessageLookupByLibrary.simpleMessage(
       "تأكد من ضبط الشهادة أو حاول لاحقاً",
     ),
+    "standings": MessageLookupByLibrary.simpleMessage("الترتيب"),
     "successfully": MessageLookupByLibrary.simpleMessage("تمت العملية بنجاح"),
     "support": MessageLookupByLibrary.simpleMessage(
       "قنوات التواصل والدعم الفني",
