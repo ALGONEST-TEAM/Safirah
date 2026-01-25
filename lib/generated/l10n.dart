@@ -338,6 +338,21 @@ class S {
     );
   }
 
+  /// `Weekly`
+  String get weekly {
+    return Intl.message('Weekly', name: 'weekly', desc: '', args: []);
+  }
+
+  /// `Monthly`
+  String get monthly {
+    return Intl.message('Monthly', name: 'monthly', desc: '', args: []);
+  }
+
+  /// `Season`
+  String get season {
+    return Intl.message('Season', name: 'season', desc: '', args: []);
+  }
+
   // skipped getter for the '--------details-----------' key
 
   /// `Size details`

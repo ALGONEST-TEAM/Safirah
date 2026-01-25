@@ -243,6 +243,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Manage My Account",
     ),
     "matches": MessageLookupByLibrary.simpleMessage("Matches"),
+    "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
     "moreDetails": MessageLookupByLibrary.simpleMessage("More details"),
     "mostSold": MessageLookupByLibrary.simpleMessage("Best sellers"),
     "myAddresses": MessageLookupByLibrary.simpleMessage("My Addresses"),
@@ -410,6 +411,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "review": MessageLookupByLibrary.simpleMessage("Review"),
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("Save changes"),
+    "season": MessageLookupByLibrary.simpleMessage("Season"),
     "sections": MessageLookupByLibrary.simpleMessage("Sections"),
     "selectionOfProducts": MessageLookupByLibrary.simpleMessage(
       "Selection of products",
@@ -505,6 +507,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "verify": MessageLookupByLibrary.simpleMessage("Verify"),
     "viewAll": MessageLookupByLibrary.simpleMessage("View All"),
     "viewMore": MessageLookupByLibrary.simpleMessage("View more"),
+    "weekly": MessageLookupByLibrary.simpleMessage("Weekly"),
     "welcome": MessageLookupByLibrary.simpleMessage("Welcome"),
     "wishlist": MessageLookupByLibrary.simpleMessage("Wishlist"),
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),

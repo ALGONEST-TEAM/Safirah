@@ -4,6 +4,7 @@ import '../../../../core/network/remote_request.dart';
 import '../../../../core/network/urls.dart';
 import '../../../../core/state/pagination_data/paginated_model.dart';
 import '../model/league_for_prediction_model.dart';
+import '../model/standings_model.dart';
 
 class PredictionRemoteDataSource {
   Future<List<LeaguesContainerModel>> getAllMatches() async {
@@ -56,5 +57,11 @@ class PredictionRemoteDataSource {
       },
     );
     return Future.value(unit);
+  }
+
+  Future<StandingsData> standings(String scope) async {
+    final response = await RemoteRequest.getData(
+        url: AppURL.standings, query: {if (scope.isNotEmpty) 'scope': scope});
+    return StandingsData.fromJson(response.data['data']);
   }
 }

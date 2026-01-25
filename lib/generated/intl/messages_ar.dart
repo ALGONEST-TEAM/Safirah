@@ -237,6 +237,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "male": MessageLookupByLibrary.simpleMessage("ذكر"),
     "manageMyAccount": MessageLookupByLibrary.simpleMessage("إدارة حسابي"),
     "matches": MessageLookupByLibrary.simpleMessage("المباريات"),
+    "monthly": MessageLookupByLibrary.simpleMessage("شهري"),
     "moreDetails": MessageLookupByLibrary.simpleMessage("تفاصيل أكثر"),
     "mostSold": MessageLookupByLibrary.simpleMessage("الأكثر مبيعًا"),
     "myAddresses": MessageLookupByLibrary.simpleMessage("العناوين الخاصة بي"),
@@ -402,6 +403,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "review": MessageLookupByLibrary.simpleMessage(" التعليق"),
     "save": MessageLookupByLibrary.simpleMessage("حفظ"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("حفظ التعديلات"),
+    "season": MessageLookupByLibrary.simpleMessage("موسم"),
     "sections": MessageLookupByLibrary.simpleMessage("الأقسام"),
     "selectionOfProducts": MessageLookupByLibrary.simpleMessage(
       "اختيار المنتجات",
@@ -483,6 +485,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "verify": MessageLookupByLibrary.simpleMessage("تحقق"),
     "viewAll": MessageLookupByLibrary.simpleMessage("عرض الكل"),
     "viewMore": MessageLookupByLibrary.simpleMessage("عرض المزيد"),
+    "weekly": MessageLookupByLibrary.simpleMessage("اسبوعي"),
     "welcome": MessageLookupByLibrary.simpleMessage("مرحبًا بك"),
     "wishlist": MessageLookupByLibrary.simpleMessage("قائمة الأماني"),
     "yes": MessageLookupByLibrary.simpleMessage("نعم"),

@@ -98,4 +98,6 @@ class AppURL {
   static const String getAllMatches = '/predictions/fixtures/current';
 
   static const String prediction = '/predictions';
+
+  static const String standings = '/predictions/rankings';
 }

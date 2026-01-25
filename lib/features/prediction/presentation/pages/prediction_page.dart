@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/main_app_bar_widget.dart';
 import '../../../../generated/l10n.dart';
-import '../widgets/leader_board_widget.dart';
+import '../widgets/standings_widget.dart';
 import '../widgets/matches_widget.dart';
 import '../widgets/prediction_list_widget.dart';
 
@@ -110,7 +110,7 @@ class _PredictionPageState extends State<PredictionPage>
                   children: const [
                     MatchesWidget(),
                     PredictionListWidget(),
-                    LeaderboardWidget(),
+                    StandingsWidget(),
                   ],
                 ),
               ),

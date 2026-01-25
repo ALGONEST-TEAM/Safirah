@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/state/pagination_data/paginated_model.dart';
 import '../data_source/prediction_remote_data_source.dart';
 import '../model/league_for_prediction_model.dart';
+import '../model/standings_model.dart';
 
 class PredictionReposaitory {
   final PredictionRemoteDataSource _predictionRemoteDataSource =
@@ -56,6 +57,15 @@ class PredictionReposaitory {
         homeScore,
         awayScore,
       );
+      return Right(remote);
+    } on DioException catch (e) {
+      return Left(e);
+    }
+  }
+
+  Future<Either<DioException, StandingsData>> standings(String scope) async {
+    try {
+      final remote = await _predictionRemoteDataSource.standings(scope);
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);

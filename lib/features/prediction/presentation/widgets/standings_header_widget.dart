@@ -5,8 +5,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/auto_size_text_widget.dart';
 
 
-class LeaderBoardHeaderWidget extends StatelessWidget {
-  const LeaderBoardHeaderWidget({super.key});
+class StandingsHeaderWidget extends StatelessWidget {
+  const StandingsHeaderWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

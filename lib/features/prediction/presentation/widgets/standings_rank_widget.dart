@@ -2,37 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 
-enum Movement { up, down, none }
+class StandingsRankWidget extends StatelessWidget {
+  final num rank;
+  final String movement;
+  final Color fontColor;
 
-class LeaderBoardRankWidget extends StatelessWidget {
-  final int rank;
-  final Movement movement;
-
-  const LeaderBoardRankWidget({
+  const StandingsRankWidget({
     super.key,
     required this.rank,
-    this.movement = Movement.none,
+    required this.movement,
+    this.fontColor = Colors.black,
   });
 
-  Color _movementColor(Movement m) {
+  Color _movementColor(String m) {
     switch (m) {
-      case Movement.up:
+      case 'up':
         return Colors.green;
-      case Movement.down:
+      case 'down':
         return Colors.red;
-      case Movement.none:
+      case 'idle':
       default:
         return Colors.grey;
     }
   }
 
-  IconData _movementIcon(Movement m) {
+  IconData _movementIcon(String m) {
     switch (m) {
-      case Movement.up:
+      case 'up':
         return Icons.arrow_circle_up;
-      case Movement.down:
+      case 'down':
         return Icons.arrow_circle_down;
-      case Movement.none:
+      case 'idle':
       default:
         return Icons.cloud_circle_sharp;
     }
@@ -45,8 +45,9 @@ class LeaderBoardRankWidget extends StatelessWidget {
       child: Row(
         children: [
           AutoSizeTextWidget(
-            text:rank.toString(),
+            text: rank.toString(),
             fontSize: 11.6.sp,
+            colorText: fontColor,
           ),
           SizedBox(width: 8.w),
           Icon(

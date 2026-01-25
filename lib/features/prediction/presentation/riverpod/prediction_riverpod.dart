@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../../../../core/state/data_state.dart';
 import '../../../../core/state/pagination_data/paginated_model.dart';
 import '../../../../core/state/state.dart';
+import '../../../../generated/l10n.dart';
 import '../../data/model/league_for_prediction_model.dart';
+import '../../data/model/standings_model.dart';
 import '../../data/repos/prediction_repo.dart';
 
 final getAllMatchesProvider = StateNotifierProvider<GetAllMatchesNotifier,
@@ -105,10 +107,10 @@ class SendPredictionNotifier extends StateNotifier<DataState<Unit>> {
       );
     });
   }
-
 }
+
 final editPredictionProvider =
-StateNotifierProvider.autoDispose<EditPredictionNotifier, DataState<Unit>>(
+    StateNotifierProvider.autoDispose<EditPredictionNotifier, DataState<Unit>>(
         (ref) => EditPredictionNotifier());
 
 class EditPredictionNotifier extends StateNotifier<DataState<Unit>> {
@@ -135,6 +137,39 @@ class EditPredictionNotifier extends StateNotifier<DataState<Unit>> {
     });
   }
 }
+
+final standingsProvider =
+    StateNotifierProvider.family<StandingsNotifier, DataState<StandingsData>,String>(
+  (ref,String scope) {
+    return StandingsNotifier(scope);
+  },
+);
+
+class StandingsNotifier extends StateNotifier<DataState<StandingsData>> {
+  final String scope;
+
+  StandingsNotifier(this.scope)
+      : super(DataState<StandingsData>.initial(StandingsData.empty())) {
+    getData();
+  }
+
+  final _controller = PredictionReposaitory();
+
+  Future<void> getData() async {
+    state = state.copyWith(state: States.loading);
+
+    final data = await _controller.standings(scope);
+    data.fold((failure) {
+      state = state.copyWith(state: States.error, exception: failure);
+    }, (newData) {
+      state = state.copyWith(state: States.loaded, data: newData);
+    });
+  }
+}
+
+final standingsScopeProvider = StateProvider<String>((ref) => 'week');
+
+//Choose the sorting method
 // ===================== Match Status Helpers (Riverpod) =====================
 
 const Set<int> _notStartedStatuses = {1, 13, 26};
