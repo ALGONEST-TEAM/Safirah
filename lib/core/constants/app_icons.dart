@@ -99,6 +99,7 @@ class AppIcons {
   static const String expectationsActive =
       '${_iconsPath}bottombar/expectations_active.svg';
   static const String league = '${_iconsPath}bottombar/league.svg';
+  static const String shop = '${_iconsPath}bottombar/shop.svg';
   static const String myOrdersActive =
       '${_iconsPath}bottombar/my_orders_active.svg';
   static const String myOrders = '${_iconsPath}bottombar/my_orders.svg';

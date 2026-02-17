@@ -10,16 +10,20 @@ import '../../data/model/league_for_prediction_model.dart';
 import '../../data/model/standings_model.dart';
 import '../../data/repos/prediction_repo.dart';
 
-final getAllMatchesProvider = StateNotifierProvider<GetAllMatchesNotifier,
-    DataState<List<LeaguesContainerModel>>>(
-  (ref) {
-    return GetAllMatchesNotifier();
+final matchesScopeProvider = StateProvider<String>((ref) => 'today');
+
+final getAllMatchesProvider = StateNotifierProvider.family<GetAllMatchesNotifier,
+    DataState<List<LeaguesContainerModel>>,String>(
+  (ref,String scope) {
+    return GetAllMatchesNotifier(scope);
   },
 );
 
 class GetAllMatchesNotifier
     extends StateNotifier<DataState<List<LeaguesContainerModel>>> {
-  GetAllMatchesNotifier() : super(DataState.initial([])) {
+  final String scope;
+
+  GetAllMatchesNotifier(this.scope) : super(DataState.initial([])) {
     getData();
   }
 
@@ -28,7 +32,7 @@ class GetAllMatchesNotifier
   Future<void> getData() async {
     state = state.copyWith(state: States.loading);
 
-    final data = await _controller.getAllMatches();
+    final data = await _controller.getAllMatches(scope);
     data.fold((failure) {
       state = state.copyWith(state: States.error, exception: failure);
     }, (newData) {

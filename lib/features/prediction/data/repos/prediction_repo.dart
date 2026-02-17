@@ -10,9 +10,9 @@ class PredictionReposaitory {
       PredictionRemoteDataSource();
 
   Future<Either<DioException, List<LeaguesContainerModel>>>
-      getAllMatches() async {
+      getAllMatches(String scope) async {
     try {
-      final remote = await _predictionRemoteDataSource.getAllMatches();
+      final remote = await _predictionRemoteDataSource.getAllMatches(scope);
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);

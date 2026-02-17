@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/main_app_bar_widget.dart';
 import '../../../../generated/l10n.dart';
@@ -76,29 +77,35 @@ class _PredictionPageState extends State<PredictionPage>
                             Colors.white, selectness)!;
 
                         return Container(
-                            height: 34.h,
-                            width: 102.w,
-                            margin: EdgeInsets.symmetric(horizontal: 6.4.w),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 14.w, vertical: 8.h),
-                            decoration: BoxDecoration(
-                              color: bgColor,
-                              borderRadius: BorderRadius.circular(8.r),
-                              border: Border.all(
-                                color: AppColors.greySwatch.shade100,
-                                width: 0.4,
-                              ),
+                          height: 36.h,
+                          width: 102.w,
+                          margin: EdgeInsets.symmetric(horizontal: 6.4.w),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 14.w, vertical: 6.h),
+                          decoration: BoxDecoration(
+                            color: bgColor,
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(
+                              color: AppColors.greySwatch.shade100,
+                              width: 0.4,
                             ),
-                            alignment: Alignment.center,
-                            child: Text(_tabs[i],
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textDirection: TextDirection.rtl,
-                                style: TextStyle(
-                                    fontFamily: 'IBMPlexSansArabic',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 12.sp,
-                                    color: textColor)));
+                          ),
+                          alignment: Alignment.center,
+                          child: AutoSizeTextWidget(
+                            text: _tabs[i],
+                            fontSize: 12.sp,
+                            colorText: textColor,
+                          ),
+                          // child: Text(_tabs[i],
+                          //     maxLines: 1,
+                          //     overflow: TextOverflow.ellipsis,
+                          //     textDirection: TextDirection.rtl,
+                          //     style: TextStyle(
+                          //         fontFamily: 'IBMPlexSansArabic',
+                          //         fontWeight: FontWeight.w500,
+                          //         fontSize: 12.sp,
+                          //         color: textColor)),
+                        );
                       },
                     ),
                 ],

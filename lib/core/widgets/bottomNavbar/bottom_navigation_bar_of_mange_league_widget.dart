@@ -6,15 +6,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:safirah/core/helpers/navigateTo.dart';
 import '../../../features/leagues_mangement/home/presntation/page/home_page.dart';
-import '../../../features/leagues_mangement/leagues/persntaion/page/create_league_page.dart';
 import '../../../features/leagues_mangement/leagues/persntaion/page/show_leagues_page.dart';
 import '../../../features/profile/presentation/pages/profile_page.dart';
-import '../../../features/shop/home/presentation/pages/home_page.dart';
-import '../../../features/shop/myOrders/presentation/pages/my_orders_page.dart';
 import '../../../generated/l10n.dart';
 import '../../constants/app_icons.dart';
 import '../../helpers/exit_from_the_app.dart';
 import '../../theme/app_colors.dart';
+import 'bottom_navigation_bar_widget.dart';
 import 'design_for_bottom_navigation_bar_widget.dart';
 
 final activeIndexProvider = StateProvider<int>((ref) => 0);
@@ -40,10 +38,9 @@ class _BottomNavigationBarWidgetState
     final activeIndex = ref.watch(activeIndexProvider);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
+      value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness:
-        activeIndex == 0 ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
         systemNavigationBarColor: Colors.white,
         systemNavigationBarDividerColor: Colors.white,
         systemNavigationBarIconBrightness: Brightness.dark,
@@ -52,30 +49,36 @@ class _BottomNavigationBarWidgetState
       child: Scaffold(
         body: _pages[activeIndex],
         floatingActionButton: SizedBox(
-          height: 60.h,
+          height: 56.h,
           child: FloatingActionButton.large(
             onPressed: () {
-              navigateTo(context, CreateLeaguePage());
+              navigateTo(context, const BottomNavigationBarWidget());
             },
             backgroundColor: AppColors.whiteColor,
-            splashColor:AppColors.primaryColor ,
+            splashColor: AppColors.primaryColor,
             elevation: 0,
             shape: const CircleBorder(),
             child: Container(
-              padding: EdgeInsets.all(11.sp),
+              padding: EdgeInsets.all(14.sp),
               decoration: const BoxDecoration(
                 color: AppColors.primaryColor,
                 shape: BoxShape.circle,
               ),
-              child: SvgPicture.asset(AppIcons.league),
+              child: SvgPicture.asset(AppIcons.shop),
             ),
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: SafeArea(
           child: Container(
-            color: AppColors.whiteColor,
             padding: EdgeInsets.only(bottom: 4.h, top: 6.h),
+            decoration: BoxDecoration(
+              color: AppColors.whiteColor,
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(8.r),
+                topLeft: Radius.circular(8.r),
+              ),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -95,7 +98,7 @@ class _BottomNavigationBarWidgetState
                 ),
                 SizedBox(
                   height: 20.h,
-                  width: 40.w,
+                  width: 20.w,
                 ),
                 _buildNavItem(
                   AppIcons.myOrders,

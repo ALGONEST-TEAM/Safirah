@@ -7,10 +7,9 @@ import '../model/league_for_prediction_model.dart';
 import '../model/standings_model.dart';
 
 class PredictionRemoteDataSource {
-  Future<List<LeaguesContainerModel>> getAllMatches() async {
+  Future<List<LeaguesContainerModel>> getAllMatches(String scope) async {
     final response = await RemoteRequest.getData(
-      url: AppURL.getAllMatches,
-    );
+        url: AppURL.getAllMatches, query: {'scope': scope});
     return LeaguesContainerModel.fromJsonList(response.data['data']);
   }
 
@@ -61,7 +60,7 @@ class PredictionRemoteDataSource {
 
   Future<StandingsData> standings(String scope) async {
     final response = await RemoteRequest.getData(
-        url: AppURL.standings, query: {if (scope.isNotEmpty) 'scope': scope});
+        url: AppURL.standings, query: {'scope': scope});
     return StandingsData.fromJson(response.data['data']);
   }
 }

@@ -36,7 +36,8 @@ class TeamWidget extends StatelessWidget {
             OnlineImagesWidget(
               imageUrl: image,
               backgroundColor: Colors.white,
-              size: sizeImage ?? Size(20.w, 20.h),
+              size: sizeImage ?? Size(22.w, 22.h),
+              fit: BoxFit.contain,
             ),
             6.w.horizontalSpace,
             Flexible(
@@ -59,7 +60,9 @@ class TeamWidget extends StatelessWidget {
             6.w.horizontalSpace,
             OnlineImagesWidget(
               imageUrl: image,
-              size: sizeImage ?? Size(20.w, 20.h),
+              size: sizeImage ?? Size(22.w, 22.h),
+              fit: BoxFit.contain,
+
             ),
           ]
         ],

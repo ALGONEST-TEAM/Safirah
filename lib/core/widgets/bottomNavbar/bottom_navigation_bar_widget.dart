@@ -5,11 +5,10 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:safirah/core/helpers/navigateTo.dart';
-import 'package:safirah/features/shop/shoppingBag/cart/presentation/pages/cart_page.dart';
-import '../../../features/prediction/presentation/pages/prediction_page.dart';
 import '../../../features/profile/presentation/pages/profile_page.dart';
 import '../../../features/shop/home/presentation/pages/home_page.dart';
 import '../../../features/shop/myOrders/presentation/pages/my_orders_page.dart';
+import '../../../features/shop/shoppingBag/cart/presentation/pages/cart_page.dart';
 import '../../../features/shop/shoppingBag/cart/presentation/riverpod/cart_riverpod.dart';
 import '../../../features/user/presentation/pages/log_in_page.dart';
 import '../../../generated/l10n.dart';
@@ -18,6 +17,7 @@ import '../../constants/app_icons.dart';
 import '../../helpers/exit_from_the_app.dart';
 import '../../theme/app_colors.dart';
 import '../auto_size_text_widget.dart';
+import 'bottom_navigation_bar_of_mange_league_widget.dart';
 import 'design_for_bottom_navigation_bar_widget.dart';
 
 final activeIndexShopProvider = StateProvider<int>((ref) => 0);
@@ -36,8 +36,6 @@ class _BottomNavigationBarWidgetState
     const ExitFromAppWidget(child: MyOrdersPage()),
     const ExitFromAppWidget(child: CartPage()),
     const ExitFromAppWidget(child: ProfilePage()),
-    const ExitFromAppWidget(child: PredictionPage()), // 👈 جديد
-
   ];
 
   @override
@@ -59,8 +57,8 @@ class _BottomNavigationBarWidgetState
           height: 57.h,
           child: FloatingActionButton.large(
             onPressed: () {
-              ref.read(activeIndexShopProvider.notifier).state = 4;
-
+              navigateTo(
+                  context, const BottomNavigationBarOfMangeLeagueWidget());
             },
             backgroundColor: AppColors.whiteColor,
             splashColor: AppColors.primaryColor,
@@ -82,11 +80,12 @@ class _BottomNavigationBarWidgetState
           child: Container(
             padding: EdgeInsets.only(bottom: 4.h, top: 8.h),
             decoration: BoxDecoration(
-                color: AppColors.whiteColor,
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(8.r),
-                  topLeft: Radius.circular(8.r),
-                )),
+              color: AppColors.whiteColor,
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(8.r),
+                topLeft: Radius.circular(8.r),
+              ),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
