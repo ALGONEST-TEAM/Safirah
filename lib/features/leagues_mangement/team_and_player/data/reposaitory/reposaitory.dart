@@ -1,169 +1,552 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:uuid/uuid.dart';
 
+import '../../../../../core/database/sync_service.dart';
+import '../../../../../core/database/sync_trigger.dart';
+import '../../../../../core/network/connectivity_service.dart';
+import '../../../../../core/network/errors/sync_dio_exception.dart';
+import '../../../../../injection.dart' as di;
 import '../data_source/local_data_source.dart';
+import '../data_source/remote_data_source/remote_data_source.dart';
 import '../model/team_model.dart';
+import '../../../../../core/network/errors/repo_guard.dart';
 
 class TeamAndPlayerRepository {
   final TeamAndPlayerLocalDataSource local;
-  TeamAndPlayerRepository({required this.local});
-  // team_repository.dart
-  // Future<Either<DioException, List<TeamModel>>> getTeamsByLeague(int leagueId) async {
-  //   try {
-  //     final rows = await local.getTeamsByLeague(leagueId);
-  //     return Right(rows.map(TeamModel.fromEntity).toList());
-  //   } catch (_) {
-  //     return Left(DioException(requestOptions: RequestOptions(path: '/teams/by_league')));
-  //   }
-  // }
-  Future<Either<DioException, List<TeamModel>>> getTeamsByLeague(int leagueId) async {
-    try {
-      final list = await local.getTeamsByLeague(leagueId);
-      return Right(list);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (_) {
-      return Left(
-        DioException(requestOptions: RequestOptions(path: '/teams/byLeague')),
-      );
-    }
+  final TeamAndPlayerRemoteDataSource remote;
+  final ConnectivityService connectivity;
+  final SyncService syncService;
+
+  TeamAndPlayerRepository({
+    required this.local,
+    required this.remote,
+    required this.connectivity,
+    required this.syncService,
+  });
+
+  Future<Either<DioException, List<TeamModel>>> getTeamsByLeague(
+      String leagueSyncId) {
+    return RepoGuard.run<List<TeamModel>>(
+      action: () => local.getTeamsByLeague(leagueSyncId),
+    );
   }
 
-  Future<Either<DioException, List<PlayerModel>>> getPlayersOfTeam(int teamId) async {
-    try {
-      final list = await local.getPlayerTeam( teamId: teamId);
-      return Right(list);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (_) {
-      return Left(
-        DioException(requestOptions: RequestOptions(path: '/teams/byLeague')),
-      );
-    }
-  }
-  Future<Either<DioException, Unit>> updateTeam(TeamModel team) async {
-    try {
-      await local.updateTeam(team);
-      return const Right(unit);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (_) {
-      return Left(
-        DioException(requestOptions: RequestOptions(path: '/teams/update')),
-      );
-    }
+  Future<Either<DioException, List<PlayerModel>>> getPlayersOfTeam(
+      String teamSyncId) {
+    return RepoGuard.run<List<PlayerModel>>(
+      action: () => local.getPlayerTeam(teamSyncId: teamSyncId),
+    );
   }
 
-  Future<Either<DioException, List<LeaguePlayerModel>>> getLeagueUsers(int leagueId) async {
-    try {
-      final rows = await local.getLeagueUsers(leagueId);
-      return Right(rows);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (_) {
-      return Left(DioException(requestOptions: RequestOptions(path: '/league_users')));
-    }
-  }
-  Future<Either<DioException, List<TeamPlayerCategoryModel>>> getCategoriesByLeague(int leagueId) async {
-    try {
-      final list = await local.getCategoriesByLeague(leagueId);
-      return Right(list);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (_) {
-      return Left(DioException(requestOptions: RequestOptions(path: '/categories')));
-    }
+  Future<Either<DioException, Unit>> updateTeam(TeamModel team) {
+    return RepoGuard.run<Unit>(
+      action: () async {
+       final teams =  await   local.updateTeam(team);
+         print(team.syncId);
+        await syncService.enqueueOperation(
+          entityType: 'team',
+          operation: SyncService.operationUpdate,
+          payload: {
+           'team_sync_id': teams!.syncId,
+            'team_name': teams.teamName,
+          },
+        );
+
+        try {
+          await di.sl<SyncTrigger>().syncIfOnline();
+        } on DioException catch (e) {
+          throw SyncDioException.from(e);
+        }
+        return unit;
+      },
+    );
+
   }
 
-  Future<Either<DioException, bool>> setLeaguePlayerCategory(
-      {required int leaguePlayerId, required int categoryId}) async {
-    try {
-      final updated = await local.setLeaguePlayerCategory(
-        leaguePlayerId: leaguePlayerId,
-        categoryId: categoryId,
-      );
-      return Right(updated > 0);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (_) {
-      return Left(DioException(
-        requestOptions:
-        RequestOptions(path: '/league_players/set_category_local'),
-      ));
-    }
+
+  Stream<List<LeaguePlayerModel>> watchLeaguePlayer({
+    required String leagueSyncId,
+  }) {
+    return local.watchLeaguesPlayer(
+      leagueSyncId: leagueSyncId,
+    );
   }
-  Future<Either<DioException, bool>> deleteLeaguePlayerCategory(
-      {required int leaguePlayerId, required int categoryId}) async {
-    try {
-      final updated = await local.deleteLeaguePlayerCategory(
-        leaguePlayerId: leaguePlayerId,
-        categoryId: categoryId,
-      );
-      return Right(updated > 0);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (_) {
-      return Left(DioException(
-        requestOptions:
-        RequestOptions(path: '/league_players/set_category_local'),
-      ));
-    }
-  }
-  Future<Either<DioException, List<LeaguePlayerModel>>> getLeaguePlayersByCategory(
-      {required int leagueId, required int categoryId}) async {
-    try {
-      final list = await local.getLeaguePlayersByCategory(
-        leagueId: leagueId, categoryId: categoryId,
-      );
-      return Right(list);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (_) {
-      return Left(DioException(requestOptions: RequestOptions(path: '/leaguePlayers/byCategory')));
-    }
-  }
-  Future<Either<DioException, List<PlayerModel>>> runDraft(int leagueId) async {
-    try {
-      final result = await local.runDraft(leagueId: leagueId);
-      return Right(result);
-    } catch (e, st) {
-      return Left(DioException(requestOptions: RequestOptions(path: '/leaguePlayers/byCategory')));
-    }
-  }
-  Future<Either<DioException, List<PlayerModel>>> assignPlayersToTeam({
-    required int teamId,
-    required List<int> leaguePlayerIds,
+  Future<Either<DioException, void>> refreshLeaguePlayer({
+    required String leagueSyncId,
   }) async {
-    try {
-      final list = await local.assignPlayersToTeam(
-        teamId: teamId,
-        leaguePlayerIds: leaguePlayerIds,
+    return RepoGuard.run<void>(action: () async {
+      if (!await connectivity.isOnline()) return;
+
+      final remoteRounds = await remote.getLeaguePlayers(
+       leagueSyncId:  leagueSyncId,
+
       );
-      return Right(list);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (e) {
-      return Left(DioException(
-        requestOptions: RequestOptions(path: '/teams/$teamId/assign'),
-        error: e,
-      ));
-    }
+
+      final normalized = remoteRounds
+          .map((r) => r.copyWith(leagueSyncId: leagueSyncId))
+          .toList();
+
+      await local.upsertLeaguePlayers(normalized);
+      await di.sl<SyncTrigger>().syncIfOnline();
+    });
   }
 
-  Future<Either<DioException, List<LeaguePlayerModel>>> leaguePlayersWithoutCategory(int leagueId) async {
-    try { return Right(await local.leaguePlayersWithoutCategory(leagueId)); }
-    on DioException catch (e) { return Left(e); }
-    catch (e) {
-      return Left(DioException(requestOptions: RequestOptions(path: '/league_players/without_category'), error: e));
-    }
+  Stream<List<TeamModel>> watchTeams({
+    required String leagueSyncId,
+  }) {
+    return local.watchTeams(
+      leagueSyncId: leagueSyncId,
+    );
+  }
+  Future<Either<DioException, void>> refreshTeams({
+    required String leagueSyncId,
+  }) async {
+    return RepoGuard.run<void>(action: () async {
+      if (!await connectivity.isOnline()) return;
+
+      final teamRemote = await remote.getTeams(
+        leagueSyncId:  leagueSyncId,
+
+      );
+
+      final normalized = teamRemote
+          .map((r) => r.copyWith(leagueSyncId: leagueSyncId))
+          .toList();
+
+      await local.upsertTeams(normalized);
+
+      await di.sl<SyncTrigger>().syncIfOnline();
+    });
   }
 
-  Future<Either<DioException, List<LeaguePlayerModel>>> leaguePlayersWithoutTeam(int leagueId) async {
-    try { return Right(await local.leaguePlayersWithoutTeam(leagueId)); }
-    on DioException catch (e) { return Left(e); }
-    catch (e) {
-      return Left(DioException(requestOptions: RequestOptions(path: '/league_players/without_team'), error: e));
-    }
+
+  Future<Either<DioException, List<TeamPlayerCategoryModel>>>
+      getCategoriesByLeague(String leagueSyncId) {
+    return RepoGuard.run<List<TeamPlayerCategoryModel>>(
+      action: () => local.getCategoriesByLeague(leagueSyncId),
+    );
+  }
+
+  Future<Either<DioException, List<InvitationsPlayersModel>>>
+      getLeagueInvitationsPlayers(String leagueSyncId) {
+    return RepoGuard.run<List<InvitationsPlayersModel>>(
+      action: () =>
+          remote.getLeagueInvitationsPlayers(leagueSyncId: leagueSyncId),
+    );
+  }
+
+  Future<Either<DioException, bool>> setLeaguePlayerCategory({
+    required int leaguePlayerId,
+    required int categoryId,
+  }) {
+    return RepoGuard.run<bool>(
+      action: () async {
+        final updated = await local.setLeaguePlayerCategory(
+          leaguePlayerId: leaguePlayerId,
+          categoryId: categoryId,
+        );
+        return updated > 0;
+      },
+    );
+  }
+
+  Future<Either<DioException, bool>> deleteLeaguePlayerCategory({
+    required int leaguePlayerId,
+    required int categoryId,
+  }) {
+    return RepoGuard.run<bool>(
+      action: () async {
+        final updated = await local.deleteLeaguePlayerCategory(
+          leaguePlayerId: leaguePlayerId,
+          categoryId: categoryId,
+        );
+        return updated > 0;
+      },
+    );
+  }
+
+  Future<Either<DioException, List<LeaguePlayerModel>>>
+      getLeaguePlayersByCategory({
+    required String leagueSyncId,
+    required int categoryId,
+  }) {
+    return RepoGuard.run<List<LeaguePlayerModel>>(
+      action: () => local.getLeaguePlayersByCategory(
+        leagueSyncId: leagueSyncId,
+        categoryId: categoryId,
+      ),
+    );
+  }
+
+  Future<Either<DioException, List<PlayerModel>>> runDraft(
+      String leagueSyncId) {
+      return RepoGuard.run<List<PlayerModel>>(
+        action: () async {
+          final player = await local.runDraft(leagueSyncId: leagueSyncId);
+
+          await syncService.enqueueOperation(
+            entityType: 'playerToTeam',
+            operation: SyncService.operationCreate,
+            payload: {
+              'players': player.map((p) => p.toJson()).toList(),
+            },
+          );
+
+          try {
+            await di.sl<SyncTrigger>().syncIfOnline();
+          } on DioException catch (e) {
+            throw SyncDioException.from(e);
+          }
+          return player;
+        },
+      );
+  }
+
+  Future<Either<DioException, List<PlayerModel>>> assignPlayersToTeam({
+    required String teamSyncId,
+    required List<String> leaguePlayerIds,
+  }) {
+    return RepoGuard.run<List<PlayerModel>>(
+      action: () async {
+        final player = await local.assignPlayersToTeam(
+          teamSyncId: teamSyncId,
+          leaguePlayerSyncIds: leaguePlayerIds,
+        );
+        await syncService.enqueueOperation(
+          entityType: 'playerToTeam',
+          operation: SyncService.operationCreate,
+          payload: {
+            'players': player.map((p) => p.toJson()).toList(),
+          },
+        );
+        try {
+          await di.sl<SyncTrigger>().syncIfOnline();
+        } on DioException catch (e) {
+          throw SyncDioException.from(e);
+        }
+        return player;
+      },
+    );
+  }
+
+  Future<Either<DioException, List<LeaguePlayerModel>>>
+      leaguePlayersWithoutCategory(String leagueSyncId) {
+    return RepoGuard.run<List<LeaguePlayerModel>>(
+      action: () => local.leaguePlayersWithoutCategory(leagueSyncId),
+    );
+  }
+
+  Future<Either<DioException, List<LeaguePlayerModel>>>
+      leaguePlayersWithoutTeam(String leagueSyncId) {
+    return RepoGuard.run<List<LeaguePlayerModel>>(
+      action: () => local.leaguePlayersWithoutTeam(leagueSyncId),
+    );
+  }
+
+  Future<Either<DioException, Unit>> addLeaguePlayer(
+      InvitationsPlayersModel leagueInvitationPlayer) {
+    return RepoGuard.run<Unit>(
+      allowSyncErrorsToBubble: true,
+      action: () async {
+        final leaguePlayerSyncId = const Uuid().v7();
+        print(
+            'addLeaguePlayer called for invitation ${leagueInvitationPlayer.id} '
+            'with syncId $leaguePlayerSyncId');
+
+        await local.addLeaguePlayer(
+          LeaguePlayerModel(
+            idInvitation: leagueInvitationPlayer.id,
+            syncId: leaguePlayerSyncId,
+            leagueSyncId: leagueInvitationPlayer.leagueSyncId,
+            name: leagueInvitationPlayer.userName,
+          ),
+        );
+
+        print('Local league player inserted with syncId $leaguePlayerSyncId');
+
+        await syncService.enqueueOperation(
+          entityType: 'invitations',
+          operation: SyncService.operationCreate,
+          payload: {
+            'action': leagueInvitationPlayer.action,
+            'sync_id': leaguePlayerSyncId,
+            'invitation_id': leagueInvitationPlayer.id,
+            'league_player_sync_id': leaguePlayerSyncId,
+          },
+        );
+
+        print(
+            'Enqueued sync operation for leaguePlayerSyncId $leaguePlayerSyncId');
+
+        try {
+          await di.sl<SyncTrigger>().syncIfOnline();
+          print('Sync finished successfully');
+        } on DioException catch (e) {
+          throw SyncDioException.from(e);
+        }
+
+        return unit;
+      },
+    );
   }
 }
-
+// import 'package:dartz/dartz.dart';
+// import 'package:dio/dio.dart';
+// import 'package:uuid/uuid.dart';
+//
+// import '../../../../../core/database/sync_service.dart';
+// import '../../../../../core/database/sync_trigger.dart';
+// import '../../../../../core/network/connectivity_service.dart';
+// import '../../../../../core/network/errors/sync_dio_exception.dart';
+// import '../../../../../injection.dart' as di;
+// import '../data_source/local_data_source.dart';
+// import '../data_source/remote_data_source/remote_data_source.dart';
+// import '../model/team_model.dart';
+// import '../../../../../core/network/errors/repo_guard.dart';
+//
+// class TeamAndPlayerRepository {
+//   final TeamAndPlayerLocalDataSource local;
+//   final TeamAndPlayerRemoteDataSource remote;
+//   final ConnectivityService connectivity;
+//   final SyncService syncService;
+//
+//   TeamAndPlayerRepository({
+//     required this.local,
+//     required this.remote,
+//     required this.connectivity,
+//     required this.syncService,
+//   });
+//
+//   Future<Either<DioException, List<TeamModel>>> getTeamsByLeague(
+//       String leagueSyncId) async {
+//     try {
+//       final list = await local.getTeamsByLeague(leagueSyncId);
+//       return Right(list);
+//     } on DioException catch (e) {
+//       return Left(e);
+//     } catch (_) {
+//       return Left(
+//         DioException(requestOptions: RequestOptions(path: '/teams/byLeague')),
+//       );
+//     }
+//   }
+//
+//   Future<Either<DioException, List<PlayerModel>>> getPlayersOfTeam(
+//       int teamId) async {
+//     try {
+//       final list = await local.getPlayerTeam(teamId: teamId);
+//       return Right(list);
+//     } on DioException catch (e) {
+//       return Left(e);
+//     } catch (_) {
+//       return Left(
+//         DioException(requestOptions: RequestOptions(path: '/teams/byLeague')),
+//       );
+//     }
+//   }
+//
+//   Future<Either<DioException, Unit>> updateTeam(TeamModel team) async {
+//     try {
+//       await local.updateTeam(team);
+//       return const Right(unit);
+//     } on DioException catch (e) {
+//       return Left(e);
+//     } catch (_) {
+//       return Left(
+//         DioException(requestOptions: RequestOptions(path: '/teams/update')),
+//       );
+//     }
+//   }
+//
+//   Future<Either<DioException, List<LeaguePlayerModel>>> getLeagueUsers(
+//       String leagueSyncId,) async {
+//     try {
+//       final cached = await local.getLeagueUsersByLeague(leagueSyncId);
+//
+//       () async {
+//         try {
+//           if (await connectivity.isOnline()) {
+//             final remotePlayers = await remote.getLeaguePlayers(leagueSyncId: leagueSyncId);
+//             final normalized = remotePlayers.map((p) => p.copyWith(leagueSyncId: leagueSyncId)).toList(
+//             );
+//             await local.upsertLeaguePlayers(normalized);
+//             await di.sl<SyncTrigger>().syncIfOnline();
+//           }
+//         } catch (_) {
+//           // لا نكسر تجربة المستخدم: يبقى cached معروض
+//         }
+//       }
+//       ();
+//
+//       return Right(cached);
+//     } on DioException catch (error) {
+//       print(error);
+//       return Left(error);
+//     }
+//   }
+//
+//   Future<Either<DioException, List<TeamPlayerCategoryModel>>>
+//   getCategoriesByLeague(String leagueSyncId) async {
+//     try {
+//       final list = await local.getCategoriesByLeague(leagueSyncId);
+//       return Right(list);
+//     } on DioException catch (e) {
+//       return Left(e);
+//     }
+//   }
+//
+//   Future<Either<DioException, List<InvitationsPlayersModel>>>
+//   getLeagueInvitationsPlayers(String leagueSyncId) async {
+//     try {
+//       final list =
+//       await remote.getLeagueInvitationsPlayers(leagueSyncId: leagueSyncId);
+//       return Right(list);
+//     } on DioException catch (e) {
+//       print(e);
+//       return Left(e);
+//     }
+//   }
+//
+//   Future<Either<DioException, bool>> setLeaguePlayerCategory(
+//       {required int leaguePlayerId, required int categoryId}) async {
+//     try {
+//       final updated = await local.setLeaguePlayerCategory(
+//         leaguePlayerId: leaguePlayerId,
+//         categoryId: categoryId,
+//       );
+//       return Right(updated > 0);
+//     } on DioException catch (e) {
+//       return Left(e);
+//     } catch (_) {
+//       return Left(DioException(
+//         requestOptions:
+//         RequestOptions(path: '/league_players/set_category_local'),
+//       ));
+//     }
+//   }
+//
+//   Future<Either<DioException, bool>> deleteLeaguePlayerCategory(
+//       {required int leaguePlayerId, required int categoryId}) async {
+//     try {
+//       final updated = await local.deleteLeaguePlayerCategory(
+//         leaguePlayerId: leaguePlayerId,
+//         categoryId: categoryId,
+//       );
+//       return Right(updated > 0);
+//     } on DioException catch (e) {
+//       return Left(e);
+//     } catch (_) {
+//       return Left(DioException(
+//         requestOptions:
+//         RequestOptions(path: '/league_players/set_category_local'),
+//       ));
+//     }
+//   }
+//
+//   Future<Either<DioException, List<LeaguePlayerModel>>>
+//   getLeaguePlayersByCategory(
+//       {required String leagueSyncId, required int categoryId}) async {
+//     try {
+//       final list = await local.getLeaguePlayersByCategory(
+//         leagueSyncId: leagueSyncId,
+//         categoryId: categoryId,
+//       );
+//       return Right(list);
+//     } on DioException catch (e) {
+//       return Left(e);
+//     }
+//   }
+//
+//   Future<Either<DioException, List<PlayerModel>>> runDraft(
+//       String leagueSyncId) async {
+//     try {
+//       final result = await local.runDraft(leagueSyncId: leagueSyncId);
+//       return Right(result);
+//     } catch (e) {
+//       return Left(
+//         DioException(
+//             requestOptions: RequestOptions(path: '/leaguePlayers/byCategory')),
+//       );
+//     }
+//   }
+//
+//   Future<Either<DioException, List<PlayerModel>>> assignPlayersToTeam({
+//     required int teamId,
+//     required List<int> leaguePlayerIds,
+//   }) async {
+//     try {
+//       final list = await local.assignPlayersToTeam(
+//         teamId: teamId,
+//         leaguePlayerIds: leaguePlayerIds,
+//       );
+//       return Right(list);
+//     } on DioException catch (e) {
+//       return Left(e);
+//     } catch (e) {
+//       return Left(DioException(
+//         requestOptions: RequestOptions(path: '/teams/$teamId/assign'),
+//         error: e,
+//       ));
+//     }
+//   }
+//
+//   Future<Either<DioException, List<LeaguePlayerModel>>>
+//   leaguePlayersWithoutCategory(String leagueSyncId) async {
+//     try {
+//       return Right(await local.leaguePlayersWithoutCategory(leagueSyncId));
+//     } on DioException catch (e) {
+//       return Left(e);
+//     } catch (e) {
+//       return Left(DioException(
+//           requestOptions:
+//           RequestOptions(path: '/league_players/without_category'),
+//           error: e));
+//     }
+//   }
+//
+//   Future<Either<DioException, List<LeaguePlayerModel>>>
+//   leaguePlayersWithoutTeam(String leagueSyncId)  {
+//     return RepoGuard.run<List<LeaguePlayerModel>>(
+//         action: () async {
+//           return await local.leaguePlayersWithoutTeam(leagueSyncId);
+//         });
+//   }
+//
+//   Future<Either<DioException, Unit>> addLeaguePlayer(
+//       InvitationsPlayersModel leagueInvitationPlayer) {
+//     return RepoGuard.run<Unit>(
+//       action: () async {
+//         final leaguePlayerSyncId = const Uuid().v7();
+//         await local.addLeaguePlayer(
+//           LeaguePlayerModel(
+//             idInvitation: leagueInvitationPlayer.id,
+//             syncId: leaguePlayerSyncId,
+//             leagueSyncId: leagueInvitationPlayer.leagueSyncId,
+//             name: leagueInvitationPlayer.userName,
+//             userId: 0,
+//           ),
+//         );
+//         await syncService.enqueueOperation(
+//           entityType: 'invitations',
+//           operation: SyncService.operationCreate,
+//           payload: {
+//             'action': leagueInvitationPlayer.action,
+//             'sync_id': const Uuid().v7(),
+//             'invitation_id': leagueInvitationPlayer.id,
+//             'league_player_sync_id': leaguePlayerSyncId,
+//           },
+//         );
+//
+//         try {
+//           await di.sl<SyncTrigger>().syncIfOnline();
+//         } on DioException catch (e) {
+//           throw SyncDioException.from(e);
+//         }
+//         return unit;
+//       },
+//     );
+//   }
+// }

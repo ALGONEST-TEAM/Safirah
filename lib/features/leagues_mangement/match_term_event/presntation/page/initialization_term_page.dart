@@ -14,9 +14,9 @@ import '../widget/match_duration_selector_widget.dart';
 import '../widget/term_count_selector_widget.dart';
 
 class LeagueTermSetupPage extends ConsumerStatefulWidget {
-  const LeagueTermSetupPage({super.key, required this.leagueId});
+  const LeagueTermSetupPage({super.key, required this.leagueSyncId});
 
-  final int leagueId;
+  final String leagueSyncId;
 
   @override
   ConsumerState<LeagueTermSetupPage> createState() =>
@@ -31,7 +31,7 @@ class _LeagueTermSetupPageState extends ConsumerState<LeagueTermSetupPage> {
   @override
   Widget build(BuildContext context) {
     final termsState = ref.watch(termsProvider);
-    final leagueTermState = ref.watch(leagueTermProvider(widget.leagueId));
+    final leagueTermState = ref.watch(leagueTermProvider(widget.leagueSyncId));
 
     return Scaffold(
       appBar: AppBar(
@@ -80,14 +80,14 @@ class _LeagueTermSetupPageState extends ConsumerState<LeagueTermSetupPage> {
                       functionSuccess: () {
                         ref
                             .read(scheduleGroupStageMatchesRRProvider(
-                                    (widget.leagueId, false))
+                                    (widget.leagueSyncId, false))
                                 .notifier)
                             .run();
                         ref
-                            .read(roundsWithGroupsProvider(
-                                    Tuple2(widget.leagueId, 'unscheduled'))
+                            .read(roundsRefreshProvider(
+                                    Tuple3(widget.leagueSyncId, 'unscheduled','organizer'))
                                 .notifier)
-                            .run();
+                            .refresh();
                         Navigator.pop(context);
                       },
                       messageSuccess:
@@ -96,7 +96,7 @@ class _LeagueTermSetupPageState extends ConsumerState<LeagueTermSetupPage> {
                         text: 'تم',
                         onPressed: () async {
                           await ref
-                              .read(leagueTermProvider(widget.leagueId).notifier)
+                              .read(leagueTermProvider(widget.leagueSyncId).notifier)
                               .initTermsUiLogic(
                                 termsState.data,
                                 selectedTermsCount,

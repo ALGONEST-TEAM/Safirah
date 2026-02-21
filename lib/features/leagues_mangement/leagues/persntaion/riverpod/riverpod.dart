@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';
+import '../../../../../core/state/pagination_data/paginated_model.dart';
 import '../../data/model/league_model.dart';
 import '../../data/model/league_status_model.dart';
 import '../../data/model/rule_league_model.dart';
@@ -45,24 +48,27 @@ class LeagueFormNotifier extends StateNotifier<LeagueModel> {
 }
 
 final detailsLeagueProvider = StateNotifierProvider.family<
-    DetailsLeaguesNotifier,
-    DataState<LeagueModel>,
-    int>(
-  (ref,idLeague) => DetailsLeaguesNotifier(idLeague),
+    DetailsLeaguesNotifier, DataState<LeagueModel>, String>(
+  (ref, leagueSyncId) => DetailsLeaguesNotifier(leagueSyncId),
 );
 
 class DetailsLeaguesNotifier extends StateNotifier<DataState<LeagueModel>> {
-  DetailsLeaguesNotifier(this.idLeague) : super(DataState<LeagueModel>.initial(LeagueModel())) {
+  DetailsLeaguesNotifier(this.leagueSyncId)
+      : super(DataState<LeagueModel>.initial(LeagueModel())) {
     getLeague();
   }
 
-  final int idLeague;
-  final _repo = LeagueRepository(local: di.sl());
+  final String leagueSyncId;
+  final _repo = LeagueRepository(
+      local: di.sl(),
+      syncService: di.sl(),
+      connectivity: di.sl(),
+      remote: di.sl());
 
   Future<void> getLeague() async {
     state = state.copyWith(state: States.loading);
 
-    final result = await _repo.getLeague(idLeague: idLeague);
+    final result = await _repo.getLeague(leagueSyncId: leagueSyncId);
 
     result.fold(
       (f) {
@@ -76,14 +82,18 @@ class DetailsLeaguesNotifier extends StateNotifier<DataState<LeagueModel>> {
 }
 
 final addLeagueProvider =
-    StateNotifierProvider.autoDispose<AddLeagueNotifier, DataState<int>>(
+    StateNotifierProvider.autoDispose<AddLeagueNotifier, DataState<String>>(
   (ref) => AddLeagueNotifier(),
 );
 
-class AddLeagueNotifier extends StateNotifier<DataState<int>> {
-  AddLeagueNotifier() : super(DataState<int>.initial(0));
+class AddLeagueNotifier extends StateNotifier<DataState<String>> {
+  AddLeagueNotifier() : super(DataState<String>.initial(''));
 
-  final _repo = LeagueRepository(local: di.sl());
+  final _repo = LeagueRepository(
+      local: di.sl(),
+      syncService: di.sl(),
+      connectivity: di.sl(),
+      remote: di.sl());
 
   Future<void> addLeague(LeagueModel model) async {
     state = state.copyWith(state: States.loading);
@@ -162,10 +172,11 @@ class AddRuleNotifier extends StateNotifier<DataState<Unit>> {
 
   AddRuleNotifier(this.repo) : super(DataState.initial(unit));
 
-  Future<void> addRuleList(int leagueId, List<LeagueRuleModel> rules) async {
+  Future<void> addRuleList(
+      String leagueSyncId, List<LeagueRuleModel> rules) async {
     state = state.copyWith(state: States.loading);
 
-    final result = await repo.replaceRulesForLeague(leagueId, rules);
+    final result = await repo.replaceRulesForLeague(leagueSyncId, rules);
 
     result.fold(
       (failure) {
@@ -182,72 +193,184 @@ class AddRuleNotifier extends StateNotifier<DataState<Unit>> {
 
 final leaguesByPrivacyProvider = StateNotifierProvider.family<
     LeaguesByPrivacyNotifier,
-    DataState<List<LeagueModel>>,
+    DataState<PaginationModel<LeagueModel>>,
     bool>((ref, isPrivate) {
   return LeaguesByPrivacyNotifier(isPrivate);
 });
 
 class LeaguesByPrivacyNotifier
-    extends StateNotifier<DataState<List<LeagueModel>>> {
+    extends StateNotifier<DataState<PaginationModel<LeagueModel>>> {
   LeaguesByPrivacyNotifier(this.isPrivate)
-      : super(DataState.initial(const [])) {
-    load();
+      : super(DataState<PaginationModel<LeagueModel>>.initial(
+          PaginationModel.empty(),
+        )) {
+    _listenToLocal();
+    getDataBookingType();
   }
 
-  final bool isPrivate; // false = عامة، true = خاصة
-  final _repo = LeagueRepository(local: di.sl());
+  final bool isPrivate;
 
-  Future<void> load() async {
-    state = state.copyWith(state: States.loading);
-    final r = await _repo.getLeaguesByPrivacy(isPrivate: isPrivate);
-    r.fold(
-      (e) => state = state.copyWith(state: States.error, exception: e),
-      (list) => state = state.copyWith(state: States.loaded, data: list),
+  final _controller = LeagueRepository(
+    remote: di.sl(),
+    local: di.sl(),
+    syncService: di.sl(),
+    connectivity: di.sl(),
+  );
+
+  final int _pageSize = 15;
+  bool _requestInFlight = false;
+
+  int _currentPage = 1;
+  StreamSubscription<PaginationModel<LeagueModel>>? _sub;
+
+  int _listenToken = 0;
+
+  void _listenToLocal() {
+    final token = ++_listenToken;
+
+    _sub = _controller
+        .getLeagues(
+      isPrivate: isPrivate,
+      page: _currentPage,
+      perPage: _pageSize,
+    )
+        .listen((pageModel) {
+      if (token != _listenToken) return;
+
+      if (pageModel.data.isEmpty && state.data.data.isNotEmpty) return;
+
+      state = state.copyWith(
+        state: state.stateData,
+        data: pageModel,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  Future<void> getDataBookingType({bool moreData = false}) async {
+    if (_requestInFlight) return;
+
+    if (moreData && state.data.currentPage >= state.data.lastPage) {
+      return;
+    }
+
+    _requestInFlight = true;
+
+    final hasData = state.data.data.isNotEmpty;
+    state = state.copyWith(
+      state: moreData
+          ? States.loadingMore
+          : (hasData ? States.loaded : States.loading),
     );
+
+    _currentPage = moreData ? _currentPage + 1 : 1;
+
+    await _sub?.cancel();
+    _listenToLocal();
+
+    state = state.copyWith(state: States.loaded);
+
+    _requestInFlight = false;
   }
 }
+
+// final leagueStatusProvider = StateNotifierProvider.family<
+//     LeagueStatusLoaderNotifier,
+//     DataState<LeagueStatusModel?>,
+//     String>((ref, leagueSyncId) {
+//   return LeagueStatusLoaderNotifier(leagueSyncId, ref);
+// });
+//
+// class LeagueStatusLoaderNotifier
+//     extends StateNotifier<DataState<LeagueStatusModel?>> {
+//   final String leagueSyncId;
+//   final LeagueRepository _repo;
+//
+//   LeagueStatusLoaderNotifier(this.leagueSyncId, Ref ref)
+//       : _repo = LeagueRepository(
+//             local: di.sl(),
+//             syncService: di.sl(),
+//             connectivity: di.sl(),
+//             remote: di.sl()),
+//         super(DataState.initial(null)) {
+//     load();
+//   }
+//
+//   Future<void> load() async {
+//     state = state.copyWith(state: States.loading);
+//
+//     final res = await _repo.getStatus(leagueSyncId);
+//     res.fold(
+//       (e) => state = state.copyWith(state: States.error, exception: e),
+//       (model) => state = state.copyWith(state: States.loaded, data: model),
+//     );
+//   }
+// }
+final leagueStatusRepoProvider = Provider<LeagueRepository>((ref) {
+  return LeagueRepository(
+    local: di.sl(),
+    remote: di.sl(),
+    connectivity: di.sl(),
+    syncService: di.sl(),
+  );
+});
+final leagueStatusStreamProvider =
+    StreamProvider.family<LeagueStatusModel?, String>((ref, param) {
+  final repo = ref.read(leagueStatusRepoProvider);
+  return repo.watchLeagueStatus(
+    leagueSyncId: param,
+  );
+});
 final leagueStatusProvider = StateNotifierProvider.family<
-    LeagueStatusLoaderNotifier,
-    DataState<LeagueStatusModel?>,
-    int>((ref, leagueId) {
-  return LeagueStatusLoaderNotifier(leagueId, ref);
+    LeagueStatusLoaderNotifier, RefreshState, String>((ref, param) {
+  final repo = ref.read(leagueStatusRepoProvider);
+  return LeagueStatusLoaderNotifier(repo, param);
 });
 
-class LeagueStatusLoaderNotifier
-    extends StateNotifier<DataState<LeagueStatusModel?>> {
-  final int leagueId;
+class LeagueStatusLoaderNotifier extends StateNotifier<RefreshState> {
   final LeagueRepository _repo;
+  final String leagueSyncId;
 
-  LeagueStatusLoaderNotifier(this.leagueId, Ref ref)
-      : _repo = LeagueRepository(local: di.sl()),
-        super(DataState.initial(null)) {
-    load();
+  LeagueStatusLoaderNotifier(this._repo, this.leagueSyncId)
+      : super(RefreshState.idle()) {
+    refresh();
   }
 
-  Future<void> load() async {
-    state = state.copyWith(state: States.loading);
+  Future<void> refresh() async {
+    state = state.copyWith(status: RefreshStatus.loading, exception: null);
 
-    final res = await _repo.getStatus(leagueId);
+    final res = await _repo.refreshLeagueStatus(
+      leagueSyncId: leagueSyncId,
+    );
+
     res.fold(
-          (e) => state = state.copyWith(state: States.error, exception: e),
-          (model) => state = state.copyWith(state: States.loaded, data: model),
+      (e) => state = state.copyWith(status: RefreshStatus.error, exception: e),
+      (_) =>
+          state = state.copyWith(status: RefreshStatus.idle, exception: null),
     );
   }
 }
+
 final leagueStatusUpdateProvider =
-StateNotifierProvider<LeagueStatusUpdaterNotifier, DataState<Unit>>((ref) {
-  return LeagueStatusUpdaterNotifier(ref);
+    StateNotifierProvider<LeagueStatusUpdaterNotifier, DataState<Unit>>((ref) {
+  final repo = ref.read(leagueStatusRepoProvider);
+
+  return LeagueStatusUpdaterNotifier(ref, repo);
 });
 
 class LeagueStatusUpdaterNotifier extends StateNotifier<DataState<Unit>> {
   final LeagueRepository _repo;
 
-  LeagueStatusUpdaterNotifier(Ref ref)
-      : _repo = LeagueRepository(local: di.sl()),
-        super(DataState.initial(unit));
+  LeagueStatusUpdaterNotifier(Ref ref, this._repo)
+      : super(DataState.initial(unit));
 
   Future<void> update({
-    required int leagueId,
+    required String leagueSyncId,
     bool? hasGroups,
     bool? hasTeamsInGroups,
     bool? hasMatches,
@@ -256,7 +379,7 @@ class LeagueStatusUpdaterNotifier extends StateNotifier<DataState<Unit>> {
     state = state.copyWith(state: States.loading);
 
     final res = await _repo.updateLeagueStatus(
-      leagueId: leagueId,
+      leagueSyncId: leagueSyncId,
       hasGroups: hasGroups,
       hasTeamsInGroups: hasTeamsInGroups,
       hasMatches: hasMatches,
@@ -264,8 +387,75 @@ class LeagueStatusUpdaterNotifier extends StateNotifier<DataState<Unit>> {
     );
 
     res.fold(
-          (e) => state = state.copyWith(state: States.error, exception: e),
-          (_) => state = state.copyWith(state: States.loaded, data: unit),
+      (e) => state = state.copyWith(state: States.error, exception: e),
+      (_) => state = state.copyWith(state: States.loaded, data: unit),
     );
   }
 }
+
+final leagueBundleRefreshProvider = StateNotifierProvider.family<
+    LeagueBundleRefreshNotifier, RefreshState, String>((ref, leagueSyncId) {
+  final repo = ref.read(leagueStatusRepoProvider);
+  return LeagueBundleRefreshNotifier(repo, leagueSyncId);
+});
+
+class LeagueBundleRefreshNotifier extends StateNotifier<RefreshState> {
+  final LeagueRepository _repo;
+  final String leagueSyncId;
+
+  LeagueBundleRefreshNotifier(this._repo, this.leagueSyncId)
+      : super(RefreshState.idle()) {
+    refresh(); // ✅ فور الدخول للصفحة
+  }
+
+  Future<void> refresh() async {
+    state = state.copyWith(status: RefreshStatus.loading, exception: null);
+
+    final res = await _repo.refreshLeagueBundle(leagueSyncId: leagueSyncId);
+
+    res.fold(
+      (e) => state = state.copyWith(status: RefreshStatus.error, exception: e),
+      (_) =>
+          state = state.copyWith(status: RefreshStatus.idle, exception: null),
+    );
+  }
+}
+
+final leagueStreamProvider =
+    StreamProvider.family<LeagueModel?, String>((ref, leagueSyncId) {
+  final repo = ref.read(leagueStatusRepoProvider);
+  return repo.watchLeague(leagueSyncId: leagueSyncId);
+});
+//
+// final leagueStatusProvider = StateNotifierProvider.family<
+//     EnsureGroupRoundsNotifier, DataState<LeagueStatusModel>, String>(
+//   (ref, leagueSyncId) => EnsureGroupRoundsNotifier(leagueSyncId),
+// );
+//
+// class EnsureGroupRoundsNotifier
+//     extends StateNotifier<DataState<LeagueStatusModel>> {
+//   EnsureGroupRoundsNotifier(this.leagueSyncId)
+//       : super(DataState<LeagueStatusModel>.initial(LeagueStatusModel(
+//             leagueSyncId: '',
+//             hasGroups: false,
+//             hasMatches: false,
+//             hasPlayersInTeams: false,
+//             hasTeamsInGroups: false,
+//             isReady: false)));
+//
+//   final String leagueSyncId;
+//   final _repo = LeagueRepository(
+//       local: di.sl(),
+//       connectivity: di.sl(),
+//       syncService: di.sl(),
+//       remote: di.sl());
+//
+//   Future<void> run() async {
+//     state = state.copyWith(state: States.loading);
+//     final res = await _repo.getStatus(leagueSyncId);
+//     res.fold(
+//       (e) => state = state.copyWith(state: States.error, exception: e),
+//       (l) => state = state.copyWith(state: States.loaded, data: l),
+//     );
+//   }
+// }

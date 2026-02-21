@@ -86,7 +86,7 @@ class RankingTeamWidget extends StatelessWidget {
                       ),
                       Expanded(
                         child: AutoSizeTextWidget(
-                          text: qt.teamName ?? '#${qt.teamId}',
+                          text: qt.teamName ?? '---',
                           textAlign: TextAlign.right,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w400,

@@ -1,13 +1,18 @@
 import 'package:drift/drift.dart';
-import '../../../../match/data/data_source/table/matches_table.dart';
-import 'league_terms_table.dart';
 
 class MatchTerms extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get matchId => integer().references(Matches, #id)();
+  // ✅ New: stable identifier for sync-based relations
+  TextColumn get syncId => text().named('sync_id')();
 
-  IntColumn get leagueTermId => integer().references(LeagueTerms, #id)();
+  TextColumn get matchSyncId => text()
+      .named('match_sync_id')
+      .customConstraint('REFERENCES matches(sync_id) ON DELETE CASCADE')();
+
+  TextColumn get leagueTermSyncId => text()
+      .named('league_term_sync_id')
+      .customConstraint('REFERENCES leagueTerms(sync_id) ON DELETE CASCADE')();
 
   // وقت بداية الشوط
   DateTimeColumn get startTime => dateTime().nullable()();
@@ -22,4 +27,9 @@ class MatchTerms extends Table {
   BoolColumn get isFinished => boolean().withDefault(const Constant(false))();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  List<String> get customConstraints => [
+        'UNIQUE(sync_id)',
+      ];
 }

@@ -9,12 +9,12 @@ import '../page/divide_group_page.dart';
 class GroupSelectorSectionWidget extends ConsumerWidget {
   const GroupSelectorSectionWidget({
     super.key,
-    required this.leagueId,
+    required this.leagueSyncId,
     required this.groups,
     required this.selectedGroupIndex,
   });
 
-  final int leagueId;
+  final String leagueSyncId;
   final List<GroupCountSuggestion> groups;
   final int? selectedGroupIndex;
 
@@ -29,9 +29,9 @@ class GroupSelectorSectionWidget extends ConsumerWidget {
           items: groups.map((e) => e.labelArabic()).toList(),
           selectedIndex: selectedGroupIndex,
           onSelected: (i) {
-            ref.read(selectedGroupIndexProvider(leagueId).notifier).state = i;
+            ref.read(selectedGroupIndexProvider(leagueSyncId).notifier).state = i;
             ref
-                .read(selectedQualifiedIndexProvider(leagueId).notifier)
+                .read(selectedQualifiedIndexProvider(leagueSyncId).notifier)
                 .state = null;
           },
         ),

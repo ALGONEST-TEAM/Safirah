@@ -1,14 +1,19 @@
 import 'package:drift/drift.dart';
 
-import '../../../../leagues/data/data_source/table/leagues_table.dart';
-
 class TeamPlayerCategories extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get leagueId =>
-      integer().references(Leagues, #id, onDelete: KeyAction.cascade)();
+
+  /// أساس الربط للمزامنة
+  TextColumn get leagueSyncId => text()
+      .named('league_sync_id')
+      .customConstraint('NULL REFERENCES leagues(sync_id) ON DELETE CASCADE')();
+
   TextColumn get name => text()(); // A, B, C, ...
+  TextColumn get syncId => text()();
 
   @override
-  List<String> get customConstraints => ['UNIQUE(league_id, name)'];
-
+  List<String> get customConstraints => [
+        'UNIQUE(league_sync_id, name)',
+        'UNIQUE(sync_id)',
+      ];
 }

@@ -2,9 +2,22 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import '../../../generated/l10n.dart';
 import 'erorr_model.dart';
+import 'sync_dio_exception.dart';
 
 class MessageOfErorrApi {
   static List<String> getExeptionMessage(DioException exception) {
+    // ✅ إذا كان الخطأ من المزامنة فقط: حاول إظهار رسالة الباكند كما هي
+    if (exception is SyncDioException) {
+      final data = exception.response?.data;
+      if (data is Map && data.containsKey('message')) {
+        final message = data['message'];
+        // أحياناً السيرفر يرجع message كنص/خريطة، فنعرضه بشكل مباشر
+        if (message is String && message.trim().isNotEmpty) {
+          return [S.current.somethingWentWrong, message];
+        }
+      }
+    }
+
     // إذا فيه response من الباكند
     if (exception.response != null) {
       final data = exception.response?.data;

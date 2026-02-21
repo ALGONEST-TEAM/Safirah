@@ -9,6 +9,8 @@ import 'package:safirah/core/theme/app_colors.dart';
 import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import 'package:safirah/core/widgets/buttons/default_button.dart';
 import '../../../../../core/widgets/bottomNavbar/bottom_navigation_bar_of_mange_league_widget.dart';
+import '../../../../../injection.dart' as di;
+import '../../../../authorization/authorization_sync_runner.dart';
 import '../../data/model/league_model.dart';
 import '../../data/model/rule_league_model.dart';
 import '../riverpod/riverpod.dart';
@@ -26,7 +28,7 @@ class LeagueRulesPage extends ConsumerStatefulWidget {
       this.maxSubPlayers,
       this.isPrivate = false,
       this.status = 'active',
-        this.logoPath,
+      this.logoPath,
       this.subscriptionPrice});
 
   final String? name;
@@ -103,12 +105,13 @@ class _LeagueRulesPageState extends ConsumerState<LeagueRulesPage> {
                   state: addLeague,
                   hasMessageSuccess: false,
                   functionSuccess: () {
+
                     SchedulerBinding.instance.addPostFrameCallback((_) {
                       final selectedRules = rules
                           .where((rule) => rule.selected)
                           .map((r) => LeagueRuleModel(
                                 description: r.rule,
-                                leagueId: addLeague.data,
+                                leagueSyncId: addLeague.data,
                               ))
                           .toList();
                       ref
@@ -117,13 +120,15 @@ class _LeagueRulesPageState extends ConsumerState<LeagueRulesPage> {
                       ref
                           .read(leaguesByPrivacyProvider(widget.isPrivate)
                               .notifier)
-                          .load();
+                          .getDataBookingType();
+
                       navigateAndFinish(context,
                           const BottomNavigationBarOfMangeLeagueWidget());
                     });
                   },
                   bottonWidget: DefaultButtonWidget(
                     text: 'انشاء الدوري',
+                    isLoading: addLeague.stateData == States.loading,
                     textColor: Colors.white,
                     background: AppColors.primaryColor,
                     onPressed: () {

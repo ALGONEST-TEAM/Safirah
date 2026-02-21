@@ -3,6 +3,10 @@ import 'package:drift/drift.dart';
 class Leagues extends Table {
   IntColumn get id => integer().autoIncrement()();
 
+  /// معرف مزامنة عالمي (UUID) يُستخدم مع الـ backend بدل id المحلي.
+  /// يجب أن يكون فريدًا على مستوى قاعدة البيانات.
+  TextColumn get syncId => text()();
+
   TextColumn get name => text()();
 
   TextColumn get subscriptionPrice => text()();
@@ -32,4 +36,9 @@ class Leagues extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().nullable()();
+  TextColumn get logoLocalPath => text().named('logo_local_path').nullable()();
+  @override
+  List<String> get customConstraints => [
+        'UNIQUE(sync_id)',
+      ];
 }

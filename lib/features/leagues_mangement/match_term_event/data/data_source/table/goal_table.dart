@@ -1,20 +1,32 @@
 import 'package:drift/drift.dart';
-import '../../../../match/data/data_source/table/matches_table.dart';
-import '../../../../team_and_player/data/data_source/table/players_table.dart';
-import 'match_terms_table.dart';
 
 class Goals extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get matchId => integer().references(Matches, #id)();
+  // ✅ stable identifier for sync-based relations
+  TextColumn get syncId => text().named('sync_id')();
 
-  IntColumn get playerId => integer().references(Players, #id)();
+  TextColumn get matchSyncId => text()
+      .named('match_sync_id')
+      .customConstraint('REFERENCES matches(sync_id) ON DELETE CASCADE')();
 
-  IntColumn get matchTermId => integer().references(MatchTerms, #id)();
+  TextColumn get playerSyncId => text()
+      .named('player_sync_id')
+      .customConstraint('REFERENCES players(sync_id) ON DELETE CASCADE')();
+
+  /// ✅ link to match_terms via matchTerms.sync_id
+  TextColumn get matchTermSyncId => text()
+      .named('match_term_sync_id')
+      .customConstraint('REFERENCES matchTerms(sync_id) ON DELETE CASCADE')();
 
   IntColumn get goalTime => integer()(); // بالثواني أو بالدقائق حسب الاتفاق
 
   TextColumn get goalType => text()(); // مثال: "Regular", "PK"
 
   TextColumn get status => text().withDefault(const Constant('active'))();
+
+  @override
+  List<String> get customConstraints => [
+        'UNIQUE(sync_id)',
+      ];
 }

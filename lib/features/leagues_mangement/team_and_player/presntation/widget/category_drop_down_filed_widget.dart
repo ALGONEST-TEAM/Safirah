@@ -102,7 +102,7 @@ import 'label_drop_down_widget.dart';
 class CategoryDropdownFieldWidget extends ConsumerWidget {
   const CategoryDropdownFieldWidget({
     super.key,
-    required this.leagueId,
+    required this.leagueSyncId,
     this.value,
     this.onChanged,
     this.validator,
@@ -110,7 +110,7 @@ class CategoryDropdownFieldWidget extends ConsumerWidget {
     this.hintText,
   });
 
-  final int leagueId;
+  final String leagueSyncId;
   final TeamPlayerCategoryModel? value;
   final ValueChanged<TeamPlayerCategoryModel?>? onChanged;
   final String? Function(TeamPlayerCategoryModel?)? validator;
@@ -119,7 +119,7 @@ class CategoryDropdownFieldWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(categoriesProvider(leagueId));
+    final state = ref.watch(categoriesProvider(leagueSyncId));
     return CheckStateInGetApiDataWidget(
       state: state,
       widgetOfData: LabeledDropdownField<TeamPlayerCategoryModel>(

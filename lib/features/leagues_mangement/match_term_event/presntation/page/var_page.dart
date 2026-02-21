@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/features/leagues_mangement/match_term_event/presntation/state_mangement/riverpod.dart';
 import '../../data/model/warring_model.dart';
-import '../state_mangement/riverpod.dart';
 import '../widget/var_review_actions_widget.dart';
 import '../widget/var_review_app_bar_page.dart';
 import '../widget/var_review_description_widget.dart';
@@ -13,13 +13,13 @@ class VarEvent {
   final String type;
   final dynamic event;
   final int playerId;
-  final int matchId;
+  final String matchSyncId;
 
   VarEvent({
     required this.type,
     required this.event,
     required this.playerId,
-    required this.matchId,
+    required this.matchSyncId,
   });
 }
 
@@ -38,11 +38,17 @@ class VarReviewPage extends ConsumerWidget {
     final isRed = varEvent.type == 'warning' &&
         (varEvent.event as WarningModel).warningType == 'red';
 
-    final int playerId = varEvent.playerId;
-    final int matchId = varEvent.matchId;
+    final String matchSyncId = varEvent.matchSyncId;
 
-    final statsState =
-        ref.watch(playerStatsProvider((matchId: matchId, playerId: playerId)));
+    // Resolve a usable playerSyncId for stats.
+    final String? playerSyncId = (varEvent.type == 'warning')
+        ? (varEvent.event as WarningModel).playerSyncId
+        : null;
+
+    final statsState = ref.watch(
+      playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId ?? '')),
+    );
+
     final yellowCount = statsState.data.yellow;
 
     return Scaffold(
@@ -66,8 +72,8 @@ class VarReviewPage extends ConsumerWidget {
               isYellow: isYellow,
               isRed: isRed,
               yellowCount: yellowCount,
-              playerId: playerId,
-              matchId: matchId,
+              playerSyncId: playerSyncId ?? '',
+              matchSyncId: matchSyncId,
             ),
           ],
         ),
@@ -75,7 +81,3 @@ class VarReviewPage extends ConsumerWidget {
     );
   }
 }
-
-
-
-

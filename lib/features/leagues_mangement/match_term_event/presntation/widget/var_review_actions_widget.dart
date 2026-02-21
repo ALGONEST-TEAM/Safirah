@@ -18,8 +18,8 @@ class VarReviewActionsWidget extends ConsumerWidget {
     required this.isYellow,
     required this.isRed,
     required this.yellowCount,
-    required this.playerId,
-    required this.matchId,
+    required this.playerSyncId,
+    required this.matchSyncId,
   });
 
   final VarEvent varEvent;
@@ -27,8 +27,8 @@ class VarReviewActionsWidget extends ConsumerWidget {
   final bool isYellow;
   final bool isRed;
   final int yellowCount;
-  final int playerId;
-  final int matchId;
+  final String playerSyncId;
+  final String matchSyncId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,74 +55,52 @@ class VarReviewActionsWidget extends ConsumerWidget {
                 final goal = varEvent.event as GoalModel;
 
                 await ref
-                    .read(deleteGoalNotifierProvider(goal.id!).notifier)
+                    .read(deleteGoalNotifierProvider(goal.syncId).notifier)
                     .run();
 
                 final deleteState =
-                ref.read(deleteGoalNotifierProvider(goal.id!));
+                    ref.read(deleteGoalNotifierProvider(goal.syncId));
                 if (deleteState.stateData == States.error) {
+                  // ignore: avoid_print
                   print('فشل في حذف الهدف');
                   return;
                 }
 
                 await ref
-                    .read(playerStatsProvider(
-                    (matchId: matchId, playerId: playerId))
-                    .notifier)
+                    .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
                     .load();
 
-                final int? assistPlayerId = deleteState.data;
-                print('assist from delete goal: ${deleteState.data}');
+                final String? assistPlayerSyncId = deleteState.data;
 
-                print(assistPlayerId);
-                if (assistPlayerId != null) {
+                if (assistPlayerSyncId != null) {
                   await ref
                       .read(
-                    playerStatsProvider((
-                    matchId: goal.matchId,
-                    playerId: assistPlayerId,
-                    )).notifier,
-                  )
+                        playerStatsProvider((
+                          matchSyncId: matchSyncId,
+                          playerSyncId: assistPlayerSyncId,
+                        )).notifier,
+                      )
                       .load();
                 }
               } else if (isYellow) {
-                if (yellowCount == 2) {
-                  final warning = varEvent.event as WarningModel;
-                  await ref
-                      .read(
-                      deleteWarningNotifierProvider(warning.id! + 1)
-                          .notifier)
-                      .run();
-                  await ref
-                      .read(playerStatsProvider((
-                  matchId: matchId, playerId: playerId))
-                      .notifier)
-                      .load();
-                }
-
                 final warning = varEvent.event as WarningModel;
+
                 await ref
-                    .read(deleteWarningNotifierProvider(warning.id!).notifier)
+                    .read(deleteWarningNotifierProvider(warning.syncId).notifier)
                     .run();
+
                 await ref
-                    .read(playerStatsProvider(
-                    (matchId: matchId, playerId: playerId))
-                    .notifier)
+                    .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
                     .load();
               } else if (isRed) {
                 final warning = varEvent.event as WarningModel;
+
                 await ref
-                    .read(deleteWarningNotifierProvider(warning.id!).notifier)
+                    .read(deleteWarningNotifierProvider(warning.syncId).notifier)
                     .run();
+
                 await ref
-                    .read(playerStatsProvider(
-                    (matchId: matchId, playerId: playerId))
-                    .notifier)
-                    .load();
-                await ref
-                    .read(playerStatsProvider(
-                    (matchId: matchId, playerId: playerId))
-                    .notifier)
+                    .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
                     .load();
               }
 

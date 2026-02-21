@@ -31,10 +31,14 @@ class PlayerStats {
   final int yellowCards;
   final int redCards;
 
-  PlayerStats({
+  const PlayerStats({
     required this.goals,
     required this.assists,
     required this.yellowCards,
     required this.redCards,
   });
+
+  /// Backward-compatible getters used in UI widgets.
+  int get yellow => yellowCards;
+  int get red => redCards;
 }

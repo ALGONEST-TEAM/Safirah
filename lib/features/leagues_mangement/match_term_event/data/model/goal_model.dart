@@ -4,31 +4,34 @@ import '../../../../../core/database/safirah_database.dart';
 
 class GoalModel {
   final int? id;
-  final int matchId;
-  final int playerId;
-  final int matchTermId;
+  final String syncId;
+  final String matchSyncId;
+  final String playerSyncId;
+  final String matchTermSyncId;
   final int goalTime;
   final String goalType;
   final String status;
-  final int? teamId; // ✅ جديد
+  final String? teamSyncId;
 
   GoalModel({
-     this.id,
-    required this.matchId,
-    required this.playerId,
-    required this.matchTermId,
+    this.id,
+    required this.syncId,
+    required this.matchSyncId,
+    required this.playerSyncId,
+    required this.matchTermSyncId,
     required this.goalTime,
     required this.goalType,
     this.status = 'active',
-    this.teamId
+    this.teamSyncId,
   });
 
   factory GoalModel.fromEntity(Goal entity) {
     return GoalModel(
       id: entity.id,
-      matchId: entity.matchId,
-      playerId: entity.playerId,
-      matchTermId: entity.matchTermId,
+      syncId: entity.syncId,
+      matchSyncId: entity.matchSyncId,
+      playerSyncId: entity.playerSyncId,
+      matchTermSyncId: entity.matchTermSyncId,
       goalTime: entity.goalTime,
       goalType: entity.goalType,
       status: entity.status,
@@ -37,10 +40,12 @@ class GoalModel {
 
   factory GoalModel.fromJson(Map<String, dynamic> json) {
     return GoalModel(
-      id: json['id'] as int,
-      matchId: json['match_id'] as int,
-      playerId: json['player_id'] as int,
-      matchTermId: json['match_term_id'] as int,
+      id: json['id'] as int?,
+      syncId: (json['sync_id'] ?? json['syncId']) as String,
+      matchSyncId: (json['match_sync_id'] ?? json['matchSyncId']) as String,
+      playerSyncId: (json['player_sync_id'] ?? json['playerSyncId']) as String,
+      matchTermSyncId:
+          (json['match_term_sync_id'] ?? json['matchTermSyncId']) as String,
       goalTime: json['goal_time'] as int,
       goalType: json['goal_type'] as String,
       status: json['status'] as String? ?? 'active',
@@ -49,9 +54,10 @@ class GoalModel {
 
   GoalsCompanion toCompanionInsert() {
     return GoalsCompanion.insert(
-      matchId: matchId,
-      playerId: playerId,
-      matchTermId: matchTermId,
+      syncId: syncId,
+      matchSyncId: matchSyncId,
+      playerSyncId: playerSyncId,
+      matchTermSyncId: matchTermSyncId,
       goalTime: goalTime,
       goalType: goalType,
       status: Value(status),
@@ -61,9 +67,10 @@ class GoalModel {
   GoalsCompanion toCompanionUpdate() {
     return GoalsCompanion(
       id: Value(id!),
-      matchId: Value(matchId),
-      playerId: Value(playerId),
-      matchTermId: Value(matchTermId),
+      syncId: Value(syncId),
+      matchSyncId: Value(matchSyncId),
+      playerSyncId: Value(playerSyncId),
+      matchTermSyncId: Value(matchTermSyncId),
       goalTime: Value(goalTime),
       goalType: Value(goalType),
       status: Value(status),
@@ -71,34 +78,37 @@ class GoalModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'match_id': matchId,
-    'player_id': playerId,
-    'match_term_id': matchTermId,
-    'goal_time': goalTime,
-    'goal_type': goalType,
-    'status': status,
-  };
+        'id': id,
+        'sync_id': syncId,
+        'match_sync_id': matchSyncId,
+        'player_sync_id': playerSyncId,
+        'match_term_sync_id': matchTermSyncId,
+        'goal_time': goalTime.toString(),
+        'goal_type': goalType,
+        'status': status,
+      };
 
   GoalModel copyWith({
     int? id,
-    int? matchId,
-    int? playerId,
-    int? matchTermId,
+    String? syncId,
+    String? matchSyncId,
+    String? playerSyncId,
+    String? matchTermSyncId,
     int? goalTime,
     String? goalType,
     String? status,
-    int? idTeam,
+    String? teamSyncId,
   }) {
     return GoalModel(
       id: id ?? this.id,
-      matchId: matchId ?? this.matchId,
-      playerId: playerId ?? this.playerId,
-      matchTermId: matchTermId ?? this.matchTermId,
+      syncId: syncId ?? this.syncId,
+      matchSyncId: matchSyncId ?? this.matchSyncId,
+      playerSyncId: playerSyncId ?? this.playerSyncId,
+      matchTermSyncId: matchTermSyncId ?? this.matchTermSyncId,
       goalTime: goalTime ?? this.goalTime,
       goalType: goalType ?? this.goalType,
       status: status ?? this.status,
-      teamId: idTeam ?? this.teamId,
+      teamSyncId: teamSyncId ?? this.teamSyncId,
     );
   }
 }

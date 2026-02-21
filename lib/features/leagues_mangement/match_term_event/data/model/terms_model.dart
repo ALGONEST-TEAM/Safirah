@@ -4,6 +4,7 @@ import '../../../../../core/database/safirah_database.dart';
 
 class TermModel {
   final int? id;
+  final String syncId;
   final String name;
   final String type;
   final int order;
@@ -11,6 +12,7 @@ class TermModel {
 
   const TermModel({
     this.id,
+    required this.syncId,
     required this.name,
     required this.type,
     required this.order,
@@ -20,6 +22,7 @@ class TermModel {
   // ✅ التحويل من Entity (drift)
   factory TermModel.fromEntity(Term term) => TermModel(
         id: term.id,
+        syncId: term.syncId,
         name: term.name,
         type: term.type,
         order: term.order,
@@ -28,6 +31,7 @@ class TermModel {
 
   // ✅ التحويل إلى Companion للإدخال
   TermsCompanion toCompanionInsert() => TermsCompanion.insert(
+        syncId: syncId,
         name: name,
         type: type,
         order: order,
@@ -36,6 +40,7 @@ class TermModel {
   // ✅ التحويل إلى Companion للتحديث
   TermsCompanion toCompanionUpdate() => TermsCompanion(
         id: id != null ? Value(id!) : const Value.absent(),
+        syncId: Value(syncId),
         name: Value(name),
         type: Value(type),
         order: Value(order),
@@ -45,6 +50,7 @@ class TermModel {
   // ✅ JSON
   factory TermModel.fromJson(Map<String, dynamic> json) => TermModel(
         id: json['id'] as int?,
+        syncId: (json['sync_id'] ?? json['syncId']) as String,
         name: json['name'] as String,
         type: json['type'] as String,
         order: json['order'] as int,
@@ -55,6 +61,7 @@ class TermModel {
 
   Map<String, dynamic> toJson() => {
         if (id != null) 'id': id,
+        'sync_id': syncId,
         'name': name,
         'type': type,
         'order': order,
@@ -63,6 +70,7 @@ class TermModel {
 
   TermModel copyWith({
     int? id,
+    String? syncId,
     String? name,
     String? type,
     int? order,
@@ -70,6 +78,7 @@ class TermModel {
   }) =>
       TermModel(
         id: id ?? this.id,
+        syncId: syncId ?? this.syncId,
         name: name ?? this.name,
         type: type ?? this.type,
         order: order ?? this.order,
@@ -79,27 +88,50 @@ class TermModel {
 
 class LeagueTermModel {
   final int? id;
-  final int leagueId;
-  final int termId;
+  final String syncId;
+  final String leagueSyncId;
+  final String termSyncId;
   final String? termName; // من جدول terms
   final String? termType; // من جدول terms
   final int durationMinutes;
-
+  final int? orderTerm;
   LeagueTermModel({
     this.id,
-    required this.leagueId,
-    required this.termId,
+    required this.syncId,
+    this.orderTerm,
+    required this.leagueSyncId,
+    required this.termSyncId,
     this.termName,
     this.termType,
     required this.durationMinutes,
   });
-
-  // 🏗️ Factory من جدول LeagueTerms (Drift Entity)
+LeagueTermModel copyWith({
+  int? id,
+  String? syncId,
+  String? leagueSyncId,
+  String? termSyncId,
+  String? termName,
+  String? termType,
+  int? durationMinutes,
+  int? orderTerm,
+}) {
+  return LeagueTermModel(
+    id: id ?? this.id,
+    syncId: syncId ?? this.syncId,
+    leagueSyncId: leagueSyncId ?? this.leagueSyncId,
+    termSyncId: termSyncId ?? this.termSyncId,
+    termName: termName ?? this.termName,
+    termType: termType ?? this.termType,
+    durationMinutes: durationMinutes ?? this.durationMinutes,
+    orderTerm: orderTerm ?? this.orderTerm,
+  );
+}
   factory LeagueTermModel.fromEntity(LeagueTerm entity) {
     return LeagueTermModel(
       id: entity.id,
-      leagueId: entity.leagueId,
-      termId: entity.termId,
+      syncId: entity.syncId,
+      leagueSyncId: entity.leagueSyncId,
+      termSyncId: entity.termSyncId,
       durationMinutes: entity.durationMinutes,
     );
   }
@@ -111,60 +143,42 @@ class LeagueTermModel {
   }) {
     return LeagueTermModel(
       id: leagueTerm.id,
-      leagueId: leagueTerm.leagueId,
-      termId: leagueTerm.termId,
+      syncId: leagueTerm.syncId,
+      leagueSyncId: leagueTerm.leagueSyncId,
+      termSyncId: leagueTerm.termSyncId,
       termName: term.name,
       termType: term.type,
       durationMinutes: leagueTerm.durationMinutes,
     );
   }
 
-  // 🧾 لتحويل إلى Companion (للإدراج في قاعدة البيانات)
   LeagueTermsCompanion toCompanion() {
     return LeagueTermsCompanion.insert(
-      leagueId: leagueId,
-      termId: termId,
+      syncId: syncId,
+      leagueSyncId: leagueSyncId,
+      termSyncId: termSyncId,
       durationMinutes: Value(durationMinutes),
     );
   }
 
   // 🔁 للتحويل إلى JSON (للتخزين أو العرض)
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'leagueId': leagueId,
-        'termId': termId,
-        'termName': termName,
-        'termType': termType,
-        'durationMinutes': durationMinutes,
+        'sync_id': syncId,
+        'term_sync_id': orderTerm,
+        'duration_minutes': durationMinutes,
       };
 
   // 🧱 Factory من JSON (للتحويل من API أو تخزين محلي)
-  factory LeagueTermModel.fromJson(Map<String, dynamic> json) =>
-      LeagueTermModel(
+  factory LeagueTermModel.fromJson(Map<String, dynamic> json) => LeagueTermModel(
         id: json['id'] as int?,
-        leagueId: json['leagueId'] as int,
-        termId: json['termId'] as int,
+        syncId: (json['sync_id'] ?? json['syncId']) as String,
+        leagueSyncId: json['leagueSyncId'] as String,
+        termSyncId: (json['termSyncId'] ?? json['term_sync_id']) as String,
         termName: json['termName'] as String?,
         termType: json['termType'] as String?,
         durationMinutes: json['durationMinutes'] as int,
       );
 
   // ⚙️ نسخ مع تعديل (copyWith)
-  LeagueTermModel copyWith({
-    int? id,
-    int? leagueId,
-    int? termId,
-    String? termName,
-    String? termType,
-    int? durationMinutes,
-  }) {
-    return LeagueTermModel(
-      id: id ?? this.id,
-      leagueId: leagueId ?? this.leagueId,
-      termId: termId ?? this.termId,
-      termName: termName ?? this.termName,
-      termType: termType ?? this.termType,
-      durationMinutes: durationMinutes ?? this.durationMinutes,
-    );
-  }
+
 }

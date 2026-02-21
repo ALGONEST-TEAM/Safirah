@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../../core/network/errors/remote_exception.dart';
+import '../../../../../core/network/errors/app_exception_message.dart';
 import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';
 import '../../../../../core/widgets/error_widget.dart';
@@ -38,10 +38,8 @@ class CategoryWidget extends StatelessWidget {
           return Padding(
             padding: EdgeInsets.only(top: 20.h),
             child: ErrorsWidget(
-              title:
-                  MessageOfErorrApi.getExeptionMessage(state.exception!).first,
-              subTitle:
-                  MessageOfErorrApi.getExeptionMessage(state.exception!).last,
+              title: MessageOfError.get(state.exception as Object).first,
+              subTitle: MessageOfError.get(state.exception as Object).last,
               onPressed: refresh,
             ),
           );

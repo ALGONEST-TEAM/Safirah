@@ -1,11 +1,16 @@
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../../core/database/safirah_database.dart';
 
 class MatchTermModel {
   final int id;
-  final int matchId;
-  final int leagueTermId;
+
+  /// Stable identifier used for relations (FKs) and sync.
+  final String syncId;
+
+  final String matchSyncId;
+  final String leagueTermSyncId;
   final DateTime? startTime;
   final DateTime? endTime;
   final int additionalMinutes;
@@ -16,8 +21,9 @@ class MatchTermModel {
 
   MatchTermModel({
     required this.id,
-    required this.matchId,
-    required this.leagueTermId,
+    required this.syncId,
+    required this.matchSyncId,
+    required this.leagueTermSyncId,
     this.startTime,
     this.endTime,
     this.additionalMinutes = 0,
@@ -32,8 +38,9 @@ class MatchTermModel {
   factory MatchTermModel.fromEntity(MatchTerm entity) {
     return MatchTermModel(
       id: entity.id,
-      matchId: entity.matchId,
-      leagueTermId: entity.leagueTermId,
+      syncId: entity.syncId,
+      matchSyncId: entity.matchSyncId,
+      leagueTermSyncId: entity.leagueTermSyncId,
       startTime: entity.startTime,
       endTime: entity.endTime,
       additionalMinutes: entity.additionalMinutes,
@@ -43,27 +50,30 @@ class MatchTermModel {
 
   /// ✅ التحويل من JSON إلى موديل
   factory MatchTermModel.fromJson(Map<String, dynamic> json) => MatchTermModel(
-    id: json['id'] as int,
-    matchId: json['match_id'] as int,
-    leagueTermId: json['league_term_id'] as int,
-    startTime: json['start_time'] != null
-        ? DateTime.tryParse(json['start_time'] as String)
-        : null,
-    endTime: json['end_time'] != null
-        ? DateTime.tryParse(json['end_time'] as String)
-        : null,
-    additionalMinutes: json['additional_minutes'] as int? ?? 0,
-    isFinished: json['is_finished'] as bool? ?? false,
-    leagueTermName: json['leagueTermName'] as String?,
-    termName: json['termName'] as String?,
-    termType: json['termType'] as String?,
-  );
+        id: json['id'] as int,
+        syncId: (json['sync_id'] ?? json['syncId']) ?? '',
+        matchSyncId: (json['match_sync_id'] ?? json['matchSyncId']) ??'',
+        leagueTermSyncId:
+            (json['league_term_sync_id'] ?? json['leagueTermSyncId'])??'' ,
+        // startTime: json['start_time'] != null
+        //     ? DateTime.tryParse(json['start_time'] ??'')
+        //     : null,
+        // endTime: json['end_time'] != null
+        //     ? DateTime.tryParse(json['end_time'] ??'')
+        //     : null,
+        additionalMinutes: json['additional_minutes'] as int? ?? 0,
+        isFinished: json['is_finished'] as bool? ?? false,
+        // leagueTermName: json['leagueTermName'] as String?,
+        // termName: json['term']['name'] ??'',
+        // termType: json['termType'] as String?,
+      );
 
   /// ✅ التحويل إلى Companion (لعمليات الإدخال)
   MatchTermsCompanion toCompanionInsert() {
     return MatchTermsCompanion.insert(
-      matchId: matchId,
-      leagueTermId: leagueTermId,
+      syncId: const Uuid().v4(),
+      matchSyncId: matchSyncId,
+      leagueTermSyncId: leagueTermSyncId,
       startTime: Value(startTime),
       endTime: Value(endTime),
       additionalMinutes: Value(additionalMinutes),
@@ -75,8 +85,8 @@ class MatchTermModel {
   MatchTermsCompanion toCompanionUpdate() {
     return MatchTermsCompanion(
       id: Value(id),
-      matchId: Value(matchId),
-      leagueTermId: Value(leagueTermId),
+      matchSyncId: Value(matchSyncId),
+      leagueTermSyncId: Value(leagueTermSyncId),
       startTime: Value(startTime),
       endTime: Value(endTime),
       additionalMinutes: Value(additionalMinutes),
@@ -86,23 +96,24 @@ class MatchTermModel {
 
   /// ✅ التحويل إلى JSON
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'match_id': matchId,
-    'league_term_id': leagueTermId,
-    if (startTime != null) 'start_time': startTime!.toIso8601String(),
-    if (endTime != null) 'end_time': endTime!.toIso8601String(),
-    'additional_minutes': additionalMinutes,
-    'is_finished': isFinished,
-    if (leagueTermName != null) 'leagueTermName': leagueTermName,
-    if (termName != null) 'termName': termName,
-    if (termType != null) 'termType': termType,
-  };
+        'sync_id': syncId,
+       // 'match_sync_id': matchSyncId,
+        'league_term_sync_id': leagueTermSyncId,
+        if (startTime != null) 'start_time': startTime!.toIso8601String(),
+        if (endTime != null) 'end_time': endTime!.toIso8601String(),
+        'additional_minutes': additionalMinutes,
+        'is_finished': isFinished,
+        // if (leagueTermName != null) 'leagueTermName': leagueTermName,
+        // if (termName != null) 'termName': termName,
+        // if (termType != null) 'termType': termType,
+      };
 
   /// ✅ نسخة محدثة (copyWith)
   MatchTermModel copyWith({
     int? id,
-    int? matchId,
-    int? leagueTermId,
+    String? syncId,
+    String? matchSyncId,
+    String? leagueTermSyncId,
     DateTime? startTime,
     DateTime? endTime,
     int? additionalMinutes,
@@ -113,8 +124,9 @@ class MatchTermModel {
   }) {
     return MatchTermModel(
       id: id ?? this.id,
-      matchId: matchId ?? this.matchId,
-      leagueTermId: leagueTermId ?? this.leagueTermId,
+      syncId: syncId ?? this.syncId,
+      matchSyncId: matchSyncId ?? this.matchSyncId,
+      leagueTermSyncId: leagueTermSyncId ?? this.leagueTermSyncId,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       additionalMinutes: additionalMinutes ?? this.additionalMinutes,
@@ -124,5 +136,7 @@ class MatchTermModel {
       termType: termType ?? this.termType,
     );
   }
-
+  static List<MatchTermModel> fromJsonList(List json) {
+    return json.map((e) => MatchTermModel.fromJson(e)).toList();
+  }
 }

@@ -1,54 +1,115 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
-import 'package:safirah/core/helpers/navigateTo.dart';
-import 'package:safirah/features/leagues_mangement/match/data/model/round_model.dart';
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
-import '../../../../../core/widgets/auto_size_text_widget.dart';
-import '../../../../../core/widgets/online_images_widget.dart';
-import '../../../group/data/model/model.dart';
-import '../../../match_term_event/presntation/page/add_event_match_page.dart';
 import '../../../match_term_event/presntation/state_mangement/riverpod.dart';
-import '../../data/model/match_model.dart';
-import '../page/schedule_match_page.dart';
+import '../../data/model/round_model.dart';
 import '../state_managment/riverpod.dart';
 import 'knockout_rounds_list_widget.dart';
 import 'rounds_list_widget.dart';
-
-class MatchesScheduleWidget extends ConsumerWidget {
-  final int leagueId;
+class MatchesScheduleWidget extends ConsumerStatefulWidget {
+  final String leagueSyncId;
   final String matchFilter;
+  final String role;
 
-  const MatchesScheduleWidget(
-      {super.key, required this.leagueId, required this.matchFilter});
+  const MatchesScheduleWidget({
+    super.key,
+    required this.leagueSyncId,
+    required this.matchFilter,
+    required this.role,
+  });
 
   @override
-  Widget build(BuildContext context, ref) {
-    final state =
-        ref.watch(roundsWithGroupsProvider(Tuple2(leagueId, matchFilter)));
+  ConsumerState<MatchesScheduleWidget> createState() => _MatchesScheduleWidgetState();
+}
+
+class _MatchesScheduleWidgetState extends ConsumerState<MatchesScheduleWidget> {
+  late final Tuple3<String, String, String> refreshParam;
+  late final Tuple2<String, String> streamParam;
+
+  @override
+  void initState() {
+    super.initState();
+    refreshParam = Tuple3(widget.leagueSyncId, widget.matchFilter, widget.role);
+    streamParam = Tuple2(widget.leagueSyncId, widget.matchFilter);
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final checkFinishedAllMatchInGroup =
-        ref.watch(checkGroupMatchesFinishedProvider(leagueId));
-    return Scaffold(
-      body: checkFinishedAllMatchInGroup.data == true
-          ? KnockoutRoundsListWidget(
-              leagueId: leagueId,
-              matchFilter: matchFilter,
-            )
-          : CheckStateInGetApiDataWidget(
-              state: state,
-              widgetOfData: RoundsListWidget(
-                rounds: state.data,
-                leagueId: leagueId,
-                matchFilter: matchFilter,
-              ),
-            ),
+    ref.watch(checkGroupMatchesFinishedProvider(widget.leagueSyncId));
+
+    if (checkFinishedAllMatchInGroup.data == true) {
+      return KnockoutRoundsListWidget(
+
+        leagueSyncId: widget.leagueSyncId,
+        matchFilter: widget.matchFilter,
+        role: widget.role,
+        refreshParam: refreshParam,
+        streamParam: streamParam,
+
+      );
+    }
+
+    return RoundsListWidget(
+      role: widget.role,
+      leagueSyncId: widget.leagueSyncId,
+      matchFilter: widget.matchFilter,
+      refreshParam: refreshParam,
+      streamParam: streamParam,
     );
   }
 }
-
-
+// class MatchesScheduleWidget extends ConsumerStatefulWidget {
+//   final String leagueSyncId;
+//   final String matchFilter;
+//   final String role;
+//
+//   const MatchesScheduleWidget({
+//     super.key,
+//     required this.leagueSyncId,
+//     required this.matchFilter,
+//     required this.role,
+//   });
+//
+//   @override
+//   ConsumerState<MatchesScheduleWidget> createState() =>
+//       _MatchesScheduleWidgetState();
+// }
+//
+// class _MatchesScheduleWidgetState extends ConsumerState<MatchesScheduleWidget> {
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       ref.read(ensureKnockoutProgressProvider(widget.leagueSyncId).notifier)
+//           .run(qualifiedPerGroup: 4);
+//     });
+//   }
+//
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final hasKnockout =
+//     ref.watch(hasAnyKnockoutRoundsProvider(widget.leagueSyncId));
+//
+//     return Scaffold(
+//       body: hasKnockout
+//           ? KnockoutRoundsListWidget(
+//         leagueSyncId: widget.leagueSyncId,
+//         matchFilter: widget.matchFilter,
+//         role: widget.role,
+//       )
+//           : RoundsListWidget(
+//         role: widget.role,
+//         leagueSyncId: widget.leagueSyncId,
+//         matchFilter: widget.matchFilter,
+//       ),
+//     );
+//   }
+// }
 
 /// 🔹 قسم الجولة الإقصائية (بدون مجموعات)
 // class KnockoutRoundSectionWidget extends StatelessWidget {
@@ -112,6 +173,3 @@ class MatchesScheduleWidget extends ConsumerWidget {
 //     );
 //   }
 // }
-
-
-

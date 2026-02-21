@@ -14,7 +14,7 @@ class GroupService {
   /// - أسماء المجموعات (A, B, ... أو Group 1, Group 2, ...)
   /// - buckets: لكل مجموعة قائمة teamIds.
   GroupDrawResult drawGroupsByCount({
-    required List<int> teamIds,
+    required List<String> teamIds,
     required int groupsCount,
     required bool useLetters,
     required Random random,
@@ -29,14 +29,14 @@ class GroupService {
     }
 
     // نعمل نسخة ونخلطها
-    final ids = List<int>.from(teamIds);
+    final ids = List<String>.from(teamIds);
     ids.shuffle(random);
 
     // حساب السعة لكل مجموعة
     final q = teamLength ~/ groupsCount;
     final r = teamLength % groupsCount;
     final caps = List<int>.generate(groupsCount, (i) => q + (i < r ? 1 : 0));
-    final buckets = List.generate(groupsCount, (_) => <int>[]);
+    final buckets = List.generate(groupsCount, (_) => <String>[]);
 
     var g = 0;
     for (final tid in ids) {
@@ -69,17 +69,17 @@ class GroupService {
 
   /// يبني قائمة المؤهلين (QualifiedTeamModel) من IDs وأسماء الفرق.
   List<QualifiedTeamModel> buildQualifiedTeams({
-    required int leagueId,
-    required int groupId,
-    required List<int> teamIds,
-    required Map<int, String> teamNameById,
+    required String leagueSyncId,
+    required String groupSyncId,
+    required List<String> teamSyncIds,
+    required Map<String, String> teamNameById,
   }) {
-    return teamIds
+    return teamSyncIds
         .map(
           (tid) => QualifiedTeamModel(
-            leagueId: leagueId,
-            groupId: groupId,
-            teamId: tid,
+            leagueSyncId: leagueSyncId,
+            groupSyncId: groupSyncId,
+            teamSyncId: tid,
             teamName: teamNameById[tid],
           ),
         )
@@ -93,7 +93,7 @@ class GroupService {
   /// [headToHeadPoints] خريطة teamId -> نقاط المواجهات المباشرة داخل مجموعة التعادل.
   List<QualifiedTeamModel> sortByHeadToHead(
     List<QualifiedTeamModel> teams,
-    Map<int, num> headToHeadPoints,
+    Map<String, num> headToHeadPoints,
   ) {
     if (teams.length <= 1) return teams;
 
@@ -119,8 +119,8 @@ class GroupService {
       if (lossesCompare != 0) return lossesCompare;
 
       // 5) أخيراً: نقاط المواجهات المباشرة كآخر معيار
-      final aH2H = headToHeadPoints[a.teamId] ?? 0;
-      final bH2H = headToHeadPoints[b.teamId] ?? 0;
+      final aH2H = headToHeadPoints[a.teamSyncId] ?? 0;
+      final bH2H = headToHeadPoints[b.teamSyncId] ?? 0;
       final h2hCompare = bH2H.compareTo(aH2H);
       if (h2hCompare != 0) return h2hCompare;
 
@@ -134,7 +134,7 @@ class GroupService {
 /// نتيجة عملية القرعة: أسماء المجموعات + توزيع الفريق على كل مجموعة.
 class GroupDrawResult {
   final List<String> groupNames;
-  final List<List<int>> buckets;
+  final List<List<String>> buckets;
 
   const GroupDrawResult({
     required this.groupNames,

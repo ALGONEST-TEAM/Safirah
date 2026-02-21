@@ -10,18 +10,18 @@ import 'group_selector_section_widget.dart';
 
 class DivideGroupContentWidget extends ConsumerWidget {
   const DivideGroupContentWidget({super.key,
-    required this.leagueId,
+    required this.leagueSyncId,
     required this.groups,
   });
 
-  final int leagueId;
+  final String leagueSyncId;
   final List<GroupCountSuggestion> groups;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedGroupIndex = ref.watch(selectedGroupIndexProvider(leagueId));
+    final selectedGroupIndex = ref.watch(selectedGroupIndexProvider(leagueSyncId));
     final selectedQualifiedIndex =
-    ref.watch(selectedQualifiedIndexProvider(leagueId));
+    ref.watch(selectedQualifiedIndexProvider(leagueSyncId));
 
     final hasGroupSelection = selectedGroupIndex != null;
 
@@ -32,7 +32,7 @@ class DivideGroupContentWidget extends ConsumerWidget {
     final draftState = ref.watch(
       groupsDraftProvider(
         (
-        leagueId,
+        leagueSyncId,
         selectedGroups ?? groups[0].groups,
         ),
       ),
@@ -44,20 +44,20 @@ class DivideGroupContentWidget extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GroupSelectorSectionWidget(
-            leagueId: leagueId,
+            leagueSyncId: leagueSyncId,
             groups: groups,
             selectedGroupIndex: selectedGroupIndex,
           ),
           12.h.verticalSpace,
           if (hasGroupSelection)
             QualifiedSelectorSectionWidget(
-              leagueId: leagueId,
+              leagueSyncId: leagueSyncId,
               selectedQualifiedIndex: selectedQualifiedIndex,
               selectedGroups: selectedGroups!,
             ),
           20.h.verticalSpace,
           DraftButtonSectionWidget(
-            leagueId: leagueId,
+            leagueSyncId: leagueSyncId,
             draftState: draftState,
             hasGroupSelection: hasGroupSelection,
             selectedQualifiedIndex: selectedQualifiedIndex,

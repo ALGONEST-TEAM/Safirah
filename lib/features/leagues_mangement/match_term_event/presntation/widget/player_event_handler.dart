@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:safirah/features/leagues_mangement/match_term_event/presntation/widget/player_tile_with_event_widget.dart';
+import 'package:uuid/uuid.dart';
 import '../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../core/state/state.dart';
 import '../../../team_and_player/presntation/state_mangment/riverpod.dart';
@@ -8,27 +9,27 @@ import '../../data/model/assist_model.dart';
 import '../../data/model/goal_model.dart';
 import '../../data/model/warring_model.dart';
 import '../page/var_page.dart';
-import '../state_mangement/riverpod.dart';
+import 'package:safirah/features/leagues_mangement/match_term_event/presntation/state_mangement/riverpod.dart';
 
 class PlayerEventHandler {
   final bool isTermRunning;
   final bool stopTerm;
   final int yellowCount;
   final int redCount;
-  final int playerId;
-  final int matchId;
-  final int matchTermId;
-  final int teamId;
+  final String playerSyncId;
+  final String matchSyncId;
+  final String matchTermSyncId;
+  final String teamSyncId;
 
   const PlayerEventHandler({
     required this.isTermRunning,
     required this.stopTerm,
     required this.yellowCount,
     required this.redCount,
-    required this.playerId,
-    required this.matchId,
-    required this.matchTermId,
-    required this.teamId,
+    required this.playerSyncId,
+    required this.matchSyncId,
+    required this.matchTermSyncId,
+    required this.teamSyncId,
   });
 
   bool _canProceed(BuildContext context) {
@@ -63,9 +64,10 @@ class PlayerEventHandler {
     if (!_canProceed(context)) return;
 
     final goal = GoalModel(
-      matchId: matchId,
-      playerId: playerId,
-      matchTermId: matchTermId,
+      syncId: const Uuid().v7(),
+      matchSyncId: matchSyncId,
+      playerSyncId: playerSyncId,
+      matchTermSyncId: matchTermSyncId,
       goalTime: DateTime.now().minute,
       goalType: 'normal',
     );
@@ -77,23 +79,21 @@ class PlayerEventHandler {
       showFlashBarError(
         context: context,
         title: '',
-
         text: 'فشل في إضافة الهدف',
       );
       return;
     }
 
     await ref
-        .read(playerStatsProvider((matchId: matchId, playerId: playerId)).notifier)
+        .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
         .load();
     ref.read(currentVarEventProvider.notifier).state = VarEvent(
       type: 'goal',
       event: result.data,
-      playerId: playerId,
-      matchId: matchId
+      playerId: 0,
+      matchSyncId: matchSyncId,
     );
-    ref.read(activeVarPlayerProvider.notifier).state = playerId;
-
+    ref.read(activeVarPlayerProvider.notifier).state = playerSyncId;
     showFlashBarSuccess(
       context: context,
       message: 'تم إضافة الهدف',
@@ -104,9 +104,10 @@ class PlayerEventHandler {
     if (!_canProceed(context)) return;
 
     final warning = WarningModel(
-      matchId: matchId,
-      playerId: playerId,
-      matchTermId: matchTermId,
+      syncId: const Uuid().v7(),
+      matchSyncId: matchSyncId,
+      playerSyncId: playerSyncId,
+      matchTermSyncId: matchTermSyncId,
       warningTime: DateTime.now().minute,
       warningType: 'yellow',
       reason: 'مخالفة بسيطة',
@@ -124,22 +125,17 @@ class PlayerEventHandler {
       return;
     }
 
-   // ref.read(playerYellowCardsProvider(playerId).notifier).state++;
     await ref
-        .read(playerStatsProvider((matchId: matchId, playerId: playerId)).notifier)
+        .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
         .load();
-    // إذا أصبحت بطاقتين → أحمر تلقائي
-    if (yellowCount == 1) {
-      await addRedCard(context, ref, autoFromYellow: true);
-    }
 
     ref.read(currentVarEventProvider.notifier).state = VarEvent(
       type: 'warning',
       event: result.data,
-      playerId: playerId,
-      matchId: matchId,
+      playerId: 0,
+      matchSyncId: matchSyncId,
     );
-    ref.read(activeVarPlayerProvider.notifier).state = playerId;
+    ref.read(activeVarPlayerProvider.notifier).state = playerSyncId;
 
     showFlashBarSuccess(
       context: context,
@@ -152,9 +148,10 @@ class PlayerEventHandler {
     if (!autoFromYellow && !_canProceed(context)) return;
 
     final warning = WarningModel(
-      matchId: matchId,
-      playerId: playerId,
-      matchTermId: matchTermId,
+      syncId: const Uuid().v7(),
+      matchSyncId: matchSyncId,
+      playerSyncId: playerSyncId,
+      matchTermSyncId: matchTermSyncId,
       warningTime: DateTime.now().minute,
       warningType: 'red',
       reason: autoFromYellow ? 'بطاقتين صفراوين' : 'سلوك غير رياضي',
@@ -171,17 +168,18 @@ class PlayerEventHandler {
       );
       return;
     }
+
     await ref
-        .read(playerStatsProvider((matchId: matchId, playerId: playerId)).notifier)
+        .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
         .load();
-  //  ref.read(playerRedCardsProvider(playerId).notifier).state++;
+
     ref.read(currentVarEventProvider.notifier).state = VarEvent(
       type: 'warning',
       event: result.data,
-      matchId: matchId,
-      playerId: playerId,
+      playerId: 0,
+      matchSyncId: matchSyncId,
     );
-    ref.read(activeVarPlayerProvider.notifier).state = playerId;
+    ref.read(activeVarPlayerProvider.notifier).state = playerSyncId;
 
     showFlashBarSuccess(
       context: context,
@@ -189,85 +187,78 @@ class PlayerEventHandler {
     );
   }
 
-    Future<void> addAssist(
-      BuildContext context,
-      WidgetRef ref, {
-      required int goalId,
-    }) async {
-      if (!_canProceed(context)) return;
+  Future<void> addAssist(
+    BuildContext context,
+    WidgetRef ref, {
+    required String goalSyncId,
+  }) async {
+    if (!_canProceed(context)) return;
 
-      final assist = AssistModel(
-        matchId: matchId,
-        playerId: playerId,
-        matchTermId: matchTermId,
-        goalId: goalId,
-        assistTime: DateTime.now().minute,
-      );
+    final assist = AssistModel(
+      matchSyncId: matchSyncId,
+      playerSyncId: playerSyncId,
+      matchTermSyncId: matchTermSyncId,
+      goalSyncId: goalSyncId,
+      assistTime: DateTime.now().minute,
+    );
 
-      await ref.read(addAssistNotifierProvider(assist).notifier).run();
-      final result = ref.read(addAssistNotifierProvider(assist));
+    await ref.read(addAssistNotifierProvider(assist).notifier).run();
+    final result = ref.read(addAssistNotifierProvider(assist));
 
-      if (result.stateData == States.error) {
-        showFlashBarError(
-          context: context,
-          text: '',
-          title: 'فشل في إضافة الأسيست',
-        );
-        return;
-      }
-
-      // ربط الأسيست بالـ VAR مثل الهدف
-      await ref
-          .read(playerStatsProvider((matchId: matchId, playerId: playerId)).notifier)
-          .load();
-      showFlashBarSuccess(
+    if (result.stateData == States.error) {
+      showFlashBarError(
         context: context,
-        message: 'تم إضافة الأسيست',
+        text: '',
+        title: 'فشل في إضافة الأسيست',
       );
+      return;
     }
+
+    await ref
+        .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
+        .load();
+
+    showFlashBarSuccess(
+      context: context,
+      message: 'تم إضافة الأسيست',
+    );
+  }
 
   Future<void> substituteWith(
     BuildContext context,
     WidgetRef ref, {
-    required int incomingPlayerId,
+    required String incomingPlayerSyncId,
   }) async {
     if (!_canProceed(context)) return;
 
     final currentTimer = ref.read(matchTimerProvider);
 
-    // تنفيذ الاستبدال عبر الريبوبود
     final subNotifier = ref.read(substitutePlayerNotifierProvider.notifier);
     subNotifier.setParams(
-      matchId: matchId,
-      matchTermId: matchTermId,
-      outgoingPlayerId: playerId,
-      incomingPlayerId: incomingPlayerId,
+      matchSyncId: matchSyncId,
+      matchTermSyncId: matchTermSyncId,
+      outgoingPlayerSyncId: playerSyncId,
+      incomingPlayerSyncId: incomingPlayerSyncId,
       substitutionMinute: currentTimer ~/ 60,
     );
 
     await subNotifier.run();
 
-    // بعد نجاح الاستبدال: تحديث حالة المشاركة للطرفين
     ref.invalidate(getPlayerParticipationStatusProvider((
-      matchId: matchId,
-      matchTermId: matchTermId,
-      playerId: playerId,
+      matchSyncId: matchSyncId,
+      matchTermSyncId: matchTermSyncId,
+      playerSyncId: playerSyncId,
     )));
     ref.invalidate(getPlayerParticipationStatusProvider((
-      matchId: matchId,
-      matchTermId: matchTermId,
-      playerId: incomingPlayerId,
+      matchSyncId: matchSyncId,
+      matchTermSyncId: matchTermSyncId,
+      playerSyncId: incomingPlayerSyncId,
     )));
 
-    // تحديث قائمة لاعبي الفريق (نفس teamId)
-    ref.read(playersOfTeamProvider(teamId).notifier).load();
+    ref.read(playersOfTeamProvider(teamSyncId).notifier).load();
 
-    // إعادة تحميل إحصائيات اللاعبين (اختياري لكن مفيد)
     await ref
-        .read(playerStatsProvider((matchId: matchId, playerId: playerId)).notifier)
-        .load();
-    await ref
-        .read(playerStatsProvider((matchId: matchId, playerId: incomingPlayerId)).notifier)
+        .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
         .load();
 
     showFlashBarSuccess(

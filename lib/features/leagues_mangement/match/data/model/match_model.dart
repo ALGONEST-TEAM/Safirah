@@ -1,3 +1,6 @@
+import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
+
 import '../../../../../core/database/safirah_database.dart';
 import '../../../match_term_event/data/model/goal_model.dart';
 import '../../../match_term_event/data/model/match_term_model.dart';
@@ -6,10 +9,17 @@ import '../../../team_and_player/data/model/team_model.dart';
 
 class MatchModel {
   final int? id;
-  final int? leagueId;
-  final int? roundId;
-  final int? homeTeamId;
-  final int? awayTeamId;
+  final String? leagueSyncId;
+  final String? syncId;
+  final String? roundSyncId;
+
+  final String? homeTeamSyncId;
+  final String? awayTeamSyncId;
+
+  // ✅ NEW
+  final String? refereeSyncId;
+  final String? mediaSyncId;
+
   final int? stadiumId;
 
   final DateTime? matchDate;
@@ -33,10 +43,16 @@ class MatchModel {
 
   const MatchModel({
     this.id,
-     this.leagueId,
-     this.roundId,
-    this.homeTeamId,
-    this.awayTeamId,
+    this.leagueSyncId,
+    this.roundSyncId,
+    this.homeTeamSyncId,
+    this.awayTeamSyncId,
+    this.syncId,
+
+    // ✅ NEW
+    this.refereeSyncId,
+    this.mediaSyncId,
+
     this.stadiumId,
     this.matchDate,
     this.scheduledStartTime,
@@ -56,10 +72,16 @@ class MatchModel {
 
   MatchModel copyWith({
     int? id,
-    int? leagueId,
-    int? roundId,
-    int? homeTeamId,
-    int? awayTeamId,
+    String? leagueSyncId,
+    String? roundSyncId,
+    String? homeTeamSyncId,
+    String? awayTeamSyncId,
+
+    // ✅ NEW
+    String? refereeSyncId,
+    String? mediaSyncId,
+
+    String? syncId,
     int? stadiumId,
     DateTime? matchDate,
     DateTime? scheduledStartTime,
@@ -78,10 +100,16 @@ class MatchModel {
   }) =>
       MatchModel(
         id: id ?? this.id,
-        leagueId: leagueId ?? this.leagueId,
-        roundId: roundId ?? this.roundId,
-        homeTeamId: homeTeamId ?? this.homeTeamId,
-        awayTeamId: awayTeamId ?? this.awayTeamId,
+        leagueSyncId: leagueSyncId ?? this.leagueSyncId,
+        roundSyncId: roundSyncId ?? this.roundSyncId,
+        homeTeamSyncId: homeTeamSyncId ?? this.homeTeamSyncId,
+        awayTeamSyncId: awayTeamSyncId ?? this.awayTeamSyncId,
+
+        // ✅ NEW
+        refereeSyncId: refereeSyncId ?? this.refereeSyncId,
+        mediaSyncId: mediaSyncId ?? this.mediaSyncId,
+
+        syncId: syncId ?? this.syncId,
         stadiumId: stadiumId ?? this.stadiumId,
         matchDate: matchDate ?? this.matchDate,
         scheduledStartTime: scheduledStartTime ?? this.scheduledStartTime,
@@ -99,32 +127,47 @@ class MatchModel {
         updatedAt: updatedAt ?? this.updatedAt,
       );
 
+  int parseIntSafe(dynamic v, {int fallback = 0}) {
+    if (v == null) return fallback;
+    if (v is int) return v;
+    if (v is String) return int.tryParse(v) ?? fallback;
+    if (v is double) return v.toInt();
+    return fallback;
+  }
+
   /// ✅ من JSON
   factory MatchModel.fromJson(Map<String, dynamic> j) => MatchModel(
-    id: j['id'] as int?,
-    leagueId: (j['league_id'] ?? j['leagueId']) as int,
-    roundId: (j['round_id'] ?? j['roundId']) as int,
-    homeTeamId: (j['home_team_id'] ?? j['homeTeamId']) as int?,
-    awayTeamId: (j['away_team_id'] ?? j['awayTeamId']) as int?,
-    stadiumId: (j['stadium_id'] ?? j['stadiumId']) as int?,
+    id: j['id'],
+    syncId: j['sync_id'],
+    leagueSyncId: (j['league_id'] ?? j['leagueId'] ?? j['league_sync_id']),
+    roundSyncId: (j['round_sync_id'] ?? j['roundSyncId'] ?? j['round_id']),
+    homeTeamSyncId: (j['home_team_sync_id'] ??
+        j['homeTeamSyncId'] ??
+        j['home_team_id']),
+    awayTeamSyncId: (j['away_team_sync_id'] ??
+        j['awayTeamSyncId'] ??
+        j['away_team_id']),
+
+    // ✅ NEW (يدعم أكثر من key لو تغيّر اسمها)
+    // refereeSyncId:
+    // (j['referee_sync_id'] ?? j['refereeSyncId'] ?? j['referee_id']),
+    // mediaSyncId: (j['media_sync_id'] ?? j['mediaSyncId'] ?? j['media_id']),
+
     matchDate: _parseDate(j['match_date'] ?? j['matchDate']),
-    scheduledStartTime: _parseDate(j['scheduled_start_time'] ?? j['scheduledStartTime']),
+    scheduledStartTime:
+    _parseDate(j['scheduled_start_time'] ?? j['scheduledStartTime']),
     startTime: _parseDate(j['start_time'] ?? j['startTime']),
     endTime: _parseDate(j['end_time'] ?? j['endTime']),
-    homeScore: (j['home_score'] ?? j['homeScore'] ?? 0) as int,
-    awayScore: (j['away_score'] ?? j['awayScore'] ?? 0) as int,
-    status: (j['status'] ?? 'scheduled') as String,
+    homeScore: (j['home_score'] ?? j['homeScore']) ?? 0,
+    awayScore: (j['away_score'] ?? j['awayScore']) ?? 0,
+    status: (j['status'] ?? 'scheduled'),
     homeTeam: j['home_team'] != null
         ? TeamModel.fromJson(j['home_team'] as Map<String, dynamic>)
         : null,
     awayTeam: j['away_team'] != null
         ? TeamModel.fromJson(j['away_team'] as Map<String, dynamic>)
         : null,
-    matchTerms: j['match_terms'] != null
-        ? (j['match_terms'] as List)
-        .map((e) => MatchTermModel.fromEntity(MatchTerm.fromJson(e)))
-        .toList()
-        : [],
+    matchTerms: MatchTermModel.fromJsonList(j['match_terms'] ?? j['matchTerms'] ?? []),
     goals: j['goals'] != null
         ? (j['goals'] as List)
         .map((e) => GoalModel.fromJson(e as Map<String, dynamic>))
@@ -141,26 +184,18 @@ class MatchModel {
 
   /// ✅ إلى JSON
   Map<String, dynamic> toJson() => {
-  'id': id,
-  'league_id': leagueId,
-  'round_id': roundId,
-  'home_team_id': homeTeamId,
-  'away_team_id': awayTeamId,
-  'stadium_id': stadiumId,
-  'match_date': matchDate?.toIso8601String(),
-  'scheduled_start_time': scheduledStartTime?.toIso8601String(),
-  'start_time': startTime?.toIso8601String(),
-  'end_time': endTime?.toIso8601String(),
-  'home_score': homeScore,
-  'away_score': awayScore,
-  'status': status,
-  'home_team': homeTeam?.toJson(),
-  'away_team': awayTeam?.toJson(),
-  'match_terms': matchTerms.map((e) => e.toJson()).toList(),
-  'goals': goals.map((e) => e.toJson()).toList(),
-  'warnings': warnings.map((e) => e.toJson()).toList(),
-  'created_at': createdAt?.toIso8601String(),
-  'updated_at': updatedAt?.toIso8601String(),
+    'match_sync_id': syncId,
+    'league_sync_id': leagueSyncId,
+    'round_sync_id': roundSyncId,
+    'home_team_sync_id': homeTeamSyncId,
+    'away_team_sync_id': awayTeamSyncId,
+    'match_date': matchDate?.toIso8601String(),
+    'scheduled_start_time': scheduledStartTime?.toIso8601String(),
+    if (refereeSyncId != null) 'referee_sync_id': refereeSyncId,
+    if (mediaSyncId != null) 'media_sync_id': mediaSyncId,
+
+    'status': status,
+    'match_terms': matchTerms.map((e) => e.toJson()).toList(),
   };
 
   /// ✅ من Drift entity مع العلاقات
@@ -174,11 +209,13 @@ class MatchModel {
       }) =>
       MatchModel(
         id: m.id,
-        leagueId: m.leagueId,
-        roundId: m.roundId,
-        homeTeamId: m.homeTeamId,
-        awayTeamId: m.awayTeamId,
-
+        syncId: m.syncId,
+        leagueSyncId: m.leagueSyncId,
+        roundSyncId: m.roundSyncId,
+        homeTeamSyncId: m.homeTeamSyncId,
+        awayTeamSyncId: m.awayTeamSyncId,
+        refereeSyncId: m.refereeSyncId,
+        mediaSyncId: m.mediaSyncId,
         matchDate: m.matchDate,
         scheduledStartTime: m.scheduledStartTime,
         startTime: m.startTime,
@@ -194,6 +231,45 @@ class MatchModel {
         createdAt: m.createdAt,
         updatedAt: m.updatedAt,
       );
+  MatchesCompanion toUpsertCompanion({
+    required String fallbackLeagueSyncId,
+    required String fallbackRoundSyncId,
+  }) {
+    final now = DateTime.now();
+
+    final league = (leagueSyncId ?? '').trim().isNotEmpty
+        ? leagueSyncId!.trim()
+        : fallbackLeagueSyncId.trim();
+
+    final round = (roundSyncId ?? '').trim().isNotEmpty
+        ? roundSyncId!.trim()
+        : fallbackRoundSyncId.trim();
+
+    return MatchesCompanion.insert(
+      syncId: (syncId ?? const Uuid().v7()).trim(),
+      leagueSyncId: league,
+      roundSyncId: round,
+      homeTeamSyncId: (homeTeamSyncId ?? '').trim(),
+      awayTeamSyncId: (awayTeamSyncId ?? '').trim(),
+      refereeSyncId:
+      refereeSyncId != null ? Value(refereeSyncId!.trim()) : const Value.absent(),
+      mediaSyncId:
+      mediaSyncId != null ? Value(mediaSyncId!.trim()) : const Value.absent(),
+      matchDate: matchDate ?? now,
+      scheduledStartTime: scheduledStartTime != null
+          ? Value(scheduledStartTime!)
+          : const Value.absent(),
+      startTime: startTime != null ? Value(startTime!) : const Value.absent(),
+      endTime: endTime != null ? Value(endTime!) : const Value.absent(),
+      homeScore: Value(homeScore),
+      awayScore: Value(awayScore),
+      status: Value(status),
+      updatedAt: Value(updatedAt ?? now),
+    );
+  }
+  static List<MatchModel> fromJsonList(List json) {
+    return json.map((e) => MatchModel.fromJson(e)).toList();
+  }
 }
 
 // === helper function ===

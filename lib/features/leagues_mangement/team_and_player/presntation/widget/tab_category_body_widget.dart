@@ -5,12 +5,12 @@ import '../../data/model/team_model.dart';
 
 class TabsCategoryBodyWidget extends StatelessWidget {
   const TabsCategoryBodyWidget(
-      {super.key, required this.leagueId,
+      {super.key, required this.leagueSyncId,
         required this.categories,
         required this.controller});
 
   final TabController controller;
-  final int leagueId;
+  final String leagueSyncId;
   final List<TeamPlayerCategoryModel> categories;
 
   @override
@@ -20,7 +20,7 @@ class TabsCategoryBodyWidget extends StatelessWidget {
       children: [
         for (final cat in categories)
           PlayersOfCategoryWidget(
-            leagueId: leagueId,
+            leagueSyncId: leagueSyncId,
             category: cat,
           ),
       ],

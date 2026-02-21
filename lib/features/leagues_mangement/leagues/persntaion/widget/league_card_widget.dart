@@ -29,7 +29,7 @@ class LeagueCardWidget extends StatelessWidget {
           navigateTo(
             context,
             DetailsLeagueWidget(
-              leagueId: leagueModel.id ?? 0,
+              leagueSyncId: leagueModel.syncId ,
             ),
           );
         },

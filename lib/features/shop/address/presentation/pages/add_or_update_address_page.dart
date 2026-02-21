@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/widgets/logo_shimmer_widget.dart';
-import '../../../../../core/network/errors/remote_exception.dart';
+import '../../../../../core/network/errors/app_exception_message.dart';
 import '../../../../../core/state/check_state_in_post_api_data_widget.dart';
 import '../../../../../core/state/state.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -72,11 +72,9 @@ class AddOrUpdateAddressPage extends ConsumerWidget {
                   districtsState.stateData == States.error)
                 Center(
                   child: ErrorsWidget(
-                    title: MessageOfErorrApi.getExeptionMessage(
-                            citiesState.exception!)
+                    title: MessageOfError.get(citiesState.exception as Object)
                         .first,
-                    subTitle: MessageOfErorrApi.getExeptionMessage(
-                            citiesState.exception!)
+                    subTitle: MessageOfError.get(citiesState.exception as Object)
                         .last,
                     onPressed: () {
                       ref.invalidate(citiesProvider);

@@ -12,15 +12,15 @@ import '../state_mangment/riverpod.dart';
 import '../widget/all_team_of_league_widget.dart';
 
 class TeamsWithPlayersPage extends ConsumerWidget {
-  const TeamsWithPlayersPage({super.key, required this.leagueId});
+  const TeamsWithPlayersPage({super.key, required this.leagueSyncId});
 
-  final int leagueId;
+  final String leagueSyncId;
 
   @override
   Widget build(BuildContext context, ref) {
     final leagueStatusUpdate = ref.watch(leagueStatusUpdateProvider);
-    final countPlayerWithTeam = ref.watch(playersCountOfTeamProvider(leagueId));
-    final leagueStatus = ref.watch(leagueStatusProvider(leagueId));
+    final countPlayerWithTeam = ref.watch(playersCountOfTeamProvider(leagueSyncId));
+    final leagueStatus = ref.watch(leagueStatusStreamProvider(leagueSyncId));
 
     return Scaffold(
       appBar: AppBar(
@@ -40,30 +40,28 @@ class TeamsWithPlayersPage extends ConsumerWidget {
           children: [
             Expanded(
               child: AllTeamOfLeagueWidget(
-                leagueId: leagueId,
+                leagueSyncId: leagueSyncId,
                 isNavToEditor: false,
               ),
             ),
-            leagueStatus.data!.hasPlayersInTeams
+            leagueStatus.asData!.value!.hasPlayersInTeams
                 ? const SizedBox()
                 : SafeArea(
                     child: CheckStateInPostApiDataWidget(
                       state: leagueStatusUpdate,
                       functionSuccess: () {
-                        ref
-                            .read(leagueStatusProvider(leagueId).notifier)
-                            .load();
-                        navigateAndFinish(context, DetailsLeagueWidget(leagueId:leagueId,));
+                        // ref
+                        //     .read(leagueStatusProvider(leagueSyncId).notifier)
+                        //     .refresh();
+                        navigateTo(context, DetailsLeagueWidget(leagueSyncId:leagueSyncId,));
                       },
                       bottonWidget: DefaultButtonWidget(
                         onPressed: () {
-                          countPlayerWithTeam > 0
-                              ? null
-                              : ref
-                                  .read(leagueStatusUpdateProvider.notifier)
-                                  .update(
-                                      leagueId: leagueId,
-                                      hasPlayersAssigned: true);
+                          ref
+                              .read(leagueStatusUpdateProvider.notifier)
+                              .update(
+                                  leagueSyncId: leagueSyncId,
+                                  hasPlayersAssigned: true);
                         },
                         text: 'اعتماد الفرق',
                         background: AppColors.primaryColor,

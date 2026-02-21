@@ -58,11 +58,11 @@ List<QualifiedSuggestion> suggestQualifiedPerGroup(int totalTeams, int groups) {
 
 /// 🔹 مزود اقتراح عدد المجموعات (Power of Two)
 final powerOfTwoGroupSuggestionsProvider =
-FutureProvider.family<List<GroupCountSuggestion>, int>((ref, leagueId) async {
+FutureProvider.family<List<GroupCountSuggestion>, String>((ref, leagueSyncId) async {
   final db = di.sl<Safirah>();
   final totalTeams = await (db.selectOnly(db.teams)
     ..addColumns([db.teams.id.count()])
-    ..where(db.teams.leagueId.equals(leagueId)))
+    ..where(db.teams.leagueSyncId.equals(leagueSyncId)))
       .map((r) => r.read<int>(db.teams.id.count())!)
       .getSingle();
   return suggestPowerOfTwoGroupCounts(totalTeams, requireExactDivision: false);
@@ -70,11 +70,11 @@ FutureProvider.family<List<GroupCountSuggestion>, int>((ref, leagueId) async {
 
 /// 🔹 مزود اقتراح عدد المتأهلين بعد اختيار عدد المجموعات
 final qualifiedSuggestionsProvider = FutureProvider.family
-<List<QualifiedSuggestion>, ({int leagueId, int groups})>((ref, params) async {
+<List<QualifiedSuggestion>, ({String leagueSyncId, int groups})>((ref, params) async {
   final db = di.sl<Safirah>();
   final totalTeams = await (db.selectOnly(db.teams)
     ..addColumns([db.teams.id.count()])
-    ..where(db.teams.leagueId.equals(params.leagueId)))
+    ..where(db.teams.leagueSyncId.equals(params.leagueSyncId)))
       .map((r) => r.read<int>(db.teams.id.count())!)
       .getSingle();
 

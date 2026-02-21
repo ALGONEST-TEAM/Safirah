@@ -6,7 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:like_button/like_button.dart';
 import '../../../../../../core/constants/app_icons.dart';
 import '../../../../../../core/helpers/flash_bar_helper.dart';
-import '../../../../../../core/network/errors/remote_exception.dart';
+import '../../../../../../core/network/errors/app_exception_message.dart';
 import '../../../../../../core/state/state.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
@@ -102,15 +102,14 @@ class CardForCommentsWidget extends ConsumerWidget {
                       builder: (context, ref, child) {
                         if (state.state.stateData == States.error) {
                           SchedulerBinding.instance.addPostFrameCallback((_) {
-                            showFlashBarError(
-                              context: context,
-                              title: MessageOfErorrApi.getExeptionMessage(
-                                      state.state.exception!)
-                                  .first,
-                              text: MessageOfErorrApi.getExeptionMessage(
-                                      state.state.exception!)
-                                  .last,
-                            );
+                            final ex = state.state.exception;
+                            if (ex != null) {
+                              showFlashBarError(
+                                context: context,
+                                title: MessageOfError.get(ex).first,
+                                text: MessageOfError.get(ex).last,
+                              );
+                            }
                             state.state.stateData = States.initial;
                           });
                         }

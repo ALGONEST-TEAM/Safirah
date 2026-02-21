@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:safirah/core/helpers/navigateTo.dart';
-import 'package:safirah/core/state/check_state_in_get_api_data_widget.dart';
-import 'package:safirah/features/leagues_mangement/leagues/data/model/league_model.dart';
-
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
-import '../../../../../core/widgets/online_images_widget.dart';
-import '../riverpod/riverpod.dart';
 import '../widget/league_list_widget.dart';
-import 'details_league_widget.dart';
 
-class ShowLeaguesPage extends StatelessWidget {
+class ShowLeaguesPage extends StatefulWidget {
   const ShowLeaguesPage({super.key});
 
+  @override
+  State<ShowLeaguesPage> createState() => _ShowLeaguesPageState();
+}
+
+class _ShowLeaguesPageState extends State<ShowLeaguesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.secondaryColor,
-        title: AutoSizeTextWidget(
+        title: const AutoSizeTextWidget(
           text: 'الدوريات',
           colorText: Colors.white,
         ),
@@ -92,5 +89,3 @@ class ShowLeaguesPage extends StatelessWidget {
     );
   }
 }
-
-

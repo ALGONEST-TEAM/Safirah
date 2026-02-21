@@ -10,12 +10,14 @@ import '../../../match_term_event/presntation/page/initialization_term_page.dart
 import '../widget/matches_schedule_widget.dart';
 
 class MatchesSchedulingPage extends ConsumerWidget {
-  const MatchesSchedulingPage({super.key, required this.leagueId});
+  const MatchesSchedulingPage(
+      {super.key, required this.leagueSyncId, required this.role});
 
-  final int leagueId;
+  final String leagueSyncId;
+  final String role;
 
   @override
-  Widget build(BuildContext context,ref) {
+  Widget build(BuildContext context, ref) {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(
@@ -60,10 +62,11 @@ class MatchesSchedulingPage extends ConsumerWidget {
                             padding: EdgeInsets.symmetric(horizontal: 4.5.w),
                             indicatorSize: TabBarIndicatorSize.tab,
                             overlayColor:
-                                MaterialStateProperty.all(Colors.transparent),
+                            MaterialStateProperty.all(Colors.transparent),
                             labelPadding: EdgeInsets.zero,
                             indicatorPadding:
-                                EdgeInsets.symmetric(horizontal: 4.5.w, vertical: 2),
+                            EdgeInsets.symmetric(
+                                horizontal: 4.5.w, vertical: 2),
                             labelColor: Colors.white,
                             unselectedLabelColor: AppColors.secondaryColor,
                             tabs: const [
@@ -78,8 +81,9 @@ class MatchesSchedulingPage extends ConsumerWidget {
                   Padding(
                     padding: EdgeInsets.all(8.0.w),
                     child: GestureDetector(
-                      onTap: (){
-                        navigateTo(context, LeagueTermSetupPage(leagueId: leagueId,));
+                      onTap: () {
+                        navigateTo(context,
+                            LeagueTermSetupPage(leagueSyncId: leagueSyncId,));
                       },
                       child: Container(
                         height: 40.h,
@@ -88,7 +92,8 @@ class MatchesSchedulingPage extends ConsumerWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(8.r),
                         ),
-                        child: SvgPicture.asset(AppIcons.settings,fit: BoxFit.none,),
+                        child: SvgPicture.asset(
+                          AppIcons.settings, fit: BoxFit.none,),
 
                       ),
                     ),
@@ -100,11 +105,13 @@ class MatchesSchedulingPage extends ConsumerWidget {
                 child: TabBarView(
                   children: [
                     MatchesScheduleWidget(
-                      leagueId: leagueId,
+                      role: role,
+                      leagueSyncId: leagueSyncId,
                       matchFilter: 'unscheduled',
                     ),
                     MatchesScheduleWidget(
-                      leagueId: leagueId,
+                      role: role,
+                      leagueSyncId: leagueSyncId,
                       matchFilter: 'scheduled,live',
                     ),
                   ],

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import '../../generated/l10n.dart';
 import '../helpers/flash_bar_helper.dart';
-import '../network/errors/remote_exception.dart';
+import '../network/errors/app_exception_message.dart';
 import '../state/state.dart';
 import '../state/data_state.dart';
 
@@ -42,8 +42,8 @@ class CheckStateInPostApiDataWidget extends StatelessWidget {
         (_) {
           showFlashBarError(
             context: context,
-            title: MessageOfErorrApi.getExeptionMessage(state.exception!).first,
-            text: MessageOfErorrApi.getExeptionMessage(state.exception!).last,
+            title: MessageOfError.get(state.exception as Object).first,
+            text: MessageOfError.get(state.exception as Object).last,
           );
           state.stateData = States.initial;
         },

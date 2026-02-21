@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 class Terms extends Table {
   IntColumn get id => integer().autoIncrement()();
+  TextColumn get syncId => text().named('sync_id')();
 
   TextColumn get name => text().withLength(min: 2, max: 50)();
 

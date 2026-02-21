@@ -10,19 +10,19 @@ import 'group_count_suggestion.dart';
 class QualifiedSelectorSectionWidget extends ConsumerWidget {
   const QualifiedSelectorSectionWidget({
     super.key,
-    required this.leagueId,
+    required this.leagueSyncId,
     required this.selectedQualifiedIndex,
     required this.selectedGroups,
   });
 
-  final int leagueId;
+  final String leagueSyncId;
   final int? selectedQualifiedIndex;
   final int selectedGroups;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final qualifiedAsync = ref.watch(
-      qualifiedSuggestionsProvider((leagueId: leagueId, groups: selectedGroups)),
+      qualifiedSuggestionsProvider((leagueSyncId: leagueSyncId, groups: selectedGroups)),
     );
 
     return qualifiedAsync.when(
@@ -52,7 +52,7 @@ class QualifiedSelectorSectionWidget extends ConsumerWidget {
               selectedIndex: selectedQualifiedIndex,
               onSelected: (i) {
                 ref
-                    .read(selectedQualifiedIndexProvider(leagueId).notifier)
+                    .read(selectedQualifiedIndexProvider(leagueSyncId).notifier)
                     .state = i;
               },
             ),

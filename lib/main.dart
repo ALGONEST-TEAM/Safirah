@@ -6,13 +6,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:safirah/core/widgets/bottomNavbar/bottom_navigation_bar_widget.dart';
 import 'core/network/remote_request.dart';
 import 'core/notifications/firebase_messaging_service.dart';
 import 'core/notifications/notification_bootstrap.dart';
 import 'core/state/app_restart_controller.dart';
 import 'package:safirah/injection.dart' as di;
+import 'core/database/sync_auto_runner.dart';
+import 'core/database/sync_failed_notifier.dart';
 import 'core/theme/theme.dart';
+import 'core/widgets/bottomNavbar/bottom_navigation_bar_of_mange_league_widget.dart';
 import 'features/notifications/presentation/state_mangment/notifications_riverpod.dart';
 import 'features/profile/presentation/riverpod/setting_riverpod.dart';
 import 'features/shop/category/data/model/category_data.dart';
@@ -25,6 +27,8 @@ import 'features/shop/productManagement/detailsProducts/data/model/product_data.
 import 'features/shop/shoppingBag/cart/presentation/riverpod/cart_riverpod.dart';
 import 'generated/l10n.dart';
 import 'services/auth/auth.dart';
+import 'features/authorization/authorization_sync_runner.dart';
+
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
@@ -71,6 +75,10 @@ class MyApp extends ConsumerStatefulWidget {
 }
 
 class _MyAppState extends ConsumerState<MyApp> {
+  SyncAutoRunner? _syncAutoRunner;
+  SyncFailedNotifier? _syncFailedNotifier;
+  AuthorizationSyncRunner? _authorizationSyncRunner;
+
   @override
   void initState() {
     FirebaseMessagingService.I.getDeviceToken().then((t) {
@@ -79,6 +87,24 @@ class _MyAppState extends ConsumerState<MyApp> {
         Auth().setFcmToken(t);
       }
     });
+
+    // ✅ مزامنة احترافية (عند التشغيل + عند رجوع النت)
+    // تم تجميع المنطق في خدمة واحدة SyncAutoRunner لسهولة الصيانة ومنع التكرار.
+    Future.microtask(() async {
+      _syncAutoRunner = di.sl<SyncAutoRunner>();
+      await _syncAutoRunner!.start();
+
+      // ✅ Authorization: sync roles->permissions on app start + on connectivity regained
+      _authorizationSyncRunner = di.sl<AuthorizationSyncRunner>();
+      await _authorizationSyncRunner!.start();
+
+      // ✅ مراقبة أخطاء المزامنة المتأخرة (FAILED) وعرضها للمستخدم
+      _syncFailedNotifier = SyncFailedNotifier(
+        db: di.sl(),
+        navigatorKey: appNavigatorKey,
+      )..start();
+    });
+
     if (Auth().loggedIn) {
       FirebaseMessagingService.I.onRefreshUnread = () {
         ref.read(unreadCountProvider.notifier).refresh();
@@ -94,6 +120,17 @@ class _MyAppState extends ConsumerState<MyApp> {
     }
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    // ignore: unawaited_futures
+    _syncAutoRunner?.dispose();
+    // ignore: unawaited_futures
+    _authorizationSyncRunner?.dispose();
+    // ignore: unawaited_futures
+    _syncFailedNotifier?.dispose();
+    super.dispose();
   }
 
   @override
@@ -120,7 +157,7 @@ class _MyAppState extends ConsumerState<MyApp> {
           Locale('en'),
         ],
         theme: lightTheme,
-        home: const BottomNavigationBarWidget(),
+        home: const BottomNavigationBarOfMangeLeagueWidget(),
       ),
     );
   }

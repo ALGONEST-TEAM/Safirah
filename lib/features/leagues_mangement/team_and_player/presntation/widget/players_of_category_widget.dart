@@ -10,17 +10,17 @@ import 'empty_card_player_widget.dart';
 class PlayersOfCategoryWidget extends ConsumerWidget {
   const PlayersOfCategoryWidget({
     super.key,
-    required this.leagueId,
+    required this.leagueSyncId,
     required this.category,
   });
 
-  final int leagueId;
+  final String leagueSyncId;
   final TeamPlayerCategoryModel category;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playersState =
-        ref.watch(playersByCategoryProvider((leagueId, category.id!)));
+        ref.watch(playersByCategoryProvider((leagueSyncId, category.id!)));
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.0.h, horizontal: 10.w),
@@ -42,7 +42,7 @@ class PlayersOfCategoryWidget extends ConsumerWidget {
                         itemBuilder: (context, index) => PlayerTilesWidget(
                           playersState.data[index],
                           categoryId: category.id!,
-                          leagueId: leagueId,
+                          leagueSyncId: leagueSyncId,
                         ),
                       ),
                     ),

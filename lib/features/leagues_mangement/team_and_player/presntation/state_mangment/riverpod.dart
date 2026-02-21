@@ -7,70 +7,139 @@ import '../../../../../core/state/state.dart';
 import '../../../../../injection.dart' as di;
 import '../../data/reposaitory/reposaitory.dart';
 
-final teamsProvider = StateNotifierProvider.family<TeamsNotifier,
-    DataState<List<TeamModel>>, int>((ref, leagueId) {
-  return TeamsNotifier(leagueId);
+final teamsAndPlayerRepoProvider = Provider<TeamAndPlayerRepository>((ref) {
+  return TeamAndPlayerRepository(
+    local: di.sl(),
+    remote: di.sl(),
+    connectivity: di.sl(),
+    syncService: di.sl(),
+  );
 });
 
-class TeamsNotifier extends StateNotifier<DataState<List<TeamModel>>> {
-  TeamsNotifier(this.leagueId) : super(DataState.initial(const [])) {
-    load();
-  }
+final teamsStreamProvider =
+StreamProvider.family<List<TeamModel>, String>((ref, param) {
+  final repo = ref.read(teamsAndPlayerRepoProvider);
+  return repo.watchTeams(
+    leagueSyncId: param,
+  );
+});
+final teamsRefreshProvider =
+StateNotifierProvider.family<TeamsNotifier, RefreshState, String>(
+        (ref, param) {
+      final repo = ref.read(teamsAndPlayerRepoProvider);
+      return TeamsNotifier(repo, param);
+    });
 
-  final int leagueId;
-  final _repo = TeamAndPlayerRepository(local: di.sl());
+class TeamsNotifier extends StateNotifier<RefreshState> {
+  final TeamAndPlayerRepository _repo;
+  final String leagueSyncId;
 
-  Future<void> load() async {
-    state = state.copyWith(state: States.loading);
-    final r = await _repo.getTeamsByLeague(leagueId);
-    r.fold(
-      (e) => state = state.copyWith(state: States.error, exception: e),
-      (list) => state = state.copyWith(state: States.loaded, data: list),
+  TeamsNotifier(this._repo, this.leagueSyncId)
+      : super(RefreshState.idle()) {}
+
+  Future<void> refresh() async {
+    state = state.copyWith(status: RefreshStatus.loading, exception: null);
+
+    final res = await _repo.refreshTeams(
+      leagueSyncId: leagueSyncId,
+    );
+
+    res.fold(
+          (e) => state = state.copyWith(status: RefreshStatus.error, exception: e),
+          (_) =>
+      state = state.copyWith(status: RefreshStatus.idle, exception: null),
     );
   }
 }
 
-final leagueUsersProvider = StateNotifierProvider.family<LeagueUsersNotifier,
-    DataState<List<LeaguePlayerModel>>, int>((ref, leagueId) {
-  return LeagueUsersNotifier(leagueId);
+final leaguePlayerStreamProvider =
+    StreamProvider.family<List<LeaguePlayerModel>, String>((ref, param) {
+  final repo = ref.read(teamsAndPlayerRepoProvider);
+  return repo.watchLeaguePlayer(
+    leagueSyncId: param,
+  );
+});
+final playerLeagueRefreshProvider =
+    StateNotifierProvider.family<LeaguePlayerNotifier, RefreshState, String>(
+        (ref, param) {
+  final repo = ref.read(teamsAndPlayerRepoProvider);
+  return LeaguePlayerNotifier(repo, param);
 });
 
-class LeagueUsersNotifier
-    extends StateNotifier<DataState<List<LeaguePlayerModel>>> {
-  LeagueUsersNotifier(this.leagueId) : super(DataState.initial(const [])) {
-    load();
-  }
+class LeaguePlayerNotifier extends StateNotifier<RefreshState> {
+  final TeamAndPlayerRepository _repo;
+  final String leagueSyncId;
 
-  final int leagueId;
-  final _repo = TeamAndPlayerRepository(local: di.sl());
+  LeaguePlayerNotifier(this._repo, this.leagueSyncId)
+      : super(RefreshState.idle()) {}
 
-  Future<void> load() async {
-    state = state.copyWith(state: States.loading);
-    final r = await _repo.getLeagueUsers(leagueId);
-    r.fold(
-      (e) => state = state.copyWith(state: States.error, exception: e),
-      (list) => state = state.copyWith(state: States.loaded, data: list),
+  Future<void> refresh() async {
+    state = state.copyWith(status: RefreshStatus.loading, exception: null);
+
+    final res = await _repo.refreshLeaguePlayer(
+      leagueSyncId: leagueSyncId,
+    );
+
+    res.fold(
+      (e) => state = state.copyWith(status: RefreshStatus.error, exception: e),
+      (_) =>
+          state = state.copyWith(status: RefreshStatus.idle, exception: null),
     );
   }
 }
 
 final categoriesProvider = StateNotifierProvider.family<CategoriesNotifier,
-    DataState<List<TeamPlayerCategoryModel>>, int>((ref, leagueId) {
-  return CategoriesNotifier(leagueId);
+    DataState<List<TeamPlayerCategoryModel>>, String>((ref, leagueSyncId) {
+  return CategoriesNotifier(leagueSyncId);
 });
 
 class CategoriesNotifier
     extends StateNotifier<DataState<List<TeamPlayerCategoryModel>>> {
-  CategoriesNotifier(this.leagueId) : super(DataState.initial(const [])) {
+  CategoriesNotifier(this.leagueSyncId) : super(DataState.initial(const [])) {
     load();
   }
 
-  final int leagueId;
-  final _repo = TeamAndPlayerRepository(local: di.sl());
+  final String leagueSyncId;
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
 
   Future<void> load() async {
     state = state.copyWith(state: States.loading);
-    final r = await _repo.getCategoriesByLeague(leagueId);
+    final r = await _repo.getCategoriesByLeague(leagueSyncId);
+    r.fold(
+      (e) => state = state.copyWith(state: States.error, exception: e),
+      (list) => state = state.copyWith(state: States.loaded, data: list),
+    );
+  }
+}
+
+final invitationsPlayersProvider = StateNotifierProvider.family<
+    LeagueInvitationsPlayersNotifier,
+    DataState<List<InvitationsPlayersModel>>,
+    String>((ref, syncLeagueId) {
+  return LeagueInvitationsPlayersNotifier(syncLeagueId);
+});
+
+class LeagueInvitationsPlayersNotifier
+    extends StateNotifier<DataState<List<InvitationsPlayersModel>>> {
+  LeagueInvitationsPlayersNotifier(this.syncLeagueId)
+      : super(DataState.initial(const [])) {
+    load();
+  }
+
+  final String syncLeagueId;
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
+
+  Future<void> load() async {
+    state = state.copyWith(state: States.loading);
+    final r = await _repo.getLeagueInvitationsPlayers(syncLeagueId);
     r.fold(
       (e) => state = state.copyWith(state: States.error, exception: e),
       (list) => state = state.copyWith(state: States.loaded, data: list),
@@ -94,7 +163,11 @@ final setPlayerCategoryProvider =
 class SetPlayerCategoryNotifier extends StateNotifier<DataState<bool>> {
   SetPlayerCategoryNotifier() : super(DataState<bool>.initial(false));
 
-  final _repo = TeamAndPlayerRepository(local: di.sl());
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
 
   Future<void> setCategory({
     required int leaguePlayerId,
@@ -125,8 +198,8 @@ class SetPlayerCategoryNotifier extends StateNotifier<DataState<bool>> {
     );
 
     res.fold(
-          (e) => state = state.copyWith(state: States.error, exception: e),
-          (ok) => state = state.copyWith(state: States.loaded, data: ok),
+      (e) => state = state.copyWith(state: States.error, exception: e),
+      (ok) => state = state.copyWith(state: States.loaded, data: ok),
     );
   }
 }
@@ -134,30 +207,34 @@ class SetPlayerCategoryNotifier extends StateNotifier<DataState<bool>> {
 final playersByCategoryProvider = StateNotifierProvider.family<
     PlayersByCategoryNotifier,
     DataState<List<LeaguePlayerModel>>,
-    (int leagueId, int categoryId)>(
+    (String leagueSyncId, int categoryId)>(
   (ref, args) => PlayersByCategoryNotifier(args.$1, args.$2),
 );
 final playersCountByCategoryProvider =
-    Provider.family<int, (int leagueId, int categoryId)>((ref, args) {
+    Provider.family<int, (String leagueSyncId, int categoryId)>((ref, args) {
   final state = ref.watch(playersByCategoryProvider(args));
   return state.data.length;
 });
 
 class PlayersByCategoryNotifier
     extends StateNotifier<DataState<List<LeaguePlayerModel>>> {
-  PlayersByCategoryNotifier(this.leagueId, this.categoryId)
+  PlayersByCategoryNotifier(this.leagueSyncId, this.categoryId)
       : super(DataState.initial(const [])) {
     load();
   }
 
-  final int leagueId;
+  final String leagueSyncId;
   final int categoryId;
-  final _repo = TeamAndPlayerRepository(local: di.sl());
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
 
   Future<void> load() async {
     state = state.copyWith(state: States.loading);
     final r = await _repo.getLeaguePlayersByCategory(
-      leagueId: leagueId,
+      leagueSyncId: leagueSyncId,
       categoryId: categoryId,
     );
     r.fold(
@@ -168,20 +245,24 @@ class PlayersByCategoryNotifier
 }
 
 final runDraftProvider = StateNotifierProvider.family<RunDraftNotifier,
-    DataState<List<PlayerModel>>, int>(
-  (ref, leagueId) => RunDraftNotifier(leagueId),
+    DataState<List<PlayerModel>>, String>(
+  (ref, leagueSyncId) => RunDraftNotifier(leagueSyncId),
 );
 
 class RunDraftNotifier extends StateNotifier<DataState<List<PlayerModel>>> {
-  RunDraftNotifier(this.leagueId)
+  RunDraftNotifier(this.leagueSyncId)
       : super(DataState<List<PlayerModel>>.initial(const []));
 
-  final int leagueId;
-  final _repo = TeamAndPlayerRepository(local: di.sl());
+  final String leagueSyncId;
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
 
   Future<void> run() async {
     state = state.copyWith(state: States.loading);
-    final res = await _repo.runDraft(leagueId);
+    final res = await _repo.runDraft(leagueSyncId);
     res.fold(
       (f) => state = state.copyWith(state: States.error, exception: f),
       (list) => state = state.copyWith(state: States.loaded, data: list),
@@ -197,7 +278,11 @@ final updateTeamProvider =
 class UpdateTeamNotifier extends StateNotifier<DataState<Unit>> {
   UpdateTeamNotifier() : super(DataState.initial(unit));
 
-  final _repo = TeamAndPlayerRepository(local: di.sl());
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
 
   Future<void> update(TeamModel team) async {
     state = state.copyWith(state: States.loading);
@@ -209,22 +294,50 @@ class UpdateTeamNotifier extends StateNotifier<DataState<Unit>> {
   }
 }
 
+final addPlayerLeagueProvider =
+    StateNotifierProvider.autoDispose<AddPlayerLeagueNotifier, DataState<Unit>>(
+  (ref) => AddPlayerLeagueNotifier(),
+);
+
+class AddPlayerLeagueNotifier extends StateNotifier<DataState<Unit>> {
+  AddPlayerLeagueNotifier() : super(DataState.initial(unit));
+
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
+
+  Future<void> add(InvitationsPlayersModel player) async {
+    state = state.copyWith(state: States.loading);
+    final r = await _repo.addLeaguePlayer(player);
+    r.fold(
+      (e) => state = state.copyWith(state: States.error, exception: e),
+      (_) => state = state.copyWith(state: States.loaded, data: unit),
+    );
+  }
+}
+
 final assignToTeamProvider = StateNotifierProvider.autoDispose
-    .family<AssignToTeamNotifier, DataState<List<PlayerModel>>, int>(
-  (ref, teamId) => AssignToTeamNotifier(teamId),
+    .family<AssignToTeamNotifier, DataState<List<PlayerModel>>, String>(
+  (ref, teamSyncId) => AssignToTeamNotifier(teamSyncId),
 );
 
 class AssignToTeamNotifier extends StateNotifier<DataState<List<PlayerModel>>> {
-  AssignToTeamNotifier(this.teamId)
+  AssignToTeamNotifier(this.teamSyncId)
       : super(DataState<List<PlayerModel>>.initial(const []));
 
-  final int teamId;
-  final _repo = TeamAndPlayerRepository(local: di.sl());
+  final String teamSyncId;
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
 
-  Future<void> assign(List<int> leaguePlayerIds) async {
+  Future<void> assign(List<String> leaguePlayerIds) async {
     state = state.copyWith(state: States.loading);
     final res = await _repo.assignPlayersToTeam(
-      teamId: teamId,
+      teamSyncId: teamSyncId,
       leaguePlayerIds: leaguePlayerIds,
     );
     res.fold(
@@ -237,27 +350,32 @@ class AssignToTeamNotifier extends StateNotifier<DataState<List<PlayerModel>>> {
 final leaguePlayersWithoutCategoryProvider = StateNotifierProvider.family<
     LeaguePlayersWithoutCategoryNotifier,
     DataState<List<LeaguePlayerModel>>,
-    int>((ref, leagueId) {
-  return LeaguePlayersWithoutCategoryNotifier(leagueId);
+    String>((ref, leagueSyncId) {
+  return LeaguePlayersWithoutCategoryNotifier(leagueSyncId);
 });
 final leaguePlayersWithoutCategoryCountProvider =
-Provider.family<int, int>((ref, leagueId) {
-  final state = ref.watch(leaguePlayersWithoutCategoryProvider(leagueId));
+    Provider.family<int, String>((ref, leagueSyncId) {
+  final state = ref.watch(leaguePlayersWithoutCategoryProvider(leagueSyncId));
   return state.data.length;
 });
+
 class LeaguePlayersWithoutCategoryNotifier
     extends StateNotifier<DataState<List<LeaguePlayerModel>>> {
-  LeaguePlayersWithoutCategoryNotifier(this.leagueId)
+  LeaguePlayersWithoutCategoryNotifier(this.leagueSyncId)
       : super(DataState.initial(const [])) {
     load();
   }
 
-  final int leagueId;
-  final _repo = TeamAndPlayerRepository(local: di.sl());
+  final String leagueSyncId;
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
 
   Future<void> load() async {
     state = state.copyWith(state: States.loading);
-    final r = await _repo.leaguePlayersWithoutCategory(leagueId);
+    final r = await _repo.leaguePlayersWithoutCategory(leagueSyncId);
     r.fold(
       (e) => state = state.copyWith(state: States.error, exception: e),
       (list) => state = state.copyWith(state: States.loaded, data: list),
@@ -265,63 +383,68 @@ class LeaguePlayersWithoutCategoryNotifier
   }
 }
 
-// === لاعبو الدوري بدون فريق ===
 final leaguePlayersWithoutTeamProvider = StateNotifierProvider.family<
     LeaguePlayersWithoutTeamNotifier,
     DataState<List<LeaguePlayerModel>>,
-    int>((ref, leagueId) {
-  return LeaguePlayersWithoutTeamNotifier(leagueId);
+    String>((ref, leagueSyncId) {
+  return LeaguePlayersWithoutTeamNotifier(leagueSyncId);
 });
 
 class LeaguePlayersWithoutTeamNotifier
     extends StateNotifier<DataState<List<LeaguePlayerModel>>> {
-  LeaguePlayersWithoutTeamNotifier(this.leagueId)
+  LeaguePlayersWithoutTeamNotifier(this.leagueSyncId)
       : super(DataState.initial(const [])) {
     load();
   }
 
-  final int leagueId;
-  final _repo = TeamAndPlayerRepository(local: di.sl());
+  final String leagueSyncId;
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
 
   Future<void> load() async {
     state = state.copyWith(state: States.loading);
-    final r = await _repo.leaguePlayersWithoutTeam(leagueId);
+    final r = await _repo.leaguePlayersWithoutTeam(leagueSyncId);
     r.fold(
       (e) => state = state.copyWith(state: States.error, exception: e),
       (list) => state = state.copyWith(state: States.loaded, data: list),
     );
   }
 }
+
 final playersOfTeamProvider = StateNotifierProvider.family<
     PlayersOfTeamNotifier,
     DataState<List<PlayerModel>>,
-    int>((ref, teamId) {
-  return PlayersOfTeamNotifier(teamId);
+    String>((ref, teamSyncId) {
+  return PlayersOfTeamNotifier(teamSyncId);
 });
-  final playersCountOfTeamProvider =
-Provider.family<int, int>((ref, idTeam) {
-  final state = ref.watch(playersOfTeamProvider(idTeam));
+final playersCountOfTeamProvider =
+    Provider.family<int, String>((ref, idSyncTeam) {
+  final state = ref.watch(playersOfTeamProvider(idSyncTeam));
   return state.data.length;
 });
 
 class PlayersOfTeamNotifier
     extends StateNotifier<DataState<List<PlayerModel>>> {
-  PlayersOfTeamNotifier(this.teamId)
-      : super(DataState.initial(const [])) {
+  PlayersOfTeamNotifier(this.teamSyncId) : super(DataState.initial(const [])) {
     load();
   }
 
-  final int teamId;
-  final _repo = TeamAndPlayerRepository(local: di.sl());
+  final String teamSyncId;
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
 
   Future<void> load() async {
     state = state.copyWith(state: States.loading);
-    final r = await _repo.getPlayersOfTeam(
-    teamId
-    );
+    final r = await _repo.getPlayersOfTeam(teamSyncId);
     r.fold(
-          (e) => state = state.copyWith(state: States.error, exception: e),
-          (list) => state = state.copyWith(state: States.loaded, data: list),
+      (e) => state = state.copyWith(state: States.error, exception: e),
+      (list) => state = state.copyWith(state: States.loaded, data: list),
     );
   }
 }

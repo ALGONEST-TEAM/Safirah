@@ -11,15 +11,15 @@ import '../page/schedule_match_page.dart';
 
 class MatchTileWidget extends StatelessWidget {
   final MatchModel match;
-  final int leagueId;
+  final String leagueSyncId;
   final String matchFilter;
-  final int roundId;
+  final String roundSyncId;
 
   const MatchTileWidget(
       {super.key,
         required this.match,
-        required this.leagueId,
-        required this.roundId,
+        required this.leagueSyncId,
+        required this.roundSyncId,
         required this.matchFilter});
 
   String dataInMatch() {
@@ -40,61 +40,67 @@ class MatchTileWidget extends StatelessWidget {
           context,
           match.status == 'unscheduled'
               ? ScheduleMatchPage(
-            leagueId: leagueId,
-            matchId: match.id!,
-          )
+                  leagueSyncId: leagueSyncId,
+                  matchSyncId: match.syncId!,
+                )
               : AddEventMatchPage(
-            awayTeam: match.awayTeam!,
-            homeTeam: match.homeTeam!,
-            matchTerm: match.matchTerms ?? [],
-            matchId: match.id ?? 0,
-            roundId: roundId,
-            leagueId: leagueId,
-          ),
+                  awayTeam: match.awayTeam!,
+                  homeTeam: match.homeTeam!,
+                  matchTerm: match.matchTerms,
+                  matchSyncId: (match.syncId ?? 0).toString(),
+                  roundSyncId: roundSyncId,
+                  leagueSyncId: leagueSyncId,
+                ),
         );
       },
-      child: ListTile(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  AutoSizeTextWidget(
-                      text: match.homeTeam!.teamName, fontSize: 11.5.sp),
-                  const SizedBox(width: 6),
-                  OnlineImagesWidget(
-                    imageUrl: '',
-                    fit: BoxFit.cover,
-                    size: Size(23.w, 23.h),
-                    borderRadius: 12.r,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          //AutoSizeTextWidget(text: DateFormat.yMMMMd('ar').format(match.matchDate!)),
+          ListTile(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      AutoSizeTextWidget(
+                          text: match.homeTeam!.teamName, fontSize: 11.5.sp),
+                      const SizedBox(width: 6),
+                      OnlineImagesWidget(
+                        imageUrl: '',
+                        fit: BoxFit.cover,
+                        size: Size(23.w, 23.h),
+                        borderRadius: 12.r,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            AutoSizeTextWidget(
-              text: dataInMatch(),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Row(
-                children: [
-                  OnlineImagesWidget(
-                    imageUrl: '',
-                    fit: BoxFit.cover,
-                    size: Size(23.w, 23.h),
-                    borderRadius: 8.r,
+                ),
+                const SizedBox(width: 10),
+                AutoSizeTextWidget(
+                  text: dataInMatch(),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Row(
+                    children: [
+                      OnlineImagesWidget(
+                        imageUrl: '',
+                        fit: BoxFit.cover,
+                        size: Size(23.w, 23.h),
+                        borderRadius: 8.r,
+                      ),
+                      const SizedBox(width: 6),
+                      AutoSizeTextWidget(
+                          text: match.awayTeam!.teamName, fontSize: 11.5.sp),
+                    ],
                   ),
-                  const SizedBox(width: 6),
-                  AutoSizeTextWidget(
-                      text: match.awayTeam!.teamName, fontSize: 11.5.sp),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

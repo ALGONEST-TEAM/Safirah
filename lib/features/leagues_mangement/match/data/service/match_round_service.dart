@@ -18,11 +18,13 @@ class MatchService {
   }
 
   /// يبني جولات دور المجموعات ومبارياتها منطقياً لمجموعة واحدة.
-  /// يعيد قائمة MatchModel مع ضبط leagueId و roundId لاحقاً من طبقة الـ DB.
+  ///
+  /// NOTE: we now work with teamSyncIds (String) instead of numeric ids.
+  /// roundSyncId will be assigned at DB layer.
   List<MatchModel> buildGroupMatches({
-    required int leagueId,
+    required String leagueSyncId,
     required GroupModel group,
-    required List<int> teamIds,
+    required List<String> teamIds,
     bool homeAway = false,
   }) {
     if (teamIds.length < 2) {
@@ -35,14 +37,14 @@ class MatchService {
     final matchesPerRound = n ~/ 2;
 
     // نعمل نسخة قابلة للتعديل من الفرق
-    var teams = List<int>.from(teamIds);
+    var teams = List<String>.from(teamIds);
     final List<MatchModel> result = [];
 
     for (var round = 0; round < rounds; round++) {
       // في حالة العدد الفردي، الفريق الأول في القائمة هو الذي يرتاح
       final playingTeams = odd
           ? teams.sublist(1) // نستثني الفريق الأول (الراحة)
-          : List<int>.from(teams);
+          : List<String>.from(teams);
 
       for (var i = 0; i < matchesPerRound; i++) {
         final homeTeamId = playingTeams[i];
@@ -50,10 +52,10 @@ class MatchService {
 
         result.add(
           MatchModel(
-            leagueId: leagueId,
-            roundId: null, // يتم تعيينها في طبقة DB بعد إنشاء الجولة
-            homeTeamId: homeTeamId,
-            awayTeamId: awayTeamId,
+            leagueSyncId: leagueSyncId,
+            roundSyncId: null, // يتم تعيينها في طبقة DB بعد إنشاء الجولة
+            homeTeamSyncId: homeTeamId,
+            awayTeamSyncId: awayTeamId,
             matchDate: DateTime.now(),
             status: 'unscheduled',
           ),
@@ -62,10 +64,10 @@ class MatchService {
         if (homeAway) {
           result.add(
             MatchModel(
-              leagueId: leagueId,
-              roundId: null,
-              homeTeamId: awayTeamId,
-              awayTeamId: homeTeamId,
+              leagueSyncId: leagueSyncId,
+              roundSyncId: null,
+              homeTeamSyncId: awayTeamId,
+              awayTeamSyncId: homeTeamId,
               matchDate: DateTime.now().add(const Duration(days: 7)),
               status: 'unscheduled',
             ),
@@ -81,7 +83,7 @@ class MatchService {
   }
 
   /// تدوير قائمة الفرق كما في المنطق الأصلي: نقل أول عنصر إلى النهاية.
-  List<int> rotateTeams(List<int> teams) {
+  List<String> rotateTeams(List<String> teams) {
     if (teams.isEmpty) return teams;
     final first = teams.first;
     final rest = teams.sublist(1);

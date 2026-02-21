@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,24 +12,25 @@ import 'player_tile_with_event_widget.dart';
 class ListOfPlayerInEventMatchWidget extends ConsumerStatefulWidget {
   const ListOfPlayerInEventMatchWidget({
     super.key,
-    required this.teamId,
-    required this.matchId,
-    required this.termId,
+    required this.teamSyncId,
+    required this.matchSyncId,
+    required this.matchTermSyncId,
   });
 
-  final int teamId;
-  final int matchId;
-  final int termId;
+  final String teamSyncId;
+  final String matchSyncId;
+  final String matchTermSyncId;
 
   @override
-  ConsumerState<ListOfPlayerInEventMatchWidget> createState() => _ListOfPlayerInEventMatchWidgetState();
+  ConsumerState<ListOfPlayerInEventMatchWidget> createState() =>
+      _ListOfPlayerInEventMatchWidgetState();
 }
 
-class _ListOfPlayerInEventMatchWidgetState extends ConsumerState<ListOfPlayerInEventMatchWidget> {
+class _ListOfPlayerInEventMatchWidgetState
+    extends ConsumerState<ListOfPlayerInEventMatchWidget> {
   @override
   Widget build(BuildContext context) {
-    final playerOfTeam = ref.watch(playersOfTeamProvider(widget.teamId));
-
+    final playerOfTeam = ref.watch(playersOfTeamProvider(widget.teamSyncId));
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8.0.w, vertical: 8.h),
@@ -38,30 +38,37 @@ class _ListOfPlayerInEventMatchWidgetState extends ConsumerState<ListOfPlayerInE
         state: playerOfTeam,
         widgetOfData: Builder(
           builder: (_) {
+            final matchTermSyncId = widget.matchTermSyncId;
+            if (matchTermSyncId.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
             final players = playerOfTeam.data;
 
-            // نقسم اللاعبين اعتماداً على حالة مشاركتهم في المباراة (داخل/خارج الملعب)
             final participating = <PlayerModel>[];
             final bench = <PlayerModel>[];
 
             for (final p in players) {
+              final playerSyncId = p.syncId;
+              if (playerSyncId == null || playerSyncId.isEmpty) {
+                // If player has no syncId, we can't query participation status.
+                // Keep them out of the list to avoid invalid provider args.
+                continue;
+              }
 
               final participationState = ref.watch(
                 getPlayerParticipationStatusProvider((
-                matchId: widget.matchId,
-                matchTermId: widget.termId,
-                playerId: p.id!,
+                  matchSyncId: widget.matchSyncId,
+                  matchTermSyncId: matchTermSyncId,
+                  playerSyncId: playerSyncId,
                 )),
               );
 
-              final status = participationState.data; // null أو STARTER / SUB_IN / SUB_OUT
+              final status = participationState.asData?.value;
 
-              // اللاعب مشارك إذا كان أساسي بدون مشاركة مسجلة بعد، أو حالته STARTER/SUB_IN
-              final isParticipating =
-                  status == 'STARTER' ||
-                      status == 'SUB_IN' ||
-                      (status == null && p.status == 'main');
-              print('player=${p.id}, baseStatus=${p.status}, participationStatus=$status, isParticipating=$isParticipating');
+              final isParticipating = status == 'STARTER' ||
+                  status == 'SUB_IN' ||
+                  (status == null && p.status == 'main');
 
               if (isParticipating) {
                 participating.add(p);
@@ -73,7 +80,7 @@ class _ListOfPlayerInEventMatchWidgetState extends ConsumerState<ListOfPlayerInE
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const AutoSizeTextWidget(text: 'اللعبين المشاركين'),
+                const AutoSizeTextWidget(text: 'اللاعبين المشاركين'),
                 8.h.verticalSpace,
                 ListView.separated(
                   shrinkWrap: true,
@@ -82,21 +89,18 @@ class _ListOfPlayerInEventMatchWidgetState extends ConsumerState<ListOfPlayerInE
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (_, i) {
                     final p = participating[i];
-                    // إذا كان status == 'sub' لكنه مشارك، فهو احتياطي تم إشراكه
                     final isSub = p.status == 'sub';
                     return PlayerTileWithEventWidget(
-                      name: p.fullName,
-                      teamId: widget.teamId,
-                      handle: '@playe' + p.id.toString(),
+                      name: p.fullName ?? '',
+                      teamSyncId: widget.teamSyncId,
                       avatar: '',
-                      playerId: p.id!,
-                      matchId: widget.matchId,
-                      matchTermId: widget.termId,
-                      isSubstitute:isSub,
+                      playerSyncId: p.syncId ?? '',
+                      matchSyncId: widget.matchSyncId,
+                      matchTermSyncId: matchTermSyncId,
+                      isSubstitute: isSub,
                     );
                   },
                 ),
-
                 const AutoSizeTextWidget(text: 'اللاعبين الاحتياط'),
                 8.h.verticalSpace,
                 ListView.separated(
@@ -108,14 +112,12 @@ class _ListOfPlayerInEventMatchWidgetState extends ConsumerState<ListOfPlayerInE
                     final p = bench[i];
                     final isSub = p.status == 'sub';
                     return PlayerTileWithEventWidget(
-                      name: p.fullName,
-                      teamId: widget.teamId,
-
-                      handle: '@playe' + p.id.toString(),
+                      name: p.fullName ?? '',
+                      teamSyncId: widget.teamSyncId,
                       avatar: '',
-                      playerId: p.id!,
-                      matchId: widget.matchId,
-                      matchTermId: widget.termId,
+                      playerSyncId: p.syncId ?? '',
+                      matchSyncId: widget.matchSyncId,
+                      matchTermSyncId: matchTermSyncId,
                       isSubstitute: isSub,
                     );
                   },

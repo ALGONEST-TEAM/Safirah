@@ -1,15 +1,40 @@
 import 'package:drift/drift.dart';
-import 'package:safirah/features/leagues_mangement/match/data/data_source/table/round_table.dart';
-
-import '../../../../leagues/data/data_source/table/leagues_table.dart';
-import '../../../../team_and_player/data/data_source/table/teams_table.dart';
 
 class Matches extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get leagueId => integer().references(Leagues, #id, onDelete: KeyAction.cascade)();
-  IntColumn get roundId => integer().references(Rounds, #id, onDelete: KeyAction.cascade)();
-  IntColumn get homeTeamId => integer().references(Teams, #id, onDelete: KeyAction.restrict)();
-  IntColumn get awayTeamId => integer().references(Teams, #id, onDelete: KeyAction.restrict)();
+  TextColumn get syncId => text().named('sync_id')();
+
+  TextColumn get leagueSyncId => text()
+      .named('league_sync_id')
+      .customConstraint('REFERENCES leagues(sync_id) ON DELETE CASCADE')();
+
+  /// ✅ sync-based FK to rounds(sync_id)
+  TextColumn get roundSyncId => text()
+      .named('round_sync_id')
+      .customConstraint('REFERENCES rounds(sync_id) ON DELETE CASCADE')();
+
+  /// ✅ sync-based FK to teams(sync_id)
+  TextColumn get homeTeamSyncId => text()
+      .named('home_team_sync_id')
+      .customConstraint('REFERENCES teams(sync_id) ON DELETE RESTRICT')();
+
+  /// ✅ sync-based FK to teams(sync_id)
+  TextColumn get awayTeamSyncId => text()
+      .named('away_team_sync_id')
+      .customConstraint('REFERENCES teams(sync_id) ON DELETE RESTRICT')();
+
+  // ✅ NEW: referee sync id (nullable)
+  TextColumn get refereeSyncId => text()
+      .named('referee_sync_id')
+      .nullable()
+      .customConstraint('REFERENCES users_has_role(sync_id) ON DELETE SET NULL')();
+
+  // ✅ NEW: media sync id (nullable)
+  TextColumn get mediaSyncId => text()
+      .named('media_sync_id')
+      .nullable()
+      .customConstraint('REFERENCES users_has_role(sync_id) ON DELETE SET NULL')();
+
   DateTimeColumn get matchDate => dateTime()(); // تاريخ اليوم
   DateTimeColumn get scheduledStartTime => dateTime().nullable()();
   DateTimeColumn get startTime => dateTime().nullable()();
@@ -18,14 +43,24 @@ class Matches extends Table {
   IntColumn get homeScore => integer().withDefault(const Constant(0))();
   IntColumn get awayScore => integer().withDefault(const Constant(0))();
 
-  TextColumn get status => text().withDefault(const Constant('unscheduled'))
-      .check(status.isIn(['scheduled','live','unscheduled','finished','canceled','walkover','postponed']))();
+  TextColumn get status => text()
+      .withDefault(const Constant('unscheduled'))
+      .check(status.isIn([
+    'scheduled',
+    'live',
+    'unscheduled',
+    'finished',
+    'canceled',
+    'walkover',
+    'postponed'
+  ]))();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   List<String> get customConstraints => [
-    'CHECK(home_team_id <> away_team_id)'
+    'UNIQUE(sync_id)',
+    'CHECK(home_team_sync_id <> away_team_sync_id)',
   ];
 }

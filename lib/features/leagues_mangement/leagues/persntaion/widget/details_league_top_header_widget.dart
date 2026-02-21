@@ -3,30 +3,67 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../core/helpers/navigateTo.dart';
+import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../core/state/check_state_in_post_api_data_widget.dart';
+import '../../../../../injection.dart' as di;
+import '../../../../authorization/authorization_sync_runner.dart';
+import '../../../../authorization/persntaion/pages/select_user_for_authorization_page.dart';
+import '../../../../authorization/persntaion/riverpod/riverpod.dart';
+import '../../../../authorization/persntaion/widgets/authorization_gate_hide_if_denied.dart';
 import '../../../group/presntaion/page/divide_group_page.dart';
 import '../../../match/presntaion/page/matches_scheduling_page.dart';
+import '../../../match/presntaion/page/refereer_matches_page.dart';
 import '../../../match/presntaion/state_managment/riverpod.dart';
+import '../../../match_term_event/presntation/state_mangement/riverpod.dart';
 import '../../../team_and_player/presntation/page/show_team_and_player_page.dart';
 import '../../../team_and_player/presntation/page/teams_with_players_widget.dart';
+import '../../data/model/league_status_model.dart';
 import '../riverpod/riverpod.dart';
 import 'button_of_organizer_widget.dart';
 
-class DetailsLeagueTopHeaderWidget extends ConsumerWidget {
+class DetailsLeagueTopHeaderWidget extends ConsumerStatefulWidget {
   const DetailsLeagueTopHeaderWidget({
     super.key,
-    required this.leagueId,
+    required this.leagueSyncId,
   });
 
-  final int leagueId;
+  final String leagueSyncId;
 
   @override
-  Widget build(BuildContext context,ref) {
+  ConsumerState<DetailsLeagueTopHeaderWidget> createState() =>
+      _DetailsLeagueTopHeaderWidgetState();
+}
 
-    final detailsLeague = ref.watch(detailsLeagueProvider(leagueId));
-    final scheduleGroupStageMatchesState =
-    ref.watch(scheduleGroupStageMatchesRRProvider((leagueId, false)));
-    final leagueStatus = ref.watch(leagueStatusProvider(leagueId));
+class _DetailsLeagueTopHeaderWidgetState
+    extends ConsumerState<DetailsLeagueTopHeaderWidget> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    di.sl<AuthorizationSyncRunner>().syncNow(tag: 'league_details_open');
+
+    // Future.microtask(() {
+    //
+    //   ref
+    //       .read(leagueStatusProvider(widget.leagueSyncId).notifier)
+    //       .refresh();
+    // });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final detailsLeague = ref.watch(leagueStreamProvider(widget.leagueSyncId));
+    final scheduleGroupStageMatchesState = ref.watch(
+        scheduleGroupStageMatchesRRProvider((widget.leagueSyncId, false)));
+    ref.watch(leagueStatusProvider(widget.leagueSyncId));
+
+    final leagueStatus =
+        ref.watch(leagueStatusStreamProvider(widget.leagueSyncId));
+    ref.watch(leaguePermissionsProvider(widget.leagueSyncId));
+
+    // ref.watch(leagueStatusProvider(widget.leagueSyncId));
+    //  ref.watch(usersHasRoleRefreshProvider(widget.leagueSyncId));
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8.0.w, vertical: 8.h),
       child: Column(
@@ -41,47 +78,130 @@ class DetailsLeagueTopHeaderWidget extends ConsumerWidget {
                 ButtonOfOrganizerWidget(
                   title: "الفرق واللعبين",
                   onTap: () {
+                    print(leagueStatus.asData!.value!.hasPlayersInTeams);
+                    print((detailsLeague.asData!.value!.maxSubPlayers ?? 0) +
+                        (detailsLeague.asData!.value!.maxMainPlayers ?? 0));
                     navigateTo(
                       context,
-                      leagueStatus.data!.hasPlayersInTeams
+                      leagueStatus.asData!.value!.hasPlayersInTeams
                           ? TeamsWithPlayersPage(
-                              leagueId: detailsLeague.data!.id!,
+                              leagueSyncId: detailsLeague.asData!.value!.syncId,
                             )
-                          : ShowTeamAndPlayerPage(
-                              leagueId: detailsLeague.data!.id!,
-                              maxTeam: detailsLeague.data!.maxTeams!,
-                              maxPlayer: detailsLeague.data!.maxSubPlayers! +
-                                  detailsLeague.data!.maxMainPlayers!,
+                          : AuthorizationGateHideIfDenied(
+                              leagueSyncId: widget.leagueSyncId,
+                              permissionKey: 'league.edit',
+                              child: ShowTeamAndPlayerPage(
+                                leagueSyncId:
+                                    detailsLeague.asData!.value!.syncId,
+                                maxTeam:
+                                    detailsLeague.asData!.value!.maxTeams ?? 0,
+                                maxPlayer: (detailsLeague
+                                            .asData!.value!.maxSubPlayers ??
+                                        0) +
+                                    (detailsLeague
+                                            .asData!.value!.maxMainPlayers ??
+                                        0),
+                                //   detailsLeague.data!.maxMainPlayers,
+                              ),
                             ),
                     );
                   },
                 ),
-                ButtonOfOrganizerWidget(
-                  title: 'تقسيم المجموعات',
-                  onTap: () {
-                    leagueStatus.data!.hasPlayersInTeams == false
-                        ? showFlashBarError(
-                            context: context,
-                            title: 'اكمل عملية تقسيم اللعبين ',
-                            text: 'قم باتمام تقسيم اللعبين على الفرق',
-                          )
-                        : navigateTo(
+                AuthorizationGateHideIfDenied(
+                  leagueSyncId: widget.leagueSyncId,
+                  permissionKey: 'league.edit',
+                  child: ButtonOfOrganizerWidget(
+                    title: 'تقسيم المجموعات',
+                    onTap: () {
+                      (leagueStatus.asData?.value!.hasPlayersInTeams ??
+                                  false) ==
+                              false
+                          ? showFlashBarError(
+                              context: context,
+                              title: 'اكمل عملية تقسيم اللعبين ',
+                              text: 'قم باتمام تقسيم اللعبين على الفرق',
+                            )
+                          : navigateTo(
+                              context,
+                              DivideGroupPage(
+                                  leagueSyncId: widget.leagueSyncId),
+                            );
+                    },
+                  ),
+                ),
+                AuthorizationGateHideIfDenied(
+                  leagueSyncId: widget.leagueSyncId,
+                  permissionKey: 'match.manage',
+                  child: Visibility(
+                    visible: leagueStatus.asData?.value!.hasMatches == false,
+                    replacement: ButtonOfOrganizerWidget(
+                      title: 'ادارة المباريات',
+                      onTap: () {
+                        navigateTo(
+                          context,
+                          RefereeMatchesPage(
+                            role: 'referrer',
+                            leagueSyncId: widget.leagueSyncId,
+                          ),
+                        );
+                      },
+                    ),
+                    child: CheckStateInPostApiDataWidget(
+                      state: scheduleGroupStageMatchesState,
+                      functionSuccess: () {
+                        ref
+                            .read(
+                              leagueStatusUpdateProvider.notifier,
+                            )
+                            .update(
+                              leagueSyncId: widget.leagueSyncId,
+                              hasMatches: true,
+                            );
+                        //  ref.read(leagueStatusStreamProvider(widget.leagueSyncId));
+                        ref
+                            .read(leagueStatusProvider(widget.leagueSyncId)
+                                .notifier)
+                            .refresh();
+                        navigateTo(
+                          context,
+                          RefereeMatchesPage(
+                            role: 'referrer',
+                            leagueSyncId: widget.leagueSyncId,
+                          ),
+                        );
+                      },
+                      bottonWidget: ButtonOfOrganizerWidget(
+                        title: 'جدولة المباريات',
+                        onTap: () {
+                          navigateTo(
                             context,
-                            DivideGroupPage(
-                              leagueId: leagueId,
+                            RefereeMatchesPage(
+                              role: 'referrer',
+                              leagueSyncId: widget.leagueSyncId,
                             ),
                           );
-                  },
+                        },
+                      ),
+                    ),
+                  ),
                 ),
                 Visibility(
-                  visible: leagueStatus.data?.hasMatches == false,
+                  visible: leagueStatus.asData?.value!.hasMatches == false,
                   replacement: ButtonOfOrganizerWidget(
                     title: 'جدولة المباريات',
                     onTap: () {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        ref
+                            .read(ensureKnockoutProgressProvider(
+                                    widget.leagueSyncId)
+                                .notifier)
+                            .run(qualifiedPerGroup: 4);
+                      });
                       navigateTo(
                         context,
                         MatchesSchedulingPage(
-                          leagueId: leagueId,
+                          role: 'organizer',
+                          leagueSyncId: widget.leagueSyncId,
                         ),
                       );
                     },
@@ -91,16 +211,22 @@ class DetailsLeagueTopHeaderWidget extends ConsumerWidget {
                     functionSuccess: () {
                       ref
                           .read(
-                        leagueStatusUpdateProvider.notifier,
-                      )
+                            leagueStatusUpdateProvider.notifier,
+                          )
                           .update(
-                        leagueId: leagueId,
-                        hasMatches: true,
-                      );
+                            leagueSyncId: widget.leagueSyncId,
+                            hasMatches: true,
+                          );
+                      //  ref.read(leagueStatusStreamProvider(widget.leagueSyncId));
+                      ref
+                          .read(leagueStatusProvider(widget.leagueSyncId)
+                              .notifier)
+                          .refresh();
                       navigateTo(
                         context,
                         MatchesSchedulingPage(
-                          leagueId: leagueId,
+                          role: 'organizer',
+                          leagueSyncId: widget.leagueSyncId,
                         ),
                       );
                     },
@@ -110,7 +236,8 @@ class DetailsLeagueTopHeaderWidget extends ConsumerWidget {
                         navigateTo(
                           context,
                           MatchesSchedulingPage(
-                            leagueId: leagueId,
+                            role: 'organizer',
+                            leagueSyncId: widget.leagueSyncId,
                           ),
                         );
                       },
@@ -123,7 +250,13 @@ class DetailsLeagueTopHeaderWidget extends ConsumerWidget {
                 ),
                 ButtonOfOrganizerWidget(
                   title: "المنظمين",
-                  onTap: () {},
+                  onTap: () {
+                    navigateTo(
+                        context,
+                        SelectUserForAuthorizationPage(
+                          leagueSyncId: widget.leagueSyncId,
+                        ));
+                  },
                 ),
               ],
             ),
@@ -145,17 +278,17 @@ class DetailsLeagueTopHeaderWidget extends ConsumerWidget {
                   ),
                 ),
                 6.w.horizontalSpace,
-                Container(
-                  width: 300.w,
-                  height: 100.h,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12.r),
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/logo.png'),
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                ),
+                // Container(
+                //   width: 300.w,
+                //   height: 100.h,
+                //   decoration: BoxDecoration(
+                //     borderRadius: BorderRadius.circular(12.r),
+                //     image: const DecorationImage(
+                //       image: AssetImage('assets/images/logo.png'),
+                //       fit: BoxFit.fill,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),

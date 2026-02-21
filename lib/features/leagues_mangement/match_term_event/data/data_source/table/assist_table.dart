@@ -1,23 +1,26 @@
-
 import 'package:drift/drift.dart';
-import '../../../../match/data/data_source/table/matches_table.dart';
-import '../../../../team_and_player/data/data_source/table/players_table.dart';
-import 'goal_table.dart';
-import 'match_terms_table.dart';
 
 class Assists extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get matchId => integer().references(Matches, #id)();
+  TextColumn get matchSyncId => text()
+      .named('match_sync_id')
+      .customConstraint('REFERENCES matches(sync_id) ON DELETE CASCADE')();
 
-  IntColumn get playerId => integer().references(Players, #id)();
+  TextColumn get playerSyncId => text()
+      .named('player_sync_id')
+      .customConstraint('REFERENCES players(sync_id) ON DELETE CASCADE')();
 
-  IntColumn get matchTermId => integer().references(MatchTerms, #id)();
+  TextColumn get matchTermSyncId => text()
+      .named('match_term_sync_id')
+      .customConstraint('REFERENCES matchTerms(sync_id) ON DELETE CASCADE')();
 
-  IntColumn get goalId => integer().references(Goals, #id)(); // ربط مع الهدف
+  // ✅ sync-based FK to goals(sync_id)
+  TextColumn get goalSyncId => text()
+      .named('goal_sync_id')
+      .customConstraint('REFERENCES goals(sync_id) ON DELETE CASCADE')();
 
-  IntColumn get assistTime => integer()(); // نفس منطق goalTime (ثواني/دقائق)
+  IntColumn get assistTime => integer()();
 
-  TextColumn get status =>
-      text().withDefault(const Constant('active'))();
+  TextColumn get status => text().withDefault(const Constant('active'))();
 }

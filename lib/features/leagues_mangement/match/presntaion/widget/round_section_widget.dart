@@ -7,13 +7,13 @@ import 'matches_schedule_widget.dart';
 
 class RoundSectionWidget extends StatelessWidget {
   final RoundModel round;
-  final int leagueId;
+  final String leagueSyncId;
   final String matchFilter;
 
   const RoundSectionWidget(
       {super.key,
         required this.round,
-        required this.leagueId,
+        required this.leagueSyncId,
         required this.matchFilter});
 
   @override
@@ -31,7 +31,7 @@ class RoundSectionWidget extends StatelessWidget {
               : GroupCardWidget(
             round: round,
             groupWithMatches: groupWithMatches,
-            leagueId: leagueId,
+            leagueSyncId: leagueSyncId,
             matchFilter: matchFilter,
           );
         }),

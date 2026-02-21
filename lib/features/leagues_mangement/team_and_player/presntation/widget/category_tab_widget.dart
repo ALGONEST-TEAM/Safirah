@@ -16,12 +16,12 @@ import 'tab_category_body_widget.dart';
 class CategoryTabWidget extends ConsumerStatefulWidget {
   const CategoryTabWidget(
       {super.key,
-      required this.leagueId,
+      required this.leagueSyncId,
       required this.categories,
       required this.numOfLeaguePlayerWithOutCate});
 
   final int numOfLeaguePlayerWithOutCate;
-  final int leagueId;
+  final String leagueSyncId;
   final List<TeamPlayerCategoryModel> categories;
 
   @override
@@ -47,13 +47,13 @@ class _CategoryTabWidgetState extends ConsumerState<CategoryTabWidget>
 
   @override
   Widget build(BuildContext context) {
-    final draftState = ref.watch(runDraftProvider(widget.leagueId));
+    final draftState = ref.watch(runDraftProvider(widget.leagueSyncId));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TabsCategoryHeaderWidget(
           controller: _controller,
-          leagueId: widget.leagueId,
+          leagueSyncId: widget.leagueSyncId,
           categories: widget.categories,
         ),
         Padding(
@@ -64,7 +64,7 @@ class _CategoryTabWidgetState extends ConsumerState<CategoryTabWidget>
         Expanded(
           child: TabsCategoryBodyWidget(
             controller: _controller,
-            leagueId: widget.leagueId,
+            leagueSyncId: widget.leagueSyncId,
             categories: widget.categories,
           ),
         ),
@@ -75,18 +75,19 @@ class _CategoryTabWidgetState extends ConsumerState<CategoryTabWidget>
               state: draftState,
               functionSuccess: () {
                 ref.read(leagueStatusUpdateProvider.notifier).update(
-                    leagueId: widget.leagueId, hasPlayersAssigned: true);
-                ref.read(leagueStatusProvider(widget.leagueId).notifier).load();
-                navigateAndFinish(
+                    leagueSyncId:widget. leagueSyncId, hasPlayersAssigned: true);
+                // ref.read(leagueStatusProvider(widget.leagueSyncId).notifier).refresh();
+                navigateTo(
                     context,
                     DetailsLeagueWidget(
-                      leagueId: widget.leagueId,
+                      leagueSyncId: widget.leagueSyncId,
                     ));
               },
               bottonWidget: DefaultButtonWidget(
                 text: 'القرعة',
                 onPressed: widget.numOfLeaguePlayerWithOutCate != 0
                     ? () {
+                  print(widget.leagueSyncId);
                         showFlashBarError(
                             context: context,
                             title: "عذرا لاتستطيع عمل القرعة الان",
@@ -95,7 +96,7 @@ class _CategoryTabWidgetState extends ConsumerState<CategoryTabWidget>
                       }
                     : () {
                         ref
-                            .read(runDraftProvider(widget.leagueId).notifier)
+                            .read(runDraftProvider(widget.leagueSyncId).notifier)
                             .run();
                       },
               ),

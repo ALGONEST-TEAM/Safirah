@@ -1,21 +1,26 @@
-// ROUND
 import 'package:drift/drift.dart';
 
-import '../../../../group/data/data_source/table/group_table.dart';
-import '../../../../leagues/data/data_source/table/leagues_table.dart';
 
 class Rounds extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get leagueId => integer().references(Leagues, #id, onDelete: KeyAction.cascade)();
+
+  TextColumn get syncId => text().named('sync_id')();
+
+  TextColumn get leagueSyncId => text()
+      .named('league_sync_id')
+      .customConstraint('REFERENCES leagues(sync_id) ON DELETE CASCADE')();
   TextColumn get name => text().named('round_name')();
-  IntColumn get groupId =>
-      integer().nullable().references(Group, #id, onDelete: KeyAction.cascade)();
-  // league|group|knockout|final
+
+  TextColumn get groupSyncId => text()
+      .named('group_sync_id').nullable()
+      .customConstraint('REFERENCES "group"(sync_id) ON DELETE CASCADE')();
   TextColumn get roundType => text().named('round_type')
       .check(roundType.isIn(['group','knockout','final','placement','qualifier']))() ;
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
-  List<String> get customConstraints => ['UNIQUE(league_id, group_id, round_name)'];
+  List<String> get customConstraints => [
+        'UNIQUE(sync_id)',
+        'UNIQUE(league_sync_id, group_sync_id, round_name)'
+      ];
 }
-

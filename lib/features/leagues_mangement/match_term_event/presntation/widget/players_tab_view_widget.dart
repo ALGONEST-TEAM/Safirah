@@ -3,16 +3,17 @@ import 'list_of_player_in_event_match_widget.dart';
 
 
 class PlayersTabViewWidget extends StatelessWidget {
-  final int homeTeamId;
-  final int awayTeamId;
-  final int matchId;
-  final int termId;
+  final String homeTeamSyncId;
+  final String awayTeamSyncId;
+  final String matchSyncId;
+  final String matchTermSyncId;
+
   const PlayersTabViewWidget({
     super.key,
-    required this.homeTeamId,
-    required this.awayTeamId,
-    required this.matchId,
-    required this.termId
+    required this.homeTeamSyncId,
+    required this.awayTeamSyncId,
+    required this.matchSyncId,
+    required this.matchTermSyncId,
   });
 
   @override
@@ -21,15 +22,16 @@ class PlayersTabViewWidget extends StatelessWidget {
       children: [
         SingleChildScrollView(
           child: ListOfPlayerInEventMatchWidget(
-            teamId: homeTeamId,
-            matchId: matchId, termId: termId,
+            teamSyncId: homeTeamSyncId,
+            matchSyncId: matchSyncId,
+            matchTermSyncId: matchTermSyncId,
           ),
         ),
         SingleChildScrollView(
           child: ListOfPlayerInEventMatchWidget(
-            teamId: awayTeamId,
-            matchId: matchId,
-            termId: termId,
+            teamSyncId: awayTeamSyncId,
+            matchSyncId: matchSyncId,
+            matchTermSyncId: matchTermSyncId,
           ),
         ),
       ],

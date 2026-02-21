@@ -9,13 +9,13 @@ import '../widget/all_players_of_league_widget.dart';
 import '../widget/all_team_of_league_widget.dart';
 
 class ShowTeamAndPlayerPage extends ConsumerWidget {
-  final int leagueId;
+  final String leagueSyncId;
   final int maxTeam;
   final int maxPlayer;
 
   const ShowTeamAndPlayerPage(
       {super.key,
-      required this.leagueId,
+      required this.leagueSyncId,
       required this.maxTeam,
       required this.maxPlayer});
 
@@ -80,11 +80,11 @@ class ShowTeamAndPlayerPage extends ConsumerWidget {
                   child: TabBarView(
                     children: [
                       AllTeamOfLeagueWidget(
-                        leagueId: leagueId,
+                        leagueSyncId: leagueSyncId,
 
                       ),
                       AllPlayersOfLeagueWidget(
-                        leagueId: leagueId,
+                        leagueSyncId: leagueSyncId,
                         maxTeam: maxTeam,
                         maxPlayer: maxPlayer,
                       ),

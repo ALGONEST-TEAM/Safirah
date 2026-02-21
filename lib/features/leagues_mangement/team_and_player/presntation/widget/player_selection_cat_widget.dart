@@ -1,4 +1,3 @@
-// players_selection_section.dart  (مشترك)
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,7 +13,7 @@ class PlayersSelectionCatWidget extends ConsumerWidget {
     required this.pickedIds,
     required this.onToggle,
     required this.searchController,
-    required this.leagueId,
+    required this.leagueSyncId,
     this.searchLabel = 'البحث عن لاعب',
     this.searchHint = 'اسم اللاعب',
     this.listTitle = 'اللاعبون',
@@ -27,12 +26,12 @@ class PlayersSelectionCatWidget extends ConsumerWidget {
   final String searchLabel;
   final String searchHint;
   final String listTitle;
-  final int leagueId;
+  final String leagueSyncId;
 
   @override
   Widget build(BuildContext context, ref) {
     final playerWithOutCatState =
-        ref.watch(leaguePlayersWithoutCategoryProvider(leagueId));
+        ref.watch(leaguePlayersWithoutCategoryProvider(leagueSyncId));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -80,16 +79,12 @@ class PlayersSelectionCatWidget extends ConsumerWidget {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text('Player #${p.id}',
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.w600)),
-                                        const Text('@username',
-                                            style: TextStyle(
-                                                color: Colors.black54)),
+                                        AutoSizeTextWidget(text: p.name??'',),
                                       ],
                                     ),
                                   ),
                                   Icon(
+                                    size: 18,
                                     selected
                                         ? Icons.check_circle
                                         : Icons.circle_outlined,

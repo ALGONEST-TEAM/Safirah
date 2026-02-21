@@ -1,19 +1,20 @@
 import 'package:drift/drift.dart';
-import '../../../../leagues/data/data_source/table/leagues_table.dart';
-import '../../../../team_and_player/data/data_source/table/teams_table.dart';
-import 'group_table.dart';
 
 class QualifiedTeam extends Table {
   IntColumn get id => integer().autoIncrement()();
+  TextColumn get syncId => text().named('sync_id')();
 
-  IntColumn get leagueId =>
-      integer().references(Leagues, #id, onDelete: KeyAction.cascade)();
+  TextColumn get leagueSyncId => text()
+      .named('league_sync_id')
+      .customConstraint('REFERENCES leagues(sync_id) ON DELETE CASCADE')();
 
-  IntColumn get groupId =>
-      integer().references(Group, #id, onDelete: KeyAction.cascade)();
 
-  IntColumn get teamId =>
-      integer().references(Teams, #id, onDelete: KeyAction.cascade)();
+  TextColumn get groupSyncId => text()
+      .named('group_sync_id')
+      .customConstraint('REFERENCES "group"(sync_id) ON DELETE CASCADE')();
+  TextColumn get teamSyncId => text()
+      .named('team_sync_id')
+      .customConstraint('NULL REFERENCES teams(sync_id) ON DELETE CASCADE')();
 
   IntColumn get played => integer().withDefault(const Constant(0))();
 
@@ -37,5 +38,5 @@ class QualifiedTeam extends Table {
 
   @override
   List<String> get customConstraints =>
-      ['UNIQUE(league_id, group_id, team_id)'];
+      ['UNIQUE(sync_id)'];
 }

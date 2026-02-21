@@ -1,18 +1,17 @@
 import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 import '../../../../../../core/database/safirah_database.dart';
 import '../../../../group/data/model/model.dart';
 import '../../../../match/data/model/match_model.dart';
-import '../../../../match/data/model/round_model.dart';
-import '../../../../team_and_player/data/model/team_model.dart';
 import '../../model/assist_model.dart';
 import '../../model/goal_model.dart';
 import '../../model/match_term_model.dart';
-import '../../model/player_match_participation_model.dart';
 import '../../model/player_stats.dart';
 import '../../model/terms_model.dart';
 import '../../model/warring_model.dart';
 import '../../service/match_term_event_operations.dart';
+typedef UpdatedQualifiedTeams = ({QualifiedTeamModel? home, QualifiedTeamModel? away});
 
 class MatchTermsEventLocalDataSource {
   final Safirah db;
@@ -33,19 +32,31 @@ class MatchTermsEventLocalDataSource {
     if (existing.isNotEmpty) return;
 
     final defaultTerms = <TermsCompanion>[
-      TermsCompanion.insert(name: 'الشوط الأول', type: 'regular', order: 1),
-      TermsCompanion.insert(name: 'الشوط الثاني', type: 'regular', order: 2),
       TermsCompanion.insert(
-        name: 'الشوط الإضافي الأول',
-        type: 'extra',
-        order: 3,
-      ),
+          name: 'الشوط الأول',
+          type: 'regular',
+          order: 1,
+          syncId: const Uuid().v7()),
       TermsCompanion.insert(
-        name: 'الشوط الإضافي الثاني',
-        type: 'extra',
-        order: 4,
-      ),
-      TermsCompanion.insert(name: 'ركلات الترجيح', type: 'penalty', order: 5),
+          name: 'الشوط الثاني',
+          type: 'regular',
+          order: 2,
+          syncId: const Uuid().v7()),
+      TermsCompanion.insert(
+          name: 'الشوط الإضافي الأول',
+          type: 'extra',
+          order: 3,
+          syncId: const Uuid().v7()),
+      TermsCompanion.insert(
+          name: 'الشوط الإضافي الثاني',
+          type: 'extra',
+          order: 4,
+          syncId: const Uuid().v7()),
+      TermsCompanion.insert(
+          name: 'ركلات الترجيح',
+          type: 'penalty',
+          order: 5,
+          syncId: const Uuid().v7()),
     ];
 
     await db.batch((batch) => batch.insertAll(db.terms, defaultTerms));
@@ -53,23 +64,56 @@ class MatchTermsEventLocalDataSource {
     print('✅ تم إدخال بيانات الأشواط الأساسية (${defaultTerms.length})');
   }
 
-  Future<void> initLeagueTerms({
-    required int leagueId,
-    required List<int> selectedTermIds,
+  //
+  // Future<List<LeagueTermModel>> initLeagueTerms({
+  //   required String leagueSyncId,
+  //   required List<String> selectedTermIds,
+  //   required int durationMinutes,
+  // }) async {
+  //   await db.transaction(() async {
+  //     await (db.delete(db.leagueTerms)
+  //           ..where((t) => t.leagueSyncId.equals(leagueSyncId)))
+  //         .go();
+  //
+  //     await db.batch((batch) {
+  //       batch.insertAll(
+  //         db.leagueTerms,
+  //         selectedTermIds.map((termSyncId) {
+  //           return LeagueTermsCompanion.insert(
+  //             syncId: const Uuid().v7(),
+  //             leagueSyncId: leagueSyncId,
+  //             termSyncId: termSyncId,
+  //             durationMinutes: Value(durationMinutes),
+  //           );
+  //         }).toList(),
+  //       );
+  //     });
+  //   });
+  //   final leagueTermsRows = await (db.select(db.leagueTerms)
+  //         ..where((t) => t.leagueSyncId.equals(leagueSyncId)))
+  //       .get();
+  //
+  //   return leagueTermsRows.map(LeagueTermModel.fromEntity).toList();
+  //   // ignore: avoid_print
+  // }
+  Future<List<LeagueTermModel>> initLeagueTerms({
+    required String leagueSyncId,
+    required List<String> selectedTermIds,
     required int durationMinutes,
   }) async {
     await db.transaction(() async {
       await (db.delete(db.leagueTerms)
-            ..where((t) => t.leagueId.equals(leagueId)))
+            ..where((t) => t.leagueSyncId.equals(leagueSyncId)))
           .go();
 
       await db.batch((batch) {
         batch.insertAll(
           db.leagueTerms,
-          selectedTermIds.map((termId) {
+          selectedTermIds.map((termSyncId) {
             return LeagueTermsCompanion.insert(
-              leagueId: leagueId,
-              termId: termId,
+              syncId: const Uuid().v7(),
+              leagueSyncId: leagueSyncId,
+              termSyncId: termSyncId,
               durationMinutes: Value(durationMinutes),
             );
           }).toList(),
@@ -77,91 +121,122 @@ class MatchTermsEventLocalDataSource {
       });
     });
 
-    // ignore: avoid_print
-    print('✅ League terms initialized for league $leagueId');
+    // Join leagueTerms with terms to get the order
+    final query = await (db.select(db.leagueTerms).join([
+      innerJoin(
+        db.terms,
+        db.terms.syncId.equalsExp(db.leagueTerms.termSyncId),
+      )
+    ])
+          ..where(db.leagueTerms.leagueSyncId.equals(leagueSyncId)))
+        .get();
+
+    return query.map((row) {
+      final leagueTerm = row.readTable(db.leagueTerms);
+      final term = row.readTable(db.terms);
+      return LeagueTermModel.fromEntity(leagueTerm)
+          .copyWith(orderTerm: term.order);
+    }).toList();
   }
 
-  Future<void> createMatchTermsFromLeague({
-    required int matchId,
-    required int leagueId,
+  Future<List<MatchTermModel>> createMatchTermsFromLeague({
+    required String matchSyncId,
+    required String leagueSyncId,
     String roundType = 'group',
   }) async {
     final leagueTerms = await (db.select(db.leagueTerms)
-          ..where((t) => t.leagueId.equals(leagueId)))
+          ..where((t) => t.leagueSyncId.equals(leagueSyncId)))
         .get();
 
     if (leagueTerms.isEmpty) {
       // ignore: avoid_print
-      print('⚠️ لا توجد إعدادات أشواط لهذا الدوري بعد ($leagueId)');
-      return;
+      print('⚠️ لا توجد إعدادات أشواط لهذا الدوري بعد ()');
+      return [];
     }
 
     final allTerms = await db.select(db.terms).get();
-    final Map<int, String> termTypeById = <int, String>{
-      for (final t in allTerms) t.id: t.type,
+    final Map<String, String> termTypeBySyncId = <String, String>{
+      for (final t in allTerms) t.syncId: t.type,
     };
 
-    List<int> selectedLeagueTermIds = <int>[];
+    List<String> selectedLeagueTermSyncIds = <String>[];
 
     if (roundType == 'group') {
       final regularTerms = leagueTerms
-          .where((lt) => termTypeById[lt.termId] == 'regular')
+          .where((lt) => termTypeBySyncId[lt.termSyncId] == 'regular')
           .toList()
         ..sort((a, b) => a.id.compareTo(b.id));
 
       if (regularTerms.isEmpty) {
         // ignore: avoid_print
-        print(
-          '⚠️ لا توجد أشواط عادية (regular) في إعدادات الدوري $leagueId',
-        );
-        return;
+        print('⚠️ لا توجد أشواط عادية (regular) في إعدادات الدوري ');
+        return [];
       }
 
       final int regularCount = regularTerms.length.clamp(1, 2);
 
-      selectedLeagueTermIds =
-          regularTerms.take(regularCount).map((e) => e.id).toList();
+      selectedLeagueTermSyncIds =
+          regularTerms.take(regularCount).map((e) => e.syncId).toList();
 
       // ignore: avoid_print
       print('⚙️ تم اختيار $regularCount شوط (regular) لدور المجموعات');
     } else {
-      selectedLeagueTermIds = leagueTerms.map((lt) => lt.id).toList();
+      selectedLeagueTermSyncIds = leagueTerms.map((lt) => lt.syncId).toList();
       // ignore: avoid_print
       print('⚙️ تم اختيار كل الأشواط للدور $roundType');
     }
 
-    if (selectedLeagueTermIds.isEmpty) {
+    if (selectedLeagueTermSyncIds.isEmpty) {
       // ignore: avoid_print
-      print(
-        '⚠️ لا توجد أشواط مطابقة للدور $roundType للدوري $leagueId',
-      );
-      return;
+      print('⚠️ لا توجد أشواط مطابقة للدور $roundType للدوري ');
+      return [];
     }
+    //
+    // await db.batch((batch) {
+    //   batch.insertAll(
+    //     db.matchTerms,
+    //     selectedLeagueTermSyncIds.map((leagueTermSyncId) {
+    //       return MatchTermsCompanion.insert(
+    //         syncId: const Uuid().v7(),
+    //         matchSyncId: matchSyncId,
+    //         leagueTermSyncId: leagueTermSyncId,
+    //       );
+    //     }).toList(),
+    //   );
+    // });
 
-    await db.batch((batch) {
-      batch.insertAll(
-        db.matchTerms,
-        selectedLeagueTermIds.map((leagueTermId) {
-          return MatchTermsCompanion.insert(
-            matchId: matchId,
-            leagueTermId: leagueTermId,
-          );
-        }).toList(),
-      );
+    List<MatchTermModel> insertedMatchTerms = [];
+
+    await db.transaction(() async {
+      for (final leagueTermSyncId in selectedLeagueTermSyncIds) {
+        final row = await db.into(db.matchTerms).insertReturning(
+              MatchTermsCompanion.insert(
+                syncId: const Uuid().v7(),
+                matchSyncId: matchSyncId,
+                leagueTermSyncId: leagueTermSyncId,
+              ),
+            );
+        insertedMatchTerms.add(MatchTermModel(
+          syncId: row.syncId,
+          id: row.id,
+          matchSyncId: row.matchSyncId,
+          leagueTermSyncId: row.leagueTermSyncId,
+        ));
+      }
     });
-
-    // ignore: avoid_print
     print(
-      '✅ تم إنشاء ${selectedLeagueTermIds.length} أشواط للمباراة '
-      '$matchId (${roundType.toUpperCase()})',
+      '✅ تم إنشاء ${selectedLeagueTermSyncIds.length} أشواط للمباراة '
+      '$matchSyncId (${roundType.toUpperCase()})',
     );
+    return insertedMatchTerms;
   }
 
+  // ✅ now matchTerms is sync-based but we still keep old signature (id) for UI.
   Future<int?> getTermDurationByMatchTermId(int matchTermId) async {
     final query = await (db.select(db.matchTerms).join(<Join>[
       innerJoin(
         db.leagueTerms,
-        db.leagueTerms.id.equalsExp(db.matchTerms.leagueTermId),
+        db.leagueTerms.syncId.equalsExp(db.matchTerms.leagueTermSyncId),
       )
     ])
           ..where(db.matchTerms.id.equals(matchTermId)))
@@ -170,8 +245,6 @@ class MatchTermsEventLocalDataSource {
     if (query == null) return null;
 
     final leagueTerm = query.readTable(db.leagueTerms);
-    // ignore: avoid_print
-    print(leagueTerm.durationMinutes);
     return leagueTerm.durationMinutes;
   }
 
@@ -187,10 +260,10 @@ class MatchTermsEventLocalDataSource {
     );
   }
 
-  Future<void> startTermSafe(int matchId, int matchTermId) async {
+  Future<void> startTermSafe(String matchSyncId, int matchTermId) async {
     await db.transaction(() async {
       final match = await (db.select(db.matches)
-            ..where((m) => m.id.equals(matchId)))
+            ..where((m) => m.syncId.equals(matchSyncId)))
           .getSingleOrNull();
 
       if (match == null) {
@@ -205,7 +278,9 @@ class MatchTermsEventLocalDataSource {
       }
 
       if (match.status != 'live') {
-        await (db.update(db.matches)..where((m) => m.id.equals(matchId))).write(
+        await (db.update(db.matches)
+              ..where((m) => m.syncId.equals(matchSyncId)))
+            .write(
           MatchesCompanion(
             status: const Value('live'),
             startTime: Value(now),
@@ -223,38 +298,212 @@ class MatchTermsEventLocalDataSource {
       );
 
       // ignore: avoid_print
-      print('✅ بدأ الشوط } لمدة  دقيقة للمباراة $matchId');
+      print('✅ بدأ الشوط لمدة دقيقة للمباراة $matchSyncId');
     });
   }
 
-  Future<void> finishTermSmart({
-    required int matchId,
+  //   Future<FinishResult?> finishTermSmart({
+  //   required String matchSyncId,
+  //   required int termId,
+  // }) async {
+  //   await db.transaction(() async {
+  //     await (db.update(db.matchTerms)..where((t) => t.id.equals(termId))).write(
+  //       const MatchTermsCompanion(isFinished: Value(true)),
+  //     );
+  //
+  //     final matchEntity = await (db.select(db.matches)
+  //           ..where((m) => m.syncId.equals(matchSyncId)))
+  //         .getSingleOrNull();
+  //
+  //     if (matchEntity == null) {
+  //       throw Exception('❌ لم يتم العثور على المباراة $matchSyncId');
+  //     }
+  //
+  //     final match = MatchModel.fromEntityWithRelations(matchEntity);
+  //
+  //     final roundEntity = await (db.select(db.rounds)
+  //           ..where((r) => r.syncId.equals(match.roundSyncId!)))
+  //         .getSingleOrNull();
+  //
+  //     if (roundEntity == null) {
+  //       throw Exception(
+  //           '❌ لم يتم العثور على الجولة الخاصة بالمباراة $matchSyncId');
+  //     }
+  //
+  //     final bool isKnockout = roundEntity.roundType == 'knockout';
+  //
+  //     final matchTerms = db.matchTerms;
+  //     final leagueTerms = db.leagueTerms;
+  //     final terms = db.terms;
+  //
+  //     // ✅ sync-based joins
+  //     final joinedTerms = await (db.select(matchTerms).join(<Join>[
+  //       innerJoin(
+  //         leagueTerms,
+  //         leagueTerms.syncId.equalsExp(matchTerms.leagueTermSyncId),
+  //       ),
+  //       innerJoin(
+  //         terms,
+  //         terms.syncId.equalsExp(leagueTerms.termSyncId),
+  //       ),
+  //     ])
+  //           ..where(matchTerms.matchSyncId.equals(matchSyncId)))
+  //         .get();
+  //
+  //     final allTerms = joinedTerms
+  //         .map(
+  //           (row) => (
+  //             matchTerm: row.readTable(matchTerms),
+  //             leagueTerm: row.readTable(leagueTerms),
+  //             term: row.readTable(terms),
+  //           ),
+  //         )
+  //         .toList();
+  //
+  //     if (allTerms.isEmpty) {
+  //       throw Exception(
+  //         '❌ لم يتم العثور على الأشواط الخاصة بالمباراة $matchSyncId',
+  //       );
+  //     }
+  //     final termRow = await (db.select(db.matchTerms)..where((t) => t.id.equals(termId)))
+  //         .getSingle();
+  //
+  //     final matchTermSyncId = termRow.syncId;
+  //     final hasExtraTime = allTerms.any((t) => t.term.type == 'extra');
+  //     final hasPenaltyShootout = allTerms.any((t) => t.term.type == 'penalty');
+  //
+  //     final normalTerms =
+  //         allTerms.where((t) => t.term.type == 'regular').toList();
+  //     final extraTerms = allTerms.where((t) => t.term.type == 'extra').toList();
+  //     final penaltyTerms =
+  //         allTerms.where((t) => t.term.type == 'penalty').toList();
+  //
+  //     final int finishedNormal =
+  //         normalTerms.where((t) => t.matchTerm.isFinished).length;
+  //     final int finishedExtra =
+  //         extraTerms.where((t) => t.matchTerm.isFinished).length;
+  //     final int finishedPenalty =
+  //         penaltyTerms.where((t) => t.matchTerm.isFinished).length;
+  //
+  //     final int totalHomeScore = match.homeScore;
+  //     final int totalAwayScore = match.awayScore;
+  //
+  //     final bool allFinished = allTerms.every((t) => t.matchTerm.isFinished);
+  //     bool matchFinished = false;
+  //     final now = DateTime.now();
+  //     if (isKnockout) {
+  //       if (finishedNormal == normalTerms.length && finishedExtra == 0) {
+  //         if (totalHomeScore != totalAwayScore) {
+  //           final unfinishedExtras =
+  //               extraTerms.where((t) => !t.matchTerm.isFinished).toList();
+  //           final unfinishedPenalties =
+  //               penaltyTerms.where((t) => !t.matchTerm.isFinished).toList();
+  //           final toFinish =
+  //               <({dynamic matchTerm, dynamic leagueTerm, dynamic term})>[
+  //             ...unfinishedExtras,
+  //             ...unfinishedPenalties,
+  //           ];
+  //
+  //           if (toFinish.isNotEmpty) {
+  //             for (final term in toFinish) {
+  //               await (db.update(db.matchTerms)
+  //                     ..where((t) => t.syncId.equals(term.matchTerm.syncId)))
+  //                   .write(
+  //                 const MatchTermsCompanion(isFinished: Value(true)),
+  //               );
+  //             }
+  //           }
+  //
+  //           matchFinished = true;
+  //           await finishMatch(match);
+  //           // return;
+  //         } else {
+  //           if (hasExtraTime) {
+  //             // return;
+  //           } else if (hasPenaltyShootout) {
+  //             // return;
+  //           } else {
+  //             matchFinished = true;
+  //             await finishMatch(match);
+  //             // return;
+  //           }
+  //         }
+  //       }
+  //
+  //       if (finishedExtra == extraTerms.length && finishedExtra > 0) {
+  //         if (totalHomeScore != totalAwayScore) {
+  //           matchFinished = true;
+  //
+  //           await finishMatch(match);
+  //           // return;
+  //         } else {
+  //           if (hasPenaltyShootout) {
+  //             // return;
+  //           } else {
+  //             matchFinished = true;
+  //
+  //             await finishMatch(match);
+  //             // return;
+  //           }
+  //         }
+  //       }
+  //
+  //       if (finishedPenalty == penaltyTerms.length && penaltyTerms.isNotEmpty) {
+  //         matchFinished = true;
+  //
+  //         await finishMatch(match);
+  //         // return;
+  //       }
+  //     } else {
+  //       if (allFinished) {
+  //         final syncId = match.syncId;
+  //         if (syncId != null) {
+  //           matchFinished = true;
+  //
+  //           await finishMatchAndUpdatePoints(syncId, DateTime.now());
+  //         }
+  //         // return;
+  //       }
+  //     }
+  //     return FinishResult(
+  //       termFinished: true,
+  //       matchFinished: matchFinished,
+  //       matchTermSyncId: matchTermSyncId,
+  //       now: now,
+  //     );
+  //     // ignore: avoid_print
+  //     print('✅ تم إنهاء الشوط $termId للمباراة $matchSyncId');
+  //   });
+  //   return null;
+  // }
+  Future<FinishTermResult> finishTermSmart({
+    required String matchSyncId,
     required int termId,
   }) async {
-    await db.transaction(() async {
+    return await db.transaction(() async {
       await (db.update(db.matchTerms)..where((t) => t.id.equals(termId))).write(
         const MatchTermsCompanion(isFinished: Value(true)),
       );
 
       final matchEntity = await (db.select(db.matches)
-            ..where((m) => m.id.equals(matchId)))
+        ..where((m) => m.syncId.equals(matchSyncId)))
           .getSingleOrNull();
 
       if (matchEntity == null) {
-        throw Exception('❌ لم يتم العثور على المباراة رقم $matchId');
+        throw Exception('❌ لم يتم العثور على المباراة $matchSyncId');
       }
+
       final match = MatchModel.fromEntityWithRelations(matchEntity);
 
       final roundEntity = await (db.select(db.rounds)
-            ..where((r) => r.id.equals(match.roundId!)))
+        ..where((r) => r.syncId.equals(match.roundSyncId!)))
           .getSingleOrNull();
 
       if (roundEntity == null) {
-        throw Exception('❌ لم يتم العثور على الجولة الخاصة بالمباراة $matchId');
+        throw Exception('❌ لم يتم العثور على الجولة الخاصة بالمباراة $matchSyncId');
       }
 
-      final round = RoundModel.fromEntity(roundEntity);
-      final bool isKnockout = round.roundType == 'knockout';
+      final bool isKnockout = roundEntity.roundType == 'knockout';
 
       final matchTerms = db.matchTerms;
       final leagueTerms = db.leagueTerms;
@@ -263,86 +512,122 @@ class MatchTermsEventLocalDataSource {
       final joinedTerms = await (db.select(matchTerms).join(<Join>[
         innerJoin(
           leagueTerms,
-          leagueTerms.id.equalsExp(matchTerms.leagueTermId),
+          leagueTerms.syncId.equalsExp(matchTerms.leagueTermSyncId),
         ),
         innerJoin(
           terms,
-          terms.id.equalsExp(leagueTerms.termId),
+          terms.syncId.equalsExp(leagueTerms.termSyncId),
         ),
       ])
-            ..where(matchTerms.matchId.equals(matchId)))
+        ..where(matchTerms.matchSyncId.equals(matchSyncId)))
           .get();
 
       final allTerms = joinedTerms
           .map(
             (row) => (
-              matchTerm: row.readTable(matchTerms),
-              leagueTerm: row.readTable(leagueTerms),
-              term: row.readTable(terms),
-            ),
-          )
+        matchTerm: row.readTable(matchTerms),
+        leagueTerm: row.readTable(leagueTerms),
+        term: row.readTable(terms),
+        ),
+      )
           .toList();
 
       if (allTerms.isEmpty) {
-        throw Exception(
-          '❌ لم يتم العثور على الأشواط الخاصة بالمباراة $matchId',
-        );
+        throw Exception('❌ لم يتم العثور على الأشواط الخاصة بالمباراة $matchSyncId');
       }
 
       final hasExtraTime = allTerms.any((t) => t.term.type == 'extra');
       final hasPenaltyShootout = allTerms.any((t) => t.term.type == 'penalty');
 
-      final normalTerms =
-          allTerms.where((t) => t.term.type == 'regular').toList();
+      final normalTerms = allTerms.where((t) => t.term.type == 'regular').toList();
       final extraTerms = allTerms.where((t) => t.term.type == 'extra').toList();
-      final penaltyTerms =
-          allTerms.where((t) => t.term.type == 'penalty').toList();
+      final penaltyTerms = allTerms.where((t) => t.term.type == 'penalty').toList();
 
-      final int finishedNormal =
-          normalTerms.where((t) => t.matchTerm.isFinished).length;
-      final int finishedExtra =
-          extraTerms.where((t) => t.matchTerm.isFinished).length;
-      final int finishedPenalty =
-          penaltyTerms.where((t) => t.matchTerm.isFinished).length;
+      final int finishedNormal = normalTerms.where((t) => t.matchTerm.isFinished).length;
+      final int finishedExtra = extraTerms.where((t) => t.matchTerm.isFinished).length;
+      final int finishedPenalty = penaltyTerms.where((t) => t.matchTerm.isFinished).length;
 
       final int totalHomeScore = match.homeScore;
       final int totalAwayScore = match.awayScore;
 
       final bool allFinished = allTerms.every((t) => t.matchTerm.isFinished);
+      final now = DateTime.now();
+      final termRow = await (db.select(db.matchTerms)
+        ..where((t) => t.id.equals(termId)))
+          .getSingleOrNull();
 
+      if (termRow == null) {
+        throw Exception('❌ لم يتم العثور على الشوط termId=$termId');
+      }
       if (isKnockout) {
         if (finishedNormal == normalTerms.length && finishedExtra == 0) {
           if (totalHomeScore != totalAwayScore) {
-            final unfinishedExtras =
-                extraTerms.where((t) => !t.matchTerm.isFinished).toList();
-            final unfinishedPenalties =
-                penaltyTerms.where((t) => !t.matchTerm.isFinished).toList();
-            final toFinish =
-                <({dynamic matchTerm, dynamic leagueTerm, dynamic term})>[
+            final unfinishedExtras = extraTerms.where((t) => !t.matchTerm.isFinished).toList();
+            final unfinishedPenalties = penaltyTerms.where((t) => !t.matchTerm.isFinished).toList();
+            final toFinish = <({dynamic matchTerm, dynamic leagueTerm, dynamic term})>[
               ...unfinishedExtras,
               ...unfinishedPenalties,
             ];
 
             if (toFinish.isNotEmpty) {
               for (final term in toFinish) {
-                await (db.update(db.matchTerms)
-                      ..where((t) => t.id.equals(term.matchTerm.id)))
-                    .write(
-                  const MatchTermsCompanion(isFinished: Value(true)),
-                );
+                await (db.update(db.matchTerms)..where((t) => t.id.equals(term.matchTerm.id)))
+                    .write(const MatchTermsCompanion(isFinished: Value(true)));
               }
             }
 
             await finishMatch(match);
-            return;
+
+            return FinishTermResult(
+              termFinished: true,
+              matchFinished: true,
+
+              matchSyncId: matchSyncId,
+              matchTermSyncId: termRow.syncId,            // ✅ المطلوب
+              leagueTermSyncId: termRow.leagueTermSyncId, // ✅ المطلوب
+              pointsUpdatedLocally: false,
+              isKnockout: true,
+              matchEndTime: now,
+              homeScore: match.homeScore,
+              awayScore: match.awayScore,
+              leagueSyncId: match.leagueSyncId,
+            );
           } else {
             if (hasExtraTime) {
-              return;
+              return FinishTermResult(
+                termFinished: true,
+                matchFinished: false,
+                matchSyncId: matchSyncId,
+                matchTermSyncId: termRow.syncId,            // ✅ المطلوب
+                leagueTermSyncId: termRow.leagueTermSyncId, // ✅ المطلوب
+                pointsUpdatedLocally: false,
+                isKnockout: true,
+              );
             } else if (hasPenaltyShootout) {
-              return;
+              return  FinishTermResult(
+                matchSyncId: matchSyncId,
+                matchTermSyncId: termRow.syncId,            // ✅ المطلوب
+                leagueTermSyncId: termRow.leagueTermSyncId,
+                termFinished: true,
+                matchFinished: false,
+                pointsUpdatedLocally: false,
+                isKnockout: true,
+              );
             } else {
               await finishMatch(match);
-              return;
+              return FinishTermResult(
+                termFinished: true,
+                matchSyncId: matchSyncId,
+                matchTermSyncId: termRow.syncId,            // ✅ المطلوب
+                leagueTermSyncId: termRow.leagueTermSyncId,
+                matchFinished: true,
+                pointsUpdatedLocally: false,
+                isKnockout: true,
+                matchEndTime: now,
+                homeScore: match.homeScore,
+                awayScore: match.awayScore,
+                leagueSyncId: match.leagueSyncId,
+              );
             }
           }
         }
@@ -350,34 +635,97 @@ class MatchTermsEventLocalDataSource {
         if (finishedExtra == extraTerms.length && finishedExtra > 0) {
           if (totalHomeScore != totalAwayScore) {
             await finishMatch(match);
-            return;
+            return FinishTermResult(
+              termFinished: true,
+              matchFinished: true,
+              matchSyncId: matchSyncId,
+              matchTermSyncId: termRow.syncId,            // ✅ المطلوب
+              leagueTermSyncId: termRow.leagueTermSyncId,
+              pointsUpdatedLocally: false,
+              isKnockout: true,
+              matchEndTime: now,
+              homeScore: match.homeScore,
+              awayScore: match.awayScore,
+              leagueSyncId: match.leagueSyncId,
+            );
           } else {
             if (hasPenaltyShootout) {
-              // ignore: avoid_print
-              print('🎯 المباراة متعادلة بعد الإضافي — الانتقال إلى البلنتيات');
-              return;
+              return  FinishTermResult(
+                termFinished: true,
+                matchFinished: false,
+                pointsUpdatedLocally: false,
+                matchSyncId: matchSyncId,
+                matchTermSyncId: termRow.syncId,            // ✅ المطلوب
+                leagueTermSyncId: termRow.leagueTermSyncId,
+                isKnockout: true,
+              );
             } else {
-              // ignore: avoid_print
-              print('⚠️ لا يوجد بلنتيات — سيتم إنهاء المباراة بالتعادل');
               await finishMatch(match);
-              return;
+              return FinishTermResult(
+                termFinished: true,
+                matchFinished: true,
+                pointsUpdatedLocally: false,
+                isKnockout: true,
+                matchSyncId: matchSyncId,
+                matchTermSyncId: termRow.syncId,            // ✅ المطلوب
+                leagueTermSyncId: termRow.leagueTermSyncId,
+                matchEndTime: now,
+                homeScore: match.homeScore,
+                awayScore: match.awayScore,
+                leagueSyncId: match.leagueSyncId,
+              );
             }
           }
         }
 
         if (finishedPenalty == penaltyTerms.length && penaltyTerms.isNotEmpty) {
           await finishMatch(match);
-          return;
+          return FinishTermResult(
+            termFinished: true,
+            matchFinished: true,
+            matchSyncId: matchSyncId,
+            matchTermSyncId: termRow.syncId,            // ✅ المطلوب
+            leagueTermSyncId: termRow.leagueTermSyncId,
+            pointsUpdatedLocally: false,
+            isKnockout: true,
+            matchEndTime: now,
+            homeScore: match.homeScore,
+            awayScore: match.awayScore,
+            leagueSyncId: match.leagueSyncId,
+          );
         }
       } else {
         if (allFinished) {
-          await finishMatchAndUpdatePoints(matchId, DateTime.now());
-          return;
+          final syncId = match.syncId;
+          if (syncId != null) {
+           // await finishMatchAndUpdatePoints(syncId, now);
+          }
+          return FinishTermResult(
+            termFinished: true,
+            matchFinished: true,
+            pointsUpdatedLocally: true,
+            isKnockout: false,
+            matchEndTime: now,
+            matchSyncId: matchSyncId,
+            matchTermSyncId: termRow.syncId,            // ✅ المطلوب
+            leagueTermSyncId: termRow.leagueTermSyncId,
+            homeScore: match.homeScore,
+            awayScore: match.awayScore,
+            leagueSyncId: match.leagueSyncId,
+          );
         }
       }
 
-      // ignore: avoid_print
-      print('✅ تم إنهاء الشوط $termId للمباراة $matchId');
+      // لم تنتهِ المباراة
+      return  FinishTermResult(
+        termFinished: true,
+        matchFinished: false,
+        pointsUpdatedLocally: false,
+        isKnockout: false,
+        matchSyncId: matchSyncId,
+        matchTermSyncId: termRow.syncId,            // ✅ المطلوب
+        leagueTermSyncId: termRow.leagueTermSyncId,
+      );
     });
   }
 
@@ -400,25 +748,46 @@ class MatchTermsEventLocalDataSource {
     print('🏁 تم إنهاء المباراة ${match.id}');
   }
 
-  Future<MatchTermModel> getCurrentMatchTerm(int matchId) async {
+  Future<MatchTermModel> getCurrentMatchTerm(String matchSyncId) async {
+    final matchEntity = await (db.select(db.matches)
+          ..where((m) => m.syncId.equals(matchSyncId)))
+        .getSingleOrNull();
+
+    if (matchEntity == null) {
+      return MatchTermModel(
+        syncId: '',
+        id: 0,
+        matchSyncId: '',
+        leagueTermSyncId: '',
+        isFinished: true,
+        termName: 'انتهت المباراة',
+        termType: 'finished',
+        leagueTermName: '',
+      );
+    }
+
     final joinedTerms = await (db.select(db.matchTerms).join(<Join>[
       innerJoin(
         db.leagueTerms,
-        db.leagueTerms.id.equalsExp(db.matchTerms.leagueTermId),
+        db.leagueTerms.syncId.equalsExp(db.matchTerms.leagueTermSyncId),
       ),
       innerJoin(
         db.terms,
-        db.terms.id.equalsExp(db.leagueTerms.termId),
+        db.terms.syncId.equalsExp(db.leagueTerms.termSyncId),
       ),
     ])
-          ..where(db.matchTerms.matchId.equals(matchId)))
+          ..where(db.matchTerms.matchSyncId.equals(matchSyncId))
+          ..orderBy([
+            OrderingTerm.asc(db.matchTerms.id),
+          ]))
         .get();
 
     if (joinedTerms.isEmpty) {
       return MatchTermModel(
+        syncId: '',
         id: 0,
-        matchId: matchId,
-        leagueTermId: 0,
+        matchSyncId: matchSyncId,
+        leagueTermSyncId: '',
         isFinished: true,
         termName: 'انتهت المباراة',
         termType: 'finished',
@@ -432,14 +801,15 @@ class MatchTermsEventLocalDataSource {
       final term = row.readTable(db.terms);
 
       return MatchTermModel(
+        syncId: mt.syncId,
         id: mt.id,
-        matchId: mt.matchId,
-        leagueTermId: mt.leagueTermId,
+        matchSyncId: mt.matchSyncId,
+        leagueTermSyncId: mt.leagueTermSyncId,
         startTime: mt.startTime,
         endTime: mt.endTime,
         additionalMinutes: mt.additionalMinutes,
         isFinished: mt.isFinished,
-        leagueTermName: lt.id.toString(),
+        leagueTermName: lt.syncId,
         termName: term.name,
         termType: term.type,
       );
@@ -450,9 +820,10 @@ class MatchTermsEventLocalDataSource {
     }
 
     return MatchTermModel(
+      syncId: '',
       id: 0,
-      matchId: matchId,
-      leagueTermId: 0,
+      matchSyncId: matchSyncId,
+      leagueTermSyncId: '',
       isFinished: true,
       termName: 'انتهت المباراة',
       termType: 'finished',
@@ -460,103 +831,228 @@ class MatchTermsEventLocalDataSource {
     );
   }
 
-  Future<void> finishMatchAndUpdatePoints(
-    int matchId,
-    DateTime now,
-  ) async {
-    final matchEntity = await (db.select(db.matches)
-          ..where((m) => m.id.equals(matchId)))
-        .getSingleOrNull();
+  // Future<UpdatedQualifiedTeams> finishMatchAndUpdatePoints(
+  //   String matchSyncId,
+  //   DateTime now,
+  // ) async {
+  //   final matchEntity = await (db.select(db.matches)
+  //         ..where((m) => m.syncId.equals(matchSyncId)))
+  //       .getSingleOrNull();
+  //
+  //   if (matchEntity == null) {
+  //     throw Exception('❌ لم يتم العثور على المباراة رقم $matchSyncId');
+  //   }
+  //
+  //   final match = MatchModel.fromEntityWithRelations(matchEntity);
+  //
+  //   if (match.status == 'finished') {
+  //     // ignore: avoid_print
+  //     print('⚠️ المباراة $matchSyncId تم إنهاؤها مسبقًا');
+  //     return;
+  //   }
+  //
+  //   if (match.leagueSyncId == null) {
+  //     // ignore: avoid_print
+  //     print('⚠️ لا يمكن تحديث النقاط لأن match.leagueId غير موجود.');
+  //     return;
+  //   }
+  //
+  //   final homeId = match.homeTeamSyncId;
+  //   final awayId = match.awayTeamSyncId;
+  //
+  //   if (homeId == null || awayId == null) {
+  //     throw Exception('❌ أحد الفريقين غير معرف في المباراة $matchSyncId');
+  //   }
+  //
+  //   int homePoints = 0;
+  //   int awayPoints = 0;
+  //
+  //   if (match.homeScore > match.awayScore) {
+  //     homePoints = 3;
+  //   } else if (match.awayScore > match.homeScore) {
+  //     awayPoints = 3;
+  //   } else {
+  //     homePoints = 1;
+  //     awayPoints = 1;
+  //   }
+  //
+  //   final q = db.qualifiedTeam;
+  //
+  //   final homeRow = await (db.select(q)
+  //         ..where(
+  //           (t) =>
+  //               t.leagueSyncId.equals(match.leagueSyncId!) &
+  //               t.teamSyncId.equals(homeId),
+  //         ))
+  //       .getSingleOrNull();
+  //
+  //   if (homeRow != null) {
+  //     final homeModel = QualifiedTeamModel.fromEntity(homeRow).copyWith(
+  //       points: homeRow.points + homePoints,
+  //       played: homeRow.played + 1,
+  //       wins: homePoints == 3 ? homeRow.wins + 1 : homeRow.wins,
+  //       losses: homePoints == 0 ? homeRow.losses + 1 : homeRow.losses,
+  //       draws: homePoints == 1 ? homeRow.draws + 1 : homeRow.draws,
+  //     );
+  //
+  //     await (db.update(q)..where((t) => t.id.equals(homeRow.id)))
+  //         .write(homeModel.toCompanionUpdate());
+  //   }
+  //
+  //   final awayRow = await (db.select(q)
+  //         ..where(
+  //           (t) =>
+  //               t.leagueSyncId.equals(match.leagueSyncId!) &
+  //               t.teamSyncId.equals(awayId),
+  //         ))
+  //       .getSingleOrNull();
+  //
+  //   if (awayRow != null) {
+  //     final awayModel = QualifiedTeamModel.fromEntity(awayRow).copyWith(
+  //       points: awayRow.points + awayPoints,
+  //       played: awayRow.played + 1,
+  //       wins: awayPoints == 3 ? awayRow.wins + 1 : awayRow.wins,
+  //       losses: awayPoints == 0 ? awayRow.losses + 1 : awayRow.losses,
+  //       draws: awayPoints == 1 ? awayRow.draws + 1 : awayRow.draws,
+  //     );
+  //
+  //     await (db.update(q)..where((t) => t.id.equals(awayRow.id)))
+  //         .write(awayModel.toCompanionUpdate());
+  //   }
+  //
+  //   await (db.update(db.matches)..where((m) => m.syncId.equals(matchSyncId))).write(
+  //     MatchesCompanion(
+  //       status: const Value('finished'),
+  //       updatedAt: Value(now),
+  //       endTime: Value(now),
+  //     ),
+  //   );
+  //
+  //   // ignore: avoid_print
+  //   print('🏁 تم إنهاء المباراة $matchSyncId وتحديث النقاط بنجاح');
+  // }
+  Future<UpdatedQualifiedTeams> finishMatchAndUpdatePoints(
+      String matchSyncId,
+      DateTime now,
+      ) async {
+    return db.transaction<UpdatedQualifiedTeams>(() async {
+      final matchEntity = await (db.select(db.matches)
+        ..where((m) => m.syncId.equals(matchSyncId)))
+          .getSingleOrNull();
 
-    if (matchEntity == null) {
-      throw Exception('❌ لم يتم العثور على المباراة رقم $matchId');
-    }
+      if (matchEntity == null) {
+        throw Exception('❌ لم يتم العثور على المباراة رقم $matchSyncId');
+      }
 
-    final match = MatchModel.fromEntityWithRelations(matchEntity);
+      final match = MatchModel.fromEntityWithRelations(matchEntity);
 
-    if (match.status == 'finished') {
-      // ignore: avoid_print
-      print('⚠️ المباراة $matchId تم إنهاؤها مسبقًا');
-      return;
-    }
+      if (match.status.toLowerCase().trim() == 'finished') {
+        // ترجع القيم الحالية بدون تعديل (إن وجدت)
+        final q = db.qualifiedTeam;
 
-    if (match.leagueId == null) {
-      // ignore: avoid_print
-      print('⚠️ لا يمكن تحديث النقاط لأن match.leagueId غير موجود.');
-      return;
-    }
+        final leagueId = (match.leagueSyncId ?? '').trim();
+        if (leagueId.isEmpty) return (home: null, away: null);
 
-    final homeId = match.homeTeamId;
-    final awayId = match.awayTeamId;
+        final homeId = (match.homeTeamSyncId ?? '').trim();
+        final awayId = (match.awayTeamSyncId ?? '').trim();
+        if (homeId.isEmpty || awayId.isEmpty) return (home: null, away: null);
 
-    if (homeId == null || awayId == null) {
-      throw Exception('❌ أحد الفريقين غير معرف في المباراة $matchId');
-    }
+        final homeRow = await (db.select(q)
+          ..where((t) =>
+          t.leagueSyncId.equals(leagueId) & t.teamSyncId.equals(homeId)))
+            .getSingleOrNull();
 
-    int homePoints = 0;
-    int awayPoints = 0;
+        final awayRow = await (db.select(q)
+          ..where((t) =>
+          t.leagueSyncId.equals(leagueId) & t.teamSyncId.equals(awayId)))
+            .getSingleOrNull();
 
-    if (match.homeScore > match.awayScore) {
-      homePoints = 3;
-    } else if (match.awayScore > match.homeScore) {
-      awayPoints = 3;
-    } else {
-      homePoints = 1;
-      awayPoints = 1;
-    }
+        return (
+        home: homeRow != null ? QualifiedTeamModel.fromEntity(homeRow) : null,
+        away: awayRow != null ? QualifiedTeamModel.fromEntity(awayRow) : null,
+        );
+      }
 
-    final q = db.qualifiedTeam;
+      final leagueId = (match.leagueSyncId ?? '').trim();
+      if (leagueId.isEmpty) {
+        throw Exception(
+            '⚠️ لا يمكن تحديث النقاط لأن match.leagueSyncId غير موجود.');
+      }
 
-    final homeRow = await (db.select(q)
-          ..where(
-            (t) => t.leagueId.equals(match.leagueId!) & t.teamId.equals(homeId),
-          ))
-        .getSingleOrNull();
+      final homeId = (match.homeTeamSyncId ?? '').trim();
+      final awayId = (match.awayTeamSyncId ?? '').trim();
+      if (homeId.isEmpty || awayId.isEmpty) {
+        throw Exception('❌ أحد الفريقين غير معرف في المباراة $matchSyncId');
+      }
 
-    if (homeRow != null) {
-      final homeModel = QualifiedTeamModel.fromEntity(homeRow).copyWith(
-        points: homeRow.points + homePoints,
-        played: homeRow.played + 1,
-        wins: homePoints == 3 ? homeRow.wins + 1 : homeRow.wins,
-        losses: homePoints == 0 ? homeRow.losses + 1 : homeRow.losses,
-        draws: homePoints == 1 ? homeRow.draws + 1 : homeRow.draws,
+      int homePoints = 0;
+      int awayPoints = 0;
+
+      if (match.homeScore > match.awayScore) {
+        homePoints = 3;
+      } else if (match.awayScore > match.homeScore) {
+        awayPoints = 3;
+      } else {
+        homePoints = 1;
+        awayPoints = 1;
+      }
+
+      final q = db.qualifiedTeam;
+
+      QualifiedTeamModel? updatedHome;
+      QualifiedTeamModel? updatedAway;
+
+      final homeRow = await (db.select(q)
+        ..where((t) =>
+        t.leagueSyncId.equals(leagueId) & t.teamSyncId.equals(homeId)))
+          .getSingleOrNull();
+
+      if (homeRow != null) {
+        updatedHome = QualifiedTeamModel.fromEntity(homeRow).copyWith(
+          points: homeRow.points + homePoints,
+          played: homeRow.played + 1,
+          wins: homePoints == 3 ? homeRow.wins + 1 : homeRow.wins,
+          losses: homePoints == 0 ? homeRow.losses + 1 : homeRow.losses,
+          draws: homePoints == 1 ? homeRow.draws + 1 : homeRow.draws,
+
+        );
+
+        await (db.update(q)
+          ..where((t) => t.id.equals(homeRow.id)))
+            .write(updatedHome.toCompanionUpdate());
+      }
+
+      final awayRow = await (db.select(q)
+        ..where((t) =>
+        t.leagueSyncId.equals(leagueId) & t.teamSyncId.equals(awayId)))
+          .getSingleOrNull();
+
+      if (awayRow != null) {
+        updatedAway = QualifiedTeamModel.fromEntity(awayRow).copyWith(
+          points: awayRow.points + awayPoints,
+          played: awayRow.played + 1,
+          wins: awayPoints == 3 ? awayRow.wins + 1 : awayRow.wins,
+          losses: awayPoints == 0 ? awayRow.losses + 1 : awayRow.losses,
+          draws: awayPoints == 1 ? awayRow.draws + 1 : awayRow.draws,
+        );
+
+        await (db.update(q)
+          ..where((t) => t.id.equals(awayRow.id)))
+            .write(updatedAway.toCompanionUpdate());
+      }
+
+      await (db.update(db.matches)
+        ..where((m) => m.syncId.equals(matchSyncId))).write(
+        MatchesCompanion(
+          status: const Value('finished'),
+          updatedAt: Value(now),
+          endTime: Value(now),
+        ),
       );
 
-      await (db.update(q)..where((t) => t.id.equals(homeRow.id)))
-          .write(homeModel.toCompanionUpdate());
-    }
-
-    final awayRow = await (db.select(q)
-          ..where(
-            (t) => t.leagueId.equals(match.leagueId!) & t.teamId.equals(awayId),
-          ))
-        .getSingleOrNull();
-
-    if (awayRow != null) {
-      final awayModel = QualifiedTeamModel.fromEntity(awayRow).copyWith(
-        points: awayRow.points + awayPoints,
-        played: awayRow.played + 1,
-        wins: awayPoints == 3 ? awayRow.wins + 1 : awayRow.wins,
-        losses: awayPoints == 0 ? awayRow.losses + 1 : awayRow.losses,
-        draws: awayPoints == 1 ? awayRow.draws + 1 : awayRow.draws,
-      );
-
-      await (db.update(q)..where((t) => t.id.equals(awayRow.id)))
-          .write(awayModel.toCompanionUpdate());
-    }
-
-    await (db.update(db.matches)..where((m) => m.id.equals(matchId))).write(
-      MatchesCompanion(
-        status: const Value('finished'),
-        updatedAt: Value(now),
-        endTime: Value(now),
-      ),
-    );
-
-    // ignore: avoid_print
-    print('🏁 تم إنهاء المباراة $matchId وتحديث النقاط بنجاح');
+      return (home: updatedHome, away: updatedAway);
+    });
   }
-
   Future<GoalModel> insertGoalAndUpdateQualifiedTeams(
     GoalModel goal,
   ) async {
@@ -570,6 +1066,7 @@ class MatchTermsEventLocalDataSource {
             ..where((g) => g.id.equals(insertedId)))
           .getSingleOrNull();
 
+      print(fetchedGoal);
       if (fetchedGoal == null) {
         throw Exception('❌ فشل في جلب الهدف بعد الإدخال.');
       }
@@ -577,31 +1074,28 @@ class MatchTermsEventLocalDataSource {
       insertedGoal = GoalModel.fromEntity(fetchedGoal);
 
       final match = await (db.select(db.matches)
-            ..where((m) => m.id.equals(goal.matchId)))
+            ..where((m) => m.syncId.equals(goal.matchSyncId)))
           .getSingleOrNull();
 
       if (match == null) {
-        throw Exception('❌ لم يتم العثور على المباراة رقم ${goal.matchId}');
+        throw Exception('❌ لم يتم العثور على المباراة');
       }
 
       final player = await (db.select(db.players)
-            ..where((p) => p.id.equals(goal.playerId)))
+            ..where((p) => p.syncId.equals(goal.playerSyncId)))
           .getSingleOrNull();
 
       if (player == null) {
-        throw Exception('❌ لم يتم العثور على اللاعب رقم ${goal.playerId}');
+        throw Exception('❌ لم يتم العثور على اللاعب');
       }
 
       final bool isOwnGoal = goal.goalType == 'own_goal';
-      final int? scoringTeamId = isOwnGoal ? match.awayTeamId : player.teamId;
+      final String scoringTeamSyncId =
+          isOwnGoal ? match.awayTeamSyncId : player.teamSyncId;
+      final String opponentTeamSyncId =
+          isOwnGoal ? player.teamSyncId : match.homeTeamSyncId;
 
-      final int? opponentTeamId = isOwnGoal
-          ? player.teamId
-          : (match.awayTeamId == scoringTeamId
-              ? match.homeTeamId
-              : match.awayTeamId);
-
-      final bool isHomeScorer = scoringTeamId == match.homeTeamId;
+      final bool isHomeScorer = scoringTeamSyncId == match.homeTeamSyncId;
       final int updatedHomeScore = match.homeScore + (isHomeScorer ? 1 : 0);
       final int updatedAwayScore = match.awayScore + (isHomeScorer ? 0 : 1);
 
@@ -617,8 +1111,8 @@ class MatchTermsEventLocalDataSource {
       final scoringRow = await (db.select(q)
             ..where(
               (t) =>
-                  t.leagueId.equals(match.leagueId) &
-                  t.teamId.equals(scoringTeamId!),
+                  t.leagueSyncId.equals(match.leagueSyncId) &
+                  t.teamSyncId.equals(scoringTeamSyncId),
             ))
           .getSingleOrNull();
 
@@ -633,8 +1127,8 @@ class MatchTermsEventLocalDataSource {
       final opponentRow = await (db.select(q)
             ..where(
               (t) =>
-                  t.leagueId.equals(match.leagueId) &
-                  t.teamId.equals(opponentTeamId!),
+                  t.leagueSyncId.equals(match.leagueSyncId) &
+                  t.teamSyncId.equals(opponentTeamSyncId),
             ))
           .getSingleOrNull();
 
@@ -650,291 +1144,57 @@ class MatchTermsEventLocalDataSource {
     return insertedGoal;
   }
 
-  Future<int> deleteGoal(int goalId) async {
-    late int? assistPlayerId;
-    await db.transaction(() async {
-      final goal = await (db.select(db.goals)
-            ..where((g) => g.id.equals(goalId)))
-          .getSingleOrNull();
-
-      if (goal == null) {
-        throw Exception('❌ الهدف غير موجود');
-      }
-      final assist = await (db.select(db.assists)
-            ..where((a) => a.goalId.equals(goalId)))
-          .getSingleOrNull();
-
-      assistPlayerId = assist?.playerId;
-      print(assistPlayerId.toString() + 'from deleteGoal');
-      if (assist != null) {
-        await (db.delete(db.assists)..where((a) => a.goalId.equals(goalId)))
-            .go();
-      }
-
-      await (db.delete(db.goals)..where((g) => g.id.equals(goalId))).go();
-
-      final match = await (db.select(db.matches)
-            ..where((m) => m.id.equals(goal.matchId)))
-          .getSingleOrNull();
-
-      if (match == null) return 0;
-
-      final player = await (db.select(db.players)
-            ..where((p) => p.id.equals(goal.playerId)))
-          .getSingleOrNull();
-
-      if (player == null) return 0;
-
-      final bool isOwnGoal = goal.goalType == 'own_goal';
-      final int? scoringTeamId = isOwnGoal ? match.awayTeamId : player.teamId;
-
-      final int? opponentTeamId = isOwnGoal
-          ? player.teamId
-          : (match.awayTeamId == scoringTeamId
-              ? match.homeTeamId
-              : match.awayTeamId);
-
-      final bool isHomeScorer = scoringTeamId == match.homeTeamId;
-      final int updatedHomeScore = match.homeScore - (isHomeScorer ? 1 : 0);
-      final int updatedAwayScore = match.awayScore - (isHomeScorer ? 0 : 1);
-
-      await (db.update(db.matches)..where((m) => m.id.equals(match.id))).write(
-        MatchesCompanion(
-          homeScore: Value(updatedHomeScore),
-          awayScore: Value(updatedAwayScore),
-        ),
-      );
-
-      final q = db.qualifiedTeam;
-
-      final scoringRow = await (db.select(q)
-            ..where(
-              (t) =>
-                  t.leagueId.equals(match.leagueId) &
-                  t.teamId.equals(scoringTeamId!),
-            ))
-          .getSingleOrNull();
-
-      if (scoringRow != null && scoringRow.goalsFor > 0) {
-        await (db.update(q)..where((t) => t.id.equals(scoringRow.id))).write(
-          QualifiedTeamCompanion(
-            goalsFor: Value(scoringRow.goalsFor - 1),
-          ),
-        );
-      }
-
-      final opponentRow = await (db.select(q)
-            ..where(
-              (t) =>
-                  t.leagueId.equals(match.leagueId) &
-                  t.teamId.equals(opponentTeamId!),
-            ))
-          .getSingleOrNull();
-
-      if (opponentRow != null && opponentRow.goalsAgainst > 0) {
-        await (db.update(q)..where((t) => t.id.equals(opponentRow.id))).write(
-          QualifiedTeamCompanion(
-            goalsAgainst: Value(opponentRow.goalsAgainst - 1),
-          ),
-        );
-      }
-      print(assistPlayerId.toString() + 'from deleteGoal');
-    });
-    return assistPlayerId!;
-  }
-
-  Future<WarningModel> insertWarning(WarningModel warning) async {
-    late WarningModel insertedWarning;
-
-    await db.transaction(() async {
-      final int idWarring =
-          await db.into(db.warnings).insert(warning.toCompanionInsert());
-
-      final fetchedWarring = await (db.select(db.warnings)
-            ..where((g) => g.id.equals(idWarring)))
-          .getSingleOrNull();
-
-      if (fetchedWarring == null) {
-        throw Exception('❌ فشل في جلب الهدف بعد الإدخال.');
-      }
-
-      insertedWarning = WarningModel.fromEntity(fetchedWarring);
-    });
-
-    return insertedWarning;
-  }
-
-  Future<void> deleteWarning(int warningId) async {
-    await (db.delete(db.warnings)..where((w) => w.id.equals(warningId))).go();
-  }
-
-  Future<MatchModel?> getFullMatchData(int matchId) async {
-    return db.transaction<MatchModel?>(() async {
-      final match = await (db.select(db.matches)
-            ..where((m) => m.id.equals(matchId)))
-          .getSingleOrNull();
-
-      if (match == null) return null;
-
-      final homeTeam = await (db.select(db.teams)
-            ..where((t) => t.id.equals(match.homeTeamId)))
-          .getSingleOrNull();
-
-      final awayTeam = await (db.select(db.teams)
-            ..where((t) => t.id.equals(match.awayTeamId)))
-          .getSingleOrNull();
-      final matchTerms = await (db.select(db.matchTerms)
-            ..where((t) => t.matchId.equals(matchId))
-            ..orderBy([
-              (t) => OrderingTerm.asc(t.id),
-            ]))
-          .get();
-
-      final goalsQuery = await (db.select(db.goals)
-            ..where((g) => g.matchId.equals(matchId)))
-          .join(<Join>[
-        leftOuterJoin(
-          db.players,
-          db.players.id.equalsExp(db.goals.playerId),
-        ),
-      ]).get();
-
-      final goalModels = goalsQuery.map((row) {
-        final goal = row.readTable(db.goals);
-        final player = row.readTableOrNull(db.players);
-        return GoalModel(
-          id: goal.id,
-          matchId: goal.matchId,
-          playerId: goal.playerId,
-          matchTermId: goal.matchTermId,
-          goalTime: goal.goalTime,
-          goalType: goal.goalType,
-          teamId: player?.teamId,
-        );
-      }).toList();
-
-      final warningsQuery = await (db.select(db.warnings)
-            ..where((w) => w.matchId.equals(matchId)))
-          .join(<Join>[
-        leftOuterJoin(
-          db.players,
-          db.players.id.equalsExp(db.warnings.playerId),
-        ),
-      ]).get();
-
-      final warningModels = warningsQuery.map((row) {
-        final warning = row.readTable(db.warnings);
-        final player = row.readTableOrNull(db.players);
-        return WarningModel(
-          id: warning.id,
-          matchId: warning.matchId,
-          playerId: warning.playerId,
-          matchTermId: warning.matchTermId,
-          warningTime: warning.warningTime,
-          warningType: warning.warningType,
-          reason: warning.reason,
-          teamId: player?.teamId,
-        );
-      }).toList();
-
-      final matchTermModels =
-          matchTerms.map(MatchTermModel.fromEntity).toList();
-
-      final fullMatch = MatchModel.fromEntityWithRelations(
-        match,
-        home: homeTeam,
-        away: awayTeam,
-        matchTerms: matchTermModels,
-        goals: goalModels,
-        warnings: warningModels,
-      );
-
-      return fullMatch;
-    });
-  }
-
-  Future<AssistModel> addAssist(AssistModel assist) async {
-    late AssistModel insertedAssist;
-
-    await db.transaction(() async {
-      // 1️⃣ تأكيد أن الهدف موجود
-      final goal = await (db.select(db.goals)
-            ..where((g) => g.id.equals(assist.goalId)))
-          .getSingleOrNull();
-      print('1');
-      if (goal == null) {
-        throw Exception('❌ لم يتم العثور على الهدف رقم ${assist.goalId}');
-      }
-      final existing = await (db.select(db.assists)
-            ..where((a) => a.goalId.equals(assist.goalId)))
-          .getSingleOrNull();
-
-      if (existing != null) {
-        throw Exception('هذا الهدف لديه أسيست بالفعل، لا يمكن إضافة أسيست آخر');
-      }
-
-      // 2️⃣ إدخال الأسيست
-      final insertedId =
-          await db.into(db.assists).insert(assist.toCompanionInsert());
-      print('2');
-
-      final fetchedAssist = await (db.select(db.assists)
-            ..where((a) => a.id.equals(insertedId)))
-          .getSingleOrNull();
-
-      if (fetchedAssist == null) {
-        throw Exception('❌ فشل في جلب الأسيست بعد الإدخال.');
-      }
-
-      insertedAssist = AssistModel.fromEntity(fetchedAssist);
-    });
-
-    return insertedAssist;
-  }
-
   Future<PlayerStats> getPlayerStats({
-    required int matchId,
-    required int playerId,
+    required String matchSyncId,
+    required String playerSyncId,
   }) async {
-    // goals
+    final matchEntity = await (db.select(db.matches)
+          ..where((m) => m.syncId.equals(matchSyncId)))
+        .getSingleOrNull();
+
+    if (matchEntity == null) {
+      return operations.buildPlayerStats(
+        goals: 0,
+        assists: 0,
+        yellowCards: 0,
+        redCards: 0,
+      );
+    }
+
     final goalsCount = await (db.select(db.goals)
           ..where((g) =>
-              g.matchId.equals(matchId) &
-              g.playerId.equals(playerId) &
+              g.matchSyncId.equals(matchSyncId) &
+              g.playerSyncId.equals(playerSyncId) &
               g.status.equals('active')))
         .get()
         .then((rows) => rows.length);
 
-    // assists
     final assistsCount = await (db.select(db.assists)
           ..where((a) =>
-              a.matchId.equals(matchId) &
-              a.playerId.equals(playerId) &
+              a.matchSyncId.equals(matchSyncId) &
+              a.playerSyncId.equals(playerSyncId) &
               a.status.equals('active')))
         .get()
         .then((rows) => rows.length);
 
-    // yellow cards
     final yellowCount = await (db.select(db.warnings)
           ..where((w) =>
-              w.matchId.equals(matchId) &
-              w.playerId.equals(playerId) &
+              w.matchSyncId.equals(matchSyncId) &
+              w.playerSyncId.equals(playerSyncId) &
               w.warningType.equals('yellow') &
               w.status.equals('active')))
         .get()
         .then((rows) => rows.length);
 
-    // red cards
     final redCount = await (db.select(db.warnings)
           ..where((w) =>
-              w.matchId.equals(matchId) &
-              w.playerId.equals(playerId) &
+              w.matchSyncId.equals(matchSyncId) &
+              w.playerSyncId.equals(playerSyncId) &
               w.warningType.equals('red') &
               w.status.equals('active')))
         .get()
         .then((rows) => rows.length);
 
-    // ✅ بناء PlayerStats عبر العمليات بدلاً من الإنشاء اليدوي
     return operations.buildPlayerStats(
       goals: goalsCount,
       assists: assistsCount,
@@ -942,313 +1202,490 @@ class MatchTermsEventLocalDataSource {
       redCards: redCount,
     );
   }
-  //
-  //
+
+  // ---------------------------------------------------------------------------
+  // Repository-required methods (were missing due to incomplete file edits)
+  // ---------------------------------------------------------------------------
+
+  Future<MatchModel?> getFullMatchData(String matchSyncId) async {
+    final matchEntity = await (db.select(db.matches)
+          ..where((m) => m.syncId.equals(matchSyncId)))
+        .getSingleOrNull();
+
+    if (matchEntity == null) return null;
+    return MatchModel.fromEntityWithRelations(matchEntity);
+  }
+
+  Future<WarningModel> insertWarning(WarningModel warning) async {
+    final insertedId =
+        await db.into(db.warnings).insert(warning.toCompanionInsert());
+    final entity = await (db.select(db.warnings)
+          ..where((w) => w.id.equals(insertedId)))
+        .getSingle();
+    return WarningModel.fromEntity(entity);
+  }
+
+  Future<void> deleteWarningBySyncId(String warningSyncId) async {
+    await (db.update(db.warnings)..where((w) => w.syncId.equals(warningSyncId)))
+        .write(const WarningsCompanion(status: Value('deleted')));
+  }
+
+  /// Backward-compatible: legacy delete by numeric id.
+  Future<void> deleteWarning(int warningId) async {
+    final row = await (db.select(db.warnings)
+          ..where((w) => w.id.equals(warningId)))
+        .getSingleOrNull();
+    if (row == null) return;
+    await deleteWarningBySyncId(row.syncId);
+  }
+
+  /// Deletes a goal by syncId and returns the assister playerSyncId if any (so UI can update assist stats).
+  Future<String?> deleteGoalBySyncId(String goalSyncId) async {
+    return db.transaction(() async {
+      final goalRow = await (db.select(db.goals)
+            ..where((g) => g.syncId.equals(goalSyncId)))
+          .getSingleOrNull();
+      if (goalRow == null) return null;
+
+      final assistRow = await (db.select(db.assists)
+            ..where((a) =>
+                a.goalSyncId.equals(goalRow.syncId) &
+                a.status.equals('active')))
+          .getSingleOrNull();
+
+      if (assistRow != null) {
+        await (db.update(db.assists)..where((a) => a.id.equals(assistRow.id)))
+            .write(const AssistsCompanion(status: Value('deleted')));
+      }
+
+      await (db.update(db.goals)..where((g) => g.syncId.equals(goalSyncId)))
+          .write(
+        const GoalsCompanion(status: Value('deleted')),
+      );
+
+      return assistRow?.playerSyncId;
+    });
+  }
+
+  /// Backward-compatible: delete by numeric id (UI might still pass it).
+  /// Internally resolves syncId then deletes by syncId.
+  Future<String?> deleteGoal(int goalId) async {
+    final goalRow = await (db.select(db.goals)
+          ..where((g) => g.id.equals(goalId)))
+        .getSingleOrNull();
+    if (goalRow == null) return null;
+    return deleteGoalBySyncId(goalRow.syncId);
+  }
+
+  Future<AssistModel> addAssist(AssistModel assist) async {
+    final insertedId =
+        await db.into(db.assists).insert(assist.toCompanionInsert());
+    final entity = await (db.select(db.assists)
+          ..where((a) => a.id.equals(insertedId)))
+        .getSingle();
+    return AssistModel.fromEntity(entity);
+  }
+
+  // ---------------------------------------------------------------------------
+  // SyncId-based player participation
+  // ---------------------------------------------------------------------------
+
   // Future<Unit> substitutePlayer({
-  //   required int matchId,
-  //   required int matchTermId,
-  //   required int outgoingPlayerId,
-  //   required int incomingPlayerId,
+  //   required String matchSyncId,
+  //   required String matchTermSyncId,
+  //   required String outgoingPlayerSyncId,
+  //   required String incomingPlayerSyncId,
   //   required int substitutionMinute,
   // }) async {
-  //   await db.transaction(() async {
-  //     // 1) إدخال مشاركة اللاعب الخارج (SUB_OUT)
-  //     print('🔁 [Local] substitutePlayer ENTER: '
-  //         'matchId=$matchId, termId=$matchTermId, '
-  //         'outgoing=$outgoingPlayerId, incoming=$incomingPlayerId, '
-  //         'minute=$substitutionMinute');
-  //     await db.into(db.playerMatchParticipation).insertReturning(
-  //           PlayerMatchParticipationCompanion.insert(
-  //             matchId: matchId,
-  //             playerId: outgoingPlayerId,
-  //             matchTermId: matchTermId,
-  //             startTime: Value(0),
-  //             // أو null أو دقيقة بداية الشوط إذا أردت
-  //             endTime: Value(substitutionMinute),
-  //             substitutedPlayerId: incomingPlayerId,
-  //             participationType: 'SUB_OUT',
-  //           ),
-  //         );
+  //   print(
+  //       '🔁 [Local] substitutePlayer ENTER: matchSyncId=$matchSyncId, termSync=$matchTermSyncId, outgoing=$outgoingPlayerSyncId, incoming=$incomingPlayerSyncId, minute=$substitutionMinute');
   //
-  //     // 2) إدخال مشاركة اللاعب الداخل (SUB_IN)
-  //     await db.into(db.playerMatchParticipation).insertReturning(
-  //           PlayerMatchParticipationCompanion.insert(
-  //             matchId: matchId,
-  //             playerId: incomingPlayerId,
-  //             matchTermId: matchTermId,
-  //             startTime: Value(substitutionMinute),
-  //             endTime: const Value(null),
-  //             substitutedPlayerId: outgoingPlayerId,
-  //             participationType: 'SUB_IN',
-  //           ),
-  //         );
+  //   return await db.transaction(() async {
+  //     final p = db.playerMatchParticipation;
+  //
+  //     final outgoingRow = await (db.select(p)
+  //           ..where((row) =>
+  //               row.matchSyncId.equals(matchSyncId) &
+  //               row.matchTermSyncId.equals(matchTermSyncId) &
+  //               row.playerSyncId.equals(outgoingPlayerSyncId)))
+  //         .getSingleOrNull();
+  //
+  //     final incomingRow = await (db.select(p)
+  //           ..where((row) =>
+  //               row.matchSyncId.equals(matchSyncId) &
+  //               row.matchTermSyncId.equals(matchTermSyncId) &
+  //               row.playerSyncId.equals(incomingPlayerSyncId)))
+  //         .getSingleOrNull();
+  //
+  //     if (outgoingRow != null) {
+  //       await (db.update(p)..where((row) => row.id.equals(outgoingRow.id)))
+  //           .write(
+  //         PlayerMatchParticipationCompanion(
+  //           endTime: Value(substitutionMinute),
+  //           participationType: const Value('SUB_OUT'),
+  //         ),
+  //       );
+  //     }
+  //
+  //     if (incomingRow == null) {
+  //       await db.into(p).insert(
+  //             PlayerMatchParticipationCompanion.insert(
+  //               matchSyncId: matchSyncId,
+  //               playerSyncId: incomingPlayerSyncId,
+  //               matchTermSyncId: matchTermSyncId,
+  //               startTime: Value(substitutionMinute),
+  //               endTime: const Value<int?>(null),
+  //               substitutedPlayerSyncId: const Value<String?>(null),
+  //               participationType: 'SUB_IN',
+  //             ),
+  //           );
+  //     } else {
+  //       await (db.update(p)..where((row) => row.id.equals(incomingRow.id)))
+  //           .write(
+  //         PlayerMatchParticipationCompanion(
+  //           startTime: Value(substitutionMinute),
+  //           endTime: const Value<int?>(null),
+  //           substitutedPlayerSyncId: Value(outgoingPlayerSyncId),
+  //           participationType: const Value('SUB_IN'),
+  //         ),
+  //       );
+  //     }
+  //
+  //     return unit;
   //   });
-  //   return Future.value(unit);
   // }
+  Future<Unit> substitutePlayer({
+    required String matchSyncId,
+    required String matchTermSyncId,
+    required String outgoingPlayerSyncId,
+    required String incomingPlayerSyncId,
+    required int substitutionMinute,
+  }) async {
+    return db.transaction(() async {
+      final p = db.playerMatchParticipation;
 
-Future<Unit> substitutePlayer({
-  required int matchId,
-  required int matchTermId,
-  required int outgoingPlayerId,
-  required int incomingPlayerId,
-  required int substitutionMinute,
-}) async {
-  print('🔁 [Local] substitutePlayer ENTER: matchId=$matchId, termId=$matchTermId, outgoing=$outgoingPlayerId, incoming=$incomingPlayerId, minute=$substitutionMinute');
+      // Helper: آخر سجل للاعب في هذا الشوط
+      Future<PlayerMatchParticipationData?> _latestRow(String playerSyncId) {
+        return (db.select(p)
+              ..where((row) =>
+                  row.matchSyncId.equals(matchSyncId) &
+                  row.matchTermSyncId.equals(matchTermSyncId) &
+                  row.playerSyncId.equals(playerSyncId))
+              ..orderBy([(row) => OrderingTerm.desc(row.id)])
+              ..limit(1))
+            .getSingleOrNull();
+      }
 
-  return await db.transaction(() async {
-    final p = db.playerMatchParticipation;
+      bool _isOnPitch(PlayerMatchParticipationData row) {
+        final t = row.participationType.toUpperCase();
+        final onType = (t == 'STARTER' || t == 'SUB_IN');
+        return onType && row.endTime == null;
+      }
 
-    // 1️⃣ اللاعب الخارج
-    final outgoingRow = await (db.select(p)
-          ..where((row) =>
-              row.matchId.equals(matchId) &
-              row.matchTermId.equals(matchTermId) &
-              row.playerId.equals(outgoingPlayerId)))
-        .getSingleOrNull();
+      final outgoingRow = await _latestRow(outgoingPlayerSyncId);
+      if (outgoingRow == null || !_isOnPitch(outgoingRow)) {
+        throw Exception('اللاعب الخارج ليس داخل الملعب حالياً');
+      }
 
-    // 2️⃣ اللاعب الداخل
-    final incomingRow = await (db.select(p)
-          ..where((row) =>
-              row.matchId.equals(matchId) &
-              row.matchTermId.equals(matchTermId) &
-              row.playerId.equals(incomingPlayerId)))
-        .getSingleOrNull();
+      final incomingRow = await _latestRow(incomingPlayerSyncId);
+      if (incomingRow != null && _isOnPitch(incomingRow)) {
+        throw Exception('اللاعب الداخل موجود في الملعب بالفعل');
+      }
 
-    print('🔁 [Local] قبل التبديل: outgoingRow=$outgoingRow, incomingRow=$incomingRow');
-
-    // ✅ تحديث اللاعب الخارج إلى SUB_OUT
-    if (outgoingRow != null) {
+      // 1) اغلاق اللاعب الخارج
       await (db.update(p)..where((row) => row.id.equals(outgoingRow.id))).write(
         PlayerMatchParticipationCompanion(
           endTime: Value(substitutionMinute),
           participationType: const Value('SUB_OUT'),
+          substitutedPlayerSyncId: Value(incomingPlayerSyncId), // اختياري
         ),
       );
-    } else {
-      print('⚠️ [Local] لم يتم العثور على مشاركة للاعب الخارج $outgoingPlayerId');
-    }
 
-    // ✅ إدخال/تحديث اللاعب الداخل إلى SUB_IN
-    if (incomingRow == null) {
-      final id = await db.into(p).insert(
-            PlayerMatchParticipationCompanion.insert(
-              matchId: matchId,
-              playerId: incomingPlayerId,
-              matchTermId: matchTermId,
-              startTime:Value( substitutionMinute),
-              endTime: const Value<int?>(null),
-              substitutedPlayerId: outgoingPlayerId,
-              participationType: 'SUB_IN',
-            ),
-          );
-      print('🔁 [Local] تم إدخال مشاركة جديدة للاعب الداخل $incomingPlayerId برقم id=$id');
-    } else {
-      await (db.update(p)..where((row) => row.id.equals(incomingRow.id))).write(
-        PlayerMatchParticipationCompanion(
-          startTime: Value(substitutionMinute),
-          endTime: const Value<int?>(null),
-          substitutedPlayerId: Value(outgoingPlayerId),
-          participationType: const Value('SUB_IN'),
-        ),
-      );
-      print('🔁 [Local] تم تحديث مشاركة اللاعب الداخل $incomingPlayerId');
-    }
-
-    // 🔍 إعادة جلب القيم بعد التحديث للتأكد
-    final updatedOutgoing = await (db.select(p)
-          ..where((row) => row.id.equals(outgoingRow?.id ?? -1)))
-        .getSingleOrNull();
-
-    final updatedIncoming = await (db.select(p)
-          ..where((row) =>
-              row.matchId.equals(matchId) &
-              row.matchTermId.equals(matchTermId) &
-              row.playerId.equals(incomingPlayerId)))
-        .getSingleOrNull();
-
-    print('🔁 [Local] بعد التبديل: updatedOutgoing=$updatedOutgoing, updatedIncoming=$updatedIncoming');
-
-    return unit;
-  });
-}
-    // Future<String?> getPlayerParticipationStatus({
-    //   required int matchId,
-    //   required int matchTermId,
-    //   required int playerId,
-    // }) async {
-    //   final query = db.select(db.playerMatchParticipation)
-    //     ..where(
-    //       (t) =>
-    //           t.matchId.equals(matchId) &
-    //           t.matchTermId.equals(matchTermId) &
-    //           t.playerId.equals(playerId),
-    //     )
-    //     ..orderBy([
-    //       // نأخذ آخر سجل (أعلى id)
-    //       (t) => OrderingTerm.desc(t.id),
-    //     ])
-    //     ..limit(1);
-    //
-    //   final row = await query.getSingleOrNull();
-    //   if (row == null) {
-    //     // لا يوجد أي سجل لهذا اللاعب في هذا الشوط
-    //     return null;
-    //   }
-    //
-    //   // هنا ممكن تكون القيمة SUB_IN أو SUB_OUT أو أنواع أخرى لو أضفتها لاحقاً
-    //   return row.participationType;
-    // }
-Future<String?> getPlayerParticipationStatus({
-  required int matchId,
-  required int matchTermId,
-  required int playerId,
-}) async {
-  print('🔎 [Local] getPlayerParticipationStatus: matchId=$matchId, termId=$matchTermId, player=$playerId');
-
-  // استعلام الجدول
-  final query = db.select(db.playerMatchParticipation)
-    ..where(
-      (t) =>
-          t.matchId.equals(matchId) &
-          t.matchTermId.equals(matchTermId) &
-          t.playerId.equals(playerId),
-    )
-    ..orderBy([
-      (t) => OrderingTerm.desc(t.id),
-    ])
-    ..limit(1);
-
-  final row = await query.getSingleOrNull();
-  if (row == null) {
-    return null;
-  }
-  return row.participationType;
-}
-Future<void> initStartersForMatchTerm({
-  required int matchId,
-  required int matchTermId,
-}) async {
-  // تهيئة اللاعبين الأساسيين كـ STARTER في هذا الشوط (مرة واحدة فقط لكل لاعب)
-  print(
-    '⚽ [Local] initStartersForMatchTerm: matchId=$matchId, termId=$matchTermId',
-  );
-
-  await db.transaction(() async {
-    // 1) جلب بيانات المباراة كـ MatchModel (باستخدام fromEntityWithRelations)
-    final matchEntity = await (db.select(db.matches)
-          ..where((m) => m.id.equals(matchId)))
-        .getSingleOrNull();
-
-    if (matchEntity == null) {
-      throw Exception('لم يتم العثور على مباراة بالمعرّف $matchId');
-    }
-
-    // نستعمل MatchModel كمودل لو احتجنا مستقبلاً المزيد من البيانات
-    final matchModel = MatchModel.fromEntityWithRelations(matchEntity);
-    final homeTeamId = matchModel.homeTeamId;
-    final awayTeamId = matchModel.awayTeamId;
-
-    if (homeTeamId == null || awayTeamId == null) {
-      throw Exception('أحد الفريقين غير معرّف في المباراة $matchId');
-    }
-
-    // 2) جلب اللاعبين الأساسيين (status == "main") للفريقين وتحويلهم إلى PlayerModel
-    final playersRows = await (db.select(db.players)
-          ..where(
-            (p) =>
-                (p.teamId.equals(homeTeamId) |
-                    p.teamId.equals(awayTeamId)) &
-                p.status.equals('main'),
-          ))
-        .get(); // List<Player>
-
-    if (playersRows.isEmpty) {
-      print(
-        '⚠ [Local] initStartersForMatchTerm: لا يوجد لاعبين أساسيين للمباراة $matchId',
-      );
-      return;
-    }
-
-    // نحول rows إلى PlayerModel لاتباع نمط الموديلات في المشروع
-    final starterPlayers = playersRows
-        .map((row) => PlayerModel.fromEntity(row))
-        .toList(); // List<PlayerModel>
-
-    final participationTable = db.playerMatchParticipation;
-    final startersWithoutParticipation = <PlayerModel>[];
-
-    // 3) نضيف STARTER فقط للاعبين الذين لا يملكون أي مشاركة في هذا الشوط
-    for (final player in starterPlayers) {
-      if (player.id == null) {
-        // لاعب بدون id من الـ DB، نتجاهله بحذر
-        print(
-          '⚠ [Local] initStartersForMatchTerm: playerModel بدون id، سيتم تجاهله',
+      // 2) فتح/تحديث اللاعب الداخل
+      if (incomingRow == null) {
+        await db.into(p).insert(
+              PlayerMatchParticipationCompanion.insert(
+                matchSyncId: matchSyncId,
+                playerSyncId: incomingPlayerSyncId,
+                matchTermSyncId: matchTermSyncId,
+                startTime: Value(substitutionMinute),
+                endTime: const Value<int?>(null),
+                substitutedPlayerSyncId: Value(outgoingPlayerSyncId),
+                // اختياري
+                participationType: 'SUB_IN',
+              ),
+            );
+      } else {
+        // تحديث آخر سجل (حتى لو كان BENCH أو SUB_OUT سابقًا)
+        await (db.update(p)..where((row) => row.id.equals(incomingRow.id)))
+            .write(
+          PlayerMatchParticipationCompanion(
+            startTime: Value(substitutionMinute),
+            endTime: const Value<int?>(null),
+            substitutedPlayerSyncId: Value(outgoingPlayerSyncId),
+            participationType: const Value('SUB_IN'),
+          ),
         );
-        continue;
+      }
+      final rows = await (db.select(p)
+            ..where((t) =>
+                t.matchSyncId.equals(matchSyncId) &
+                t.matchTermSyncId.equals(matchTermSyncId))
+            ..orderBy([
+              (t) => OrderingTerm.asc(t.playerSyncId),
+              (t) => OrderingTerm.desc(t.id)
+            ]))
+          .get();
+
+      for (final r in rows) {
+        print(
+            'P=${r.playerSyncId} type=${r.participationType} start=${r.startTime} end=${r.endTime}');
       }
 
-      final existing = await (db.select(participationTable)
-            ..where(
-              (row) =>
-                  row.matchId.equals(matchId) &
-                  row.matchTermId.equals(matchTermId) &
-                  row.playerId.equals(player.id!),
-            ))
+      return unit;
+    });
+  }
+
+  Future<String?> getPlayerParticipationStatus({
+    required String matchSyncId,
+    required String matchTermSyncId,
+    required String playerSyncId,
+  }) async {
+    final query = db.select(db.playerMatchParticipation)
+      ..where(
+        (t) =>
+            t.matchSyncId.equals(matchSyncId) &
+            t.matchTermSyncId.equals(matchTermSyncId) &
+            t.playerSyncId.equals(playerSyncId),
+      )
+      ..orderBy([
+        (t) => OrderingTerm.desc(t.id),
+      ])
+      ..limit(1);
+
+    final row = await query.getSingleOrNull();
+    return row?.participationType;
+  }
+
+  Future<void> initStartersForMatchTerm({
+    required String matchSyncId,
+    required String matchTermSyncId,
+  }) async {
+    await db.transaction(() async {
+      final matchEntity = await (db.select(db.matches)
+            ..where((m) => m.syncId.equals(matchSyncId)))
           .getSingleOrNull();
 
-      if (existing == null) {
-        startersWithoutParticipation.add(player);
-      } else {
-        print(
-          'ℹ [Local] initStartersForMatchTerm: اللاعب ${player.id} لديه مشاركة سابقة '
-          '(${existing.participationType})، لن يُعاد تعيينه كـ STARTER.',
-        );
+      if (matchEntity == null) {
+        throw Exception('لم يتم العثور على مباراة بالمعرّف $matchSyncId');
       }
-    }
 
-    if (startersWithoutParticipation.isEmpty) {
-      print(
-        'ℹ [Local] initStartersForMatchTerm: جميع اللاعبين الأساسيين لديهم مشاركات '
-        'في هذا الشوط، لن تتم إضافة STARTER جديدة.',
-      );
-      return;
-    }
+      final matchModel = MatchModel.fromEntityWithRelations(matchEntity);
+      final homeTeamSyncId = matchModel.homeTeamSyncId;
+      final awayTeamSyncId = matchModel.awayTeamSyncId;
 
-    // 4) إنشاء PlayerMatchParticipationModel لكل لاعب ثم تحويله إلى Companion وإدخاله
-    await db.batch((batch) {
-      batch.insertAll(
-        participationTable,
-        startersWithoutParticipation.map((player) {
-          // ننشئ مودل المشاركة
-          final participationModel = PlayerMatchParticipationModel(
-            id: 0, // سيتم تجاهله في insert (Drift ينشئ id)
-            matchId: matchId,
-            playerId: player.id!,
-            matchTermId: matchTermId,
-            startTime: 0, // بداية الشوط من الدقيقة 0
-            endTime: null,
-            substitutedPlayerId: null,
-            participationType: 'STARTER',
-          );
+      if (homeTeamSyncId == null || awayTeamSyncId == null) {
+        throw Exception('أحد الفريقين غير معرّف في المباراة $matchSyncId');
+      }
 
-          // ثم نحوله يدوياً إلى Companion مناسب لـ Drift
-          return PlayerMatchParticipationCompanion.insert(
-            matchId: participationModel.matchId,
-            playerId: participationModel.playerId,
-            matchTermId: participationModel.matchTermId,
-            startTime: Value(participationModel.startTime),
-            endTime: const Value<int?>(null),
-            substitutedPlayerId: 0,
-            participationType: participationModel.participationType,
-          );
-        }).toList(),
-      );
+      final playersRows = await (db.select(db.players)
+            ..where(
+              (p) =>
+                  (p.teamSyncId.equals(homeTeamSyncId) |
+                      p.teamSyncId.equals(awayTeamSyncId)) &
+                  p.status.equals('main'),
+            ))
+          .get();
+
+      if (playersRows.isEmpty) {
+        return;
+      }
+
+      final participationTable = db.playerMatchParticipation;
+
+      for (final player in playersRows) {
+        final existing = await (db.select(participationTable)
+              ..where(
+                (row) =>
+                    row.matchSyncId.equals(matchSyncId) &
+                    row.matchTermSyncId.equals(matchTermSyncId) &
+                    row.playerSyncId.equals(player.syncId),
+              ))
+            .getSingleOrNull();
+
+        if (existing != null) continue;
+
+        await db.into(participationTable).insert(
+              PlayerMatchParticipationCompanion.insert(
+                matchSyncId: matchSyncId,
+                playerSyncId: player.syncId,
+                matchTermSyncId: matchTermSyncId,
+                startTime: const Value(0),
+                endTime: const Value<int?>(null),
+                substitutedPlayerSyncId: const Value<String?>(null),
+                participationType: 'STARTER',
+              ),
+            );
+      }
     });
+  }
 
-    print(
-      '✅ [Local] initStartersForMatchTerm: تم تهيئة '
-      '${startersWithoutParticipation.length} لاعباً كأساسيين لهذا الشوط.',
-    );
-  });
+  Future<void> initMatchTermParticipation({
+    required String matchSyncId,
+    required String matchTermSyncId, // الشوط الحالي/الجديد
+  }) async {
+    await db.transaction(() async {
+      final p = db.playerMatchParticipation;
+
+      // 0) لو الشوط الحالي تم تهيئته بالفعل لا نكرر
+      final currentCountRow = await (db.selectOnly(p)
+            ..addColumns([p.id.count()])
+            ..where(
+              p.matchSyncId.equals(matchSyncId) &
+                  p.matchTermSyncId.equals(matchTermSyncId),
+            ))
+          .getSingle();
+
+      final currentCount = currentCountRow.read(p.id.count()) ?? 0;
+      if (currentCount > 0) return;
+
+      // 1) اكتشف الشوط السابق تلقائياً (آخر term غير الحالي)
+      final prevTerm = await (db.select(db.matchTerms)
+            ..where((t) =>
+                t.matchSyncId.equals(matchSyncId) &
+                t.syncId.isNotIn([matchTermSyncId]))
+            ..orderBy([(t) => OrderingTerm.desc(t.id)])
+            ..limit(1))
+          .getSingleOrNull();
+
+      // ==========================
+      // CASE A) لا يوجد شوط سابق => الشوط الأول
+      // ==========================
+      if (prevTerm == null) {
+        final matchEntity = await (db.select(db.matches)
+              ..where((m) => m.syncId.equals(matchSyncId)))
+            .getSingleOrNull();
+
+        if (matchEntity == null) {
+          throw Exception('لم يتم العثور على مباراة بالمعرّف $matchSyncId');
+        }
+
+        final matchModel = MatchModel.fromEntityWithRelations(matchEntity);
+        final homeTeamSyncId = matchModel.homeTeamSyncId;
+        final awayTeamSyncId = matchModel.awayTeamSyncId;
+
+        if (homeTeamSyncId == null || awayTeamSyncId == null) {
+          throw Exception('أحد الفريقين غير معرّف في المباراة $matchSyncId');
+        }
+
+        final playersRows = await (db.select(db.players)
+              ..where(
+                (pl) =>
+                    (pl.teamSyncId.equals(homeTeamSyncId) |
+                        pl.teamSyncId.equals(awayTeamSyncId)) &
+                    pl.status.equals('main'),
+              ))
+            .get();
+
+        if (playersRows.isEmpty) return;
+
+        await db.batch((b) {
+          for (final player in playersRows) {
+            b.insert(
+              p,
+              PlayerMatchParticipationCompanion.insert(
+                matchSyncId: matchSyncId,
+                playerSyncId: player.syncId,
+                matchTermSyncId: matchTermSyncId,
+                startTime: const Value(0),
+                endTime: const Value<int?>(null),
+                substitutedPlayerSyncId: const Value<String?>(null),
+                participationType: 'STARTER',
+              ),
+              mode: InsertMode.insertOrIgnore,
+            );
+          }
+        });
+
+        return;
+      }
+
+      // ==========================
+      // CASE B) يوجد شوط سابق => نسخ الحالة بمنطق كرة القدم
+      // ==========================
+      final previousMatchTermSyncId = prevTerm.syncId;
+
+      final prevRows = await (db.select(p)
+            ..where((row) =>
+                row.matchSyncId.equals(matchSyncId) &
+                row.matchTermSyncId.equals(previousMatchTermSyncId))
+            ..orderBy([
+              (row) => OrderingTerm.asc(row.playerSyncId),
+              (row) => OrderingTerm.desc(row.id),
+            ]))
+          .get();
+
+      if (prevRows.isEmpty) return;
+
+      // آخر حالة لكل لاعب
+      final latestByPlayer = <String, PlayerMatchParticipationData>{};
+      for (final row in prevRows) {
+        latestByPlayer.putIfAbsent(row.playerSyncId, () => row);
+      }
+
+      bool isOnPitch(String type) {
+        final t = type.toUpperCase();
+        return t == 'STARTER' || t == 'SUB_IN';
+      }
+
+      await db.batch((b) {
+        for (final old in latestByPlayer.values) {
+          final newType =
+              isOnPitch(old.participationType) ? 'STARTER' : 'SUB_OUT';
+
+          b.insert(
+            p,
+            PlayerMatchParticipationCompanion.insert(
+              matchSyncId: matchSyncId,
+              playerSyncId: old.playerSyncId,
+              matchTermSyncId: matchTermSyncId,
+              startTime: const Value(0),
+              endTime: const Value<int?>(null),
+              substitutedPlayerSyncId: const Value<String?>(null),
+              participationType: newType,
+            ),
+            mode: InsertMode.insertOrIgnore,
+          );
+        }
+      });
+    });
+  }
 }
+class FinishTermResult {
+  final bool termFinished;              // دائماً true هنا
+  final bool matchFinished;             // هل انتهت المباراة؟
+  final bool pointsUpdatedLocally;      // هل تم تحديث النقاط محلياً؟ (غير knockout)
+  final bool isKnockout;                // لتحديد مسار المزامنة
+  final DateTime? matchEndTime;         // وقت إنهاء المباراة إن انتهت
+  final int? homeScore;
+  final int? awayScore;
+  final String? leagueSyncId;
+  final String? matchTermSyncId;      // match_terms.sync_id
+  final String leagueTermSyncId;      // match_terms.league_term_sync_id
+  final String matchSyncId;
+
+  const FinishTermResult({
+    required this.termFinished,
+    required this.matchSyncId,
+
+    required this.matchTermSyncId,
+    required this.leagueTermSyncId,
+    required this.matchFinished,
+    required this.pointsUpdatedLocally,
+    required this.isKnockout,
+    this.matchEndTime,
+    this.homeScore,
+    this.awayScore,
+    this.leagueSyncId,
+  });
 }

@@ -1,10 +1,11 @@
 import 'package:drift/drift.dart';
 
-import 'leagues_table.dart';
-
 class LeagueStatus extends Table {
-  IntColumn get leagueId =>
-      integer().references(Leagues, #id)();
+  /// الأساس الجديد: الربط عبر sync id
+  TextColumn get leagueSyncId => text()
+      .named('league_sync_id')
+      .customConstraint('REFERENCES leagues(sync_id) ON DELETE CASCADE')();
+
 
   BoolColumn get hasGroups => boolean().withDefault(const Constant(false))();
   BoolColumn get hasTeamsInGroups => boolean().withDefault(const Constant(false))();
@@ -13,5 +14,5 @@ class LeagueStatus extends Table {
   DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
-  Set<Column> get primaryKey => {leagueId}; //  مهم جداً للـ upser
+  Set<Column> get primaryKey => {leagueSyncId};
 }

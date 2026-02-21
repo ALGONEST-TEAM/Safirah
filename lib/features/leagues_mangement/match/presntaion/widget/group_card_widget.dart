@@ -5,18 +5,17 @@ import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../group/data/model/model.dart';
 import '../../data/model/round_model.dart';
 import 'match_tile_widget.dart';
-import 'matches_schedule_widget.dart';
 
 class GroupCardWidget extends StatelessWidget {
   final GroupModel groupWithMatches;
-  final int leagueId;
+  final String leagueSyncId;
   final RoundModel round;
   final String matchFilter;
 
   const GroupCardWidget(
       {super.key,
         required this.groupWithMatches,
-        required this.leagueId,
+        required this.leagueSyncId,
         required this.round,
         required this.matchFilter});
 
@@ -54,9 +53,9 @@ class GroupCardWidget extends StatelessWidget {
             return Column(
               children: [
                 MatchTileWidget(
-                  roundId: round.id!,
+                  roundSyncId: round.syncId!,
                   match: match,
-                  leagueId: leagueId,
+                  leagueSyncId: leagueSyncId,
                   matchFilter: matchFilter,
                 ),
                 if (i != matches.length - 1)

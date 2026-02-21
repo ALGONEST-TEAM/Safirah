@@ -5,20 +5,20 @@ import '../widget/divide_group_content_widget.dart';
 import '../widget/group_count_suggestion.dart';
 import '../widget/divide_group_appbar_widget.dart';
 final selectedGroupIndexProvider =
-    StateProvider.family<int?, int>((ref, leagueId) => null);
+    StateProvider.family<int?, String>((ref, leagueSyncId) => null);
 
 final selectedQualifiedIndexProvider =
-    StateProvider.family<int?, int>((ref, leagueId) => null);
+    StateProvider.family<int?, String>((ref, leagueSyncId) => null);
 
 class DivideGroupPage extends ConsumerWidget {
-  const DivideGroupPage({super.key, required this.leagueId});
+  const DivideGroupPage({super.key, required this.leagueSyncId});
 
-  final int leagueId;
+  final String leagueSyncId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final groupSuggestions =
-        ref.watch(powerOfTwoGroupSuggestionsProvider(leagueId));
+        ref.watch(powerOfTwoGroupSuggestionsProvider(leagueSyncId));
 
     return Scaffold(
       appBar: const DivideGroupAppBarWidget(),
@@ -31,7 +31,7 @@ class DivideGroupPage extends ConsumerWidget {
           }
 
           return DivideGroupContentWidget(
-            leagueId: leagueId,
+            leagueSyncId: leagueSyncId,
             groups: groups,
           );
         },

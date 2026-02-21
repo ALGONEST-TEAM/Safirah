@@ -9,7 +9,7 @@ class TeamPlayerDraftService {
 
   /// يبني لاعبي الـ draft منطقياً بدون تخزين في قاعدة البيانات.
   List<PlayerModel> buildDraftPlayers({
-    required int leagueId,
+    required String leagueSyncId,
     required List<TeamModel> teams,
     required List<TeamPlayerCategoryModel> categories,
     required Map<int?, List<LeaguePlayerModel>> leaguePlayersByCategory,
@@ -20,11 +20,11 @@ class TeamPlayerDraftService {
     if (teams.isEmpty) return const [];
 
     // نضمن أن لكل فريق id غير فارغ قبل الاستخدام
-    final teamIds = teams.map((t) => t.id!).toList();
+    final teamIds = teams.map((t) => t.syncId).toList();
 
     // عدّادات لكل فريق
-    final Map<int, int> mainCount = {for (final t in teams) t.id!: 0};
-    final Map<int, int> subCount = {for (final t in teams) t.id!: 0};
+    final Map<String, int> mainCount = {for (final t in teams) t.syncId: 0};
+    final Map<String, int> subCount = {for (final t in teams) t.syncId: 0};
 
     final rng = seed == null ? null : Random(seed);
     final result = <PlayerModel>[];
@@ -62,10 +62,9 @@ class TeamPlayerDraftService {
         }
 
         result.add(PlayerModel(
-          id: null, // يتم تعيينه في طبقة الـ DB
-          playerLeagueId: lp.id!,
-          teamId: teamId,
-          fullName: 'Player #${lp.userId}',
+          playerLeagueSyncId: lp.syncId,
+          teamSyncId: teamId,
+          fullName: lp.name??'',
           status: status,
         ));
 
@@ -76,16 +75,16 @@ class TeamPlayerDraftService {
         }
       }
     }
-
+    print(result[0].playerLeagueSyncId);
     return result;
   }
 
   /// منطق تعيين لاعبين محددين لفريق معين، مع احترام الحد الأعلى.
   List<PlayerModel> buildAssignPlayersToTeam({
-    required int teamId,
-    required int leagueId,
+    required String teamSyncId,
+    required String leagueSyncId,
     required List<LeaguePlayerModel> leaguePlayers,
-    required Set<int> takenLeaguePlayerIds,
+    required Set<String> takenLeaguePlayerIds,
     required int currentMain,
     required int currentSub,
     int maxMainPlayers = 0,
@@ -96,7 +95,10 @@ class TeamPlayerDraftService {
     final result = <PlayerModel>[];
 
     for (final lp in leaguePlayers) {
-      if (takenLeaguePlayerIds.contains(lp.id)) {
+      // نفس المنطق، لكن باستخدام syncId بدل id
+      final lpSyncId = lp.syncId;
+      if (lpSyncId.trim().isEmpty) continue;
+      if (takenLeaguePlayerIds.contains(lpSyncId)) {
         continue;
       }
 
@@ -109,9 +111,9 @@ class TeamPlayerDraftService {
       }
 
       result.add(PlayerModel(
-        playerLeagueId: lp.id!,
-        teamId: teamId,
-        fullName: 'Player #${lp.userId}',
+        playerLeagueSyncId: lpSyncId,
+        teamSyncId: teamSyncId,
+        fullName: lp.name,
         status: status,
       ));
 

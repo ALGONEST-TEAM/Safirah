@@ -12,15 +12,15 @@ import '../../../../../main.dart';
 import '../state_mangement/riverpod.dart';
 
 class ControlButtonWidget extends ConsumerStatefulWidget {
-  final int matchId;
-  final int leagueId;
-  final int roundId;
+  final String matchSyncId;
+  final String leagueSyncId;
+  final String  roundSyncId;
 
   const ControlButtonWidget({
     super.key,
-    required this.matchId,
-    required this.leagueId,
-    required this.roundId,
+    required this.matchSyncId,
+    required this.leagueSyncId,
+    required this.roundSyncId,
   });
 
   @override
@@ -32,9 +32,12 @@ class _ControlButtonWidgetState extends ConsumerState<ControlButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final counterState = ref.watch(matchTermCounterProvider(widget.matchId));
-    final currentTerm = ref.watch(getCurrentMatchTermProvider(widget.matchId));
-    final notifier = ref.read(matchTermCounterProvider(widget.matchId).notifier);
+    final counterState = ref.watch(matchTermCounterProvider(widget.matchSyncId));
+    final currentTerm =
+        ref.watch(getCurrentMatchTermProvider(widget.matchSyncId));
+    final notifier =
+        ref.read(matchTermCounterProvider(widget.matchSyncId).notifier);
+
     final termId = currentTerm.data?.id ?? 0;
 
     return SafeArea(
@@ -47,7 +50,13 @@ class _ControlButtonWidgetState extends ConsumerState<ControlButtonWidget> {
             _isFinishing = true;
 
             try {
-              await _handleMatchAction(context, counterState, currentTerm, notifier, termId);
+              await _handleMatchAction(
+                context,
+                counterState,
+                currentTerm,
+                notifier,
+                termId,
+              );
             } finally {
               _isFinishing = false;
             }
@@ -65,12 +74,12 @@ class _ControlButtonWidgetState extends ConsumerState<ControlButtonWidget> {
   }
 
   Future<void> _handleMatchAction(
-      BuildContext context,
-      dynamic counter,
-      dynamic currentTerm,
-      dynamic notifier,
-      int termId,
-      ) async {
+    BuildContext context,
+    dynamic counter,
+    dynamic currentTerm,
+    dynamic notifier,
+    int termId,
+  ) async {
     if (currentTerm.data == null || currentTerm.data!.termName == 'انتهت المباراة') {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -80,6 +89,7 @@ class _ControlButtonWidgetState extends ConsumerState<ControlButtonWidget> {
     }
 
     final term = currentTerm.data!;
+    final matchTermSyncId = term.syncId;
 
     if (!counter.data.isRunning && !counter.data.isPaused) {
       await _startTerm(notifier, term);
@@ -87,17 +97,22 @@ class _ControlButtonWidgetState extends ConsumerState<ControlButtonWidget> {
     }
 
     if (counter.data.isRunning && !counter.data.isPaused) {
-      notifier.stop(termId);
+      if (matchTermSyncId.isNotEmpty) {
+        notifier.stop(matchTermSyncId);
+      }
       if (!mounted) return;
       showFlashBarSuccess(
-        message: 'تم توقيف المباراة، الوقت الضائع محسوب بالكامل',
+        message:
+            'تم توقيف المباراة، الوقت الضائع محسوب بالكامل',
         context: context,
       );
       return;
     }
 
     if (counter.data.isPaused) {
-      notifier.resume(termId);
+      if (matchTermSyncId.isNotEmpty) {
+        notifier.resume(matchTermSyncId);
+      }
       if (!mounted) return;
       showFlashBarSuccess(
         message: 'تم استئناف المباراة، تم احتساب الوقت الضائع',
@@ -108,8 +123,8 @@ class _ControlButtonWidgetState extends ConsumerState<ControlButtonWidget> {
 
   Future<void> _startTerm(dynamic notifier, dynamic currentTerm) async {
     await notifier.start(
-      roundId: widget.roundId,
-      leagueId: widget.leagueId,
+      roundSyncId: widget.roundSyncId,
+      leagueSyncId: widget.leagueSyncId,
       currentTerm: currentTerm,
       onAskExtraTime: (title, wastedMinutes) async {
         final controller = TextEditingController();

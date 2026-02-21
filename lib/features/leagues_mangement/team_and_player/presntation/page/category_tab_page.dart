@@ -9,18 +9,18 @@ import '../widget/category_tab_widget.dart';
 class CategoryTabsPage extends ConsumerWidget {
   const CategoryTabsPage(
       {super.key,
-        required this.leagueId,
+        required this.leagueSyncId,
         required this.leagueName,
         required this.numOfLeaguePlayerWithOutCate});
 
   final int numOfLeaguePlayerWithOutCate;
-  final int leagueId;
+  final String leagueSyncId;
   final String leagueName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final catsState = ref.watch(categoriesProvider(leagueId));
-    final  countPlayerWithOutCategory = ref.watch(leaguePlayersWithoutCategoryCountProvider(leagueId));
+    final catsState = ref.watch(categoriesProvider(leagueSyncId));
+    final  countPlayerWithOutCategory = ref.watch(leaguePlayersWithoutCategoryCountProvider(leagueSyncId));
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(
@@ -38,7 +38,7 @@ class CategoryTabsPage extends ConsumerWidget {
           : !(catsState.data.isNotEmpty )
           ? const Center(child: Text('لا توجد فئات بعد'))
           : CategoryTabWidget(
-        leagueId: leagueId,
+        leagueSyncId: leagueSyncId,
         categories: catsState.data,
         numOfLeaguePlayerWithOutCate: countPlayerWithOutCategory,
       ),

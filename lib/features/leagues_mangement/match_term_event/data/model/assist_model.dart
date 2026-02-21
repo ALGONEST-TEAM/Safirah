@@ -1,23 +1,22 @@
-
 import 'package:drift/drift.dart';
 
 import '../../../../../core/database/safirah_database.dart';
 
 class AssistModel {
   final int? id;
-  final int matchId;
-  final int playerId;
-  final int matchTermId;
-  final int goalId;
+  final String matchSyncId;
+  final String playerSyncId;
+  final String matchTermSyncId;
+  final String goalSyncId;
   final int assistTime;
   final String status;
 
   AssistModel({
     this.id,
-    required this.matchId,
-    required this.playerId,
-    required this.matchTermId,
-    required this.goalId,
+    required this.matchSyncId,
+    required this.playerSyncId,
+    required this.matchTermSyncId,
+    required this.goalSyncId,
     required this.assistTime,
     this.status = 'active',
   });
@@ -25,10 +24,10 @@ class AssistModel {
   factory AssistModel.fromEntity(Assist entity) {
     return AssistModel(
       id: entity.id,
-      matchId: entity.matchId,
-      playerId: entity.playerId,
-      matchTermId: entity.matchTermId,
-      goalId: entity.goalId,
+      matchSyncId: entity.matchSyncId,
+      playerSyncId: entity.playerSyncId,
+      matchTermSyncId: entity.matchTermSyncId,
+      goalSyncId: entity.goalSyncId,
       assistTime: entity.assistTime,
       status: entity.status,
     );
@@ -37,10 +36,11 @@ class AssistModel {
   factory AssistModel.fromJson(Map<String, dynamic> json) {
     return AssistModel(
       id: json['id'] as int?,
-      matchId: json['match_id'] as int,
-      playerId: json['player_id'] as int,
-      matchTermId: json['match_term_id'] as int,
-      goalId: json['goal_id'] as int,
+      matchSyncId: (json['match_sync_id'] ?? json['matchSyncId']) as String,
+      playerSyncId: (json['player_sync_id'] ?? json['playerSyncId']) as String,
+      matchTermSyncId:
+          (json['match_term_sync_id'] ?? json['matchTermSyncId']) as String,
+      goalSyncId: (json['goal_sync_id'] ?? json['goalSyncId']) as String,
       assistTime: json['assist_time'] as int,
       status: json['status'] as String? ?? 'active',
     );
@@ -48,10 +48,10 @@ class AssistModel {
 
   AssistsCompanion toCompanionInsert() {
     return AssistsCompanion.insert(
-      matchId: matchId,
-      playerId: playerId,
-      matchTermId: matchTermId,
-      goalId: goalId,
+      matchSyncId: matchSyncId,
+      playerSyncId: playerSyncId,
+      matchTermSyncId: matchTermSyncId,
+      goalSyncId: goalSyncId,
       assistTime: assistTime,
       status: Value(status),
     );
@@ -60,10 +60,10 @@ class AssistModel {
   AssistsCompanion toCompanionUpdate() {
     return AssistsCompanion(
       id: Value(id!),
-      matchId: Value(matchId),
-      playerId: Value(playerId),
-      matchTermId: Value(matchTermId),
-      goalId: Value(goalId),
+      matchSyncId: Value(matchSyncId),
+      playerSyncId: Value(playerSyncId),
+      matchTermSyncId: Value(matchTermSyncId),
+      goalSyncId: Value(goalSyncId),
       assistTime: Value(assistTime),
       status: Value(status),
     );
@@ -71,29 +71,29 @@ class AssistModel {
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'match_id': matchId,
-        'player_id': playerId,
-        'match_term_id': matchTermId,
-        'goal_id': goalId,
-        'assist_time': assistTime,
+        'match_sync_id': matchSyncId,
+        'player_sync_id': playerSyncId,
+        'match_term_sync_id': matchTermSyncId,
+        'goal_sync_id': goalSyncId,
+        'assist_time': assistTime.toString(),
         'status': status,
       };
 
   AssistModel copyWith({
     int? id,
-    int? matchId,
-    int? playerId,
-    int? matchTermId,
-    int? goalId,
+    String? matchSyncId,
+    String? playerSyncId,
+    String? matchTermSyncId,
+    String? goalSyncId,
     int? assistTime,
     String? status,
   }) {
     return AssistModel(
       id: id ?? this.id,
-      matchId: matchId ?? this.matchId,
-      playerId: playerId ?? this.playerId,
-      matchTermId: matchTermId ?? this.matchTermId,
-      goalId: goalId ?? this.goalId,
+      matchSyncId: matchSyncId ?? this.matchSyncId,
+      playerSyncId: playerSyncId ?? this.playerSyncId,
+      matchTermSyncId: matchTermSyncId ?? this.matchTermSyncId,
+      goalSyncId: goalSyncId ?? this.goalSyncId,
       assistTime: assistTime ?? this.assistTime,
       status: status ?? this.status,
     );

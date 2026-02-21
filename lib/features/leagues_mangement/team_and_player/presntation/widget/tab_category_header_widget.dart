@@ -7,13 +7,13 @@ import '../../data/model/team_model.dart';
 class TabsCategoryHeaderWidget extends StatefulWidget {
   const TabsCategoryHeaderWidget(
       {super.key,
-      required this.leagueId,
+      required this.leagueSyncId,
       required this.categories,
       required this.controller});
 
   final TabController controller;
 
-  final int leagueId;
+  final String leagueSyncId;
   final List<TeamPlayerCategoryModel> categories;
 
   @override

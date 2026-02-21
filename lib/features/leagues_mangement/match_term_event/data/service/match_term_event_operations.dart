@@ -3,12 +3,9 @@ import '../../../match/data/model/match_model.dart';
 import '../model/player_stats.dart';
 import '../model/player_match_participation_model.dart';
 
-/// كلاس عمليات (Business Logic) لأحداث المباراة والأشواط
-/// لا يتعامل مع قاعدة البيانات مباشرة، بل يعمل على الموديلات فقط.
 class MatchTermEventOperations {
   const MatchTermEventOperations();
 
-  /// حساب نقاط الفريقين بناءً على نتيجة المباراة (دور المجموعات)
   ({int homePoints, int awayPoints}) computePointsForMatch(MatchModel match) {
     int homePoints = 0;
     int awayPoints = 0;
@@ -25,7 +22,6 @@ class MatchTermEventOperations {
     return (homePoints: homePoints, awayPoints: awayPoints);
   }
 
-  /// تحديث نموذج QualifiedTeamModel عند انتهاء مباراة (فقط منطق، بدون DB)
   QualifiedTeamModel buildUpdatedQualifiedTeam(
     QualifiedTeamModel current,
     int addedPoints,
@@ -38,7 +34,6 @@ class MatchTermEventOperations {
     );
   }
 
-  /// حساب تأثير هدف جديد على نتيجة المباراة (لكل من home / away)
   ({int homeScore, int awayScore}) applyGoalToScore({
     required MatchModel match,
     required bool isHomeScorer,
@@ -48,7 +43,6 @@ class MatchTermEventOperations {
     return (homeScore: updatedHomeScore, awayScore: updatedAwayScore);
   }
 
-  /// حساب تأثير حذف هدف على نتيجة المباراة
   ({int homeScore, int awayScore}) revertGoalFromScore({
     required MatchModel match,
     required bool isHomeScorer,
@@ -58,7 +52,6 @@ class MatchTermEventOperations {
     return (homeScore: updatedHomeScore, awayScore: updatedAwayScore);
   }
 
-  /// دمج إحصائيات اللاعب من قيم خام (goals, assists, yellow, red)
   PlayerStats buildPlayerStats({
     required int goals,
     required int assists,
@@ -73,60 +66,57 @@ class MatchTermEventOperations {
     );
   }
 
-  /// بناء مشاركة لاعب كأساسي في مباراة/شوط
   PlayerMatchParticipationModel buildStarterParticipation({
-    required int matchId,
-    required int matchTermId,
-    required int playerId,
+    required String matchSyncId,
+    required String matchTermSyncId,
+    required String playerSyncId,
   }) {
     return PlayerMatchParticipationModel(
       id: 0,
-      matchId: matchId,
-      playerId: playerId,
-      matchTermId: matchTermId,
+      matchSyncId: matchSyncId,
+      playerSyncId: playerSyncId,
+      matchTermSyncId: matchTermSyncId,
       startTime: 0,
       endTime: null,
-      substitutedPlayerId: null,
+      substitutedPlayerSyncId: null,
       participationType: 'STARTER',
     );
   }
 
-  /// بناء مشاركة لاعب كخارج (SUB_OUT)
   PlayerMatchParticipationModel buildSubOutParticipation({
-    required int matchId,
-    required int matchTermId,
-    required int playerId,
+    required String matchSyncId,
+    required String matchTermSyncId,
+    required String playerSyncId,
     required int substitutionMinute,
-    required int substitutedByPlayerId,
+    required String substitutedByPlayerSyncId,
   }) {
     return PlayerMatchParticipationModel(
       id: 0,
-      matchId: matchId,
-      playerId: playerId,
-      matchTermId: matchTermId,
+      matchSyncId: matchSyncId,
+      playerSyncId: playerSyncId,
+      matchTermSyncId: matchTermSyncId,
       startTime: 0,
       endTime: substitutionMinute,
-      substitutedPlayerId: substitutedByPlayerId,
+      substitutedPlayerSyncId: substitutedByPlayerSyncId,
       participationType: 'SUB_OUT',
     );
   }
 
-  /// بناء مشاركة لاعب كداخل (SUB_IN)
   PlayerMatchParticipationModel buildSubInParticipation({
-    required int matchId,
-    required int matchTermId,
-    required int playerId,
+    required String matchSyncId,
+    required String matchTermSyncId,
+    required String playerSyncId,
     required int substitutionMinute,
-    required int substitutedPlayerId,
+    required String substitutedPlayerSyncId,
   }) {
     return PlayerMatchParticipationModel(
       id: 0,
-      matchId: matchId,
-      playerId: playerId,
-      matchTermId: matchTermId,
+      matchSyncId: matchSyncId,
+      playerSyncId: playerSyncId,
+      matchTermSyncId: matchTermSyncId,
       startTime: substitutionMinute,
       endTime: null,
-      substitutedPlayerId: substitutedPlayerId,
+      substitutedPlayerSyncId: substitutedPlayerSyncId,
       participationType: 'SUB_IN',
     );
   }

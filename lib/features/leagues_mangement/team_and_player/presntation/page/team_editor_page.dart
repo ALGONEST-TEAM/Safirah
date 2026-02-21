@@ -14,10 +14,11 @@ import '../state_mangment/riverpod.dart';
 import '../widget/edit_team_logo_picker_widget.dart';
 
 class TeamEditorPage extends ConsumerStatefulWidget {
-  final int leagueId;
+  final String leagueSyncId;
   final TeamModel team;
 
-  const TeamEditorPage({super.key, required this.leagueId, required this.team});
+  const TeamEditorPage(
+      {super.key, required this.leagueSyncId, required this.team});
 
   @override
   ConsumerState<TeamEditorPage> createState() => _TeamEditorPageState();
@@ -89,9 +90,10 @@ class _TeamEditorPageState extends ConsumerState<TeamEditorPage> {
                   isLoading: saver.stateData == States.loading,
                   onPressed: () {
                     final team = TeamModel(
-                        leagueId: widget.leagueId,
+                        leagueSyncId: widget.leagueSyncId,
                         teamName: _nameCtrl.text,
                         logoUrl: _logoUrl,
+                        syncId: widget.team.syncId,
                         id: widget.team.id);
                     if (_nameCtrl.text.trim().isEmpty) return;
                     ref.read(updateTeamProvider.notifier).update(team);
@@ -99,7 +101,9 @@ class _TeamEditorPageState extends ConsumerState<TeamEditorPage> {
                 ),
                 state: saver,
                 functionSuccess: () {
-                  ref.read(teamsProvider(widget.leagueId).notifier).load();
+                  ref
+                      .read(teamsRefreshProvider(widget.leagueSyncId).notifier)
+                      .refresh();
                   Navigator.pop(context);
                 },
               )

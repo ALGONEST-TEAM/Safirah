@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
+  sdk: ^3.5.3
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -77,8 +77,12 @@ dependencies:
   path_provider:
   path:
   custom_refresh_indicator:
+  connectivity_plus: ^6.1.0
+  crypto:
+
   sms_autofill: ^2.4.1
   firebase_core:
+#  flutter_local_notifications:
   awesome_notifications:
   firebase_messaging:
   extended_nested_scroll_view: ^6.2.1
@@ -86,12 +90,14 @@ dependencies:
   video_thumbnail:
   video_player:
   chewie:
+  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   drift_dev:
   build_runner:
+  rxdart:
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your

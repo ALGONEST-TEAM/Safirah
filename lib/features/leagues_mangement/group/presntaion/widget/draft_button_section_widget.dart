@@ -12,14 +12,14 @@ import 'group_count_suggestion.dart';
 class DraftButtonSectionWidget extends ConsumerWidget {
   const DraftButtonSectionWidget({
     super.key,
-    required this.leagueId,
+    required this.leagueSyncId,
     required this.draftState,
     required this.hasGroupSelection,
     required this.selectedQualifiedIndex,
     required this.selectedGroups,
   });
 
-  final int leagueId;
+  final String leagueSyncId;
   final DataState draftState;
   final bool hasGroupSelection;
   final int? selectedQualifiedIndex;
@@ -33,15 +33,13 @@ class DraftButtonSectionWidget extends ConsumerWidget {
           child: CheckStateInPostApiDataWidget(
             state: draftState,
             functionSuccess: () {
-              ref.read(ensureGroupRoundsProvider(leagueId).notifier).run();
+              ref.read(ensureGroupRoundsProvider(leagueSyncId).notifier).run();
               ref
-                  .read(groupsWithQualifiedTeamsProvider(leagueId).notifier)
-                  .load();
-              ref.read(leagueStatusUpdateProvider.notifier).update(
-                    leagueId: leagueId,
-                    hasTeamsInGroups: true,
-                  );
-              ref.read(leagueStatusProvider(leagueId).notifier).load();
+                  .read(groupRefreshProvider(leagueSyncId).notifier)
+                  .refresh();
+                ref.read(leagueStatusUpdateProvider.notifier).update(leagueSyncId: leagueSyncId,hasGroups: true);
+              // ref.read(leagueStatusStreamProvider(leagueSyncId));
+              // ref.read(leagueStatusProvider(leagueSyncId).notifier).refresh();
 
               Navigator.pop(context);
             },
@@ -50,11 +48,12 @@ class DraftButtonSectionWidget extends ConsumerWidget {
               text: 'قرعة',
               onPressed: hasGroupSelection && selectedQualifiedIndex != null
                   ? () async {
+                print(selectedGroups);
                       final qualifiedList = ref
                           .read(
                             qualifiedSuggestionsProvider(
                               (
-                                leagueId: leagueId,
+                              leagueSyncId: leagueSyncId,
                                 groups: selectedGroups!,
                               ),
                             ),
@@ -65,7 +64,7 @@ class DraftButtonSectionWidget extends ConsumerWidget {
                           qualifiedList![selectedQualifiedIndex!].count;
                       ref
                           .read(groupsDraftProvider(
-                                  (leagueId, selectedGroups)).notifier)
+                                  (leagueSyncId, selectedGroups)).notifier)
                           .run(
                             qualifiedPerGroup: qualifiedPerGroup,
                             seed: DateTime.now().millisecondsSinceEpoch,

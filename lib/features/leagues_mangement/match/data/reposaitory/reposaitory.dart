@@ -1,87 +1,144 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import '../../../../../core/database/sync_service.dart';
+import '../../../../../core/database/sync_trigger.dart';
+import '../../../../../core/network/connectivity_service.dart';
+import '../../../../../core/network/errors/repo_guard.dart';
+import '../../../../../core/network/errors/sync_dio_exception.dart';
+import '../../../../../injection.dart' as di;
 import '../data_source/local_data_source.dart';
+import '../data_source/remote_data_source/remote_data_source.dart';
 import '../model/round_model.dart';
-
 
 class MatchesRepository {
   final MatchesLocalDataSource local;
-  MatchesRepository({required this.local});
+  final ConnectivityService connectivity;
+  final SyncService syncService;
+  final MatchRemoteDataSource remote;
 
-  // Future<Either<DioException, Unit>> initGroupStageMatches(int leagueId) async {
-  //   try { return Right(await local.initGroupStageMatches(leagueId: leagueId)); }
-  //   catch (e) { return Left(DioException(requestOptions: RequestOptions(path: '/matches/init_group'), error: e)); }
-  // }
-  Future<Either<DioException, Unit>> ensureGroupRounds(int leagueId) async {
-    try {
-      await local.ensureGroupRounds(leagueId: leagueId);
-      return Right(unit);
-    } catch (e) {
-      return Left(DioException(
-        requestOptions: RequestOptions(path: '/rounds/ensure_group'),
-        error: e,
-      ));
-    }
-  }
-  Future<Either<DioException, Unit>> scheduleGroupStageMatchesRR(int leagueId) async {
-    try {
-      await local.scheduleGroupStageMatchesRR(leagueId: leagueId);
-      return Right(unit);
-    } catch (e) {
-      return Left(DioException(
-        requestOptions: RequestOptions(path: '/rounds/ensure_group'),
-        error: e,
-      ));
-    }
-  }
-  // Future<Either<DioException, List<RoundWithGroups>>> getLeagueRoundsWithGroupsAndMatches(int leagueId) async {
-  //   try {
-  //     final list = await local.getRoundsWithGroupsAndMatches(leagueId);
-  //     return Right(list);
-  //   } on DioException catch (e) {
-  //     return Left(e);
-  //   } catch (_) {
-  //     return Left(
-  //       DioException(requestOptions: RequestOptions(path: '/teams/byLeague')),
-  //     );
-  //   }
-  // }
+  MatchesRepository(
+      {required this.local,
+      required this.connectivity,
+      required this.syncService,
+      required this.remote});
 
-  Future<Either<DioException, List<RoundModel>>> getLeagueRoundsWithGroupsAndMatches(int leagueId,String matchFilter) async {
+  Future<Either<DioException, Unit>> ensureGroupRounds(
+      String leagueSyncId) async {
     try {
-      final list = await local.getLeagueRoundsWithGroupsAndMatches(leagueId,matchFilter);
-      return Right(list);
+      final rounds = await local.ensureGroupRounds(leagueSyncId: leagueSyncId);
+      await syncService.enqueueOperation(
+        entityType: 'rounds',
+        operation: SyncService.operationCreate,
+        payload: {
+          'rounds': rounds.map((r) => r.toJson()).toList(),
+        },
+      );
+      try {
+        di.sl<SyncTrigger>().syncIfOnlineInBackground();
+      } on DioException catch (e) {
+        throw SyncDioException.from(e);
+      }
+      return Right(unit);
     } on DioException catch (e) {
       return Left(e);
-    } catch (e) {
-      print(e);
-      return Left(DioException(
-        requestOptions: RequestOptions(path: '/rounds/$leagueId/groups-matches'),
-        error: e,
-      ));
     }
+  }
+
+  Future<Either<DioException, Unit>> scheduleGroupStageMatchesRR(
+      String leagueSyncId) async {
+    return RepoGuard.run<Unit>(
+      action: () async {
+        final matches =
+            await local.scheduleGroupStageMatchesRR(leagueSyncId: leagueSyncId);
+        await syncService.enqueueOperation(
+          entityType: 'match',
+          operation: SyncService.operationCreate,
+          payload: {
+            'matches': matches.map((d) => d.toJson()).toList(),
+          },
+        );
+
+        try {
+          di.sl<SyncTrigger>().syncIfOnlineInBackground();
+        } on DioException catch (e) {
+          throw SyncDioException.from(e);
+        }
+        return unit;
+      },
+    );
+  }
+
+  Stream<List<RoundModel>> watchLeagueRoundsWithGroupsAndMatches({
+    required String leagueSyncId,
+    required String matchFilter,
+  }) {
+    return local.watchLeagueRoundsWithGroupsAndMatches(
+      leagueSyncId: leagueSyncId,
+      matchFilter: matchFilter,
+    );
+  }
+
+  Future<Either<DioException, void>> refreshLeagueRoundsWithGroupsAndMatches({
+    required String leagueSyncId,
+    required String matchFilter,
+    required String role
+
+  }) async {
+    return RepoGuard.run<void>(action: () async {
+      final List<RoundModel> remoteRounds;
+      if (!await connectivity.isOnline()) return;
+      if(role == 'organizer'){
+         remoteRounds = await remote.getLeagueRounds(
+          leagueSyncId,
+        );
+      }else{
+        remoteRounds = await remote.getLeagueRoundsRole(
+          leagueSyncId,
+          'media'
+        );
+      }
+
+      final rounds = remoteRounds;
+      print('API rounds=${rounds.length}');
+      print('first groups=${rounds.first.groups.length}');
+      print('first matches=${rounds.first.groups.first.matches.length}');
+
+      await local.upsertLeagueRoundsFromApiOneResponse(
+        leagueSyncId: leagueSyncId,
+        apiRounds: remoteRounds,
+      );
+      di.sl<SyncTrigger>().syncIfOnlineInBackground();
+    });
   }
 
   Future<Either<DioException, Unit>> scheduleMatch({
-    required int matchId,
+    required String matchSyncId,
     required DateTime scheduledDateTime,
+    required String refereeSyncId,
+    required String mediaSyncId,
   }) async {
-    try {
-       await local.scheduleMatch(
-        matchId: matchId,
-        scheduledDateTime: scheduledDateTime,
-      );
+    return RepoGuard.run<Unit>(
+      action: () async {
+        final matches = await local.scheduleMatch(
+          matchSyncId: matchSyncId,
+          scheduledDateTime: scheduledDateTime,
+          refereeSyncId: refereeSyncId,
+          mediaSyncId: mediaSyncId,
+        );
+   //     print("jjh" + matches.mediaSyncId!);
+        await syncService.enqueueOperation(
+          entityType: 'match',
+          operation: SyncService.operationUpdate,
+          payload: matches.toJson(),
+        );
 
-
-
-      return const Right(unit);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (e) {
-      return Left(DioException(
-        requestOptions: RequestOptions(path: '/matches/$matchId/schedule'),
-        error: e,
-      ));
-    }
+        try {
+          di.sl<SyncTrigger>().syncIfOnlineInBackground();
+        } on DioException catch (e) {
+          throw SyncDioException.from(e);
+        }
+        return unit;
+      },
+    );
   }
 }

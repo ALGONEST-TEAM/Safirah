@@ -13,23 +13,23 @@ class PlayersSelectionTeamWidget extends ConsumerWidget {
     required this.pickedIds,
     required this.onToggle,
     required this.searchController,
-    required this.leagueId,
+    required this.leagueSyncId,
     this.searchLabel = 'البحث عن لاعب',
     this.searchHint = 'اسم اللاعب',
     this.listTitle = 'اللاعبون',
   });
 
   final String title;
-  final Set<int> pickedIds;
-  final void Function(int id) onToggle;
+  final Set<String> pickedIds;
+  final void Function(String id) onToggle;
   final TextEditingController searchController;
   final String searchLabel;
   final String searchHint;
   final String listTitle;
-  final int leagueId;
+  final String leagueSyncId;
   @override
   Widget build(BuildContext context,ref) {
-    final playerWithOutTeamState= ref.watch(leaguePlayersWithoutTeamProvider(leagueId));
+    final playerWithOutTeamState= ref.watch(leaguePlayersWithoutTeamProvider(leagueSyncId));
     return Column(
       children: [
         // قائمة اللاعبين
@@ -53,9 +53,9 @@ class PlayersSelectionTeamWidget extends ConsumerWidget {
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (_, i) {
                         final p = playerWithOutTeamState.data[i];
-                        final selected = pickedIds.contains(p.id!);
+                        final selected = pickedIds.contains(p.syncId);
                         return InkWell(
-                          onTap: () => onToggle(p.id!),
+                          onTap: () => onToggle(p.syncId),
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: Container(
@@ -74,15 +74,13 @@ class PlayersSelectionTeamWidget extends ConsumerWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text('Player #${p.id}',
-                                            style: const TextStyle(fontWeight: FontWeight.w600)),
-                                        const Text('@username',
-                                            style: TextStyle(color: Colors.black54)),
+                                        AutoSizeTextWidget( text: p.name??'',),
                                       ],
                                     ),
                                   ),
                                   Icon(
                                     selected ? Icons.check_circle : Icons.circle_outlined,
+                                    size: 18,
                                     color: selected ? Theme.of(context).colorScheme.primary : null,
                                   ),
                                 ],

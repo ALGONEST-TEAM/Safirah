@@ -6,8 +6,8 @@ import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../state_mangement/riverpod.dart';
 
 class MatchAppBarWidget extends ConsumerWidget implements PreferredSizeWidget {
-  final int matchId;
-  const MatchAppBarWidget({super.key, required this.matchId});
+  final String matchSyncId;
+  const MatchAppBarWidget({super.key, required this.matchSyncId});
 
   String _formatTime(int seconds) {
     final min = (seconds ~/ 60).toString().padLeft(2, '0');
@@ -17,7 +17,7 @@ class MatchAppBarWidget extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final termState = ref.watch(matchTermCounterProvider(matchId));
+    final termState = ref.watch(matchTermCounterProvider(matchSyncId));
 
     return AppBar(
       leading: const BackButton(color: Colors.white),

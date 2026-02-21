@@ -5,78 +5,93 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/constants/app_icons.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../data/model/goal_model.dart';
 import '../page/var_page.dart';
 import '../state_mangement/riverpod.dart';
 import 'event_button_widget.dart';
 import 'player_event_handler.dart';
 
-final activeVarPlayerProvider = StateProvider<int?>((ref) => null);
+final activeVarPlayerProvider = StateProvider<String?>((ref) => null);
 final matchTermStateProvider =
-    StateProvider.family<bool, int>((ref, termId) => false);
+    StateProvider.family<bool, String>((ref, matchTermSyncId) => false);
 final stopTermStateProvider =
-    StateProvider.family<bool, int>((ref, termId) => false);
+    StateProvider.family<bool, String>((ref, matchTermSyncId) => false);
 
+/// While selecting a substitution, we keep which player is chosen as incoming.
 final selectedIncomingSubstitutePlayerProvider =
-    StateProvider<({int playerId, int teamId})?>((ref) => null);
+    StateProvider<({String playerSyncId, String teamSyncId})?>((ref) => null);
 
 class PlayerTileWithEventWidget extends ConsumerWidget {
-  final String name, handle, avatar;
-  final int playerId, matchId, matchTermId;
-  final int teamId;
+  final String name, avatar;
+  final String matchSyncId;
+  final String matchTermSyncId;
+  final String playerSyncId;
+  final String teamSyncId;
   final bool isSubstitute;
 
   const PlayerTileWithEventWidget({
     super.key,
     required this.name,
-    required this.handle,
     required this.avatar,
-    required this.playerId,
-    required this.matchId,
-    required this.matchTermId,
+    required this.playerSyncId,
+    required this.matchSyncId,
+    required this.matchTermSyncId,
     required this.isSubstitute,
-    required this.teamId,
+    required this.teamSyncId,
   });
 
   @override
   Widget build(BuildContext context, ref) {
-    final statsState =
-        ref.watch(playerStatsProvider((matchId: matchId, playerId: playerId)));
+    final statsState = ref.watch(
+      playerStatsProvider(
+          (matchSyncId: matchSyncId, playerSyncId: playerSyncId)),
+    );
     final stats = statsState.data;
 
     final goals = stats.goals;
     final assist = stats.assists;
     final yellow = stats.yellow;
     final red = stats.red;
-    final isTermRunning = ref.watch(matchTermStateProvider(matchTermId));
-    final stopTerm = ref.watch(stopTermStateProvider(matchTermId));
-    final activeVarPlayerId = ref.watch(activeVarPlayerProvider);
-    final notifier = ref.read(matchTermCounterProvider(matchId).notifier);
 
-    final varEvent = ref.watch(currentVarEventProvider);
+    final isTermRunning = ref.watch(matchTermStateProvider(matchTermSyncId));
+    final stopTerm = ref.watch(stopTermStateProvider(matchTermSyncId));
+
+    final notifier = ref.read(matchTermCounterProvider(matchSyncId).notifier);
+
     final playerParticipationStatusState = ref.watch(
-        getPlayerParticipationStatusProvider(
-            (matchId: matchId, matchTermId: matchTermId, playerId: playerId)));
-    final int? lastGoalId =
-        (varEvent?.type == 'goal') ? (varEvent?.event as GoalModel).id : null;
+      getPlayerParticipationStatusProvider((
+        matchSyncId: matchSyncId,
+        matchTermSyncId: matchTermSyncId,
+        playerSyncId: playerSyncId,
+      )),
+    );
 
-    final selectedIncoming =
-        ref.watch(selectedIncomingSubstitutePlayerProvider);
+    final participation = playerParticipationStatusState.value;
 
     final handler = PlayerEventHandler(
       isTermRunning: isTermRunning,
       stopTerm: stopTerm,
       yellowCount: yellow,
       redCount: red,
-      playerId: playerId,
-      matchId: matchId,
-      matchTermId: matchTermId,
-      teamId: teamId,
+      playerSyncId: playerSyncId,
+      matchSyncId: matchSyncId,
+      matchTermSyncId: matchTermSyncId,
+      teamSyncId: teamSyncId,
     );
 
-    final isParticipating = playerParticipationStatusState.data == 'SUB_IN' ||
-        playerParticipationStatusState.data == 'STARTER' ||
-        (!isSubstitute && playerParticipationStatusState.data != 'SUB_OUT');
+    final isParticipating = participation == 'SUB_IN' ||
+        participation == 'STARTER' ||
+        (!isSubstitute && participation != 'SUB_OUT');
+
+    final selectedIncoming =
+        ref.watch(selectedIncomingSubstitutePlayerProvider);
+
+    // Used by assist button. We store last goal sync id on var state, so read it from current var event if present.
+    final currentVar = ref.watch(currentVarEventProvider);
+    final String? lastGoalSyncId = (currentVar?.type == 'goal')
+        ? (currentVar!.event as dynamic).syncId as String?
+        : null;
+
+    final activeVarPlayerSyncId = ref.watch(activeVarPlayerProvider);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -96,13 +111,8 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AutoSizeTextWidget(
-                  text: 'لاعب وهمي $playerId',
+                  text: ' $name',
                   fontSize: 11.sp,
-                ),
-                AutoSizeTextWidget(
-                  text: handle,
-                  fontSize: 11.sp,
-                  colorText: Colors.grey,
                 ),
               ],
             ),
@@ -123,7 +133,7 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
               color: AppColors.secondaryColor,
               count: assist,
               onPressed: (ctx, r) async {
-                if (lastGoalId == null) {
+                if (lastGoalSyncId == null) {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     const SnackBar(
                       content: Text('لا يوجد هدف مرتبط لإضافة الأسيست'),
@@ -131,7 +141,7 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
                   );
                   return;
                 }
-                await handler.addAssist(ctx, r, goalId: lastGoalId);
+                await handler.addAssist(ctx, r, goalSyncId: lastGoalSyncId);
               },
             ),
             12.w.horizontalSpace,
@@ -153,13 +163,14 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
               },
             ),
             12.w.horizontalSpace,
-            if (selectedIncoming != null && selectedIncoming.teamId == teamId)
+            if (selectedIncoming != null &&
+                selectedIncoming.teamSyncId == teamSyncId)
               GestureDetector(
                 onTap: () async {
                   await handler.substituteWith(
                     context,
                     ref,
-                    incomingPlayerId: selectedIncoming.playerId,
+                    incomingPlayerSyncId: selectedIncoming.playerSyncId,
                   );
                   ref
                       .read(selectedIncomingSubstitutePlayerProvider.notifier)
@@ -178,12 +189,45 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
                   ),
                 ),
               ),
+            12.w.horizontalSpace,
+            if (activeVarPlayerSyncId == playerSyncId)
+              GestureDetector(
+                onTap: () {
+                  final currentVarEvent = ref.read(currentVarEventProvider);
+                  if (currentVarEvent != null) {
+                    notifier.stop(matchTermSyncId);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            VarReviewPage(varEvent: currentVarEvent),
+                      ),
+                    ).then((_) {
+                      notifier.resume(matchTermSyncId);
+                      ref.read(activeVarPlayerProvider.notifier).state = null;
+                      ref.read(currentVarEventProvider.notifier).state = null;
+                    });
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 4.w),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.secondaryColor),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: AutoSizeTextWidget(
+                    text: 'VAR',
+                    fontSize: 11.sp,
+                  ),
+                ),
+              ),
           ] else ...[
             GestureDetector(
               onTap: () async {
                 ref
-                    .read(selectedIncomingSubstitutePlayerProvider.notifier)
-                    .state = (playerId: playerId, teamId: teamId);
+                        .read(selectedIncomingSubstitutePlayerProvider.notifier)
+                        .state =
+                    (playerSyncId: playerSyncId, teamSyncId: teamSyncId);
               },
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
@@ -199,37 +243,6 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
               ),
             ),
           ],
-          12.w.horizontalSpace,
-          if (activeVarPlayerId == playerId)
-            GestureDetector(
-              onTap: () {
-                final currentVar = ref.read(currentVarEventProvider);
-                if (currentVar != null) {
-                  notifier.stop(matchTermId);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => VarReviewPage(varEvent: currentVar),
-                    ),
-                  ).then((_) {
-                    notifier.resume(matchTermId);
-                    ref.read(activeVarPlayerProvider.notifier).state = null;
-                    ref.read(currentVarEventProvider.notifier).state = null;
-                  });
-                }
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 4.w),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.secondaryColor),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: AutoSizeTextWidget(
-                  text: 'VAR',
-                  fontSize: 11.sp,
-                ),
-              ),
-            ),
         ],
       ),
     );

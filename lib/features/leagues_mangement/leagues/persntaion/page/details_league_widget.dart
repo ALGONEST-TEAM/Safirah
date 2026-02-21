@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../authorization/authorization_service.dart';
 import '../../../match/presntaion/widget/matches_schedule_widget.dart';
+import '../riverpod/riverpod.dart';
 import '../widget/details_league_tabbar_widget.dart';
 import '../widget/details_league_top_header_widget.dart';
 import '../widget/list_ranking_group_widget.dart';
+
 class DetailsLeagueWidget extends ConsumerStatefulWidget {
-  const DetailsLeagueWidget({super.key, required this.leagueId});
-  final int leagueId;
+  const DetailsLeagueWidget({super.key, required this.leagueSyncId});
+  final String leagueSyncId;
   @override
   ConsumerState<DetailsLeagueWidget> createState() =>
       _DetailsLeagueWidgetState();
@@ -18,9 +21,20 @@ class _DetailsLeagueWidgetState extends ConsumerState<DetailsLeagueWidget>
     with SingleTickerProviderStateMixin {
   late final TabController controller;
   final List<String> tabTitle = ['المراكز', 'المباريات', 'اخبار', 'احصائيات'];
+  late final AuthorizationService service;
 
   @override
   void initState() {
+    // Future.microtask(() async {
+    //   await service.syncUserAccessForAllLeagues();
+    //
+    // });
+    // Future.microtask(() {
+    //
+    //   ref
+    //       .read(leagueStatusProvider(widget.leagueSyncId).notifier)
+    //       .refresh();
+    // });
     super.initState();
     controller = TabController(length: tabTitle.length, vsync: this);
     controller.addListener(() => setState(() {}));
@@ -35,6 +49,8 @@ class _DetailsLeagueWidgetState extends ConsumerState<DetailsLeagueWidget>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(leagueBundleRefreshProvider(widget.leagueSyncId)); // يعمل sync فورًا
+  //  final league = ref.watch(leagueStreamProvider(leagueSyncId));
 
     return Scaffold(
       appBar: AppBar(
@@ -52,7 +68,7 @@ class _DetailsLeagueWidgetState extends ConsumerState<DetailsLeagueWidget>
           return [
             SliverToBoxAdapter(
               child:DetailsLeagueTopHeaderWidget(
-                leagueId: widget.leagueId,
+                leagueSyncId: widget.leagueSyncId,
               ),
 
             ),
@@ -74,18 +90,23 @@ class _DetailsLeagueWidgetState extends ConsumerState<DetailsLeagueWidget>
           controller: controller,
           children: [
             ListRankingGroupWidget(
-              leagueId: widget.leagueId,
+              leagueSyncId:widget.leagueSyncId,
             ),
             MatchesScheduleWidget(
-              leagueId: widget.leagueId,
+              role: 'organizer',
+              leagueSyncId: widget.leagueSyncId,
               matchFilter: 'scheduled,live,finished',
             ),
             MatchesScheduleWidget(
-              leagueId: widget.leagueId,
+              role: 'organizer',
+
+              leagueSyncId: widget.leagueSyncId,
               matchFilter: 'scheduled,live,finished',
             ),
             MatchesScheduleWidget(
-              leagueId: widget.leagueId,
+              role: 'organizer',
+
+              leagueSyncId: widget.leagueSyncId,
               matchFilter: 'scheduled,live,finished',
             ),
           ],

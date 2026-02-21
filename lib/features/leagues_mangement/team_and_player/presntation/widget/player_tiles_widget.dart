@@ -6,9 +6,9 @@ import '../state_mangment/riverpod.dart';
 
 class PlayerTilesWidget extends ConsumerWidget {
   const PlayerTilesWidget(this.player,
-      {super.key, required this.categoryId, required this.leagueId});
+      {super.key, required this.categoryId, required this.leagueSyncId});
 
-  final int leagueId;
+  final String leagueSyncId;
   final int categoryId;
   final LeaguePlayerModel player;
 
@@ -49,7 +49,7 @@ class PlayerTilesWidget extends ConsumerWidget {
                     .deletePlayerCategory(
                         leaguePlayerId: player.id!, categoryId: categoryId);
                 ref
-                    .read(playersByCategoryProvider((leagueId, categoryId))
+                    .read(playersByCategoryProvider((leagueSyncId, categoryId))
                         .notifier)
                     .load();
               },

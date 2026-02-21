@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/core/state/state.dart';
 import 'package:safirah/features/leagues_mangement/team_and_player/presntation/page/teams_with_players_widget.dart';
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/state/check_state_in_post_api_data_widget.dart';
@@ -14,13 +15,13 @@ import '../widget/player_selection_team_widget.dart';
 import '../widget/team_drop_down_filed_widget.dart';
 
 class TeamStepPage extends ConsumerStatefulWidget {
-  final int leagueId;
+  final String leagueSyncId;
   final List<LeaguePlayerModel> players;
   final int maxPlayersTeam;
 
   const TeamStepPage(
       {super.key,
-      required this.leagueId,
+      required this.leagueSyncId,
       required this.players,
       required this.maxPlayersTeam});
 
@@ -31,7 +32,7 @@ class TeamStepPage extends ConsumerStatefulWidget {
 class _TeamStepPageState extends ConsumerState<TeamStepPage> {
   TeamModel? _selectedTeam;
   final _searchCtrl = TextEditingController();
-  final _pickedIds = <int>{};
+  final _pickedIds = <String>{};
 
   @override
   void initState() {
@@ -47,15 +48,15 @@ class _TeamStepPageState extends ConsumerState<TeamStepPage> {
 
   @override
   Widget build(BuildContext context) {
-    final currentCount = (_selectedTeam?.id == null)
+    final currentCount = (_selectedTeam?.syncId == null)
         ? 0
-        : ref.watch(playersCountOfTeamProvider((_selectedTeam!.id!)));
+        : ref.watch(playersCountOfTeamProvider((_selectedTeam!.syncId)));
     final remaining =
         (widget.maxPlayersTeam - currentCount).clamp(0, widget.maxPlayersTeam);
-    final canCommit = _selectedTeam?.id != null &&
+    final canCommit = _selectedTeam?.syncId != null &&
         _pickedIds.isNotEmpty &&
         _pickedIds.length <= remaining;
-    final state = ref.watch(assignToTeamProvider(_selectedTeam?.id ?? 1));
+    final state = ref.watch(assignToTeamProvider(_selectedTeam?.syncId ?? ''));
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(color: Colors.white),
@@ -71,11 +72,12 @@ class _TeamStepPageState extends ConsumerState<TeamStepPage> {
           children: [
             12.h.verticalSpace,
             TeamDropdownFieldWidget(
-              leagueId: widget.leagueId,
+              leagueSyncId: widget.leagueSyncId,
               value: _selectedTeam,
               onChanged: (team) {
                 setState(() {
                   _selectedTeam = team;
+
                   _pickedIds.clear();
                 });
               },
@@ -99,7 +101,9 @@ class _TeamStepPageState extends ConsumerState<TeamStepPage> {
                     hintFontSize: 12,
                     fillColor: AppColors.scaffoldColor,
                     hintText: "رقم المستخدم",
-                    onChanged: (_) => setState(() {}),
+                    onChanged: (_) => setState(() {
+                      print( widget.maxPlayersTeam);
+                    }),
                   ),
                 ],
               ),
@@ -109,7 +113,7 @@ class _TeamStepPageState extends ConsumerState<TeamStepPage> {
               child: PlayersSelectionTeamWidget(
                 title: 'تحديد اللاعبين',
                 pickedIds: _pickedIds,
-                leagueId: widget.leagueId,
+                leagueSyncId: widget.leagueSyncId,
                 searchController: _searchCtrl,
                 searchLabel: 'البحث عن لاعب',
                 searchHint: 'اسم اللاعب',
@@ -141,7 +145,7 @@ class _TeamStepPageState extends ConsumerState<TeamStepPage> {
                                   navigateTo(
                                       context,
                                       TeamsWithPlayersPage(
-                                          leagueId: widget.leagueId));
+                                          leagueSyncId: widget.leagueSyncId));
                                 },
                                 background: AppColors.primaryColor,
                                 text: 'متابعة',
@@ -160,18 +164,19 @@ class _TeamStepPageState extends ConsumerState<TeamStepPage> {
                           functionSuccess: () {
                             ref
                                 .read(leaguePlayersWithoutTeamProvider(
-                                        widget.leagueId)
+                                        widget.leagueSyncId)
                                     .notifier)
                                 .load();
                           },
                           bottonWidget: DefaultButtonWidget(
+                            isLoading: state.stateData == States.loading,
                               onPressed: canCommit
                                   ? (_selectedTeam != null &&
                                           _pickedIds.isNotEmpty)
                                       ? () {
                                           ref
                                               .read(assignToTeamProvider(
-                                                      _selectedTeam!.id!)
+                                                      _selectedTeam!.syncId)
                                                   .notifier)
                                               .assign(_pickedIds.toList());
                                         }

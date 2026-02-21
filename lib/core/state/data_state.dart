@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
+
 import 'pagination_data/paginated_model.dart';
 import 'state.dart';
 
 class DataState<T> {
   States stateData;
-  final DioException? exception;
+  final Object? exception;
   final T data;
 
   DataState({
@@ -22,7 +23,7 @@ class DataState<T> {
 
   DataState<T> copyWith({
     required States state,
-    DioException? exception,
+    Object? exception,
     T? data,
   }) {
     return DataState(
@@ -42,6 +43,29 @@ extension DataStateExtension<T> on DataState<PaginationModel<T>> {
         currentPage: newData.currentPage,
         lastPage: newData.lastPage,
       ),
+    );
+  }
+}
+enum RefreshStatus { idle, loading, error }
+
+class RefreshState {
+  final RefreshStatus status;
+  final DioException? exception;
+
+  const RefreshState({
+    required this.status,
+    this.exception,
+  });
+
+  factory RefreshState.idle() => const RefreshState(status: RefreshStatus.idle);
+
+  RefreshState copyWith({
+    RefreshStatus? status,
+    DioException? exception,
+  }) {
+    return RefreshState(
+      status: status ?? this.status,
+      exception: exception,
     );
   }
 }

@@ -15,13 +15,13 @@ import '../widget/player_selection_cat_widget.dart';
 import 'category_tab_page.dart';
 
 class CategoryStepPage extends ConsumerStatefulWidget {
-  final int leagueId;
+  final String leagueSyncId;
   final int maxTeam;
   final List<LeaguePlayerModel> players;
 
   const CategoryStepPage(
       {super.key,
-      required this.leagueId,
+      required this.leagueSyncId,
       required this.players,
       required this.maxTeam});
 
@@ -39,7 +39,7 @@ class _CategoryStepPageState extends ConsumerState<CategoryStepPage> {
     final currentCount = (_selectedCategory == null)
         ? 0
         : ref.watch(playersCountByCategoryProvider((
-            widget.leagueId,
+            widget.leagueSyncId,
             _selectedCategory!.id!,
           )));
     final remaining = (widget.maxTeam - currentCount).clamp(0, widget.maxTeam);
@@ -66,7 +66,7 @@ class _CategoryStepPageState extends ConsumerState<CategoryStepPage> {
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             SizedBox(height: 12.h),
             CategoryDropdownFieldWidget(
-              leagueId: widget.leagueId, // يجلب الفئات داخليًا
+              leagueSyncId: widget.leagueSyncId, // يجلب الفئات داخليًا
               value: _selectedCategory,
               onChanged: (cat) {
                 setState(() {
@@ -91,7 +91,7 @@ class _CategoryStepPageState extends ConsumerState<CategoryStepPage> {
               child: PlayersSelectionCatWidget(
                 title: 'تحديد اللاعبين',
                 pickedIds: _pickedIds,
-                leagueId: widget.leagueId,
+                leagueSyncId: widget.leagueSyncId,
                 searchController: _searchCtrl,
                 searchLabel: 'البحث عن لاعب',
                 searchHint: 'رقم المستخدم',
@@ -124,7 +124,7 @@ class _CategoryStepPageState extends ConsumerState<CategoryStepPage> {
                                     CategoryTabsPage(
                                       numOfLeaguePlayerWithOutCate: 0,
                                       // numOfLeaguePlayerWithOutCate:_visiblePlayers.length ,
-                                      leagueId: widget.leagueId,
+                                      leagueSyncId: widget.leagueSyncId,
                                       leagueName: 'دوري الاشول',
                                     ));
                               },
@@ -143,7 +143,7 @@ class _CategoryStepPageState extends ConsumerState<CategoryStepPage> {
                             functionSuccess: () {
                               ref
                                   .read(leaguePlayersWithoutCategoryProvider(
-                                          widget.leagueId)
+                                          widget.leagueSyncId)
                                       .notifier)
                                   .load();
                             },
@@ -162,7 +162,7 @@ class _CategoryStepPageState extends ConsumerState<CategoryStepPage> {
                                       }
                                       ref
                                           .read(playersByCategoryProvider((
-                                            widget.leagueId,
+                                            widget.leagueSyncId,
                                             _selectedCategory!.id!
                                           )).notifier)
                                           .load();
