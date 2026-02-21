@@ -24,6 +24,7 @@ class MainAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       elevation: 0.0,
       centerTitle: true,
+      automaticallyImplyLeading: false,
       title: AutoSizeTextWidget(
         text: title,
         fontSize: 14.8.sp,

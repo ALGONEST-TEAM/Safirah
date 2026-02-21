@@ -9,10 +9,8 @@ import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../core/widgets/design_please_login_widget.dart';
 import '../../../../core/widgets/logo_shimmer_widget.dart';
 import '../../../../services/auth/auth.dart';
-import '../../data/model/standings_model.dart';
 import '../riverpod/prediction_riverpod.dart';
 import 'standings_list_card_widget.dart';
-import 'standings_rank_widget.dart';
 import 'standings_scope_card_widget.dart';
 import 'standings_user_row_widget.dart';
 

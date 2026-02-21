@@ -5,8 +5,9 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:safirah/core/helpers/navigateTo.dart';
-import '../../../features/leagues_mangement/home/presntation/page/home_page.dart';
+import '../../../features/leagues_mangement/home/presntation/pages/home_page.dart';
 import '../../../features/leagues_mangement/leagues/persntaion/page/show_leagues_page.dart';
+import '../../../features/prediction/presentation/pages/prediction_page.dart';
 import '../../../features/profile/presentation/pages/profile_page.dart';
 import '../../../generated/l10n.dart';
 import '../../constants/app_icons.dart';
@@ -28,7 +29,7 @@ class _BottomNavigationBarWidgetState
     extends ConsumerState<BottomNavigationBarOfMangeLeagueWidget> {
   final List<Widget> _pages = [
     const ExitFromAppWidget(child: HomePages()),
-    const ExitFromAppWidget(child: Scaffold()),
+    const ExitFromAppWidget(child: PredictionPage()),
     const ExitFromAppWidget(child: ShowLeaguesPage()),
     const ExitFromAppWidget(child: ProfilePage()),
   ];

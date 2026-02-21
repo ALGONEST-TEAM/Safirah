@@ -100,4 +100,9 @@ class AppURL {
   static const String prediction = '/predictions';
 
   static const String standings = '/predictions/rankings';
+
+  static const String leagueHome = '/league-application/home/main';
+
+  static const String news = '/league-application/news';
+
 }

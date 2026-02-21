@@ -96,15 +96,6 @@ class _PredictionPageState extends State<PredictionPage>
                             fontSize: 12.sp,
                             colorText: textColor,
                           ),
-                          // child: Text(_tabs[i],
-                          //     maxLines: 1,
-                          //     overflow: TextOverflow.ellipsis,
-                          //     textDirection: TextDirection.rtl,
-                          //     style: TextStyle(
-                          //         fontFamily: 'IBMPlexSansArabic',
-                          //         fontWeight: FontWeight.w500,
-                          //         fontSize: 12.sp,
-                          //         color: textColor)),
                         );
                       },
                     ),
