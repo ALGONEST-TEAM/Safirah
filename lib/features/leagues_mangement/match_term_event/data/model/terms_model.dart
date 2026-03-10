@@ -54,9 +54,6 @@ class TermModel {
         name: json['name'] as String,
         type: json['type'] as String,
         order: json['order'] as int,
-        createdAt: json['createdAt'] != null
-            ? DateTime.tryParse(json['createdAt'])
-            : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -84,6 +81,9 @@ class TermModel {
         order: order ?? this.order,
         createdAt: createdAt ?? this.createdAt,
       );
+  static List<TermModel> fromJsonList(List json) {
+    return json.map((e) => TermModel.fromJson(e)).toList();
+  }
 }
 
 class LeagueTermModel {
@@ -91,10 +91,12 @@ class LeagueTermModel {
   final String syncId;
   final String leagueSyncId;
   final String termSyncId;
+  final TermModel? term;
   final String? termName; // من جدول terms
   final String? termType; // من جدول terms
   final int durationMinutes;
   final int? orderTerm;
+
   LeagueTermModel({
     this.id,
     required this.syncId,
@@ -103,29 +105,32 @@ class LeagueTermModel {
     required this.termSyncId,
     this.termName,
     this.termType,
+    this.term,
     required this.durationMinutes,
   });
-LeagueTermModel copyWith({
-  int? id,
-  String? syncId,
-  String? leagueSyncId,
-  String? termSyncId,
-  String? termName,
-  String? termType,
-  int? durationMinutes,
-  int? orderTerm,
-}) {
-  return LeagueTermModel(
-    id: id ?? this.id,
-    syncId: syncId ?? this.syncId,
-    leagueSyncId: leagueSyncId ?? this.leagueSyncId,
-    termSyncId: termSyncId ?? this.termSyncId,
-    termName: termName ?? this.termName,
-    termType: termType ?? this.termType,
-    durationMinutes: durationMinutes ?? this.durationMinutes,
-    orderTerm: orderTerm ?? this.orderTerm,
-  );
-}
+
+  LeagueTermModel copyWith(
+      {int? id,
+      String? syncId,
+      String? leagueSyncId,
+      String? termSyncId,
+      String? termName,
+      String? termType,
+      int? durationMinutes,
+      int? orderTerm,
+      TermModel? term}) {
+    return LeagueTermModel(
+        id: id ?? this.id,
+        syncId: syncId ?? this.syncId,
+        leagueSyncId: leagueSyncId ?? this.leagueSyncId,
+        termSyncId: termSyncId ?? this.termSyncId,
+        termName: termName ?? this.termName,
+        termType: termType ?? this.termType,
+        durationMinutes: durationMinutes ?? this.durationMinutes,
+        orderTerm: orderTerm ?? this.orderTerm,
+        term: term ?? this.term);
+  }
+
   factory LeagueTermModel.fromEntity(LeagueTerm entity) {
     return LeagueTermModel(
       id: entity.id,
@@ -169,16 +174,17 @@ LeagueTermModel copyWith({
       };
 
   // 🧱 Factory من JSON (للتحويل من API أو تخزين محلي)
-  factory LeagueTermModel.fromJson(Map<String, dynamic> json) => LeagueTermModel(
+  factory LeagueTermModel.fromJson(Map<String, dynamic> json) =>
+      LeagueTermModel(
         id: json['id'] as int?,
         syncId: (json['sync_id'] ?? json['syncId']) as String,
-        leagueSyncId: json['leagueSyncId'] as String,
+        leagueSyncId: json['league_sync_id'] as String,
         termSyncId: (json['termSyncId'] ?? json['term_sync_id']) as String,
-        termName: json['termName'] as String?,
-        termType: json['termType'] as String?,
-        durationMinutes: json['durationMinutes'] as int,
+        termName: json['term']['name'] as String?,
+        termType: json['term']['term_type'] as String?,
+        durationMinutes: json['duration_minutes'] as int,
+        term: TermModel.fromJson(json['term']),
       );
 
-  // ⚙️ نسخ مع تعديل (copyWith)
-
+// ⚙️ نسخ مع تعديل (copyWith)
 }

@@ -8,6 +8,7 @@ import '../../../../../core/network/errors/sync_dio_exception.dart';
 import '../../../../../injection.dart' as di;
 import '../data_source/local_data_source.dart';
 import '../data_source/remote_data_source/remote_data_source.dart';
+import '../model/match_event_model.dart';
 import '../model/round_model.dart';
 
 class MatchesRepository {
@@ -94,14 +95,12 @@ class MatchesRepository {
       }else{
         remoteRounds = await remote.getLeagueRoundsRole(
           leagueSyncId,
-          'media'
+         role
         );
       }
 
-      final rounds = remoteRounds;
-      print('API rounds=${rounds.length}');
-      print('first groups=${rounds.first.groups.length}');
-      print('first matches=${rounds.first.groups.first.matches.length}');
+
+       print('API rounds=${remoteRounds.length}');
 
       await local.upsertLeagueRoundsFromApiOneResponse(
         leagueSyncId: leagueSyncId,
@@ -133,12 +132,20 @@ class MatchesRepository {
         );
 
         try {
-          di.sl<SyncTrigger>().syncIfOnlineInBackground();
+          di.sl<SyncTrigger>().syncIfOnline();
         } on DioException catch (e) {
           throw SyncDioException.from(e);
         }
         return unit;
       },
+    );
+  }
+
+  Future<Either<DioException,MatchDetailsModel>>
+  getMatchDetails(String matchSyncId) {
+    return RepoGuard.run<MatchDetailsModel>(
+      action: () =>
+          remote.getMatchDetails(matchSyncId),
     );
   }
 }

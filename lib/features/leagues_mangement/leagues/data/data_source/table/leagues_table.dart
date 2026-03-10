@@ -8,6 +8,8 @@ class Leagues extends Table {
   TextColumn get syncId => text()();
 
   TextColumn get name => text()();
+  TextColumn get nameOrganizer => text().nullable()();
+  BoolColumn get canWatch => boolean().nullable().withDefault(const Constant(false))();
 
   TextColumn get subscriptionPrice => text()();
 

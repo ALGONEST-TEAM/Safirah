@@ -48,6 +48,8 @@ Future<EntitySyncEndpoint> defaultEntityEndpointResolver(
       return _resolveAssistEndpoint(operation);
     case 'warning':
       return _resolveWarningEndpoint(operation);
+    case 'rule':
+      return _resolveRuleEndpoint(operation);
     default:
       throw UnsupportedError('Unknown entityType: $entityType');
   }
@@ -128,6 +130,17 @@ EntitySyncEndpoint _resolvePlayerToTeamEndpoint(String operation) {
   }
 }
 
+EntitySyncEndpoint _resolveRuleEndpoint(String operation) {
+  switch (operation) {
+    case SyncService.operationCreate:
+      return EntitySyncEndpoint(
+        path: '${AppURL.baseURL}/league-application/league-rules',
+        method: HttpMethod.post,
+      );
+    default:
+      throw UnsupportedError('Unknown operation for league: $operation');
+  }
+}
 EntitySyncEndpoint _resolveLeagueTermEndpoint(String operation) {
   switch (operation) {
     case SyncService.operationCreate:

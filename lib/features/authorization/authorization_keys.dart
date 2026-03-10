@@ -10,6 +10,7 @@ class AuthorizationKeys {
 
   // Matches
   static const matchManage = 'match.manage';
+  static const matchReport = 'match.report';
 
   // Teams
   static const teamManage = 'team.manage';

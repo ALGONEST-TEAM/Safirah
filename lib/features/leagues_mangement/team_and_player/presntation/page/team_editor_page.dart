@@ -8,6 +8,7 @@ import '../../../../../core/state/state.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/buttons/default_button.dart';
+import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../core/widgets/text_form_field.dart';
 import '../../data/model/team_model.dart';
 import '../state_mangment/riverpod.dart';
@@ -46,18 +47,9 @@ class _TeamEditorPageState extends ConsumerState<TeamEditorPage> {
     final saver = ref.watch(updateTeamProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const AutoSizeTextWidget(
-          text: 'تعديل بيانات الفريق',
-          colorText: Colors.white,
-        ),
-        centerTitle: true,
-        leading: const BackButton(
-          color: Colors.white,
-        ),
-        backgroundColor: AppColors.secondaryColor,
-      ),
-      body: SafeArea(
+      appBar:SecondaryAppBarWidget(title: 'تعديل بيانات الفريق',),
+
+    body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
           child: Column(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:safirah/core/state/check_state_in_get_api_data_widget.dart';
+import 'package:safirah/core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../state_mangment/riverpod.dart';
@@ -16,17 +17,7 @@ class InvitationsPlayersPage extends ConsumerWidget {
     final invitationsPlayersState =
     ref.watch(invitationsPlayersProvider(leagueSyncId));
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(
-          color: Colors.white,
-        ),
-        title: const AutoSizeTextWidget(
-          text: 'طلبات الانضمام',
-          colorText: Colors.white,
-        ),
-        centerTitle: true,
-        backgroundColor: AppColors.secondaryColor,
-      ),
+      appBar: SecondaryAppBarWidget( title: 'طلبات الانضمام',),
       body: CheckStateInGetApiDataWidget(
         state: invitationsPlayersState,
         widgetOfData: ListView.builder(

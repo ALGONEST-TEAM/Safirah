@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 
 class RuleTileWidget extends StatelessWidget {
   const RuleTileWidget({
@@ -16,15 +17,14 @@ class RuleTileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(
-        text,
+      title: AutoSizeTextWidget(
+       text:  text,
         maxLines: 6,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 11.sp),
+        fontSize: 10.5.sp,
       ),
       leading: SizedBox(
         width: 20.w,
-        height: 20.h,
+        height: 10.h,
         child: Checkbox(
           value: selected,
           onChanged: onChanged,

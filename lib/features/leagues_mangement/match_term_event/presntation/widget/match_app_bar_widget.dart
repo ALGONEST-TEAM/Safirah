@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../state_mangement/riverpod.dart';
 
 class MatchAppBarWidget extends ConsumerWidget implements PreferredSizeWidget {
@@ -19,27 +20,24 @@ class MatchAppBarWidget extends ConsumerWidget implements PreferredSizeWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final termState = ref.watch(matchTermCounterProvider(matchSyncId));
 
-    return AppBar(
-      leading: const BackButton(color: Colors.white),
-      backgroundColor: AppColors.secondaryColor,
-      title: const AutoSizeTextWidget(
-        text: 'احداث المباراة',
-        colorText: Colors.white,
-      ),
+    return SecondaryAppBarWidget(
+
+      title: 'احداث المباراة',
+
       actions: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 10.w),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.secondaryColor,
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: AutoSizeTextWidget(
               text: _formatTime(termState.data.elapsedSeconds),
               fontSize: 14.sp,
               fontWeight: FontWeight.bold,
-              colorText: AppColors.secondaryColor,
+              colorText: Colors.white,
             ),
           ),
         ),

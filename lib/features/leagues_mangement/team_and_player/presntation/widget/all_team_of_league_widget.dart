@@ -27,9 +27,9 @@ class _AllTeamOfLeagueWidgetState extends ConsumerState<AllTeamOfLeagueWidget> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      ref.read(teamsRefreshProvider(widget.leagueSyncId).notifier).refresh();
-    });
+    // Future.microtask(() {
+    //   ref.read(teamsRefreshProvider(widget.leagueSyncId).notifier).refresh();
+    // });
   }
   @override
   Widget build(BuildContext context) {
@@ -64,6 +64,8 @@ class _AllTeamOfLeagueWidgetState extends ConsumerState<AllTeamOfLeagueWidget> {
                         PlayersOfTeamWidget(
                           teamSyncId: t.syncId!,
                           teamName: t.teamName,
+                          leagueSyncId: widget.leagueSyncId,
+                          teamModel: t,
                         ));
               },
             );

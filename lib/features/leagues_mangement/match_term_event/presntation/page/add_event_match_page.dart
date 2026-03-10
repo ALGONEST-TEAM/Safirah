@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../team_and_player/data/model/team_model.dart';
 import '../../data/model/match_term_model.dart';
 import '../state_mangement/riverpod.dart';
@@ -41,7 +42,8 @@ class _AddEventMatchPageState extends ConsumerState<AddEventMatchPage> {
     final matchTermSyncId = currentTermState.data?.syncId ?? '';
 
     return Scaffold(
-      appBar: MatchAppBarWidget(matchSyncId: widget.matchSyncId),
+       appBar: MatchAppBarWidget(matchSyncId: widget.matchSyncId),
+
       body: DefaultTabController(
         length: 2,
         child: Column(
@@ -62,6 +64,7 @@ class _AddEventMatchPageState extends ConsumerState<AddEventMatchPage> {
               matchSyncId: widget.matchSyncId,
               leagueSyncId: widget.leagueSyncId,
               roundSyncId: widget.roundSyncId,
+
             ),
           ],
         ),

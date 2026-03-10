@@ -11,12 +11,14 @@ class GroupCardWidget extends StatelessWidget {
   final String leagueSyncId;
   final RoundModel round;
   final String matchFilter;
+  final String role;
 
   const GroupCardWidget(
       {super.key,
         required this.groupWithMatches,
         required this.leagueSyncId,
         required this.round,
+        required this.role,
         required this.matchFilter});
 
   String _groupHeaderDate() {
@@ -43,7 +45,7 @@ class GroupCardWidget extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: AutoSizeTextWidget(
               text: matches.isNotEmpty
-                  ? "المجموعة ${groupWithMatches.groupName}   ${_groupHeaderDate()}"
+                  ? "المجموعة ${groupWithMatches.groupName} "
                   : "",
             ),
           ),
@@ -53,6 +55,7 @@ class GroupCardWidget extends StatelessWidget {
             return Column(
               children: [
                 MatchTileWidget(
+                  role: role,
                   roundSyncId: round.syncId!,
                   match: match,
                   leagueSyncId: leagueSyncId,

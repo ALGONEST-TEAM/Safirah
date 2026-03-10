@@ -55,16 +55,16 @@ class MatchTermModel {
         matchSyncId: (json['match_sync_id'] ?? json['matchSyncId']) ??'',
         leagueTermSyncId:
             (json['league_term_sync_id'] ?? json['leagueTermSyncId'])??'' ,
-        // startTime: json['start_time'] != null
-        //     ? DateTime.tryParse(json['start_time'] ??'')
-        //     : null,
-        // endTime: json['end_time'] != null
-        //     ? DateTime.tryParse(json['end_time'] ??'')
-        //     : null,
+        startTime: json['start_time'] != null
+            ? DateTime.tryParse(json['start_time'] ??'')
+            : null,
+        endTime: json['end_time'] != null
+            ? DateTime.tryParse(json['end_time'] ??'')
+            : null,
         additionalMinutes: json['additional_minutes'] as int? ?? 0,
         isFinished: json['is_finished'] as bool? ?? false,
         // leagueTermName: json['leagueTermName'] as String?,
-        // termName: json['term']['name'] ??'',
+         //termName: json['term_name']['name'] ??'',
         // termType: json['termType'] as String?,
       );
 

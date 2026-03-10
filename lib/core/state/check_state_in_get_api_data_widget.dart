@@ -6,6 +6,7 @@ import '../network/errors/app_exception_message.dart';
 import '../state/state.dart';
 import '../theme/app_colors.dart';
 import '../widgets/error_widget.dart';
+import '../widgets/logo_shimmer_widget.dart';
 import 'data_state.dart';
 
 class CheckStateInGetApiDataWidget extends StatelessWidget {
@@ -26,7 +27,8 @@ class CheckStateInGetApiDataWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(state.stateData);
+    // NOTE: Avoid spamming logs on rebuilds.
+    // print(state.stateData);
 
     if (state.stateData == States.loaded ||
         state.stateData == States.loadingMore) {
@@ -115,21 +117,22 @@ class CheckStateInStreamWidget<T> extends StatelessWidget {
 
       return loadingWidget ??
           const Center(
-            child: CircularProgressIndicator(color: AppColors.primaryColor),
+            child: LogoShimmerWidget(),
           );
     }
 
     // 2) ERROR
     if (async.hasError) {
       final error = async.error;
+      final safeError = error ?? Exception('Unknown error');
 
       // ✅ قاعدة إلزامية: إذا عندك بيانات قديمة -> FlashBar فقط + اعرض البيانات القديمة
       if (previousData != null) {
         SchedulerBinding.instance.addPostFrameCallback((_) {
           showFlashBarError(
             context: context,
-            title: MessageOfError.get(error as Object).first,
-            text: MessageOfError.get(error as Object).last,
+            title: MessageOfError.get(safeError).first,
+            text: MessageOfError.get(safeError).last,
           );
         });
 
@@ -139,8 +142,8 @@ class CheckStateInStreamWidget<T> extends StatelessWidget {
       // إذا لا توجد بيانات قديمة: اعرض Error Widget مع زر refresh (إن توفر)
       return Center(
         child: ErrorsWidget(
-          title: MessageOfError.get(error as Object).first,
-          subTitle: MessageOfError.get(error as Object).last,
+          title: MessageOfError.get(safeError).first,
+          subTitle: MessageOfError.get(safeError).last,
           onPressed: onRefresh == null ? null : () => onRefresh!(),
         ),
       );
@@ -153,7 +156,23 @@ class CheckStateInStreamWidget<T> extends StatelessWidget {
 
   Widget _buildDataOrEmpty(T data) {
     if (isEmpty(data)) {
-      return emptyBuilder?.call() ?? const SizedBox.shrink();
+      // If caller didn't provide an emptyBuilder, don't collapse the UI.
+      // Show a minimal empty state instead (and allow refresh if provided).
+      if (emptyBuilder != null) return emptyBuilder!.call();
+
+      final content = const Center(child: Text('لا توجد بيانات'));
+
+      if (onRefresh != null) {
+        return RefreshIndicator(
+          onRefresh: onRefresh!,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [const SizedBox(height: 280), content],
+          ),
+        );
+      }
+
+      return content;
     }
     return dataBuilder(data);
   }

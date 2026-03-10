@@ -6,6 +6,7 @@ import 'package:safirah/core/constants/app_icons.dart';
 import 'package:safirah/core/helpers/navigateTo.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../match_term_event/presntation/page/initialization_term_page.dart';
 import '../widget/matches_schedule_widget.dart';
 
@@ -17,19 +18,9 @@ class RefereeMatchesPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context,ref) {
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(
-          color: Colors.white,
-        ),
-        title: const AutoSizeTextWidget(
-          text: 'ادارة مبارياتي',
-          colorText: Colors.white,
-        ),
-        centerTitle: true,
-        backgroundColor: AppColors.secondaryColor,
+      appBar:   SecondaryAppBarWidget(title: 'ادارة المباريات'),
 
-      ),
-      body: SafeArea(
+    body: SafeArea(
         child: DefaultTabController(
           length: 2,
           child: Column(
@@ -42,7 +33,7 @@ class RefereeMatchesPage extends ConsumerWidget {
                       child: Container(
                         height: 40.h,
                         width: double.infinity,
-                        padding: EdgeInsets.all(4.r),
+                        padding: EdgeInsets.all(2.r),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12.r),
@@ -54,16 +45,17 @@ class RefereeMatchesPage extends ConsumerWidget {
                             dividerColor: Colors.transparent,
                             tabAlignment: TabAlignment.fill,
                             indicator: BoxDecoration(
-                              color: AppColors.primaryColor,
+                              color: AppColors.secondaryColor,
                               borderRadius: BorderRadius.circular(8.r),
                             ),
-                            padding: EdgeInsets.symmetric(horizontal: 4.5.w),
+                            padding: EdgeInsets.symmetric(horizontal: 2.5.w),
                             indicatorSize: TabBarIndicatorSize.tab,
                             overlayColor:
                             MaterialStateProperty.all(Colors.transparent),
                             labelPadding: EdgeInsets.zero,
                             indicatorPadding:
-                            EdgeInsets.symmetric(horizontal: 4.5.w, vertical: 2),
+                            EdgeInsets.symmetric(
+                                horizontal: 4.5.w, vertical: 0),
                             labelColor: Colors.white,
                             unselectedLabelColor: AppColors.secondaryColor,
                             tabs: const [
@@ -75,6 +67,7 @@ class RefereeMatchesPage extends ConsumerWidget {
                       ),
                     ),
                   ),
+
                 ],
               ),
               // ===== المحتوى =====
@@ -89,7 +82,7 @@ class RefereeMatchesPage extends ConsumerWidget {
                     MatchesScheduleWidget(
                       role: role,
                       leagueSyncId: leagueSyncId,
-                      matchFilter: 'live',
+                      matchFilter: 'live,finished',
                     ),
                   ],
                 ),

@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 
 class Matches extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  // ✅ sync_id is the primary key
   TextColumn get syncId => text().named('sync_id')();
 
   TextColumn get leagueSyncId => text()
@@ -23,19 +23,17 @@ class Matches extends Table {
       .named('away_team_sync_id')
       .customConstraint('REFERENCES teams(sync_id) ON DELETE RESTRICT')();
 
-  // ✅ NEW: referee sync id (nullable)
   TextColumn get refereeSyncId => text()
       .named('referee_sync_id')
       .nullable()
       .customConstraint('REFERENCES users_has_role(sync_id) ON DELETE SET NULL')();
 
-  // ✅ NEW: media sync id (nullable)
   TextColumn get mediaSyncId => text()
       .named('media_sync_id')
       .nullable()
       .customConstraint('REFERENCES users_has_role(sync_id) ON DELETE SET NULL')();
 
-  DateTimeColumn get matchDate => dateTime()(); // تاريخ اليوم
+  DateTimeColumn get matchDate => dateTime()();
   DateTimeColumn get scheduledStartTime => dateTime().nullable()();
   DateTimeColumn get startTime => dateTime().nullable()();
   DateTimeColumn get endTime => dateTime().nullable()();
@@ -46,21 +44,23 @@ class Matches extends Table {
   TextColumn get status => text()
       .withDefault(const Constant('unscheduled'))
       .check(status.isIn([
-    'scheduled',
-    'live',
-    'unscheduled',
-    'finished',
-    'canceled',
-    'walkover',
-    'postponed'
-  ]))();
+        'scheduled',
+        'live',
+        'unscheduled',
+        'finished',
+        'canceled',
+        'walkover',
+        'postponed'
+      ]))();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
+  Set<Column<Object>> get primaryKey => {syncId};
+
+  @override
   List<String> get customConstraints => [
-    'UNIQUE(sync_id)',
-    'CHECK(home_team_sync_id <> away_team_sync_id)',
-  ];
+        'CHECK(home_team_sync_id <> away_team_sync_id)',
+      ];
 }

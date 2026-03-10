@@ -38,4 +38,16 @@ class TeamAndPlayerRemoteDataSource {
     return InvitationsPlayersModel.fromJsonInvitationsPlayersList(
         response.data['data']['data']);
   }
+
+  Future<LeaguePlayerStatsModel> getLeaguePlayersStatistics({
+    required String leagueSyncId,
+  }) async {
+    final response = await RemoteRequest.getData(
+      url: '${AppURL.baseURL}/league-application/league-statistics',
+      query: {
+        'league_sync_id': leagueSyncId,
+      },
+    );
+    return LeaguePlayerStatsModel.fromJson(response.data['data']);
+  }
 }

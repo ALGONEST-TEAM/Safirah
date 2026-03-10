@@ -25,9 +25,8 @@ class LatestNewsCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         navigateTo(context, NewsDetailsPage(id: news.id));
-
       },
       child: Container(
         height: size.height,
@@ -70,7 +69,7 @@ class LatestNewsCardWidget extends StatelessWidget {
                             VideoPlayerPage(url: news.primaryMedia.url),
                       ),
                     );
-                  }else{
+                  } else {
                     navigateTo(context, NewsDetailsPage(id: news.id));
                   }
                 },

@@ -7,8 +7,8 @@ class MatchesPredictionsModel {
   final String? resultInfo;
   final bool? hasPrediction;
   final bool? isSpecialMatch;
-  final TeamModel homeTeam;
-  final TeamModel awayTeam;
+  final TeamModelForPrediction homeTeam;
+  final TeamModelForPrediction awayTeam;
   final num? homeScore;
   final num? awayScore;
   final num? pointsEarned;
@@ -42,8 +42,8 @@ class MatchesPredictionsModel {
       resultInfo: json['result_info'] ?? '',
       hasPrediction: json['has_prediction'] ?? false,
       isSpecialMatch: json['is_special_match'] ?? false,
-      homeTeam: TeamModel.fromJson(json['home_team']),
-      awayTeam: TeamModel.fromJson(json['away_team']),
+      homeTeam: TeamModelForPrediction.fromJson(json['home_team']),
+      awayTeam: TeamModelForPrediction.fromJson(json['away_team']),
       statusColor: json['status_color'] ?? '',
       pointsEarned: json['points_earned'] ?? 0,
       homeScore: prediction?['home_score'] ?? 0,
@@ -57,21 +57,21 @@ class MatchesPredictionsModel {
   }
 }
 
-class TeamModel {
+class TeamModelForPrediction {
   final int id;
   final String name;
   final String logo;
   final int? score;
 
-  TeamModel({
+  TeamModelForPrediction({
     required this.id,
     required this.name,
     required this.logo,
     this.score,
   });
 
-  factory TeamModel.fromJson(Map<String, dynamic> json) {
-    return TeamModel(
+  factory TeamModelForPrediction.fromJson(Map<String, dynamic> json) {
+    return TeamModelForPrediction(
       id: json['id'],
       name: json['name'] ?? '',
       logo: json['logo'] ?? '',

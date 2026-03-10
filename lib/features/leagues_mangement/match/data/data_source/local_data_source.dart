@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'dart:async';
+
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../../core/database/safirah_database.dart';
 import '../../../group/data/model/model.dart';
 import '../../../match_term_event/data/data_source/local_data_source/local_term_data_source.dart';
@@ -73,7 +77,7 @@ class MatchesLocalDataSource {
 
     await db.transaction(() async {
       final groups = await (db.select(db.group)
-            ..where((g) => g.leagueSyncId.equals(leagueSyncId)))
+        ..where((g) => g.leagueSyncId.equals(leagueSyncId)))
           .get();
 
       for (final g in groups) {
@@ -84,12 +88,15 @@ class MatchesLocalDataSource {
           innerJoin(
               db.teams, db.teams.syncId.equalsExp(db.groupTeam.teamSyncId)),
         ])
-              ..where(db.groupTeam.groupSyncId.equals(g.syncId))
-              ..orderBy([OrderingTerm.asc(db.teams.id)]))
+          ..where(db.groupTeam.groupSyncId.equals(g.syncId))
+          ..orderBy([OrderingTerm.asc(db.teams.id)]))
             .get();
 
         final teamSyncIds =
-            teamJoin.map((r) => r.readTable(db.teams).syncId).toList();
+        teamJoin.map((r) =>
+        r
+            .readTable(db.teams)
+            .syncId).toList();
         if (teamSyncIds.length < 2) continue;
 
         // بناء مباريات منطقياً باستخدام sync ids
@@ -104,9 +111,9 @@ class MatchesLocalDataSource {
 
         // جلب الجولات لهذا group (ما زلنا نستخدم groupId هنا للربط الداخلي بالأمان)
         final rounds = await (db.select(db.rounds)
-              ..where((r) =>
-                  r.leagueSyncId.equals(leagueSyncId) & r.groupSyncId.equals(g.syncId))
-              ..orderBy([(r) => OrderingTerm.asc(r.id)]))
+          ..where((r) =>
+          r.leagueSyncId.equals(leagueSyncId) & r.groupSyncId.equals(g.syncId))
+          ..orderBy([(r) => OrderingTerm.asc(r.createdAt)]))
             .get();
 
         if (rounds.isEmpty) continue;
@@ -124,84 +131,144 @@ class MatchesLocalDataSource {
           final takeCount = (remainingMatches / remainingRounds).ceil();
 
           final slice =
-              logicalMatches.skip(matchIndex).take(takeCount).toList();
+          logicalMatches.skip(matchIndex).take(takeCount).toList();
           matchIndex += slice.length;
 
           for (final m in slice) {
             final exists = await (db.select(db.matches)
-                  ..where((match) =>
-                      match.leagueSyncId.equals(leagueSyncId) &
-                      match.roundSyncId.equals(round.syncId) &
-                      ((match.homeTeamSyncId.equals(m.homeTeamSyncId!) &
-                              match.awayTeamSyncId.equals(m.awayTeamSyncId!)) |
-                          (match.homeTeamSyncId.equals(m.awayTeamSyncId!) &
-                              match.awayTeamSyncId.equals(m.homeTeamSyncId!)))))
+              ..where((match) =>
+              match.leagueSyncId.equals(leagueSyncId) &
+              match.roundSyncId.equals(round.syncId) &
+              ((match.homeTeamSyncId.equals(m.homeTeamSyncId!) &
+              match.awayTeamSyncId.equals(m.awayTeamSyncId!)) |
+              (match.homeTeamSyncId.equals(m.awayTeamSyncId!) &
+              match.awayTeamSyncId.equals(m.homeTeamSyncId!)))))
                 .getSingleOrNull();
 
             if (exists != null) continue;
 
             final matchEntity = await db.into(db.matches).insertReturning(
-                  MatchesCompanion.insert(
-                    syncId: const Uuid().v7(),
-                    leagueSyncId: leagueSyncId,
-                    roundSyncId: round.syncId,
-                    homeTeamSyncId: m.homeTeamSyncId!,
-                    awayTeamSyncId: m.awayTeamSyncId!,
-                    matchDate: m.matchDate ?? DateTime.now(),
-                    homeScore: Value(m.homeScore),
-                    awayScore: Value(m.awayScore),
-                    status: Value(m.status),
-                  ),
-                );
+              MatchesCompanion.insert(
+                syncId: const Uuid().v7(),
+                leagueSyncId: leagueSyncId,
+                roundSyncId: round.syncId,
+                homeTeamSyncId: m.homeTeamSyncId!,
+                awayTeamSyncId: m.awayTeamSyncId!,
+                matchDate: m.matchDate ?? DateTime.now(),
+                homeScore: Value(m.homeScore),
+                awayScore: Value(m.awayScore),
+                status: Value(m.status),
+              ),
+            );
 
             // ignore: avoid_print
             print(
-                "✅ Inserted match: ${m.homeTeamSyncId} vs ${m.awayTeamSyncId} in ${round.name}");
+                "✅ Inserted match: ${m.homeTeamSyncId} vs ${m
+                    .awayTeamSyncId} in ${round.name}");
 
-         final termsMatch =   await matchTermLocal.createMatchTermsFromLeague(
+            // ✅ نستخدم createMatchTermsNoTx لأننا داخل transaction خارجية
+            // استخدام createMatchTermsFromLeague هنا كان يسبب nested transaction
+            // مما أدى إلى تكرار league_term_sync_id في الـ API
+            final termsMatch = await matchTermLocal.
+            createMatchTermsNoTx(
               matchSyncId: matchEntity.syncId,
-
               leagueSyncId: leagueSyncId,
-
             );
-            insertedMatches.add(MatchModel.fromEntityWithRelations(matchEntity,matchTerms: termsMatch));
+            print('000000000000000');
 
+            print(termsMatch[0].leagueTermSyncId);
+            print(termsMatch[1].leagueTermSyncId);
+
+            insertedMatches.add(MatchModel.fromEntityWithRelations(
+                matchEntity, matchTerms: termsMatch));
+          }
+        }
+      }  });
+        return insertedMatches;
+      }
+
+
+
+  Stream<List<RoundModel>> watchLeagueRoundsWithGroupsAndMatches({
+    required String leagueSyncId,
+    required String matchFilter,
+  }) {
+    // Drift tables don't expose `.watch()` directly, so we watch a lightweight select.
+    final Stream<void> triggers = MergeStream<void>([
+      (db.select(db.rounds)..where((r) => r.leagueSyncId.equals(leagueSyncId)))
+          .watch()
+          .map((_) => null),
+      (db.select(db.group)..where((g) => g.leagueSyncId.equals(leagueSyncId)))
+          .watch()
+          .map((_) => null),
+      (db.select(db.matches)
+            ..where((m) => m.leagueSyncId.equals(leagueSyncId)))
+          .watch()
+          .map((_) => null),
+      db.select(db.matchTerms).watch().map((_) => null),
+      db.select(db.teams).watch().map((_) => null),
+    ]);
+
+    String signatureOf(List<RoundModel> rounds) {
+      final b = StringBuffer();
+      for (final r in rounds) {
+        b.write('|R:${r.syncId ?? ''}:${r.roundName}|');
+        for (final g in r.groups) {
+          b.write('G:${g.syncId ?? ''}:${g.groupName}|');
+          for (final m in g.matches) {
+            b.write(
+                'M:${m.syncId ?? ''}:${m.status}:${m.homeScore}:${m.awayScore}|');
           }
         }
       }
+      return b.toString();
+    }
+
+    // The key: emit initial snapshot immediately, then recompute on every trigger.
+    // Also, don't spam UI with identical payloads.
+    return Rx.defer(() {
+      DateTime lastNonEmptyAt = DateTime.fromMillisecondsSinceEpoch(0);
+
+      return Stream<void>.value(null)
+          .concatWith([triggers])
+          .asyncMap((_) => getLeagueRoundsWithGroupsAndMatches(
+                leagueSyncId: leagueSyncId,
+                matchFilter: matchFilter,
+              ))
+          .distinct((a, b) => signatureOf(a) == signatureOf(b))
+          // Suppress transient empty only for a brief grace window after having data.
+          .scan<List<RoundModel>>((acc, curr, _) {
+            if (curr.isNotEmpty) {
+              lastNonEmptyAt = DateTime.now();
+              return curr;
+            }
+
+            if (acc.isEmpty) return curr;
+
+            const grace = Duration(milliseconds: 800);
+            final tooSoon = DateTime.now().difference(lastNonEmptyAt) < grace;
+            if (tooSoon) return acc;
+
+            return curr;
+          }, const <RoundModel>[]);
     });
-    return insertedMatches;
   }
 
-  // Future<List<RoundModel>> getLeagueRoundsWithGroupsAndMatches(
-  //   String leagueSyncId,
-  //   String matchFilter,
-  // ) async {
+  /// ✅ قراءة مرة واحدة (تستعمل نفس منطق البناء)
+  // Future<List<RoundModel>> getLeagueRoundsWithGroupsAndMatches({
+  //   required String leagueSyncId,
+  //   required String matchFilter,
+  // }) async {
   //   final homeAlias = db.alias(db.teams, 'home');
   //   final awayAlias = db.alias(db.teams, 'away');
   //
   //   final rounds = await (db.select(db.rounds)
   //         ..where((r) => r.leagueSyncId.equals(leagueSyncId))
-  //         ..orderBy([(r) => OrderingTerm.asc(r.id)]))
+  //         ..orderBy([
+  //           (r) => OrderingTerm.asc(r.createdAt),]))
   //       .get();
   //
-  //   if (rounds.isEmpty) {
-  //     // ignore: avoid_print
-  //     print('⚠️ لا توجد جولات لهذا الدوري ($leagueSyncId)');
-  //     return [];
-  //   }
-  //
-  //   final roundNumbers = rounds
-  //       .map((r) {
-  //         final match = RegExp(r'(\d+)$').firstMatch(r.name);
-  //         return match != null ? int.tryParse(match.group(1)!) : null;
-  //       })
-  //       .whereType<int>()
-  //       .toSet()
-  //       .toList()
-  //     ..sort();
-  //
-  //   final List<RoundModel> result = [];
+  //   if (rounds.isEmpty) return [];
   //
   //   final filtersList = matchFilter
   //       .toLowerCase()
@@ -212,148 +279,99 @@ class MatchesLocalDataSource {
   //
   //   final bool showAll = filtersList.contains('all') || filtersList.isEmpty;
   //
-  //   for (final roundNo in roundNumbers) {
-  //     final relatedRounds =
-  //         rounds.where((r) => r.name.endsWith('Round $roundNo')).toList();
-  //     if (relatedRounds.isEmpty) continue;
-  //
-  //     final List<GroupModel> groupsForThisRound = [];
-  //
-  //     for (final round in relatedRounds) {
-  //       if (round.groupSyncId == null) continue;
-  //
-  //       final group = await (db.select(db.group)
-  //             ..where((g) => g.syncId.equals(round.groupSyncId!)))
-  //           .getSingleOrNull();
-  //       if (group == null) continue;
-  //
-  //       final query = db.select(db.matches).join([
-  //         innerJoin(
-  //             homeAlias, homeAlias.syncId.equalsExp(db.matches.homeTeamSyncId)),
-  //         innerJoin(
-  //             awayAlias, awayAlias.syncId.equalsExp(db.matches.awayTeamSyncId)),
-  //       ]);
-  //
-  //       final filters = <Expression<bool>>[
-  //         db.matches.roundSyncId.equals(round.syncId),
-  //         db.matches.leagueSyncId.equals(leagueSyncId),
-  //       ];
-  //
-  //       if (!showAll) {
-  //         final statusExpressions = <Expression<bool>>[];
-  //
-  //         for (final status in filtersList) {
-  //           switch (status) {
-  //             case 'scheduled':
-  //               statusExpressions.add(db.matches.status.equals('scheduled'));
-  //               break;
-  //             case 'unscheduled':
-  //               statusExpressions.add(db.matches.status.equals('unscheduled'));
-  //               break;
-  //             case 'live':
-  //               statusExpressions.add(db.matches.status.equals('live'));
-  //               break;
-  //             case 'finished':
-  //               statusExpressions.add(db.matches.status.equals('finished'));
-  //               break;
-  //           }
-  //         }
-  //
-  //         if (statusExpressions.isNotEmpty) {
-  //           final combined = statusExpressions.reduce((a, b) => a | b);
-  //           filters.add(combined);
-  //         }
+  //   Expression<bool> statusFilterExpr() {
+  //     final list = <Expression<bool>>[];
+  //     for (final status in filtersList) {
+  //       switch (status) {
+  //         case 'scheduled':
+  //         case 'unscheduled':
+  //         case 'live':
+  //         case 'finished':
+  //           list.add(db.matches.status.equals(status));
+  //           break;
   //       }
+  //     }
+  //     if (list.isEmpty) return const Constant(true);
+  //     return list.reduce((a, b) => a | b);
+  //   }
   //
-  //       query.where(filters.reduce((a, b) => a & b));
+  //   // Load all groups referenced by rounds (1 query)
+  //   final groupIds = rounds.map((r) => r.groupSyncId).whereType<String>().toSet().toList();
+  //   final groupsById = <String, GroupData>{};
+  //   if (groupIds.isNotEmpty) {
+  //     final groupRows = await (db.select(db.group)..where((g) => g.syncId.isIn(groupIds))).get();
+  //     for (final g in groupRows) {
+  //       groupsById[g.syncId] = g;
+  //     }
+  //   }
   //
-  //       final joined = await query.get();
+  //   final List<RoundModel> result = [];
   //
-  //       final matches = await Future.wait(joined.map((row) async {
-  //         final match = row.readTable(db.matches);
-  //         final home = row.readTable(homeAlias);
-  //         final away = row.readTable(awayAlias);
+  //   for (final round in rounds) {
+  //     final groupSyncId = round.groupSyncId;
+  //     if (groupSyncId == null) continue;
   //
-  //         final matchTerms = await (db.select(db.matchTerms)
-  //               ..where((mt) => mt.matchSyncId.equals(match.syncId)))
-  //             .get();
+  //     final group = groupsById[groupSyncId];
+  //     if (group == null) continue;
   //
-  //         final matchTermModels =
-  //             matchTerms.map((mt) => MatchTermModel.fromEntity(mt)).toList();
-  //         return MatchModel.fromEntityWithRelations(
-  //           match,
-  //           home: home,
-  //           away: away,
-  //           matchTerms: matchTermModels,
-  //         );
-  //       }));
+  //     // Load matches for this round with teams
+  //     final query = db.select(db.matches).join([
+  //       innerJoin(homeAlias, homeAlias.syncId.equalsExp(db.matches.homeTeamSyncId)),
+  //       innerJoin(awayAlias, awayAlias.syncId.equalsExp(db.matches.awayTeamSyncId)),
+  //     ]);
   //
-  //       if (matches.isEmpty) continue;
+  //     final filters = <Expression<bool>>[
+  //       db.matches.roundSyncId.equals(round.syncId),
+  //       db.matches.leagueSyncId.equals(leagueSyncId),
+  //       if (!showAll) statusFilterExpr(),
+  //     ];
+  //     query.where(filters.reduce((a, b) => a & b));
   //
-  //       groupsForThisRound
-  //           .add(GroupModel.fromEntity(group).copyWith(matches: matches));
+  //     final joined = await query.get();
+  //
+  //     if (joined.isEmpty) {
+  //       // If you want to show empty rounds, remove this continue.
+  //       continue;
   //     }
   //
-  //     if (groupsForThisRound.any((g) => g.matches.isNotEmpty)) {
-  //       final roundEntity = relatedRounds.first;
-  //       final roundModel = RoundModel.fromEntity(roundEntity).copyWith(
-  //         roundName: 'Round $roundNo',
-  //         groups: groupsForThisRound,
+  //     final matchIds = joined.map((row) => row.readTable(db.matches).syncId).toSet().toList();
+  //
+  //     final termsByMatch = <String, List<MatchTermModel>>{};
+  //     if (matchIds.isNotEmpty) {
+  //       final terms = await (db.select(db.matchTerms)..where((mt) => mt.matchSyncId.isIn(matchIds))).get();
+  //       for (final t in terms) {
+  //         termsByMatch.putIfAbsent(t.matchSyncId, () => []).add(MatchTermModel.fromEntity(t));
+  //       }
+  //     }
+  //
+  //     final matches = joined.map((row) {
+  //       final match = row.readTable(db.matches);
+  //       final home = row.readTable(homeAlias);
+  //       final away = row.readTable(awayAlias);
+  //
+  //       return MatchModel.fromEntityWithRelations(
+  //         match,
+  //         home: home,
+  //         away: away,
+  //         matchTerms: termsByMatch[match.syncId] ?? const [],
   //       );
-  //       result.add(roundModel);
-  //     }
+  //     }).toList();
+  //
+  //     if (matches.isEmpty) continue;
+  //
+  //     final groupModel = GroupModel.fromEntity(group).copyWith(matches: matches);
+  //
+  //     result.add(
+  //       RoundModel.fromEntity(round).copyWith(
+  //         // Keep original round name; UI can format it.
+  //         roundName: round.name,
+  //         groups: [groupModel],
+  //       ),
+  //     );
   //   }
   //
   //   return result;
   // }
-  Stream<List<RoundModel>> watchLeagueRoundsWithGroupsAndMatches({
-    required String leagueSyncId,
-    required String matchFilter,
-  }) {
-    final roundsTrigger = (db.select(db.rounds)
-      ..where((r) => r.leagueSyncId.equals(leagueSyncId)))
-        .watch()
-        .map((_) => null);
-
-    final matchesTrigger = (db.select(db.matches)
-      ..where((m) => m.leagueSyncId.equals(leagueSyncId)))
-        .watch()
-        .map((_) => null);
-
-    // ✅ debounced rebuild لتجنب كثرة إعادة البناء أثناء التحديثات
-    return MergeStream([roundsTrigger, matchesTrigger])
-        .debounceTime(const Duration(milliseconds: 120))
-        .asyncMap((_) => getLeagueRoundsWithGroupsAndMatches(
-      leagueSyncId: leagueSyncId,
-      matchFilter: matchFilter,
-    ));
-  }
-  // Stream<List<RoundModel>> watchLeagueRoundsWithGroupsAndMatches(
-  //     String leagueSyncId,
-  //     String matchFilter,
-  //     ) {
-  //   final roundsTrigger = (db.select(db.rounds)
-  //     ..where((r) => r.leagueSyncId.equals(leagueSyncId)))
-  //       .watch()
-  //       .map((_) => null);
-  //
-  //   final matchesTrigger = (db.select(db.matches)
-  //     ..where((m) => m.leagueSyncId.equals(leagueSyncId)))
-  //       .watch()
-  //       .map((_) => null);
-  //
-  //   final groupsTrigger = (db.select(db.group)
-  //     ..where((g) => g.leagueSyncId.equals(leagueSyncId)))
-  //       .watch()
-  //       .map((_) => null);
-  //
-  //   return MergeStream([roundsTrigger, matchesTrigger, groupsTrigger])
-  //       .startWith(null) // ✅ يضمن أول emit حتى بدون تغيّر DB
-  //       .debounceTime(const Duration(milliseconds: 120))
-  //       .asyncMap((_) => getLeagueRoundsWithGroupsAndMatches(leagueSyncId: leagueSyncId, matchFilter: matchFilter));
-  // }
-
-  /// ✅ قراءة مرة واحدة (تستعمل نفس منطق البناء)
   Future<List<RoundModel>> getLeagueRoundsWithGroupsAndMatches({
     required String leagueSyncId,
     required String matchFilter,
@@ -364,7 +382,7 @@ class MatchesLocalDataSource {
 
     final rounds = await (db.select(db.rounds)
       ..where((r) => r.leagueSyncId.equals(leagueSyncId))
-      ..orderBy([(r) => OrderingTerm.asc(r.id)]))
+      ..orderBy([(r) => OrderingTerm.asc(r.createdAt)]))
         .get();
 
     if (rounds.isEmpty) return [];
@@ -499,25 +517,18 @@ class MatchesLocalDataSource {
     required List<RoundModel> apiRounds, // كل عنصر فيه group + matches
     bool deleteMissingRounds = true,
     bool deleteMissingMatches = true,
+    bool deleteMissingMatchTerms = true, // ✅ NEW
   }) async {
     if (apiRounds.isEmpty) return;
-    print('ENTER upsert: apiRounds=${apiRounds.length}');
 
-    for (final r in apiRounds.take(10)) {
-      print('API round sid=${r.syncId} name=${r.roundName} groupSid=${r.groupSyncId} groupsLen=${r.groups.length} matches=${r.groups.isNotEmpty ? r.groups.first.matches.length : 0}');
-    }
+    final seenGroup = <String>{}; // groupSyncId
+    final seenRound = <String>{}; // roundSyncId
+    final seenMatch = <String>{}; // matchSyncId
+    final seenTerm = <String>{};  // matchTermSyncId ✅ NEW
 
-
-    // ----------------------------
-    // Dedup داخل نفس العملية
-    // ----------------------------
-    final seenGroup = <String>{};   // groupSyncId
-    final seenRound = <String>{};   // roundSyncId
-    final seenMatch = <String>{};   // matchSyncId
-
-    // للـcleanup
     final keepRoundIds = <String>{};
     final keepMatchIds = <String>{};
+    final keepTermIds = <String>{}; // ✅ NEW
 
     await db.transaction(() async {
       for (final r in apiRounds) {
@@ -530,14 +541,10 @@ class MatchesLocalDataSource {
         final roundName = r.roundName.trim();
         if (roundName.isEmpty) continue;
 
-        // ✅ payload عندك اسمه "group" (واحد) وليس "groups"
-        // بس موديلك RoundModel فيه groups List
-        // فنتعامل مع أول group إن وجد، أو ننشئ GroupModel minimal.
-        final GroupModel? payloadGroup =
-        r.groups.isNotEmpty ? r.groups.first : null;
+        final GroupModel? payloadGroup = r.groups.isNotEmpty ? r.groups.first : null;
 
         // ----------------------------
-        // 1) UPSERT GROUP (مرة واحدة لكل groupSyncId)
+        // 1) UPSERT GROUP
         // ----------------------------
         if (payloadGroup != null && seenGroup.add(groupSid)) {
           await db.into(db.group).insert(
@@ -546,9 +553,7 @@ class MatchesLocalDataSource {
               leagueSyncId: Value(leagueSyncId),
               groupName: Value(payloadGroup.groupName),
               qualifiedTeamNumber: Value(payloadGroup.qualifiedTeamNumber),
-              createdAt: payloadGroup.createdAt != null
-                  ? Value(payloadGroup.createdAt!)
-                  : const Value.absent(),
+              createdAt: payloadGroup.createdAt != null ? Value(payloadGroup.createdAt!) : const Value.absent(),
             ),
             onConflict: DoUpdate(
                   (old) => GroupCompanion(
@@ -556,7 +561,6 @@ class MatchesLocalDataSource {
                 groupName: Value(payloadGroup.groupName),
                 qualifiedTeamNumber: Value(payloadGroup.qualifiedTeamNumber),
               ),
-              // لو عندك unique(sync_id, league_sync_id) كما في جدولك:
               target: [db.group.syncId, db.group.leagueSyncId],
             ),
           );
@@ -564,8 +568,6 @@ class MatchesLocalDataSource {
 
         // ----------------------------
         // 2) UPSERT ROUND
-        //    - محاولة upsert على sync_id
-        //    - لو تعارض UNIQUE المركب (league, group, name) نحدّث الصف الموجود بالثلاثي
         // ----------------------------
         if (seenRound.add(roundSid)) {
           try {
@@ -576,9 +578,7 @@ class MatchesLocalDataSource {
                 groupSyncId: Value(groupSid),
                 name: Value(roundName),
                 roundType: Value(r.roundType),
-                createdAt: r.createdAt != null
-                    ? Value(r.createdAt!)
-                    : const Value.absent(),
+                createdAt: r.createdAt != null ? Value(r.createdAt!) : const Value.absent(),
               ),
               onConflict: DoUpdate(
                     (old) => RoundsCompanion(
@@ -591,8 +591,6 @@ class MatchesLocalDataSource {
               ),
             );
           } on SqliteException catch (e) {
-            // ✅ لو السبب UNIQUE المركب: (league_sync_id, group_sync_id, round_name)
-            // نلقط الصف الموجود بالثلاثي ونحدّثه بدل insert
             final isCompositeUnique =
                 e.message.contains('UNIQUE constraint failed: rounds.league_sync_id') ||
                     e.message.contains('rounds.league_sync_id, rounds.group_sync_id, rounds.round_name');
@@ -608,12 +606,10 @@ class MatchesLocalDataSource {
 
             if (existing == null) rethrow;
 
-            await (db.update(db.rounds)..where((t) => t.id.equals(existing.id)))
-                .write(
+            await (db.update(db.rounds)..where((t) => t.syncId.equals(existing.syncId))).write(
               RoundsCompanion(
-                syncId: Value(roundSid), // ✅ نطابق sync_id الجديد
+                syncId: Value(roundSid),
                 roundType: Value(r.roundType),
-                // createdAt نتركه كما هو
               ),
             );
           }
@@ -622,7 +618,7 @@ class MatchesLocalDataSource {
         keepRoundIds.add(roundSid);
 
         // ----------------------------
-        // 3) UPSERT MATCHES (داخل نفس round)
+        // 3) UPSERT MATCHES + MATCH_TERMS ✅
         // ----------------------------
         final matches = payloadGroup?.matches ?? const <MatchModel>[];
 
@@ -635,20 +631,18 @@ class MatchesLocalDataSource {
           final awayId = (m.awayTeamSyncId ?? '').trim();
           final date = m.matchDate;
 
-          // matchDate في جدولك non-null
           if (homeId.isEmpty || awayId.isEmpty || date == null) continue;
 
+          // 3.1 upsert match
           await db.into(db.matches).insert(
             MatchesCompanion(
               syncId: Value(msid),
               leagueSyncId: Value(leagueSyncId),
-              roundSyncId: Value(roundSid), // ✅ اربطها بالـRound الحالي
+              roundSyncId: Value(roundSid),
               homeTeamSyncId: Value(homeId),
               awayTeamSyncId: Value(awayId),
               matchDate: Value(date),
-              scheduledStartTime: m.scheduledStartTime != null
-                  ? Value(m.scheduledStartTime!)
-                  : const Value.absent(),
+              scheduledStartTime: m.scheduledStartTime != null ? Value(m.scheduledStartTime!) : const Value.absent(),
               startTime: m.startTime != null ? Value(m.startTime!) : const Value.absent(),
               endTime: m.endTime != null ? Value(m.endTime!) : const Value.absent(),
               homeScore: Value(m.homeScore),
@@ -664,9 +658,7 @@ class MatchesLocalDataSource {
                 homeTeamSyncId: Value(homeId),
                 awayTeamSyncId: Value(awayId),
                 matchDate: Value(date),
-                scheduledStartTime: m.scheduledStartTime != null
-                    ? Value(m.scheduledStartTime!)
-                    : const Value.absent(),
+                scheduledStartTime: m.scheduledStartTime != null ? Value(m.scheduledStartTime!) : const Value.absent(),
                 startTime: m.startTime != null ? Value(m.startTime!) : const Value.absent(),
                 endTime: m.endTime != null ? Value(m.endTime!) : const Value.absent(),
                 homeScore: Value(m.homeScore),
@@ -679,74 +671,73 @@ class MatchesLocalDataSource {
           );
 
           keepMatchIds.add(msid);
+
+          // 3.2 upsert match terms ✅
+          // غيّر اسم القائمة حسب موديلك
+          final terms = m.matchTerms ?? const <MatchTermModel>[]; // ✅ <-- عدّل هنا لو الاسم مختلف
+
+          for (final t in terms) {
+            final tsid = (t.syncId ?? '').trim();
+            if (tsid.isEmpty) continue;
+            if (!seenTerm.add(tsid)) continue;
+
+            final leagueTermSid = (t.leagueTermSyncId ?? '').trim();
+            if (leagueTermSid.isEmpty) continue;
+
+          final x=  await db.into(db.matchTerms).insertReturning(
+              MatchTermsCompanion(
+                syncId: Value(tsid),
+                matchSyncId: Value(msid),
+                leagueTermSyncId: Value(leagueTermSid),
+                startTime: t.startTime != null ? Value(t.startTime!) : const Value.absent(),
+                endTime: t.endTime != null ? Value(t.endTime!) : const Value.absent(),
+                additionalMinutes: Value(t.additionalMinutes ?? 0),
+                isFinished: Value(t.isFinished ?? false),
+              //  createdAt: t.createdAt != null ? Value(t.createdAt!) : const Value.absent(),
+              ),
+              onConflict: DoUpdate(
+                    (old) => MatchTermsCompanion(
+                  matchSyncId: Value(msid),
+                  leagueTermSyncId: Value(leagueTermSid),
+                  startTime: t.startTime != null ? Value(t.startTime!) : const Value.absent(),
+                  endTime: t.endTime != null ? Value(t.endTime!) : const Value.absent(),
+                  additionalMinutes: Value(t.additionalMinutes ?? 0),
+                  isFinished: Value(t.isFinished ?? false),
+                ),
+                target: [db.matchTerms.syncId],
+              ),
+            );
+
+            keepTermIds.add(tsid);
+            print(x.syncId);
+          }
         }
       }
+
+      // ----------------------------
+      // CLEANUP
+      // ----------------------------
       if (deleteMissingRounds) {
         await (db.delete(db.rounds)
-          ..where((t) =>
-          t.leagueSyncId.equals(leagueSyncId) &
-          t.syncId.isNotIn(keepRoundIds)))
+          ..where((t) => t.leagueSyncId.equals(leagueSyncId) & t.syncId.isNotIn(keepRoundIds)))
             .go();
       }
 
       if (deleteMissingMatches) {
         await (db.delete(db.matches)
-          ..where((t) =>
-          t.leagueSyncId.equals(leagueSyncId) &
-          t.syncId.isNotIn(keepMatchIds)))
+          ..where((t) => t.leagueSyncId.equals(leagueSyncId) & t.syncId.isNotIn(keepMatchIds)))
             .go();
       }
 
-      // final rCount = await (db.selectOnly(db.rounds)..addColumns([db.rounds.id.count()])).getSingle();
-      // final mCount = await (db.selectOnly(db.matches)..addColumns([db.matches.id.count()])).getSingle();
-      final rCount = await (db.selectOnly(db.rounds)
-        ..addColumns([db.rounds.id.count()])
-        ..where(db.rounds.leagueSyncId.equals(leagueSyncId)))
-          .getSingle();
-
-      final mCount = await (db.selectOnly(db.matches)
-        ..addColumns([db.matches.id.count()])
-        ..where(db.matches.leagueSyncId.equals(leagueSyncId)))
-          .getSingle();
-      print('LOCAL rounds=${rCount.read(db.rounds.id.count())}, matches=${mCount.read(db.matches.id.count())}');
-
-      final broken = await (db.customSelect(
-        'SELECT COUNT(*) AS c FROM matches m LEFT JOIN rounds r ON r.sync_id = m.round_sync_id WHERE r.sync_id IS NULL AND m.league_sync_id = ?',
-        variables: [Variable<String>(leagueSyncId)],
-      )).getSingle();
-      print('BROKEN match->round FK = ${broken.data['c']}');
-      final apiIds = apiRounds.map((e) => e.syncId!).toSet();
-      final local = await (db.select(db.rounds)
-        ..where((r)=> r.leagueSyncId.equals(leagueSyncId)))
-          .get();
-
-      final extra = local.where((r)=> !apiIds.contains(r.syncId)).toList();
-      print('EXTRA rounds local=${extra.length}');
-      for(final r in extra){
-        print('EXTRA: ${r.name} sid=${r.syncId}');
+      if (deleteMissingMatchTerms) {
+        // تنظيف كل terms التي لا تخص matches الموجودة بعد التحديث.
+        // 1) احذف حسب keepTermIds (إن كانت القائمة ضخمة، اجعلها batch لاحقًا)
+        await (db.delete(db.matchTerms)
+          ..where((t) => t.syncId.isNotIn(keepTermIds)))
+            .go();
       }
-
-      // ----------------------------
-      // 4) Cleanup اختياري
-      // ----------------------------
-      // if (deleteMissingRounds && keepRoundIds.isNotEmpty) {
-      //   await (db.delete(db.rounds)
-      //     ..where((t) =>
-      //     t.leagueSyncId.equals(leagueSyncId) &
-      //     t.syncId.isNotIn(keepRoundIds)))
-      //       .go();
-      // }
-
-      // if (deleteMissingMatches && keepMatchIds.isNotEmpty) {
-      //   await (db.delete(db.matches)
-      //     ..where((t) =>
-      //     t.leagueSyncId.equals(leagueSyncId) &
-      //     t.syncId.isNotIn(keepMatchIds)))
-      //       .go();
-      // }
     });
   }
-
 
   Future<MatchModel> scheduleMatch({
     required String matchSyncId,

@@ -148,11 +148,6 @@ class MatchModel {
         j['awayTeamSyncId'] ??
         j['away_team_id']),
 
-    // ✅ NEW (يدعم أكثر من key لو تغيّر اسمها)
-    // refereeSyncId:
-    // (j['referee_sync_id'] ?? j['refereeSyncId'] ?? j['referee_id']),
-    // mediaSyncId: (j['media_sync_id'] ?? j['mediaSyncId'] ?? j['media_id']),
-
     matchDate: _parseDate(j['match_date'] ?? j['matchDate']),
     scheduledStartTime:
     _parseDate(j['scheduled_start_time'] ?? j['scheduledStartTime']),
@@ -208,7 +203,6 @@ class MatchModel {
         List<WarningModel>? warnings,
       }) =>
       MatchModel(
-        id: m.id,
         syncId: m.syncId,
         leagueSyncId: m.leagueSyncId,
         roundSyncId: m.roundSyncId,

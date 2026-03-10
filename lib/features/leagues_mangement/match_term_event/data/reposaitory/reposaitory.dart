@@ -14,12 +14,17 @@ import '../model/match_term_model.dart';
 import '../model/player_stats.dart';
 import '../model/terms_model.dart';
 import '../model/warring_model.dart';
+import '../model/start_term_result.dart';
 
 class MatchTermsEventRepository {
   final MatchTermsEventLocalDataSource local;
   final ConnectivityService connectivity;
   final SyncService syncService;
-  MatchTermsEventRepository({required this.local,required this.connectivity,required this.syncService});
+
+  MatchTermsEventRepository(
+      {required this.local,
+      required this.connectivity,
+      required this.syncService});
 
   Future<Either<DioException, List<TermModel>>> getAllTerms() async {
     try {
@@ -33,7 +38,8 @@ class MatchTermsEventRepository {
     }
   }
 
-  Future<Either<DioException, MatchModel>> getFullMatchData(String matchSyncId) async {
+  Future<Either<DioException, MatchModel>> getFullMatchData(
+      String matchSyncId) async {
     try {
       final result = await local.getFullMatchData(matchSyncId);
       return Right(result!);
@@ -63,80 +69,101 @@ class MatchTermsEventRepository {
     required List<String> selectedTermIds,
     required int durationMinutes,
   }) async {
-      return RepoGuard.run<Unit>(
-        action: () async {
-          final leagueTerm = await local.initLeagueTerms(
-            leagueSyncId: leagueSyncId,
-            selectedTermIds: List<String>.from(selectedTermIds),
-            durationMinutes: durationMinutes,
-          );
-          await syncService.enqueueOperation(
-            entityType: 'leagueTerm',
-            operation: SyncService.operationCreate,
-            payload: {
-              'league_sync_id': leagueSyncId,
-              'terms': leagueTerm.map((d) => d.toJson()).toList(),
-            },
-          );
+    return RepoGuard.run<Unit>(
+      action: () async {
+        final leagueTerm = await local.initLeagueTerms(
+          leagueSyncId: leagueSyncId,
+          selectedTermIds: List<String>.from(selectedTermIds),
+          durationMinutes: durationMinutes,
+        );
+        await syncService.enqueueOperation(
+          entityType: 'leagueTerm',
+          operation: SyncService.operationCreate,
+          payload: {
+            'league_sync_id': leagueSyncId,
+            'terms': leagueTerm.map((d) => d.toJson()).toList(),
+          },
+        );
 
-          try {
-            di.sl<SyncTrigger>().syncIfOnlineInBackground();
-          } on DioException catch (e) {
-            throw SyncDioException.from(e);
-          }
-          return unit;
-        },
-      );
-
-
+        try {
+          di.sl<SyncTrigger>().syncIfOnlineInBackground();
+        } on DioException catch (e) {
+          throw SyncDioException.from(e);
+        }
+        return unit;
+      },
+    );
   }
 
-  Future<Either<DioException, int>> getTermDurationByMatchTermId(
-      int matchTermId) async {
+  Future<Either<DioException, int>> getTermDuration(
+      String matchTermSyncId) async {
     try {
-      final duration = await local.getTermDurationByMatchTermId(matchTermId);
+      final duration = await local.getTermDuration(matchTermSyncId);
       if (duration == null) {
+
         return Left(DioException(
-          error: "No duration found for matchTermId $matchTermId",
+          error: "No duration found for matchTermId $matchTermSyncId",
           requestOptions:
-              RequestOptions(path: '/league-terms/get-duration/$matchTermId'),
+              RequestOptions(path: '/league-terms/get-duration/$matchTermSyncId'),
         ));
       }
       return Right(duration);
     } catch (e, s) {
+      print(e);
       return Left(DioException(
         error: e,
         stackTrace: s,
         requestOptions:
-            RequestOptions(path: '/league-terms/get-duration/$matchTermId'),
+            RequestOptions(path: '/league-terms/get-duration/$matchTermSyncId'),
       ));
     }
   }
 
   Future<Either<DioException, Unit>> updateAdditionalMinutes(
-    int termId,
+    String termSyncId,
     int additionalMinutes,
   ) async {
     try {
-      await local.updateAdditionalMinutes(termId, additionalMinutes);
+      await local.updateAdditionalMinutes(termSyncId, additionalMinutes);
       return const Right(unit);
     } catch (e, s) {
       return Left(DioException(
         error: e,
         stackTrace: s,
         requestOptions: RequestOptions(
-            path: '/match-terms/update-additional-minutes/$termId'),
+            path: '/match-terms/update-additional-minutes/$termSyncId'),
       ));
     }
   }
 
-  Future<Either<DioException, Unit>> startTermSafe(
+  Future<Either<DioException, StartTermResult>> startTermSafe(
     String matchSyncId,
-    int idMatchTerm,
+    String idSyncMatchTerm,
   ) async {
     try {
-      await local.startTermSafe(matchSyncId, idMatchTerm);
-      return const Right(unit);
+      final term = await local.startTermSafe(matchSyncId, idSyncMatchTerm);
+
+      await syncService.enqueueOperation(
+        entityType: 'match',
+        operation: SyncService.operationUpdate,
+        payload: {
+          'match_sync_id': matchSyncId,
+          'status': term.matchStatus,
+          'match_terms': [
+            {
+              'sync_id': term.matchTermSyncId,
+              'league_term_sync_id': term.leagueTermSyncId,
+              if (term.termStartTime != null)
+                'start_time': term.termStartTime!.toIso8601String(),
+              'additional_minutes': 0,
+              'is_finished': false,
+            }
+          ]
+        },
+      );
+
+      di.sl<SyncTrigger>().syncIfOnlineInBackground();
+      return Right(term);
     } catch (e, s) {
       return Left(DioException(
         error: e,
@@ -149,34 +176,36 @@ class MatchTermsEventRepository {
 
   Future<Either<DioException, Unit>> finishCurrentTerm({
     required String matchSyncId,
-    required int termId,
+    required String matchTermSyncId,
   }) async {
     return RepoGuard.run<Unit>(action: () async {
       // 1) محلي
       final result = await local.finishTermSmart(
         matchSyncId: matchSyncId,
-        termId: termId,
+        matchTermSyncId: matchTermSyncId,
       );
-
-      // 2) مزامنة الشوط دائماً (API المباراة/الشوط واحد)
+      print(matchTermSyncId);
+      // 2) مزامنة الشوط الذي تم إنهاؤه فقط (بدون قيم خاطئة)
+      // ملاحظة: سابقًا كان يتم إرسال start_time = end_time وبـ additional_minutes = 0 دائمًا
+      // مما قد يسبب سلوك غريب عند إعادة بناء الواجهة أو عند المزامنة.
       await syncService.enqueueOperation(
         entityType: 'match',
         operation: SyncService.operationUpdate,
         payload: {
           'match_sync_id': matchSyncId,
           'league_sync_id': result.leagueSyncId,
-          'match_terms':
-            [
-              {
-                'sync_id': result.matchTermSyncId,
-                'league_term_sync_id': result.leagueTermSyncId,
-                'start_time': result.matchEndTime?.toIso8601String(),
-                'end_time': result.matchEndTime?.toIso8601String(),
-                'additional_minutes':0,
-                'is_finished': true,
-              }
-            ]
-
+          'match_terms': [
+            {
+              'sync_id': matchTermSyncId,
+              'league_term_sync_id': result.leagueTermSyncId,
+              // اترك الأوقات null إذا لم تكن متاحة بدلاً من إرسال قيم خاطئة
+              if (result.termEndTime != null)
+                'end_time': result.termEndTime!.toIso8601String(),
+              'is_finished': true,
+              if (result.additionalMinutes != null)
+                'additional_minutes': result.additionalMinutes,
+            }
+          ]
         },
       );
 
@@ -189,28 +218,26 @@ class MatchTermsEventRepository {
             'league_sync_id': result.leagueSyncId,
             'match_sync_id': matchSyncId,
             'status': 'finished',
-            'end_time': result.matchEndTime?.toIso8601String(),
+            if (result.matchEndTime != null)
+              'end_time': result.matchEndTime!.toIso8601String(),
             'home_score': result.homeScore,
             'away_score': result.awayScore,
           },
         );
 
-       // 4) إذا تم تحديث النقاط محلياً (غير knockout) -> استخدم API النقاط الآخر
+        // 4) تحديث النقاط (غير knockout) عند انتهاء المباراة
         if (!result.isKnockout && result.pointsUpdatedLocally) {
-          final res = await local.finishMatchAndUpdatePoints(matchSyncId, DateTime.now());
-          print(res.home?.points);
-          print(res.away?.points);
+          final res = await local.finishMatchAndUpdatePoints(
+              matchSyncId, DateTime.now());
           await syncService.enqueueOperation(
             entityType: 'qualifiedTeam',
             operation: SyncService.operationUpdate,
-            payload:
-              res.home!.toJson(),
+            payload: res.home!.toJson(),
           );
           await syncService.enqueueOperation(
             entityType: 'qualifiedTeam',
             operation: SyncService.operationUpdate,
-            payload:
-            res.away!.toJson(),
+            payload: res.away!.toJson(),
           );
         }
       }
@@ -226,13 +253,23 @@ class MatchTermsEventRepository {
     try {
       final goals = await local.insertGoalAndUpdateQualifiedTeams(goal);
       await syncService.enqueueOperation(
-        entityType: 'goal',
-        operation: SyncService.operationCreate,
-        payload: goal.toJson()
+          entityType: 'goal',
+          operation: SyncService.operationCreate,
+          payload: goal.toJson());
+      await syncService.enqueueOperation(
+        entityType: 'qualifiedTeam',
+        operation: SyncService.operationUpdate,
+        payload: goals.scoring!.toJson(),
       );
+      await syncService.enqueueOperation(
+        entityType: 'qualifiedTeam',
+        operation: SyncService.operationUpdate,
+        payload: goals.opttend!.toJson(),
+      );
+
       di.sl<SyncTrigger>().syncIfOnlineInBackground();
 
-      return Right(goals);
+      return Right(goals.goal);
     } catch (e) {
       return Left(
         DioException(
@@ -250,8 +287,7 @@ class MatchTermsEventRepository {
       await syncService.enqueueOperation(
           entityType: 'warning',
           operation: SyncService.operationCreate,
-          payload: waring.toJson()
-      );
+          payload: waring.toJson());
       di.sl<SyncTrigger>().syncIfOnlineInBackground();
 
       return Right(waring);
@@ -269,10 +305,7 @@ class MatchTermsEventRepository {
       await syncService.enqueueOperation(
           entityType: 'goal',
           operation: SyncService.operationUpdate,
-          payload:{
-            'goal_sync_id':assistPlayer
-          }
-      );
+          payload: {'goal_sync_id': assistPlayer});
       // ignore: avoid_print
       di.sl<SyncTrigger>().syncIfOnlineInBackground();
 
@@ -312,8 +345,7 @@ class MatchTermsEventRepository {
       await syncService.enqueueOperation(
           entityType: 'assist',
           operation: SyncService.operationCreate,
-          payload: assist.toJson()
-      );
+          payload: assist.toJson());
       di.sl<SyncTrigger>().syncIfOnlineInBackground();
       return Right(result);
     } catch (e) {
@@ -362,6 +394,7 @@ class MatchTermsEventRepository {
       );
       return Right(result);
     } catch (e) {
+      print(e);
       return Left(
         DioException(
           requestOptions: RequestOptions(path: '/player/substitute'),
@@ -412,25 +445,49 @@ class MatchTermsEventRepository {
     }
   }
 
-  Future<Either<DioException, String?>> deleteGoalBySyncId(String goalSyncId) async {
+  Future<Either<DioException, String?>> deleteGoalBySyncId(
+      String goalSyncId) async {
     try {
       final assistPlayer = await local.deleteGoalBySyncId(goalSyncId);
       return Right(assistPlayer);
     } catch (e) {
       return Left(DioException(
-        requestOptions: RequestOptions(path: '/goals/delete-by-sync/$goalSyncId'),
+        requestOptions:
+            RequestOptions(path: '/goals/delete-by-sync/$goalSyncId'),
         error: e,
       ));
     }
   }
+  Future<Either<DioException, Unit>> initStartersForMatch({
+    required String matchSyncId,
+    required String matchTermSyncId,
+  }) async {
+    try {
+      await local.initStartersForMatchTerm(
+        matchSyncId: matchSyncId,
+        matchTermSyncId: matchTermSyncId,
+      );
+      return const Right(unit);
+    } catch (e, s) {
+      return Left(DioException(
+        error: e,
+        stackTrace: s,
+        requestOptions: RequestOptions(path: '/match/starters/init'),
+      ));
+    }
+  }
 
-  Future<Either<DioException, Unit>> deleteWarningBySyncId(String warningSyncId) async {
+
+
+  Future<Either<DioException, Unit>> deleteWarningBySyncId(
+      String warningSyncId) async {
     try {
       await local.deleteWarningBySyncId(warningSyncId);
       return const Right(unit);
     } catch (e) {
       return Left(DioException(
-        requestOptions: RequestOptions(path: '/warnings/delete-by-sync/$warningSyncId'),
+        requestOptions:
+            RequestOptions(path: '/warnings/delete-by-sync/$warningSyncId'),
         error: e,
       ));
     }

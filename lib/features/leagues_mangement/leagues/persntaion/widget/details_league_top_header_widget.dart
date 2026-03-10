@@ -190,13 +190,13 @@ class _DetailsLeagueTopHeaderWidgetState
                   replacement: ButtonOfOrganizerWidget(
                     title: 'جدولة المباريات',
                     onTap: () {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        ref
-                            .read(ensureKnockoutProgressProvider(
-                                    widget.leagueSyncId)
-                                .notifier)
-                            .run(qualifiedPerGroup: 4);
-                      });
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          ref
+                              .read(ensureKnockoutProgressProvider(
+                                      widget.leagueSyncId)
+                                  .notifier)
+                              .run(qualifiedPerGroup: 4);
+                        });
                       navigateTo(
                         context,
                         MatchesSchedulingPage(

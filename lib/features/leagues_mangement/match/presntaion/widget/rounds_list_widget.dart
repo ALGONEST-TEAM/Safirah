@@ -1,8 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
+import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../data/model/round_model.dart';
 import '../state_managment/riverpod.dart';
 import 'round_section_widget.dart';
@@ -87,6 +89,12 @@ class RoundsListWidget extends ConsumerWidget {
       isEmpty: (rounds) => rounds.isEmpty,
       onRefresh: () => ref.read(roundsRefreshProvider(refreshParam).notifier).refresh(),
       keepPreviousDataWhileLoading: true,
+      emptyBuilder: () => Center(
+        child: AutoSizeTextWidget(
+          text: ' لا توجد جولات بعد',
+          fontSize: 14.sp,
+        ),
+      ),
       dataBuilder: (rounds) {
         return RefreshIndicator(
           onRefresh: () => ref.read(roundsRefreshProvider(refreshParam).notifier).refresh(),
@@ -98,6 +106,7 @@ class RoundsListWidget extends ConsumerWidget {
               final round = rounds[i];
               return RoundSectionWidget(
                 round: round,
+                role: role,
                 leagueSyncId: leagueSyncId,
                 matchFilter: matchFilter,
               );

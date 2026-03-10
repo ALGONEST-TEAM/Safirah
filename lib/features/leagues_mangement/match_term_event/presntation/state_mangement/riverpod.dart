@@ -82,9 +82,11 @@ class LeagueTermNotifier
           allTerms.firstWhere((t) => t.type == 'regular' && t.order == 1);
       selectedTermIds.add(first.syncId);
     } else if (selectedTermsCount == 2) {
+
       selectedTermIds.addAll(
         allTerms.where((t) => t.type == 'regular').take(2).map((t) => t.syncId),
       );
+
     }
 
     if (includeExtraAndPenalties) {
@@ -97,7 +99,10 @@ class LeagueTermNotifier
       final penalty = allTerms.firstWhere((t) => t.type == 'penalty');
       selectedTermIds.add(penalty.syncId);
     }
-    print(selectedTermIds);
+    for(var id in allTerms){
+      print(id.name);
+    }
+    print(allTerms);
     await initTerms(
       selectedTermIds: selectedTermIds,
       durationMinutes: matchDuration,
@@ -125,50 +130,59 @@ class LeagueTermNotifier
 }
 
 final termDurationProvider =
-    StateNotifierProvider.family<TermDurationNotifier, DataState<int>, int>(
-  (ref, matchTermId) => TermDurationNotifier(matchTermId),
+    StateNotifierProvider.family<TermDurationNotifier, DataState<int?>, String>(
+  (ref, matchTermSyncId) => TermDurationNotifier(matchTermSyncId),
 );
 
-class TermDurationNotifier extends StateNotifier<DataState<int>> {
-  final int matchTermId;
+class TermDurationNotifier extends StateNotifier<DataState<int?>> {
+  final String matchTermSyncId;
   final _repo = MatchTermsEventRepository(
       local: di.sl(), syncService: di.sl(), connectivity: di.sl());
 
-  TermDurationNotifier(this.matchTermId) : super(DataState.initial(0)) {
+  TermDurationNotifier(this.matchTermSyncId) : super(DataState.initial(null)) {
     loadTermDuration();
   }
 
   Future<void> loadTermDuration() async {
     state = state.copyWith(state: States.loading);
-    final result = await _repo.getTermDurationByMatchTermId(matchTermId);
+    final result = await _repo.getTermDuration(matchTermSyncId);
 
     result.fold(
-      (e) => state = state.copyWith(state: States.error, exception: e),
-      (duration) =>
-          state = state.copyWith(state: States.loaded, data: duration),
+      (e) {
+        print(e.error.toString());
+
+        return state = state.copyWith(state: States.error, exception: e);
+      },
+      (duration) {
+
+        return state = state.copyWith(state: States.loaded, data: duration);
+      },
     );
   }
 }
 
 final updateAdditionalMinutesNotifierProvider = StateNotifierProvider.family<
-        UpdateAdditionalMinutesNotifier, DataState<bool>, Map<String, int>>(
-    (ref, params) =>
-        UpdateAdditionalMinutesNotifier(params['termId']!, params['minutes']!));
+    UpdateAdditionalMinutesNotifier,
+    DataState<bool>,
+    (
+      String,
+      int
+    )>((ref, params) => UpdateAdditionalMinutesNotifier(params.$1, params.$2));
 
 class UpdateAdditionalMinutesNotifier extends StateNotifier<DataState<bool>> {
-  final int termId;
+  final String termSyncId;
   final int minutes;
   final _repo = MatchTermsEventRepository(
       local: di.sl(), syncService: di.sl(), connectivity: di.sl());
 
-  UpdateAdditionalMinutesNotifier(this.termId, this.minutes)
+  UpdateAdditionalMinutesNotifier(this.termSyncId, this.minutes)
       : super(DataState.initial(false)) {
     update();
   }
 
   Future<void> update() async {
     state = state.copyWith(state: States.loading);
-    final res = await _repo.updateAdditionalMinutes(termId, minutes);
+    final res = await _repo.updateAdditionalMinutes(termSyncId, minutes);
     res.fold(
       (l) => state = state.copyWith(state: States.error, exception: l),
       (r) => state = state.copyWith(state: States.loaded, data: true),
@@ -182,17 +196,17 @@ final startTermNotifierProvider = StateNotifierProvider.family<
     (ref, params) => StartTermNotifier(
           ref,
           params['matchSyncId']!,
-          int.parse(params['idMatchTerm']!),
+          params['idMatchTerm']!,
         ));
 
 class StartTermNotifier extends StateNotifier<DataState<bool>> {
   final Ref ref;
   final String matchSyncId;
-  final int idMatchTerm;
+  final String idSyncMatchTerm;
   final _repo = MatchTermsEventRepository(
       local: di.sl(), syncService: di.sl(), connectivity: di.sl());
 
-  StartTermNotifier(this.ref, this.matchSyncId, this.idMatchTerm)
+  StartTermNotifier(this.ref, this.matchSyncId, this.idSyncMatchTerm)
       : super(DataState.initial(false)) {
     startTerm();
   }
@@ -201,7 +215,7 @@ class StartTermNotifier extends StateNotifier<DataState<bool>> {
   Future<void> startTerm() async {
     state = state.copyWith(state: States.loading);
 
-    final res = await _repo.startTermSafe(matchSyncId, idMatchTerm);
+    final res = await _repo.startTermSafe(matchSyncId, idSyncMatchTerm);
 
     res.fold(
       (error) => state = state.copyWith(state: States.error, exception: error),
@@ -211,22 +225,22 @@ class StartTermNotifier extends StateNotifier<DataState<bool>> {
 }
 
 final finishTermNotifierProvider = StateNotifierProvider.family<
-    FinishTermNotifier, DataState<bool>, Map<String, String>>((ref, ids) {
+    FinishTermNotifier, DataState<bool>,(String,String)>((ref, ids) {
   return FinishTermNotifier(
-    matchSyncId: ids['matchSyncId']!,
-    termId: int.parse(ids['termId']!),
+    matchSyncId:ids.$1,
+    matchTermSyncId:ids.$2,
   );
 });
 
 class FinishTermNotifier extends StateNotifier<DataState<bool>> {
   final String matchSyncId;
-  final int termId;
+  final String matchTermSyncId;
   final _repo = MatchTermsEventRepository(
       local: di.sl(), syncService: di.sl(), connectivity: di.sl());
 
   bool _isRunning = false; // لمنع الاستدعاء المتكرر
 
-  FinishTermNotifier({required this.matchSyncId, required this.termId})
+  FinishTermNotifier({required this.matchSyncId, required this.matchTermSyncId})
       : super(DataState.initial(false));
 
   Future<void> finish() async {
@@ -237,7 +251,7 @@ class FinishTermNotifier extends StateNotifier<DataState<bool>> {
       state = state.copyWith(state: States.loading);
 
       final res = await _repo.finishCurrentTerm(
-          matchSyncId: matchSyncId, termId: termId);
+          matchSyncId: matchSyncId, matchTermSyncId: matchTermSyncId);
 
       res.fold(
         (l) => state = state.copyWith(state: States.error, exception: l),
@@ -272,45 +286,55 @@ class MatchTermCounterNotifier extends StateNotifier<DataState<CounterData>> {
       required String leagueSyncId}) async {
     if (_timer != null) return;
 
-    final termId = currentTerm.id;
+    final termId = currentTerm.syncId;
     final matchSyncId = currentTerm.matchSyncId;
     final matchTermSyncId = currentTerm.syncId;
 
     final startTermProviderRef = startTermNotifierProvider({
       'matchSyncId': matchSyncId,
-      'idMatchTerm': termId.toString(),
+      'idMatchTerm': termId,
     });
 
     await ref.read(startTermProviderRef.notifier).startTerm();
 
-    if (currentTerm.termType == 'regular' &&
-        currentTerm.termName == 'الشوط الأول') {
-      final termSyncId = matchTermSyncId;
+    final termSyncId = matchTermSyncId;
+    if(currentTerm.termName=='الشوط الاول'&&currentTerm.termType=='regular'){
+
       if (termSyncId.isNotEmpty) {
         await ref
             .read(initStartersNotifierProvider(
-                    (matchSyncId: matchSyncId, matchTermSyncId: termSyncId))
-                .notifier)
+            (matchSyncId: matchSyncId, matchTermSyncId: termSyncId))
+            .notifier)
             .run();
       }
-    } else {}
+    } else {
+      await ref
+          .read(initStartersTermNotifierProvider(
+          (matchSyncId: matchSyncId, matchTermSyncId: termSyncId))
+          .notifier)
+          .run();
+    }
 
     final startState = ref.read(startTermProviderRef);
     if (startState.stateData == States.error) {
+      print('startTermProviderRef');
       return;
     }
 
     int baseDuration;
     final durationState = ref.read(termDurationProvider(termId));
     if (durationState.stateData == States.loaded) {
-      baseDuration = durationState.data;
+      print(durationState.data);
+      baseDuration = durationState.data!;
     } else {
       try {
         await ref
             .read(termDurationProvider(termId).notifier)
             .loadTermDuration();
-        baseDuration = ref.read(termDurationProvider(termId)).data;
+        baseDuration = ref.read(termDurationProvider(termId)).data!;
+        print(baseDuration);
       } catch (e) {
+        print(e);
         return;
       }
     }
@@ -338,10 +362,10 @@ class MatchTermCounterNotifier extends StateNotifier<DataState<CounterData>> {
         state: States.loaded,
         data: state.data.copyWith(elapsedSeconds: newElapsed),
       );
-
+     // referee
       // if (_isPaused) return;
-       if (!state.data.alertShown && newElapsed >= (baseDuration - 1) * 60) {
-      //if (!state.data.alertShown && newElapsed >= (baseDuration - 1)) {
+      if (!state.data.alertShown && newElapsed >= (baseDuration - 1) * 60) {
+      //  if (!state.data.alertShown && newElapsed >= (baseDuration - 1)) {
         state = state.copyWith(
           state: States.loaded,
           data: state.data.copyWith(alertShown: true),
@@ -362,10 +386,9 @@ class MatchTermCounterNotifier extends StateNotifier<DataState<CounterData>> {
 
         if (extra != null && extra > 0) {
           await ref
-              .read(updateAdditionalMinutesNotifierProvider({
-                'termId': termId,
-                'minutes': extra,
-              }).notifier)
+              .read(updateAdditionalMinutesNotifierProvider(
+                (termId, extra),
+              ).notifier)
               .update();
 
           additional = extra;
@@ -376,8 +399,8 @@ class MatchTermCounterNotifier extends StateNotifier<DataState<CounterData>> {
       }
 
       // 🎯 تحقق من نهاية الوقت الكلي (الرسمي + الإضافي)
-      //if (newElapsed >= (baseDuration + additional)) {
-         if (newElapsed >= (baseDuration + additional) * 60) {
+    // if (newElapsed >= (baseDuration + additional)) {
+      if (newElapsed >= (baseDuration + additional) * 60) {
         await _finishCurrentTerm(roundSyncId, leagueSyncId, currentTerm);
       }
     });
@@ -420,7 +443,7 @@ class MatchTermCounterNotifier extends StateNotifier<DataState<CounterData>> {
     if (_isFinishing) return;
     _isFinishing = true;
 
-    final termId = currentTerm.id;
+    final termId = currentTerm.syncId;
     final matchSyncId = currentTerm.matchSyncId;
     final matchTermSyncId = currentTerm.syncId;
 
@@ -428,28 +451,22 @@ class MatchTermCounterNotifier extends StateNotifier<DataState<CounterData>> {
       _timer?.cancel();
       _timer = null;
 
-      final notifier = ref.read(finishTermNotifierProvider({
-        'matchSyncId': matchSyncId,
-        'termId': termId.toString(),
-      }).notifier);
+      final notifier = ref.read(finishTermNotifierProvider(
+          (matchSyncId,matchTermSyncId)
+
+      ).notifier);
 
       await notifier.finish();
-      final finishState = ref.read(finishTermNotifierProvider({
-        'matchSyncId': matchSyncId,
-        'termId': termId.toString(),
-      }));
+      final finishState = ref.read(finishTermNotifierProvider(
+          (matchSyncId,matchTermSyncId)));
 
       if (finishState.stateData == States.error) {
         return;
       }
 
-       ref.read(matchTermStateProvider(matchTermSyncId).notifier).state = false;
-      await ref
-               .read(getCurrentMatchTermProvider(matchSyncId).notifier)
-               .run();
-          await ref
-              .read(getCurrentMatchTermProvider(matchSyncId).notifier)
-              .run();
+      ref.read(matchTermStateProvider(matchTermSyncId).notifier).state = false;
+      await ref.read(getCurrentMatchTermProvider(matchSyncId).notifier).run();
+      await ref.read(getCurrentMatchTermProvider(matchSyncId).notifier).run();
       // try {
       //   await ref
       //       .read(getCurrentLeagueRoundProvider(leagueSyncId).notifier)
@@ -588,7 +605,7 @@ class InitStartersNotifier extends StateNotifier<DataState<Unit>> {
   Future<void> run() async {
     state = state.copyWith(state: States.loading);
 
-    final res = await _repo.initStartersForMatchTerm(
+    final res = await _repo.initStartersForMatch(
       matchSyncId: matchSyncId,
       matchTermSyncId: matchTermSyncId,
     );
@@ -596,6 +613,38 @@ class InitStartersNotifier extends StateNotifier<DataState<Unit>> {
     res.fold(
       (e) => state = state.copyWith(state: States.error, exception: e),
       (_) => state = state.copyWith(state: States.loaded, data: unit),
+    );
+  }
+}
+
+/// Initializes participation rows for starters when the first term starts.
+final initStartersTermNotifierProvider = StateNotifierProvider.family<
+    InitStartersTermNotifier,
+    DataState<Unit>,
+    ({String matchSyncId, String matchTermSyncId})>((ref, args) {
+  return InitStartersTermNotifier(args.matchSyncId, args.matchTermSyncId);
+});
+
+class InitStartersTermNotifier extends StateNotifier<DataState<Unit>> {
+  InitStartersTermNotifier(this.matchSyncId, this.matchTermSyncId)
+      : super(DataState.initial(unit));
+
+  final String matchSyncId;
+  final String matchTermSyncId;
+  final _repo = MatchTermsEventRepository(
+      local: di.sl(), syncService: di.sl(), connectivity: di.sl());
+
+  Future<void> run() async {
+    state = state.copyWith(state: States.loading);
+
+    final res = await _repo.initStartersForMatchTerm(
+      matchSyncId: matchSyncId,
+      matchTermSyncId: matchTermSyncId,
+    );
+
+    res.fold(
+          (e) => state = state.copyWith(state: States.error, exception: e),
+          (_) => state = state.copyWith(state: States.loaded, data: unit),
     );
   }
 }
@@ -1193,7 +1242,8 @@ final substitutePlayerNotifierProvider =
 //   );
 // });
 final roundsWithKnockoutStreamProvider =
-StreamProvider.family<List<RoundModel>, Tuple2<String, String>>((ref, param) {
+    StreamProvider.family<List<RoundModel>, Tuple2<String, String>>(
+        (ref, param) {
   final repo = ref.read(knockoutRepoProvider);
   return repo.watchLeagueRoundsWithMatchesKnockout(
     leagueSyncId: param.value1,
@@ -1222,7 +1272,7 @@ class RoundsKnockoutRefreshNotifier extends StateNotifier<RefreshState> {
   final String role;
 
   RoundsKnockoutRefreshNotifier(this.leagueSyncId, this.matchFilter, this.role)
-      : super(RefreshState.idle()) ;
+      : super(RefreshState.idle());
 
   final repo = KnockoutRepository(
       local: di.sl(),
@@ -1243,8 +1293,11 @@ class RoundsKnockoutRefreshNotifier extends StateNotifier<RefreshState> {
     );
   }
 }
+
 final ensureKnockoutOnEnterProvider = StateNotifierProvider.family<
-    EnsureKnockoutOnEnterNotifier, DataState<Unit>, String>((ref, leagueSyncId) {
+    EnsureKnockoutOnEnterNotifier,
+    DataState<Unit>,
+    String>((ref, leagueSyncId) {
   return EnsureKnockoutOnEnterNotifier(ref, leagueSyncId);
 });
 
@@ -1267,13 +1320,16 @@ class EnsureKnockoutOnEnterNotifier extends StateNotifier<DataState<Unit>> {
 
     try {
       // 1) current round
-      await ref.read(getCurrentLeagueRoundProvider(leagueSyncId).notifier).run();
+      await ref
+          .read(getCurrentLeagueRoundProvider(leagueSyncId).notifier)
+          .run();
       if (!mounted) return;
 
       final roundState = ref.read(getCurrentLeagueRoundProvider(leagueSyncId));
       if (roundState.stateData == States.error) {
         if (mounted) {
-          state = state.copyWith(state: States.error, exception: roundState.exception);
+          state = state.copyWith(
+              state: States.error, exception: roundState.exception);
         }
         return;
       }
@@ -1284,13 +1340,17 @@ class EnsureKnockoutOnEnterNotifier extends StateNotifier<DataState<Unit>> {
       // GROUP BRANCH
       // =========================
       if (round.roundType == 'group') {
-        await ref.read(checkGroupMatchesFinishedProvider(leagueSyncId).notifier).run();
+        await ref
+            .read(checkGroupMatchesFinishedProvider(leagueSyncId).notifier)
+            .run();
         if (!mounted) return;
 
-        final finishedState = ref.read(checkGroupMatchesFinishedProvider(leagueSyncId));
+        final finishedState =
+            ref.read(checkGroupMatchesFinishedProvider(leagueSyncId));
         if (finishedState.stateData == States.error) {
           if (mounted) {
-            state = state.copyWith(state: States.error, exception: finishedState.exception);
+            state = state.copyWith(
+                state: States.error, exception: finishedState.exception);
           }
           return;
         }
@@ -1299,7 +1359,8 @@ class EnsureKnockoutOnEnterNotifier extends StateNotifier<DataState<Unit>> {
 
         if (isFinishedAllGroupMatch) {
           // ✅ Idempotency: لا تنشئ knockout إذا موجود محلياً
-          final hasKnockout = ref.read(hasAnyKnockoutRoundsProvider(leagueSyncId));
+          final hasKnockout =
+              ref.read(hasAnyKnockoutRoundsProvider(leagueSyncId));
           if (!hasKnockout) {
             await ref
                 .read(generateFirstKnockoutProvider((leagueSyncId, 4)).notifier)
@@ -1307,21 +1368,24 @@ class EnsureKnockoutOnEnterNotifier extends StateNotifier<DataState<Unit>> {
             if (!mounted) return;
           }
 
-          final knockoutState = ref.read(generateFirstKnockoutProvider((leagueSyncId, 4)));
+          final knockoutState =
+              ref.read(generateFirstKnockoutProvider((leagueSyncId, 4)));
 
           // refresh knockout list
           ref
               .read(roundsRefreshKnockoutProvider(
-              Tuple3(leagueSyncId, 'unscheduled', 'organizer'))
-              .notifier)
+                      Tuple3(leagueSyncId, 'unscheduled', 'organizer'))
+                  .notifier)
               .refresh();
 
           if (knockoutState.stateData == States.error) {
             // ignore: avoid_print
-            print("⚠️ خطأ أثناء تفعيل الأدوار الإقصائية: ${knockoutState.exception}");
+            print(
+                "⚠️ خطأ أثناء تفعيل الأدوار الإقصائية: ${knockoutState.exception}");
           } else if (knockoutState.stateData == States.loaded) {
             // ignore: avoid_print
-            print("🎯 تم إنشاء الجولة الإقصائية الأولى: ${knockoutState.data.roundName}");
+            print(
+                "🎯 تم إنشاء الجولة الإقصائية الأولى: ${knockoutState.data.roundName}");
           }
         }
 
@@ -1329,13 +1393,13 @@ class EnsureKnockoutOnEnterNotifier extends StateNotifier<DataState<Unit>> {
         ref.read(groupRefreshProvider(leagueSyncId).notifier).refresh();
         ref
             .read(roundsRefreshProvider(Tuple3(
-            leagueSyncId, 'scheduled,live,finished', 'organizer'))
-            .notifier)
+                    leagueSyncId, 'scheduled,live,finished', 'organizer'))
+                .notifier)
             .refresh();
         ref
             .read(roundsRefreshProvider(
-            Tuple3(leagueSyncId, 'scheduled,live', 'organizer'))
-            .notifier)
+                    Tuple3(leagueSyncId, 'scheduled,live', 'organizer'))
+                .notifier)
             .refresh();
 
         if (mounted) {
@@ -1347,33 +1411,34 @@ class EnsureKnockoutOnEnterNotifier extends StateNotifier<DataState<Unit>> {
       // =========================
       // KNOCKOUT BRANCH
       // =========================
-      final key =
-      await ref.read(lastFinishedKnockoutRoundKeyProvider(leagueSyncId).future);
+      final key = await ref
+          .read(lastFinishedKnockoutRoundKeyProvider(leagueSyncId).future);
       if (!mounted) return;
 
-      final finishedRoundId = key?.syncId; // ✅ int? هو المطلوب للـ provider عندك
+      final finishedRoundId =
+          key?.syncId; // ✅ int? هو المطلوب للـ provider عندك
       if (finishedRoundId != null) {
         await ref
             .read(generateNextKnockoutProvider((leagueSyncId, finishedRoundId))
-            .notifier)
+                .notifier)
             .run();
         if (!mounted) return;
       }
 
       ref
-          .read(roundsRefreshKnockoutProvider(Tuple3(
-          leagueSyncId, 'scheduled,live,finished', 'organizer'))
-          .notifier)
+          .read(roundsRefreshKnockoutProvider(
+                  Tuple3(leagueSyncId, 'scheduled,live,finished', 'organizer'))
+              .notifier)
           .refresh();
       ref
           .read(roundsRefreshKnockoutProvider(
-          Tuple3(leagueSyncId, 'unscheduled', 'organizer'))
-          .notifier)
+                  Tuple3(leagueSyncId, 'unscheduled', 'organizer'))
+              .notifier)
           .refresh();
       ref
           .read(roundsRefreshKnockoutProvider(
-          Tuple3(leagueSyncId, 'scheduled,live', 'organizer'))
-          .notifier)
+                  Tuple3(leagueSyncId, 'scheduled,live', 'organizer'))
+              .notifier)
           .refresh();
 
       if (mounted) {
@@ -1392,14 +1457,14 @@ class EnsureKnockoutOnEnterNotifier extends StateNotifier<DataState<Unit>> {
 }
 
 final lastFinishedKnockoutRoundKeyProvider =
-FutureProvider.family<({int? id, String? syncId})?, String>((ref, leagueSyncId) async {
-  final rounds = await ref
-      .read(roundsWithKnockoutStreamProvider(
-      Tuple2(leagueSyncId, 'scheduled,live,finished'))
+    FutureProvider.family<({int? id, String? syncId})?, String>(
+        (ref, leagueSyncId) async {
+  final rounds = await ref.read(roundsWithKnockoutStreamProvider(
+          Tuple2(leagueSyncId, 'scheduled,live,finished'))
       .future);
 
   final knockoutRounds =
-  rounds.where((r) => r.roundType == 'knockout').toList();
+      rounds.where((r) => r.roundType == 'knockout').toList();
 
   // ترتيب (لو عندك createdAt/updatedAt استخدمها بدل id)
   knockoutRounds.sort((a, b) => (a.id ?? 0).compareTo(b.id ?? 0));
@@ -1423,7 +1488,7 @@ FutureProvider.family<({int? id, String? syncId})?, String>((ref, leagueSyncId) 
   return null;
 });
 final hasAnyKnockoutRoundsProvider =
-Provider.family<bool, String>((ref, leagueSyncId) {
+    Provider.family<bool, String>((ref, leagueSyncId) {
   final asyncRounds = ref.watch(
     roundsWithKnockoutStreamProvider(
       Tuple2(leagueSyncId, 'scheduled,live,finished,unscheduled'),
@@ -1450,7 +1515,7 @@ final knockoutRepositoryProvider = Provider<KnockoutRepository>((ref) {
 // 2) Provider family للـ notifier
 final ensureKnockoutProgressProvider = StateNotifierProvider.family<
     EnsureKnockoutProgressNotifier, DataState<Unit>, String>(
-      (ref, leagueSyncId) => EnsureKnockoutProgressNotifier(
+  (ref, leagueSyncId) => EnsureKnockoutProgressNotifier(
     ref: ref,
     leagueSyncId: leagueSyncId,
     repo: ref.read(knockoutRepositoryProvider),
@@ -1489,23 +1554,27 @@ class EnsureKnockoutProgressNotifier extends StateNotifier<DataState<Unit>> {
 
       // 3) لا تستخدم fold مع async — افصلها
       res.fold(
-            (DioException e) {
+        (DioException e) {
           if (!_alive) return;
           state = state.copyWith(state: States.error, exception: e);
         },
-            (createdRound) {
+        (createdRound) {
           if (!_alive) return;
 
           // لو ما في شيء جديد تم إنشاؤه: still success
           // لكن ممكن ما تعمل refresh أو تعمل refresh خفيف حسب رغبتك
           if (createdRound != null) {
-            ref.read(roundsRefreshKnockoutProvider(
-              Tuple3(leagueSyncId, 'unscheduled', 'organizer'),
-            ).notifier).refresh();
+            ref
+                .read(roundsRefreshKnockoutProvider(
+                  Tuple3(leagueSyncId, 'unscheduled', 'organizer'),
+                ).notifier)
+                .refresh();
 
-            ref.read(roundsRefreshKnockoutProvider(
-              Tuple3(leagueSyncId, 'scheduled,live,finished', 'organizer'),
-            ).notifier).refresh();
+            ref
+                .read(roundsRefreshKnockoutProvider(
+                  Tuple3(leagueSyncId, 'scheduled,live,finished', 'organizer'),
+                ).notifier)
+                .refresh();
           }
 
           state = state.copyWith(state: States.loaded, data: unit);

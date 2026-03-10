@@ -6,8 +6,11 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';
 import '../../../../../core/state/pagination_data/paginated_model.dart';
+import '../../../home/data/models/banners_model.dart';
+import '../../../home/data/models/news_item_model.dart';
 import '../../data/model/league_model.dart';
 import '../../data/model/league_status_model.dart';
+import '../../data/model/report_model.dart';
 import '../../data/model/rule_league_model.dart';
 import '../../data/reposaitory/league_reposaitory.dart';
 import 'package:safirah/injection.dart' as di;
@@ -95,10 +98,10 @@ class AddLeagueNotifier extends StateNotifier<DataState<String>> {
       connectivity: di.sl(),
       remote: di.sl());
 
-  Future<void> addLeague(LeagueModel model) async {
+  Future<void> addLeague(LeagueModel model,List<LeagueRuleModel> leagueRule) async {
     state = state.copyWith(state: States.loading);
 
-    final result = await _repo.createLeague(model);
+    final result = await _repo.createLeague(model, leagueRule);
 
     result.fold(
       (f) {
@@ -119,33 +122,45 @@ final rulesProvider =
 class RulesNotifier extends StateNotifier<List<RuleUIModel>> {
   RulesNotifier() : super(_defaultRules);
 
+  /// نصوص القواعد الأساسية الافتراضية (لاستخدامها في التصنيف/العرض بدون رقم ثابت)
+  static List<String> get defaultRulesText =>
+      _defaultRules.map((e) => e.rule.trim()).toList(growable: false);
+
   static final _defaultRules = [
     RuleUIModel(
-      rule:
-          "يتكون كل فريق من 11 لاعبًا بما في ذلك حارس المرمى. يجب أن يكون لدى الفريق عدد كافٍ من اللاعبين للعب المباراة (عادة ما بين 7 و 11 لاعبًا).",
+      rule: "الالتزام باللبس الرياضي المناسب.",
       isDefault: true,
+      selected: true,
     ),
     RuleUIModel(
-      rule:
-          "تتكون المباراة من شوطين مدة كل شوط 45 دقيقة. في حال التعادل يتم إضافة وقت إضافي (2 × 15 دقيقة) ثم ركلات ترجيح إذا استمر التعادل.",
+      rule: "ممنوع اللعب الخشن أو العنيف.",
       isDefault: true,
+      selected: true,
     ),
     RuleUIModel(
-      rule:
-          "يجب أن يكون اللعب مستطيلاً بطول يتراوح بين 90 مترًا و120 مترًا، وعرض بين 45 مترًا و90 مترًا. وسط الملعب خط الوسط وهناك منطقة جزاء أمام كل مرمى.",
+      rule: "احترام جميع اللاعبين والمنظمين.",
       isDefault: true,
+      selected: true,
     ),
     RuleUIModel(
-      rule:
-          "يجب أن تكون الكرة كروية الشكل ومحيطها يتراوح بين 68 و70 سم ووزنها بين 410 و450 جم.",
+      rule: "الالتزام بقواعد المباراة المتفق عليها قبل البداية.",
       isDefault: true,
+      selected: true,
+    ),
+    RuleUIModel(
+      rule: "اللعب بروح رياضية والمحافظة على سلامة الجميع.",
+      isDefault: true,
+      selected: true,
     ),
   ];
 
   void toggleSelection(int index) {
+    final current = state[index];
+    if (current.isDefault) return; // default rules must stay selected
+
     final updated = [...state];
-    updated[index] = updated[index].copyWith(
-      selected: !updated[index].selected,
+    updated[index] = current.copyWith(
+      selected: !current.selected,
     );
     state = updated;
   }
@@ -176,7 +191,7 @@ class AddRuleNotifier extends StateNotifier<DataState<Unit>> {
       String leagueSyncId, List<LeagueRuleModel> rules) async {
     state = state.copyWith(state: States.loading);
 
-    final result = await repo.replaceRulesForLeague(leagueSyncId, rules);
+    final result = await repo.replaceRulesForLeague(leagueSyncId: leagueSyncId, rules: rules);
 
     result.fold(
       (failure) {
@@ -279,38 +294,6 @@ class LeaguesByPrivacyNotifier
   }
 }
 
-// final leagueStatusProvider = StateNotifierProvider.family<
-//     LeagueStatusLoaderNotifier,
-//     DataState<LeagueStatusModel?>,
-//     String>((ref, leagueSyncId) {
-//   return LeagueStatusLoaderNotifier(leagueSyncId, ref);
-// });
-//
-// class LeagueStatusLoaderNotifier
-//     extends StateNotifier<DataState<LeagueStatusModel?>> {
-//   final String leagueSyncId;
-//   final LeagueRepository _repo;
-//
-//   LeagueStatusLoaderNotifier(this.leagueSyncId, Ref ref)
-//       : _repo = LeagueRepository(
-//             local: di.sl(),
-//             syncService: di.sl(),
-//             connectivity: di.sl(),
-//             remote: di.sl()),
-//         super(DataState.initial(null)) {
-//     load();
-//   }
-//
-//   Future<void> load() async {
-//     state = state.copyWith(state: States.loading);
-//
-//     final res = await _repo.getStatus(leagueSyncId);
-//     res.fold(
-//       (e) => state = state.copyWith(state: States.error, exception: e),
-//       (model) => state = state.copyWith(state: States.loaded, data: model),
-//     );
-//   }
-// }
 final leagueStatusRepoProvider = Provider<LeagueRepository>((ref) {
   return LeagueRepository(
     local: di.sl(),
@@ -404,9 +387,7 @@ class LeagueBundleRefreshNotifier extends StateNotifier<RefreshState> {
   final String leagueSyncId;
 
   LeagueBundleRefreshNotifier(this._repo, this.leagueSyncId)
-      : super(RefreshState.idle()) {
-    refresh(); // ✅ فور الدخول للصفحة
-  }
+      : super(RefreshState.idle());
 
   Future<void> refresh() async {
     state = state.copyWith(status: RefreshStatus.loading, exception: null);
@@ -426,36 +407,225 @@ final leagueStreamProvider =
   final repo = ref.read(leagueStatusRepoProvider);
   return repo.watchLeague(leagueSyncId: leagueSyncId);
 });
-//
-// final leagueStatusProvider = StateNotifierProvider.family<
-//     EnsureGroupRoundsNotifier, DataState<LeagueStatusModel>, String>(
-//   (ref, leagueSyncId) => EnsureGroupRoundsNotifier(leagueSyncId),
-// );
-//
-// class EnsureGroupRoundsNotifier
-//     extends StateNotifier<DataState<LeagueStatusModel>> {
-//   EnsureGroupRoundsNotifier(this.leagueSyncId)
-//       : super(DataState<LeagueStatusModel>.initial(LeagueStatusModel(
-//             leagueSyncId: '',
-//             hasGroups: false,
-//             hasMatches: false,
-//             hasPlayersInTeams: false,
-//             hasTeamsInGroups: false,
-//             isReady: false)));
-//
-//   final String leagueSyncId;
-//   final _repo = LeagueRepository(
-//       local: di.sl(),
-//       connectivity: di.sl(),
-//       syncService: di.sl(),
-//       remote: di.sl());
-//
-//   Future<void> run() async {
-//     state = state.copyWith(state: States.loading);
-//     final res = await _repo.getStatus(leagueSyncId);
-//     res.fold(
-//       (e) => state = state.copyWith(state: States.error, exception: e),
-//       (l) => state = state.copyWith(state: States.loaded, data: l),
-//     );
-//   }
-// }
+
+
+final getAllLatestNewsLeagueProvider = StateNotifierProvider.family.autoDispose<
+    GetAllLatestNewsLeagueNotifier,
+    DataState<PaginationModel<NewsItemModel>>,
+    String>(
+  (ref, leagueSyncId) {
+    return GetAllLatestNewsLeagueNotifier(leagueSyncId);
+  },
+);
+
+class GetAllLatestNewsLeagueNotifier
+    extends StateNotifier<DataState<PaginationModel<NewsItemModel>>> {
+  GetAllLatestNewsLeagueNotifier(this.leagueSyncId)
+      : super(DataState<PaginationModel<NewsItemModel>>.initial(
+            PaginationModel.empty())) {
+    getData();
+  }
+
+  final String leagueSyncId;
+  final _repo = LeagueRepository(
+      local: di.sl(),
+      syncService: di.sl(),
+      connectivity: di.sl(),
+      remote: di.sl());
+
+  Future<void> getData({bool moreData = false}) async {
+    if (moreData && state.data.currentPage >= state.data.lastPage) {
+      return;
+    }
+    if (moreData) {
+      state = state.copyWith(state: States.loadingMore);
+    } else {
+      state = state.copyWith(state: States.loading);
+    }
+
+    final nextPage = moreData ? state.data.currentPage + 1 : 1;
+
+    final result = await _repo.getAllLatestLeagueNews(leagueSyncId, nextPage);
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(state: States.error, exception: failure);
+      },
+      (newData) {
+        state = state.success(newData, moreData);
+      },
+    );
+  }
+}
+
+final addReportProvider =
+    StateNotifierProvider.autoDispose<AddReportNotifier, DataState<String>>(
+  (ref) => AddReportNotifier(),
+);
+
+class AddReportNotifier extends StateNotifier<DataState<String>> {
+  AddReportNotifier() : super(DataState<String>.initial(''));
+  final _repo = LeagueRepository(
+      local: di.sl(),
+      syncService: di.sl(),
+      connectivity: di.sl(),
+      remote: di.sl());
+
+  Future<void> addReport(ReportModel model) async {
+    state = state.copyWith(state: States.loading);
+
+    final result = await _repo.addReport(model);
+
+    result.fold(
+      (f) {
+        state = state.copyWith(state: States.error, exception: f);
+      },
+      (_) {
+        state = state.copyWith(
+          state: States.loaded,
+        );
+      },
+    );
+  }
+}
+
+final reporterDetailsProvider = StateNotifierProvider.family<
+    ReporterDetailsController, DataState<NewsItemModel>, int>(
+  (ref, int id) {
+    return ReporterDetailsController(id);
+  },
+);
+
+class ReporterDetailsController
+    extends StateNotifier<DataState<NewsItemModel>> {
+  final int id;
+
+  ReporterDetailsController(this.id)
+      : super(DataState<NewsItemModel>.initial(NewsItemModel.empty())) {
+    getData();
+  }
+
+  final _repo = LeagueRepository(
+      local: di.sl(),
+      syncService: di.sl(),
+      connectivity: di.sl(),
+      remote: di.sl());
+
+  Future<void> getData() async {
+    state = state.copyWith(state: States.loading);
+    final data = await _repo.reportDetails(id: id);
+    data.fold(
+      (failure) {
+        state = state.copyWith(state: States.error, exception: failure);
+      },
+      (orderDetailsData) {
+        state = state.copyWith(
+          state: States.loaded,
+          data: orderDetailsData,
+        );
+      },
+    );
+  }
+}
+
+final orderLeagueInvitationsPlayerProvider = StateNotifierProvider.family<
+    OrderLeagueInvitationsPlayerNotifier,
+    DataState<Unit>,
+    String>((ref, syncLeagueId) {
+  return OrderLeagueInvitationsPlayerNotifier(syncLeagueId);
+});
+
+class OrderLeagueInvitationsPlayerNotifier
+    extends StateNotifier<DataState<Unit>> {
+  OrderLeagueInvitationsPlayerNotifier(this.syncLeagueId)
+      : super(DataState.initial(unit)) ;
+
+  final String syncLeagueId;
+  final _repo = LeagueRepository(
+      local: di.sl(),
+      syncService: di.sl(),
+      connectivity: di.sl(),
+      remote: di.sl());
+
+
+  Future<void> add() async {
+    state = state.copyWith(state: States.loading);
+    final r = await _repo.orderLeagueInvitationsPlayer(syncLeagueId);
+    r.fold(
+          (e) => state = state.copyWith(state: States.error, exception: e),
+          (_) => state = state.copyWith(state: States.loaded),
+    );
+  }
+}
+
+final getLeagueBannersProvider = StateNotifierProvider.family<
+    GetLeagueBannersNotifier,
+    DataState<List<BannerModel>>,
+    String>((ref, syncLeagueId) {
+  return GetLeagueBannersNotifier(syncLeagueId);
+});
+
+class GetLeagueBannersNotifier
+    extends StateNotifier<DataState<List<BannerModel>>> {
+  GetLeagueBannersNotifier(this.syncLeagueId)
+      : super(DataState.initial([])){
+    load();
+  }
+
+  final String syncLeagueId;
+  final _repo = LeagueRepository(
+      local: di.sl(),
+      syncService: di.sl(),
+      connectivity: di.sl(),
+      remote: di.sl());
+
+
+  Future<void> load() async {
+    state = state.copyWith(state: States.loading);
+    final r = await _repo.getLeagueBanners(syncLeagueId);
+    r.fold(
+          (e) => state = state.copyWith(state: States.error, exception: e),
+          (data) => state = state.copyWith(state: States.loaded,data: data),
+    );
+  }
+}
+
+
+
+/// يراقب قواعد دوري محدد (من اللوكال) ويحدث الواجهة تلقائيًا.
+final leagueRulesStreamProvider = StreamProvider.family
+    <List<LeagueRuleModel>, String>((ref, leagueSyncId) {
+  final repo = ref.read(leagueStatusRepoProvider);
+  return repo.watchLeagueRules(leagueSyncId: leagueSyncId);
+});
+
+/// حالة refresh لقواعد الدوري (تحميل/نجاح/خطأ)
+final leagueRulesRefreshProvider = StateNotifierProvider.family
+    <LeagueRulesRefreshNotifier, RefreshState, String>((ref, leagueSyncId) {
+  final repo = ref.read(leagueStatusRepoProvider);
+  return LeagueRulesRefreshNotifier(repo, leagueSyncId);
+});
+
+class LeagueRulesRefreshNotifier extends StateNotifier<RefreshState> {
+  LeagueRulesRefreshNotifier(this._repo, this.leagueSyncId)
+      : super(RefreshState.idle());
+
+  final LeagueRepository _repo;
+  final String leagueSyncId;
+
+  Future<void> refresh({bool deleteMissing = true}) async {
+    if (state.status == RefreshStatus.loading) return;
+
+    state = state.copyWith(status: RefreshStatus.loading, exception: null);
+
+    final res = await _repo.refreshLeagueRules(
+      leagueSyncId: leagueSyncId,
+      deleteMissing: deleteMissing,
+    );
+
+    res.fold(
+      (e) => state = state.copyWith(status: RefreshStatus.error, exception: e),
+      (_) => state = state.copyWith(status: RefreshStatus.idle, exception: null),
+    );
+  }
+}

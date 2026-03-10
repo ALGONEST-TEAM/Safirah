@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:safirah/core/helpers/navigateTo.dart';
+import 'package:safirah/features/profile/presentation/pages/settings_page.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../authorization/authorization_service.dart';
+import '../../../home/presntation/pages/latest_news_page.dart';
+import '../../../match/presntaion/page/matches_in_details_league_page.dart';
 import '../../../match/presntaion/widget/matches_schedule_widget.dart';
-import '../riverpod/riverpod.dart';
+import '../../../team_and_player/data/model/team_model.dart';
+import '../../../team_and_player/presntation/page/league_player_stats_page.dart';
+import '../../../team_and_player/presntation/state_mangment/riverpod.dart';
 import '../widget/details_league_tabbar_widget.dart';
-import '../widget/details_league_top_header_widget.dart';
 import '../widget/list_ranking_group_widget.dart';
+import 'latest_news_league_page.dart';
+import 'league_settings_page.dart';
 
 class DetailsLeagueWidget extends ConsumerStatefulWidget {
   const DetailsLeagueWidget({super.key, required this.leagueSyncId});
@@ -25,6 +33,11 @@ class _DetailsLeagueWidgetState extends ConsumerState<DetailsLeagueWidget>
 
   @override
   void initState() {
+    Future.microtask(() {
+
+      ref.read(teamsRefreshProvider(widget.leagueSyncId).notifier).refresh();
+
+    });
     // Future.microtask(() async {
     //   await service.syncUserAccessForAllLeagues();
     //
@@ -49,92 +62,48 @@ class _DetailsLeagueWidgetState extends ConsumerState<DetailsLeagueWidget>
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(leagueBundleRefreshProvider(widget.leagueSyncId)); // يعمل sync فورًا
   //  final league = ref.watch(leagueStreamProvider(leagueSyncId));
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: AppColors.secondaryColor,
-        elevation: 0,
-        leading: const BackButton(color: Colors.white),
-        title: const AutoSizeTextWidget(
-          text:  'تفاصيل الدوري',
-          colorText: Colors.white,
+        appBar: SecondaryAppBarWidget(
+          title: 'تفاصيل الدوري',
+          actions: [
+            IconButton(onPressed: (){
+              navigateTo(context, LeagueSettingsPage(leagueSyncId: widget.leagueSyncId,));
+            }, icon:  Icon(Icons.settings))
+          ],
         ),
-      ),
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerScrolled) {
-          return [
-            SliverToBoxAdapter(
-              child:DetailsLeagueTopHeaderWidget(
-                leagueSyncId: widget.leagueSyncId,
-              ),
-
-            ),
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _TabBarSliverDelegate(
-                child: Material(
-                  color: Colors.white,
-                  child: DetailsLeagueTabBarWidget(
-                    controller: controller,
-                    tabTitle: tabTitle,
-                  ),
-                ),
-              ),
-            ),
-          ];
-        },
-        body: TabBarView(
-          controller: controller,
+        body: Column(
           children: [
-            ListRankingGroupWidget(
-              leagueSyncId:widget.leagueSyncId,
+            DetailsLeagueTabBarWidget(
+              controller: controller,
+              tabTitle: tabTitle,
             ),
-            MatchesScheduleWidget(
-              role: 'organizer',
-              leagueSyncId: widget.leagueSyncId,
-              matchFilter: 'scheduled,live,finished',
-            ),
-            MatchesScheduleWidget(
-              role: 'organizer',
-
-              leagueSyncId: widget.leagueSyncId,
-              matchFilter: 'scheduled,live,finished',
-            ),
-            MatchesScheduleWidget(
-              role: 'organizer',
-
-              leagueSyncId: widget.leagueSyncId,
-              matchFilter: 'scheduled,live,finished',
+            Expanded(
+              child: TabBarView(
+                controller: controller,
+                children: [
+                  ListRankingGroupWidget(
+                    leagueSyncId:widget.leagueSyncId,
+                  ),
+                  MatchesInDetailsLeaguePage(
+                    role: 'organizer',
+                    leagueSyncId: widget.leagueSyncId,
+                    matchFilter: 'scheduled,live,finished',
+                  ),
+                  LatestNewsLeaguePage(
+                    leagueSyncId: widget.leagueSyncId,
+                  ),
+                  LeaguePlayerStatsPage(
+                    leagueSyncId: widget.leagueSyncId,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-      ),
-    );
+      );
+   // );
   }
 }
 
-class _TabBarSliverDelegate extends SliverPersistentHeaderDelegate {
-  _TabBarSliverDelegate({required this.child});
-
-  final Widget child;
-
-  @override
-  double get minExtent => 56.0;
-
-  @override
-  double get maxExtent => 56.0;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
-  }
-
-  @override
-  bool shouldRebuild(covariant _TabBarSliverDelegate oldDelegate) {
-    return false;
-  }
-}

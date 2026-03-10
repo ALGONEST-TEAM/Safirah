@@ -1,3 +1,4 @@
+import 'package:safirah/features/leagues_mangement/match/data/model/match_event_model.dart';
 import 'package:safirah/features/leagues_mangement/match/data/model/match_model.dart';
 
 import '../../../../../../core/network/remote_request.dart';
@@ -46,4 +47,17 @@ class MatchRemoteDataSource {
     );
     return  MatchModel.fromJsonList(response.data['data']);
   }
+  Future<MatchDetailsModel> getMatchDetails(
+      String matchSyncId,
+      )async {
+    final  response = await RemoteRequest.getData(
+      url: '${AppURL
+          .baseURL}/league-application/matches/show',
+      query: {
+        'sync_id': matchSyncId,
+      },
+    );
+    return  MatchDetailsModel.fromJson(response.data['data']);
+  }
+
 }

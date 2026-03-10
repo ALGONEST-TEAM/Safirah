@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:safirah/core/constants/app_icons.dart';
-import 'package:safirah/core/helpers/navigateTo.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
-import '../../../match_term_event/presntation/page/initialization_term_page.dart';
+import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../widget/matches_schedule_widget.dart';
 
 class MatchesSchedulingPage extends ConsumerWidget {
@@ -19,17 +16,8 @@ class MatchesSchedulingPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(
-          color: Colors.white,
-        ),
-        title: const AutoSizeTextWidget(
-          text: 'جدولة المباريات',
-          colorText: Colors.white,
-        ),
-        centerTitle: true,
-        backgroundColor: AppColors.secondaryColor,
-
+      appBar: SecondaryAppBarWidget(
+        title: 'جدولة المباريات',
       ),
       body: SafeArea(
         child: DefaultTabController(
@@ -44,7 +32,7 @@ class MatchesSchedulingPage extends ConsumerWidget {
                       child: Container(
                         height: 40.h,
                         width: double.infinity,
-                        padding: EdgeInsets.all(4.r),
+                        padding: EdgeInsets.all(2.r),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12.r),
@@ -56,17 +44,17 @@ class MatchesSchedulingPage extends ConsumerWidget {
                             dividerColor: Colors.transparent,
                             tabAlignment: TabAlignment.fill,
                             indicator: BoxDecoration(
-                              color: AppColors.primaryColor,
+                              color: AppColors.secondaryColor,
                               borderRadius: BorderRadius.circular(8.r),
                             ),
-                            padding: EdgeInsets.symmetric(horizontal: 4.5.w),
+                            padding: EdgeInsets.symmetric(horizontal: 2.5.w),
                             indicatorSize: TabBarIndicatorSize.tab,
                             overlayColor:
                             MaterialStateProperty.all(Colors.transparent),
                             labelPadding: EdgeInsets.zero,
                             indicatorPadding:
                             EdgeInsets.symmetric(
-                                horizontal: 4.5.w, vertical: 2),
+                                horizontal: 4.5.w, vertical: 0),
                             labelColor: Colors.white,
                             unselectedLabelColor: AppColors.secondaryColor,
                             tabs: const [
@@ -78,26 +66,7 @@ class MatchesSchedulingPage extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.all(8.0.w),
-                    child: GestureDetector(
-                      onTap: () {
-                        navigateTo(context,
-                            LeagueTermSetupPage(leagueSyncId: leagueSyncId,));
-                      },
-                      child: Container(
-                        height: 40.h,
-                        width: 50.w,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: SvgPicture.asset(
-                          AppIcons.settings, fit: BoxFit.none,),
 
-                      ),
-                    ),
-                  )
                 ],
               ),
               // ===== المحتوى =====
@@ -109,10 +78,18 @@ class MatchesSchedulingPage extends ConsumerWidget {
                       leagueSyncId: leagueSyncId,
                       matchFilter: 'unscheduled',
                     ),
-                    MatchesScheduleWidget(
-                      role: role,
-                      leagueSyncId: leagueSyncId,
-                      matchFilter: 'scheduled,live',
+                    Visibility(
+                      visible: role=='organizer',
+                      replacement: MatchesScheduleWidget(
+                        role: role,
+                        leagueSyncId: leagueSyncId,
+                        matchFilter: 'scheduled,live,finished',
+                      ),
+                      child: MatchesScheduleWidget(
+                        role: role,
+                        leagueSyncId: leagueSyncId,
+                        matchFilter: 'scheduled,live',
+                      ),
                     ),
                   ],
                 ),

@@ -24,6 +24,7 @@ class NotificationNotifier
   Future<void> getNotifications() async {
     state = state.copyWith(state: States.loading);
     final res = await _repo.getNotifications();
+    if (!mounted) return; // ✅ قد يكون dispose() تم أثناء الانتظار
     res.fold(
       (f) => state = state.copyWith(state: States.error, exception: f),
       (data) => state = state.copyWith(state: States.loaded, data: data),
@@ -53,6 +54,8 @@ class NotificationNotifier
     _pending.add(index);
     final res = await _repo.markAsRead(item.id!.toString());
     _pending.remove(index);
+
+    if (!mounted) return; // ✅ قد يكون dispose() تم أثناء الانتظار
 
     res.fold((_) {
       items[index] = old;

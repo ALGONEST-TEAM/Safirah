@@ -35,7 +35,7 @@ class TeamsNotifier extends StateNotifier<RefreshState> {
   final String leagueSyncId;
 
   TeamsNotifier(this._repo, this.leagueSyncId)
-      : super(RefreshState.idle()) {}
+      : super(RefreshState.idle()) ;
 
   Future<void> refresh() async {
     state = state.copyWith(status: RefreshStatus.loading, exception: null);
@@ -71,7 +71,7 @@ class LeaguePlayerNotifier extends StateNotifier<RefreshState> {
   final String leagueSyncId;
 
   LeaguePlayerNotifier(this._repo, this.leagueSyncId)
-      : super(RefreshState.idle()) {}
+      : super(RefreshState.idle()) ;
 
   Future<void> refresh() async {
     state = state.copyWith(status: RefreshStatus.loading, exception: null);
@@ -445,6 +445,37 @@ class PlayersOfTeamNotifier
     r.fold(
       (e) => state = state.copyWith(state: States.error, exception: e),
       (list) => state = state.copyWith(state: States.loaded, data: list),
+    );
+  }
+}
+
+final getLeaguePlayersStatisticsProvider = StateNotifierProvider.family<
+    GetLeaguePlayersStatisticsNotifier,
+    DataState<LeaguePlayerStatsModel>,
+    String>((ref, syncLeagueId) {
+  return GetLeaguePlayersStatisticsNotifier(syncLeagueId);
+});
+
+class GetLeaguePlayersStatisticsNotifier
+    extends StateNotifier<DataState<LeaguePlayerStatsModel>> {
+  GetLeaguePlayersStatisticsNotifier(this.syncLeagueId)
+      : super(DataState.initial(LeaguePlayerStatsModel())) {
+    load();
+  }
+
+  final String syncLeagueId;
+  final _repo = TeamAndPlayerRepository(
+      local: di.sl(),
+      remote: di.sl(),
+      connectivity: di.sl(),
+      syncService: di.sl());
+
+  Future<void> load() async {
+    state = state.copyWith(state: States.loading);
+    final r = await _repo.getLeaguePlayersStatistics(syncLeagueId);
+    r.fold(
+          (e) => state = state.copyWith(state: States.error, exception: e),
+          (list) => state = state.copyWith(state: States.loaded, data: list),
     );
   }
 }

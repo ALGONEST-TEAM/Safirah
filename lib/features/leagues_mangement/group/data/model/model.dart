@@ -351,6 +351,7 @@ class QualifiedTeamModel {
         qualificationType: e.qualificationType,
         createdAt: e.createdAt,
         updatedAt: e.updatedAt,
+
       );
 
   QualifiedTeamModel withTeamName(String? name) => copyWith(teamName: name);

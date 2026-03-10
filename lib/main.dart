@@ -28,6 +28,7 @@ import 'features/shop/shoppingBag/cart/presentation/riverpod/cart_riverpod.dart'
 import 'generated/l10n.dart';
 import 'services/auth/auth.dart';
 import 'features/authorization/authorization_sync_runner.dart';
+import 'core/deep_links/deep_link_service.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -81,6 +82,10 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   void initState() {
+    // Start deep link listener as early as possible.
+    // ignore: discarded_futures
+    DeepLinkService.I.start();
+
     FirebaseMessagingService.I.getDeviceToken().then((t) {
       if (t != null) {
         debugPrint('Device Token: $t');
@@ -124,6 +129,8 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   void dispose() {
+    // ignore: discarded_futures
+    DeepLinkService.I.dispose();
     // ignore: unawaited_futures
     _syncAutoRunner?.dispose();
     // ignore: unawaited_futures

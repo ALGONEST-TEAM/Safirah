@@ -10,6 +10,7 @@ class LeagueStatusModel {
   final bool hasPlayersInTeams;
   final bool isReady;
   final DateTime? updatedAt;
+  final bool hasKnockout;
 
   const LeagueStatusModel({
     this.id,
@@ -20,6 +21,7 @@ class LeagueStatusModel {
     this.hasPlayersInTeams = false,
     this.isReady = false,
     this.updatedAt,
+    this.hasKnockout = false,
   });
 
   factory LeagueStatusModel.fromEntity(LeagueStatusData e) => LeagueStatusModel(
@@ -29,6 +31,7 @@ class LeagueStatusModel {
         hasMatches: e.hasMatches,
         hasPlayersInTeams: e.hasPlayersAssigned,
         updatedAt: e.updatedAt,
+        hasKnockout: e.hasKnockout,
       );
 
   factory LeagueStatusModel.fromJson(Map<String, dynamic> json) =>
@@ -40,6 +43,7 @@ class LeagueStatusModel {
         hasMatches: json['has_matches'] as bool? ?? false,
         hasPlayersInTeams: json['has_players_assigned'] as bool? ?? false,
         isReady: json['isReady'] as bool? ?? false,
+        hasKnockout: json['has_knockout'] as bool? ?? false,
         updatedAt: json['updatedAt'] != null
             ? DateTime.parse(json['updatedAt'] as String)
             : null,
@@ -51,6 +55,7 @@ class LeagueStatusModel {
         hasTeamsInGroups: Value(hasTeamsInGroups),
         hasMatches: Value(hasMatches),
         hasPlayersAssigned: Value(hasPlayersInTeams),
+        hasKnockout: Value(hasKnockout),
         updatedAt: Value(DateTime.now()),
       );
 }

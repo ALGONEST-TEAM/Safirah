@@ -10,83 +10,6 @@ import '../../data/model/match_model.dart';
 import '../../data/model/round_model.dart';
 import 'match_tile_widget.dart';
 import 'matches_schedule_widget.dart';
-//
-// class KnockoutRoundsListWidget extends ConsumerWidget {
-//   final String leagueSyncId;
-//   final String matchFilter;
-//   final String role;
-//
-//   const KnockoutRoundsListWidget({
-//     super.key,
-//     required this.leagueSyncId,
-//     required this.matchFilter,
-//     required this.role,
-//   });
-//
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//
-//     ref.watch(
-//         roundsRefreshKnockoutProvider(Tuple3(leagueSyncId, matchFilter, role)));
-//     final stateRoundsWithKnockout = ref.watch(
-//         roundsWithKnockoutStreamProvider(Tuple2(leagueSyncId, matchFilter)));
-//
-//     return CheckStateInStreamWidget<List<RoundModel>>(
-//         async: stateRoundsWithKnockout,
-//         isEmpty: (rounds) => rounds.isEmpty,
-//         onRefresh: () => ref
-//             .read(roundsRefreshKnockoutProvider(
-//                     Tuple3(leagueSyncId, matchFilter, role))
-//                 .notifier)
-//             .refresh(),
-//         keepPreviousDataWhileLoading: true,
-//         dataBuilder: (round) {
-//           return RefreshIndicator(
-//               onRefresh: () => ref
-//                   .read(roundsRefreshKnockoutProvider(
-//                           Tuple3(leagueSyncId, matchFilter, role))
-//                       .notifier)
-//                   .refresh(),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Padding(
-//                     padding:
-//                         const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-//                     child: AutoSizeTextWidget(
-//                       text: round[0].roundName,
-//                       fontSize: 16.sp,
-//                     ),
-//                   ),
-//                   Container(
-//                     decoration: BoxDecoration(
-//                       color: Colors.white,
-//                       borderRadius: BorderRadius.circular(12),
-//                     ),
-//                     child: Column(
-//                       children: List.generate(round[0].matches!.length, (j) {
-//                         final match = round[0].matches![j];
-//                         return Column(
-//                           children: [
-//                             MatchTileWidget(
-//                               roundSyncId: round[0].syncId ?? '',
-//                               match: match,
-//                               leagueSyncId: leagueSyncId,
-//                               matchFilter: matchFilter,
-//                             ),
-//                             if (j != round[0].matches!.length - 1)
-//                               const Divider(
-//                                   height: 1, color: Color(0xffF2F0FB)),
-//                           ],
-//                         );
-//                       }),
-//                     ),
-//                   ),
-//                 ],
-//               ));
-//         });
-//   }
-// }
 class KnockoutRoundsListWidget extends ConsumerStatefulWidget {
   final String leagueSyncId;
   final String matchFilter;
@@ -128,6 +51,12 @@ class _KnockoutRoundsListWidgetState extends ConsumerState<KnockoutRoundsListWid
       onRefresh: () => ref
           .read(roundsRefreshKnockoutProvider(widget.refreshParam).notifier)
           .refresh(),
+      emptyBuilder: () => Center(
+        child: AutoSizeTextWidget(
+          text: ' لا توجد جولات اقصائية بعد',
+          fontSize: 14.sp,
+        ),
+      ),
       keepPreviousDataWhileLoading: true,
       dataBuilder: (rounds) {
         // ✅ لا تفترض rounds[0]
@@ -164,6 +93,7 @@ class _KnockoutRoundsListWidgetState extends ConsumerState<KnockoutRoundsListWid
                         return Column(
                           children: [
                             MatchTileWidget(
+                              role: widget.role,
                               roundSyncId: round.syncId ?? '',
                               match: match,
                               leagueSyncId: widget.leagueSyncId,

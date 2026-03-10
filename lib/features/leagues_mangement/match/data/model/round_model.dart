@@ -98,7 +98,7 @@ class RoundModel {
 
   factory RoundModel.fromJson(Map<String, dynamic> j) {
     final leagueId =
-    (j['league_sync_id'] ?? j['leagueSyncId'] ?? j['league_id']) as String?;
+    (j['league_sync_id'] ?? j['leagueSyncId'] ) as String?;
 
     final dynamic groupRaw = j['group'];
     final List<GroupModel> groups = [];
@@ -133,16 +133,16 @@ class RoundModel {
     );
   }
   Map<String, dynamic> toJson() => {
-    if (syncId != null) 'sync_id': syncId,
-    'league_sync_id': leagueSyncId,
-    // ✅ الصحيح: group_sync_id ليس قائمة groups! هو قيمة واحدة على مستوى الجولة
-    'group_sync_id': groupSyncId,
-    'round_type': roundType,
-    'round_name': roundName,
-    if (groups.isNotEmpty) 'groups': groups.map((g) => g.toJson()).toList(),
-    if (matches?.isNotEmpty==true) 'matches': matches?.map((m) => m.toJson()).toList(),
-
-  };
+        if ((syncId ?? '').trim().isNotEmpty) 'sync_id': syncId,
+        'league_sync_id': leagueSyncId,
+        // لا ترسل group_sync_id إذا كانت null/فارغة
+        if ((groupSyncId ?? '').trim().isNotEmpty) 'group_sync_id': groupSyncId,
+        'round_type': roundType,
+        'round_name': roundName,
+        if (groups.isNotEmpty) 'groups': groups.map((g) => g.toJson()).toList(),
+        if (matches?.isNotEmpty == true)
+          'matches': matches?.map((m) => m.toJson()).toList(),
+      };
 
   RoundsCompanion toCompanionInsert() => RoundsCompanion.insert(
     syncId:syncId?? const Uuid().v7(),
@@ -154,7 +154,6 @@ class RoundModel {
   );
 
   RoundsCompanion toCompanionUpdate() => RoundsCompanion(
-    id: id != null ? Value(id!) : const Value.absent(),
     syncId: syncId != null ? Value(syncId!) : const Value.absent(),
     leagueSyncId: Value(leagueSyncId),
     name: Value(roundName),
@@ -165,7 +164,6 @@ class RoundModel {
   );
 
   static RoundModel fromEntity(Round e) => RoundModel(
-    id: e.id,
     syncId: e.syncId,
     groupSyncId: e.groupSyncId, // ✅ NEW
     leagueSyncId: e.leagueSyncId,

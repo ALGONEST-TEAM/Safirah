@@ -6,7 +6,9 @@ import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/online_images_widget.dart';
 import '../../../match_term_event/presntation/page/add_event_match_page.dart';
+import '../../../leagues/persntaion/page/report_of_match_in_league_page.dart';
 import '../../data/model/match_model.dart';
+import '../page/match_details_page.dart';
 import '../page/schedule_match_page.dart';
 
 class MatchTileWidget extends StatelessWidget {
@@ -14,52 +16,110 @@ class MatchTileWidget extends StatelessWidget {
   final String leagueSyncId;
   final String matchFilter;
   final String roundSyncId;
+  final String role;
 
   const MatchTileWidget(
       {super.key,
-        required this.match,
-        required this.leagueSyncId,
-        required this.roundSyncId,
-        required this.matchFilter});
+      required this.match,
+      required this.leagueSyncId,
+      required this.roundSyncId,
+      required this.role,
+      required this.matchFilter});
 
   String dataInMatch() {
     if (match.status == 'unscheduled') {
       return '-:-';
     } else if (match.status == 'scheduled') {
-      return DateFormat('hh:mm a', 'ar').format(match.scheduledStartTime!);
+      final dt = match.scheduledStartTime ?? match.matchDate;
+      if (dt == null) return '-:-';
+      return DateFormat('hh:mm a', 'ar').format(dt);
     } else {
       return '${match.awayScore}:${match.homeScore}';
     }
   }
 
+  void _handleTap(BuildContext context) {
+    // 1) إذا المباراة غير مجدولة، دائماً نذهب لصفحة الجدولة
+    if (match.status == 'unscheduled') {
+      navigateTo(
+        context,
+        ScheduleMatchPage(
+          leagueSyncId: leagueSyncId,
+          matchSyncId: match.syncId!,
+        ),
+      );
+      return;
+    }
+
+    // 2) Role: media -> تقرير المباراة داخل الدوري
+    if (role == 'Media') {
+      navigateTo(
+        context,
+        ReportOfMatchInLeaguePage(
+          leagueSyncId: leagueSyncId,
+          matchSyncId: (match.syncId ?? 0).toString(),
+        ),
+      );
+      return;
+    }
+    if (role == 'organizer' ||
+        (match.status == 'finished' && role != 'Referee')) {
+      navigateTo(
+          context,
+          MatchDetailsPage(
+            matchSyncId: match.syncId!,
+
+          ));
+      return;
+    }
+    // 3) Role: organizer -> يبقى على صفحة الجدولة (حسب السلوك الحالي عندك)
+    if (role == 'organizer') {
+      navigateTo(
+        context,
+        ScheduleMatchPage(
+          leagueSyncId: leagueSyncId,
+          matchSyncId: match.syncId!,
+        ),
+      );
+      return;
+    }
+
+    // 4) باقي الأدوار -> إضافة أحداث/تفاصيل المباراة
+    navigateTo(
+      context,
+      AddEventMatchPage(
+        awayTeam: match.awayTeam!,
+        homeTeam: match.homeTeam!,
+        matchTerm: match.matchTerms,
+        matchSyncId: (match.syncId ?? 0).toString(),
+        roundSyncId: roundSyncId,
+        leagueSyncId: leagueSyncId,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final dt = match.matchDate;
+    final dateText = dt == null
+        ? ''
+        : '${DateFormat('EEEE', 'ar').format(dt)}  ${DateFormat.yMMMMd('ar').format(dt)}';
+
     return GestureDetector(
-      onTap: () {
-        navigateTo(
-          context,
-          match.status == 'unscheduled'
-              ? ScheduleMatchPage(
-                  leagueSyncId: leagueSyncId,
-                  matchSyncId: match.syncId!,
-                )
-              : AddEventMatchPage(
-                  awayTeam: match.awayTeam!,
-                  homeTeam: match.homeTeam!,
-                  matchTerm: match.matchTerms,
-                  matchSyncId: (match.syncId ?? 0).toString(),
-                  roundSyncId: roundSyncId,
-                  leagueSyncId: leagueSyncId,
-                ),
-        );
-      },
+      onTap: () => _handleTap(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //AutoSizeTextWidget(text: DateFormat.yMMMMd('ar').format(match.matchDate!)),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+            child: AutoSizeTextWidget(
+              text: dateText,
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xffF2F0FB)),
           ListTile(
             title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
               children: [
                 Expanded(
                   child: Row(
@@ -67,7 +127,7 @@ class MatchTileWidget extends StatelessWidget {
                     children: [
                       AutoSizeTextWidget(
                           text: match.homeTeam!.teamName, fontSize: 11.5.sp),
-                      const SizedBox(width: 6),
+                       SizedBox(width: 6.w),
                       OnlineImagesWidget(
                         imageUrl: '',
                         fit: BoxFit.cover,
@@ -77,11 +137,11 @@ class MatchTileWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 10),
+                 SizedBox(width: 10.w),
                 AutoSizeTextWidget(
                   text: dataInMatch(),
                 ),
-                const SizedBox(width: 10),
+                 SizedBox(width: 10.w),
                 Expanded(
                   child: Row(
                     children: [

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/features/authorization/presentation/riverpod/authorization_providers.dart';
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../data/model/league_model.dart';
+import '../page/details_league_user_page.dart';
 import '../page/details_league_widget.dart';
 import 'league_card_image_widget.dart';
 import 'league_card_info_widget.dart';
 
-class LeagueCardWidget extends StatelessWidget {
+class LeagueCardWidget extends ConsumerWidget {
   final LeagueModel leagueModel;
   final String imageUrl;
 
@@ -17,8 +20,11 @@ class LeagueCardWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     const cardBg = Colors.white;
+
+    final canEditAsync = ref.watch(canEditLeagueProvider(leagueModel.syncId));
+    final canEdit = canEditAsync.asData?.value ?? false;
 
     return Material(
       color: cardBg,
@@ -26,12 +32,12 @@ class LeagueCardWidget extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12.r),
         onTap: () {
-          navigateTo(
-            context,
-            DetailsLeagueWidget(
-              leagueSyncId: leagueModel.syncId ,
-            ),
-          );
+          final page = canEdit
+              ? DetailsLeagueWidget(leagueSyncId: leagueModel.syncId)
+              : (leagueModel.canWatch==false?DetailsLeagueUserPage(leagueSyncId: leagueModel.syncId)
+                  : DetailsLeagueWidget(leagueSyncId: leagueModel.syncId));
+
+          navigateTo(context, page);
         },
         child: Container(
           decoration: BoxDecoration(
@@ -53,5 +59,3 @@ class LeagueCardWidget extends StatelessWidget {
     );
   }
 }
-
-

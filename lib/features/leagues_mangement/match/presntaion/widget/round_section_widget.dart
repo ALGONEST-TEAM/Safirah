@@ -9,10 +9,12 @@ class RoundSectionWidget extends StatelessWidget {
   final RoundModel round;
   final String leagueSyncId;
   final String matchFilter;
+  final String role;
 
   const RoundSectionWidget(
       {super.key,
         required this.round,
+        required this.role,
         required this.leagueSyncId,
         required this.matchFilter});
 
@@ -30,6 +32,7 @@ class RoundSectionWidget extends StatelessWidget {
               ? const SizedBox()
               : GroupCardWidget(
             round: round,
+            role: role,
             groupWithMatches: groupWithMatches,
             leagueSyncId: leagueSyncId,
             matchFilter: matchFilter,

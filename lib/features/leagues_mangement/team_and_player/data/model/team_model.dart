@@ -30,6 +30,8 @@ class TeamModel {
     String? logoUrl,
     String? status,
     String? leagueSyncId,
+     List<PlayerModel>?player
+
   }) => TeamModel(
         id: id ?? this.id,
         syncId: syncId ?? this.syncId,
@@ -38,6 +40,7 @@ class TeamModel {
         logoUrl: logoUrl ?? this.logoUrl,
         status: status ?? this.status,
         leagueSyncId: leagueSyncId ?? this.leagueSyncId,
+    player: player??this.player
       );
 
   // API JSON
@@ -51,8 +54,8 @@ class TeamModel {
            .map((e) => PlayerModel.fromJson(e as Map<String, dynamic>))
            .toList()
            : [],
-       // logoUrl: j['logo_url'] ??'',
-       // status: j['status'] ??'',
+        logoUrl: j['logo_url'] ??'',
+        status: j['status'] ??'',
       );
 
   Map<String, dynamic> toJson() =>
@@ -98,15 +101,16 @@ class PlayerModel {
   final String status; // main | sub (إلخ)
   final DateTime? createdAt; // اختياري للقراءة/العرض
   final DateTime? updatedAt; // اختياري للقراءة/العرض
-
+  final String? teamName; // اسم الفريق (للعرض فقط، غير مخزن في قاعدة البيانات)
   final String? syncId;
 
   PlayerModel({
     this.id,
     this.playerLeagueSyncId,
     this.teamSyncId,
-     this.fullName,
+    this.fullName,
     this.position,
+    this.teamName,
     this.status = 'main',
     String? syncId,
     this.createdAt,
@@ -123,6 +127,7 @@ class PlayerModel {
     String? status,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? teamName,
   }) {
     return PlayerModel(
       id: id ?? this.id,
@@ -134,20 +139,41 @@ class PlayerModel {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      teamName: teamName ?? this.teamName,
     );
   }
 
   // -------- JSON (API / local cache) ----------
-  factory PlayerModel.fromJson(Map<String, dynamic> j) => PlayerModel(
-        id: j['id'] as int?,
-        playerLeagueSyncId: (j['player_league_id'] ?? j['playerLeagueId']),
-        teamSyncId: (j['team_id'] ?? j['teamId']),
-        fullName: (j['full_name'] ?? j['fullName'] ?? j['name']),
-        position: j['position'] as String?,
-        status: (j['status'] ?? 'main') as String,
-        createdAt: _parseDate(j['created_at'] ?? j['createdAt']),
-        updatedAt: _parseDate(j['updated_at'] ?? j['updatedAt']),
-      );
+  factory PlayerModel.fromJson(Map<String, dynamic> j) {
+    final dynamic teamRaw = j['team'];
+    String? parsedTeamName;
+
+    if (teamRaw is Map) {
+      final map = Map<String, dynamic>.from(teamRaw);
+      parsedTeamName = map['team_name']?.toString();
+    }
+
+    parsedTeamName ??= j['team_name']?.toString();
+    parsedTeamName ??= j['teamName']?.toString();
+
+    // أحياناً يرجع team كسلسلة أو قيمة أخرى
+    if (parsedTeamName == null && teamRaw is String && teamRaw.isNotEmpty) {
+      parsedTeamName = teamRaw;
+    }
+
+    return PlayerModel(
+      id: j['id'] as int?,
+      playerLeagueSyncId: (j['player_league_sync_id'] ?? '').toString(),
+      syncId: j['sync_id']?.toString(),
+      teamSyncId: (j['team_sync_id'] ?? '').toString(),
+      fullName: (j['full_name'] ?? j['fullName'] ?? j['name'])?.toString(),
+      position: j['position'] as String?,
+      status: (j['status'] ?? 'main') as String,
+      createdAt: _parseDate(j['created_at'] ?? j['createdAt']),
+      updatedAt: _parseDate(j['updated_at'] ?? j['updatedAt']),
+      teamName: parsedTeamName,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'sync_id':syncId,
@@ -198,6 +224,70 @@ class PlayerModel {
         updatedAt: e.updatedAt,
         syncId: e.syncId,
       );
+}
+
+/// ================= PLAYER STATS (API) =================
+/// عنصر واحد داخل top_scorer/top_assist/... => { count: x, player: {...} }
+class PlayerStatItemModel {
+  final int count;
+  final PlayerModel player;
+
+  const PlayerStatItemModel({required this.count, required this.player});
+
+  factory PlayerStatItemModel.fromJson(Map<String, dynamic> j) {
+    return PlayerStatItemModel(
+      count: (j['count'] is num) ? (j['count'] as num).toInt() : int.tryParse('${j['count']}') ?? 0,
+      player: PlayerModel.fromJson(Map<String, dynamic>.from(j['player'] as Map)),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'count': count,
+        'player': player.toJson(),
+      };
+
+  static List<PlayerStatItemModel> fromJsonList(dynamic v) {
+    final list = (v as List?) ?? const [];
+    return list
+        .whereType<Map>()
+        .map((e) => PlayerStatItemModel.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+}
+
+/// غلاف كل الإحصائيات كما يرجعها الـ API
+class LeaguePlayerStatsModel {
+  final List<PlayerStatItemModel> topScorer;
+  final List<PlayerStatItemModel> topAssist;
+  final List<PlayerStatItemModel> topContributor;
+  final List<PlayerStatItemModel> topYellowCards;
+  final List<PlayerStatItemModel> topRedCards;
+
+  const LeaguePlayerStatsModel({
+    this.topScorer = const [],
+    this.topAssist = const [],
+    this.topContributor = const [],
+    this.topYellowCards = const [],
+    this.topRedCards = const [],
+  });
+
+  factory LeaguePlayerStatsModel.fromJson(Map<String, dynamic> j) {
+    return LeaguePlayerStatsModel(
+      topScorer: PlayerStatItemModel.fromJsonList(j['top_scorer'] ?? j['topScorer']),
+      topAssist: PlayerStatItemModel.fromJsonList(j['top_assist'] ?? j['topAssist']),
+      topContributor: PlayerStatItemModel.fromJsonList(j['top_contributor'] ?? j['topContributor']),
+      topYellowCards: PlayerStatItemModel.fromJsonList(j['top_yellow_cards'] ?? j['topYellowCards']),
+      topRedCards: PlayerStatItemModel.fromJsonList(j['top_red_cards'] ?? j['topRedCards']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'top_scorer': topScorer.map((e) => e.toJson()).toList(),
+        'top_assist': topAssist.map((e) => e.toJson()).toList(),
+        'top_contributor': topContributor.map((e) => e.toJson()).toList(),
+        'top_yellow_cards': topYellowCards.map((e) => e.toJson()).toList(),
+        'top_red_cards': topRedCards.map((e) => e.toJson()).toList(),
+      };
 }
 
 /// ============ TEAM PLAYER CATEGORY ============

@@ -1,12 +1,16 @@
+import 'dart:io';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:safirah/core/helpers/navigateTo.dart';
 import 'package:safirah/core/widgets/buttons/default_button.dart';
+import 'package:uuid/uuid.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/widgets/auto_size_text_widget.dart';
-import '../../../../authorization/authorization_sync_runner.dart';
+import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../riverpod/riverpod.dart';
 import '../widget/create_league_form_fields_widget.dart';
 import '../widget/create_league_logo_picker_widget.dart';
@@ -28,12 +32,14 @@ class _LeagueFormPageState extends ConsumerState<CreateLeaguePage> {
       TextEditingController();
 
   final formKey = GlobalKey<FormState>();
-  String? _logoUrl;
+  String? _logoLocalPath;
   final ImagePicker _picker = ImagePicker();
+  final String _draftKey = const Uuid().v7();
+  final LocalImageStore _imageStore = const LocalImageStore();
 
   void _onLogoChanged(String? path) {
     setState(() {
-      _logoUrl = path;
+      _logoLocalPath = path;
     });
   }
 
@@ -43,16 +49,9 @@ class _LeagueFormPageState extends ConsumerState<CreateLeaguePage> {
     final notifier = ref.read(leagueFormProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: AppColors.secondaryColor,
-        elevation: 0,
-        leading: const BackButton(color: Colors.white),
-        title: const AutoSizeTextWidget(
-          text: 'انشاء دوري',
-          colorText: Colors.white,
-        ),
-      ),
+      appBar:  SecondaryAppBarWidget(
+      title: 'انشاء الدوري',
+    ),
       body: SafeArea(
         child: Column(
           children: [
@@ -75,10 +74,17 @@ class _LeagueFormPageState extends ConsumerState<CreateLeaguePage> {
                         notifier: notifier,
                       ),
                       SizedBox(height: 12.h),
+                      // CreateLeagueLogoPickerWidget(
+                      //   logoPath: _logoUrl,
+                      //   picker: _picker,
+                      //   onLogoChanged: _onLogoChanged,
+                      // ),
                       CreateLeagueLogoPickerWidget(
-                        logoPath: _logoUrl,
+                        logoLocalPath: _logoLocalPath,
                         picker: _picker,
                         onLogoChanged: _onLogoChanged,
+                        imageStore: _imageStore,
+                        draftKey: _draftKey,
                       ),
                     ],
                   ),
@@ -91,6 +97,8 @@ class _LeagueFormPageState extends ConsumerState<CreateLeaguePage> {
                 text: 'متابعة',
                 background: AppColors.primaryColor,
                 onPressed: () {
+                  print(_logoLocalPath);
+
                   final isValid = formKey.currentState!.validate();
 
                   if (isValid) {
@@ -107,7 +115,7 @@ class _LeagueFormPageState extends ConsumerState<CreateLeaguePage> {
                         type: state.type,
                         scope: state.scope,
                         subscriptionPrice: subscriptionPriceController.text,
-                        logoPath: _logoUrl,
+                        logoPath: _logoLocalPath,
                       ),
                     );
                   }
@@ -118,5 +126,36 @@ class _LeagueFormPageState extends ConsumerState<CreateLeaguePage> {
         ),
       ),
     );
+  }
+}
+
+
+class LocalImageStore {
+  const LocalImageStore();
+
+  String _hash(String input) => sha1.convert(input.codeUnits).toString();
+
+  Future<String> savePickedImage({
+    required String pickedPath,
+    required String namespace, // 'leagues'
+    required String key, // league temp key or uuid
+  }) async {
+    final src = File(pickedPath);
+    if (!await src.exists()) {
+      throw Exception('Picked image not found: $pickedPath');
+    }
+
+    final docs = await getApplicationDocumentsDirectory();
+    final dir = Directory(p.join(docs.path, 'images', namespace));
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+
+    final ext = p.extension(pickedPath).isNotEmpty ? p.extension(pickedPath) : '.jpg';
+    final name = '${_hash(key)}$ext';
+    final dst = File(p.join(dir.path, name));
+
+    await src.copy(dst.path);
+    return dst.path;
   }
 }

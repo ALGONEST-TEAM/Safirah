@@ -20,7 +20,7 @@ class TeamTabsWidget extends StatelessWidget {
       padding: EdgeInsets.all(8.0.w),
       child: Container(
         height: 40.h,
-        padding: EdgeInsets.all(4.r),
+        padding: EdgeInsets.all(3.r),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
@@ -29,15 +29,15 @@ class TeamTabsWidget extends StatelessWidget {
           dividerColor: Colors.transparent,
           tabAlignment: TabAlignment.fill,
           indicator: BoxDecoration(
-            color: AppColors.primaryColor,
+            color: AppColors.secondaryColor,
             borderRadius: BorderRadius.circular(8.r),
           ),
           padding: EdgeInsets.symmetric(horizontal: 4.5.w),
           indicatorSize: TabBarIndicatorSize.tab,
           overlayColor: MaterialStateProperty.all(Colors.transparent),
           labelPadding: EdgeInsets.zero,
-          indicatorPadding:
-          EdgeInsets.symmetric(horizontal: 4.5.w, vertical: 2),
+          // indicatorPadding:
+          // EdgeInsets.symmetric(horizontal: 4.5.w, vertical: 2),
           labelColor: Colors.white,
           unselectedLabelColor: AppColors.secondaryColor,
           tabs: [

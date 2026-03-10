@@ -7,6 +7,8 @@ import 'package:safirah/core/widgets/buttons/default_button.dart';
 import '../../../../../core/state/state.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../../core/widgets/secondary_app_bar_widget.dart';
+import '../../../leagues/persntaion/riverpod/riverpod.dart';
 import '../../../match/presntaion/state_managment/riverpod.dart';
 import '../state_mangement/riverpod.dart';
 import '../widget/knockout_rule_selector_widget.dart';
@@ -34,14 +36,8 @@ class _LeagueTermSetupPageState extends ConsumerState<LeagueTermSetupPage> {
     final leagueTermState = ref.watch(leagueTermProvider(widget.leagueSyncId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const AutoSizeTextWidget(
-          text: "تهيئة الدوري",
-          colorText: Colors.white,
-        ),
-        backgroundColor: AppColors.secondaryColor,
-        leading: const BackButton(color: Colors.white),
-        centerTitle: true,
+      appBar: SecondaryAppBarWidget(
+        title: 'تهيئة الاشواط',
       ),
       body: SafeArea(
         child: Padding(
@@ -51,11 +47,10 @@ class _LeagueTermSetupPageState extends ConsumerState<LeagueTermSetupPage> {
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    /// 🏁 عدد الأشواط
-                    TermCountSelectorWidget(
-                      selectedTermsCount: selectedTermsCount,
-                      onChanged: (v) => setState(() => selectedTermsCount = v),
-                    ),
+                   TermCountSelectorWidget(
+                        selectedTermsCount: selectedTermsCount,
+                        onChanged: (v) => setState(() => selectedTermsCount = v),
+                      ),
 
                     20.h.verticalSpace,
 
@@ -83,6 +78,19 @@ class _LeagueTermSetupPageState extends ConsumerState<LeagueTermSetupPage> {
                                     (widget.leagueSyncId, false))
                                 .notifier)
                             .run();
+                        ref
+                            .read(
+                          leagueStatusUpdateProvider.notifier,
+                        )
+                            .update(
+                          leagueSyncId: widget.leagueSyncId,
+                          hasMatches: true,
+                        );
+                        //  ref.read(leagueStatusStreamProvider(widget.leagueSyncId));
+                        ref
+                            .read(leagueStatusProvider(widget.leagueSyncId)
+                            .notifier)
+                            .refresh();
                         ref
                             .read(roundsRefreshProvider(
                                     Tuple3(widget.leagueSyncId, 'unscheduled','organizer'))

@@ -13,19 +13,24 @@ class ButtonOfOrganizerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap:onTap ,
-      child: Container(
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.r)
-        ),
-        child: Padding(
-          padding:  EdgeInsets.symmetric(horizontal: 6.0.w,vertical: 8.h),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset(AppIcons.league,width: 16.w,height: 16.h,),
-              AutoSizeTextWidget(text:title,fontSize: 11.5.sp,)
-            ],
+      child: Padding(
+        padding:  EdgeInsets.symmetric(horizontal: 6.0.w,vertical: 4.h),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.r)
+          ),
+          child: Padding(
+            padding:  EdgeInsets.symmetric(horizontal: 10.0.w,vertical: 14.h),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SvgPicture.asset(AppIcons.league,width: 16.w,height: 16.h,),
+                4.w.horizontalSpace,
+                AutoSizeTextWidget(text:title,fontSize: 11.5.sp,)
+              ],
+            ),
           ),
         ),
       ),

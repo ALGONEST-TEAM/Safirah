@@ -6,6 +6,7 @@ import 'package:safirah/core/widgets/buttons/default_button.dart';
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../leagues/persntaion/page/details_league_widget.dart';
 import '../../../leagues/persntaion/riverpod/riverpod.dart';
 import '../state_mangment/riverpod.dart';
@@ -23,17 +24,8 @@ class TeamsWithPlayersPage extends ConsumerWidget {
     final leagueStatus = ref.watch(leagueStatusStreamProvider(leagueSyncId));
 
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(
-          color: Colors.white,
-        ),
-        title: const AutoSizeTextWidget(
-          text: 'تحديد الفرق',
-          colorText: Colors.white,
-        ),
-        centerTitle: true,
-        backgroundColor: AppColors.secondaryColor,
-      ),
+      appBar:SecondaryAppBarWidget(title: 'اعتماد الفرق',),
+
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 8.0.w, vertical: 8.h),
         child: Column(

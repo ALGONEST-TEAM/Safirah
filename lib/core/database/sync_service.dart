@@ -7,6 +7,8 @@ import 'package:safirah/core/database/safirah_database.dart';
 import 'package:safirah/core/network/remote_request.dart';
 import 'package:safirah/core/database/table/sync_queue_table.dart';
 
+import 'maltipart_payload.dart';
+
 /// خدمة عامة لإدارة المزامنة بين قاعدة البيانات المحلية والخادم.
 ///
 /// الفكرة:
@@ -23,6 +25,13 @@ class SyncService {
   static const String operationCreate = 'create';
   static const String operationUpdate = 'update';
   static const String operationDelete = 'delete';
+
+  /// تهدئة بسيطة بين كل عملية sync (حتى لو ناجحة) لتقليل ضغط الطلبات على السيرفر
+  /// وتقليل احتمالية 429.
+  static const Duration _interItemDelay = Duration(milliseconds: 250);
+
+  /// سقف انتظار مناسب لإعادة المحاولة (خصوصاً مع 429/5xx)
+  static const Duration _maxBackoff = Duration(seconds: 60);
 
   bool _isSyncing = false;
 
@@ -82,9 +91,15 @@ class SyncService {
     try {
       final pending = await getPendingOperations(maxAttempts: maxAttempts);
 
-      for (final item in pending) {
+      for (var i = 0; i < pending.length; i++) {
+        final item = pending[i];
+
+        // تهدئة ثابتة بين العناصر (تقلل 429 حتى لو لم يكن هناك فشل سابق)
+        if (i > 0 && _interItemDelay != Duration.zero) {
+          await Future<void>.delayed(_interItemDelay);
+        }
+
         // Backoff بسيط: إذا كان هناك محاولات سابقة، انتظر مدة قصيرة قبل إعادة المحاولة.
-        // الهدف تقليل الضغط على الشبكة/السيرفر عند فشل متكرر.
         final wait = _computeBackoff(item.attemptCount);
         if (wait != Duration.zero) {
           await Future<void>.delayed(wait);
@@ -119,7 +134,18 @@ class SyncService {
             ),
           );
         } catch (e) {
-          final decision = _decideRetry(e, attemptCount: item.attemptCount, maxAttempts: maxAttempts);
+          final decision = _decideRetry(
+            e,
+            attemptCount: item.attemptCount,
+            maxAttempts: maxAttempts,
+          );
+
+          // إذا السيرفر رجّع Retry-After (خصوصاً 429)، احترمه قبل تحديث السجل
+          // حتى لا نضرب السيرفر مرة ثانية بسرعة.
+          if (decision.recommendedWait != null &&
+              decision.recommendedWait != Duration.zero) {
+            await Future<void>.delayed(decision.recommendedWait!);
+          }
 
           await (db.update(db.syncQueue)..where((tbl) => tbl.id.equals(item.id)))
               .write(
@@ -134,7 +160,8 @@ class SyncService {
           if (throwOnFirstError) {
             if (e is DioException) {
               // ignore: avoid_print
-              print('[SyncService] immediate sync failed: ${e.response?.statusCode} ${e.response?.data}');
+              print(
+                  '[SyncService] immediate sync failed: ${e.response?.statusCode} ${e.response?.data}');
               rethrow;
             }
             // ignore: avoid_print
@@ -149,17 +176,59 @@ class SyncService {
   }
 
   Duration _computeBackoff(int attemptCount) {
-    // 0 => لا انتظار. 1 => 800ms. 2 => 1.6s. 3 => 3.2s ... بحد أقصى 10s
+    // 0 => لا انتظار.
+    // 1 => ~800ms. 2 => ~1.6s. 3 => ~3.2s ... مع jitter وبحد أقصى 60s
     if (attemptCount <= 0) return Duration.zero;
-    final ms = (800 * math.pow(2, attemptCount - 1)).toInt();
-    final capped = ms.clamp(0, 10000);
+
+    final baseMs = (800 * math.pow(2, attemptCount - 1)).toInt();
+
+    // jitter: +/- 20% لتجنب تزامن الأجهزة على نفس اللحظة
+    final jitterFactor = 0.8 + (_rand.nextDouble() * 0.4); // 0.8..1.2
+    final withJitter = (baseMs * jitterFactor).round();
+
+    final capped = withJitter.clamp(0, _maxBackoff.inMilliseconds);
     return Duration(milliseconds: capped);
   }
 
-  _RetryDecision _decideRetry(Object error, {required int attemptCount, required int maxAttempts}) {
-    // القاعدة: أخطاء "دائمة" => failed مباشرة.
-    // أخطاء "مؤقتة" => pending مع زيادة attemptCount حتى maxAttempts.
+  static final math.Random _rand = math.Random();
 
+  Duration? _parseRetryAfter(DioException error) {
+    final headers = error.response?.headers;
+    if (headers == null) return null;
+
+    // Dio headers values are List<String>
+    String? raw;
+    final values = headers.map['retry-after'] ?? headers.map['Retry-After'];
+    if (values != null && values.isNotEmpty) {
+      raw = values.first;
+    }
+    if (raw == null) return null;
+
+    // Retry-After can be seconds or HTTP-date.
+    final seconds = int.tryParse(raw.trim());
+    if (seconds != null) {
+      // حد أقصى حتى لا نعلق طويلاً لو السيرفر يرسل رقم كبير.
+      final capped = seconds.clamp(0, _maxBackoff.inSeconds);
+      return Duration(seconds: capped);
+    }
+
+    // محاولة تفسيره كتاريخ
+    final date = DateTime.tryParse(raw);
+    if (date != null) {
+      final diff = date.toUtc().difference(DateTime.now().toUtc());
+      if (diff.isNegative) return Duration.zero;
+      if (diff > _maxBackoff) return _maxBackoff;
+      return diff;
+    }
+
+    return null;
+  }
+
+  _RetryDecision _decideRetry(
+    Object error, {
+    required int attemptCount,
+    required int maxAttempts,
+  }) {
     final nextAttemptCount = attemptCount + 1;
 
     if (error is DioException) {
@@ -181,7 +250,20 @@ class SyncService {
         );
       }
 
-      // 2) 5xx => مؤقتة
+      // 2) 429 => rate limit (مؤقتة) مع احترام Retry-After إن توفر
+      if (status == 429) {
+        final retryAfter = _parseRetryAfter(error);
+        final wait = retryAfter ?? _computeBackoff(nextAttemptCount);
+
+        return _RetryDecision.pending(
+          nextAttemptCount: nextAttemptCount,
+          maxAttempts: maxAttempts,
+          message: 'Rate limited (429). Will retry after ${wait.inSeconds}s.',
+          recommendedWait: wait,
+        );
+      }
+
+      // 3) 5xx => مؤقتة
       if (status != null && status >= 500) {
         return _RetryDecision.pending(
           nextAttemptCount: nextAttemptCount,
@@ -190,7 +272,7 @@ class SyncService {
         );
       }
 
-      // 3) 409 => تعارض (غالباً دائم) => failed
+      // 4) 409 => تعارض (غالباً دائم) => failed
       if (status == 409) {
         return _RetryDecision.failed(
           nextAttemptCount: nextAttemptCount,
@@ -198,7 +280,7 @@ class SyncService {
         );
       }
 
-      // 4) 4xx => غالباً دائم (payload/صلاحيات/endpoint)
+      // 5) 4xx => غالباً دائم (payload/صلاحيات/endpoint)
       if (status != null && status >= 400 && status < 500) {
         return _RetryDecision.failed(
           nextAttemptCount: nextAttemptCount,
@@ -206,7 +288,7 @@ class SyncService {
         );
       }
 
-      // 5) باقي الحالات: نعاملها كمؤقتة حتى maxAttempts
+      // 6) باقي الحالات: نعاملها كمؤقتة حتى maxAttempts
       return _RetryDecision.pending(
         nextAttemptCount: nextAttemptCount,
         maxAttempts: maxAttempts,
@@ -214,7 +296,6 @@ class SyncService {
       );
     }
 
-    // Error عام
     return _RetryDecision.pending(
       nextAttemptCount: nextAttemptCount,
       maxAttempts: maxAttempts,
@@ -228,26 +309,57 @@ class SyncService {
   }
 
   /// إرسال البيانات إلى الخادم حسب نوع العملية (create / update / delete)
+  // Future<void> _sendToRemote({
+  //   required EntitySyncEndpoint endpoint,
+  //   required Map<String, dynamic> data,
+  // }) async {
+  //   switch (endpoint.method) {
+  //     case HttpMethod.post:
+  //       await RemoteRequest.postData(path: endpoint.path, data: data);
+  //       break;
+  //     case HttpMethod.put:
+  //       await RemoteRequest.putData(path: endpoint.path, data: data);
+  //       break;
+  //     case HttpMethod.delete:
+  //       await RemoteRequest.deleteData(path: endpoint.path, data: data);
+  //       break;
+  //     case HttpMethod.get:
+  //       await RemoteRequest.getData(url: endpoint.path, query: data);
+  //       break;
+  //   }
+  // }
   Future<void> _sendToRemote({
     required EntitySyncEndpoint endpoint,
     required Map<String, dynamic> data,
   }) async {
+    // ✅ يتحول لـ FormData فقط إذا يوجد __files
+    final body = await MultipartPayload.maybeToFormData(data);
+    if (body is FormData) {
+      // ignore: avoid_print
+      print('FORM fields=${body.fields.length} files=${body.files.length}');
+      for (final f in body.files) {
+        // ignore: avoid_print
+        print('FILE key=${f.key} filename=${f.value.filename} len=${f.value.length}');
+      }
+    }
     switch (endpoint.method) {
       case HttpMethod.post:
-        await RemoteRequest.postData(path: endpoint.path, data: data);
+        await RemoteRequest.postData(path: endpoint.path, data: body);
         break;
+
       case HttpMethod.put:
-        await RemoteRequest.putData(path: endpoint.path, data: data);
+        await RemoteRequest.putData(path: endpoint.path, data: body);
         break;
+
       case HttpMethod.delete:
-        await RemoteRequest.deleteData(path: endpoint.path, data: data);
+        await RemoteRequest.deleteData(path: endpoint.path, data: body);
         break;
+
       case HttpMethod.get:
         await RemoteRequest.getData(url: endpoint.path, query: data);
         break;
     }
   }
-
   /// مراقبة جدول المزامنة بالكامل (للاستخدام في UI/Debug).
   Stream<List<SyncQueueData>> watchQueue({
     String? entityType,
@@ -307,26 +419,40 @@ class _RetryDecision {
   final String status;
   final int nextAttemptCount;
   final String message;
+  final Duration? recommendedWait;
 
   const _RetryDecision({
     required this.status,
     required this.nextAttemptCount,
     required this.message,
+    this.recommendedWait,
   });
- /// 3913aea5-1b3f-4980-aa43-47933b58a34d
+
   factory _RetryDecision.pending({
     required int nextAttemptCount,
     required int maxAttempts,
     required String message,
+    Duration? recommendedWait,
   }) {
-    final st = nextAttemptCount >= maxAttempts ? SyncQueueStatus.failed : SyncQueueStatus.pending;
-    return _RetryDecision(status: st, nextAttemptCount: nextAttemptCount, message: message);
+    final st = nextAttemptCount >= maxAttempts
+        ? SyncQueueStatus.failed
+        : SyncQueueStatus.pending;
+    return _RetryDecision(
+      status: st,
+      nextAttemptCount: nextAttemptCount,
+      message: message,
+      recommendedWait: recommendedWait,
+    );
   }
 
   factory _RetryDecision.failed({
     required int nextAttemptCount,
     required String message,
   }) {
-    return _RetryDecision(status: SyncQueueStatus.failed, nextAttemptCount: nextAttemptCount, message: message);
+    return _RetryDecision(
+      status: SyncQueueStatus.failed,
+      nextAttemptCount: nextAttemptCount,
+      message: message,
+    );
   }
 }

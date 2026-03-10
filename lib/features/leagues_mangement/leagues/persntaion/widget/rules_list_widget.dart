@@ -27,10 +27,12 @@ class RulesListSectionWidget extends StatelessWidget {
         itemCount: rules.length,
         itemBuilder: (context, index) {
           final rule = rules[index];
+          final canToggle = !rule.isDefault;
+
           return RuleTileWidget(
             text: rule.rule,
             selected: rule.selected,
-            onChanged: (_) => onToggle(index),
+            onChanged: canToggle ? (_) => onToggle(index) : (_) {},
           );
         },
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../../core/widgets/main_app_bar_widget.dart';
 import '../widget/league_list_widget.dart';
 
 class ShowLeaguesPage extends StatefulWidget {
@@ -15,13 +16,16 @@ class _ShowLeaguesPageState extends State<ShowLeaguesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.secondaryColor,
-        title: const AutoSizeTextWidget(
-          text: 'الدوريات',
-          colorText: Colors.white,
-        ),
-        centerTitle: true,
+      // appBar: AppBar(
+      //   backgroundColor: AppColors.secondaryColor,
+      //   title: const AutoSizeTextWidget(
+      //     text: 'الدوريات',
+      //     colorText: Colors.white,
+      //   ),
+      //   centerTitle: true,
+      // ),
+      appBar: MainAppBarWidget(
+        title: 'الدوريات',
       ),
       body: SafeArea(
         child: DefaultTabController(
@@ -45,7 +49,7 @@ class _ShowLeaguesPageState extends State<ShowLeaguesPage> {
                       dividerColor: Colors.transparent,
                       tabAlignment: TabAlignment.fill,
                       indicator: BoxDecoration(
-                        color: AppColors.primaryColor,
+                        color: AppColors.secondaryColor,
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 4.5.w),

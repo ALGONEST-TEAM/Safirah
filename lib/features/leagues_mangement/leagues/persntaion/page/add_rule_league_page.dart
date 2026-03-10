@@ -8,9 +8,8 @@ import 'package:safirah/core/state/state.dart';
 import 'package:safirah/core/theme/app_colors.dart';
 import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import 'package:safirah/core/widgets/buttons/default_button.dart';
+import 'package:safirah/core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../core/widgets/bottomNavbar/bottom_navigation_bar_of_mange_league_widget.dart';
-import '../../../../../injection.dart' as di;
-import '../../../../authorization/authorization_sync_runner.dart';
 import '../../data/model/league_model.dart';
 import '../../data/model/rule_league_model.dart';
 import '../riverpod/riverpod.dart';
@@ -60,17 +59,7 @@ class _LeagueRulesPageState extends ConsumerState<LeagueRulesPage> {
     final addRuleLeague = ref.watch(addRuleProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.secondaryColor,
-        leading: const BackButton(
-          color: Colors.white,
-        ),
-        title: const AutoSizeTextWidget(
-          text: "إنشاء الدوري",
-          colorText: Colors.white,
-        ),
-        centerTitle: true,
-      ),
+      appBar: SecondaryAppBarWidget(title: "اضافة قواعد الدوري"),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(12.w),
@@ -95,28 +84,13 @@ class _LeagueRulesPageState extends ConsumerState<LeagueRulesPage> {
                     }
                   },
                 ),
-                SizedBox(height: 12.h),
-                // LeagueDatesWidget(
-                //   dateStartCtrl: dateStart,
-                //   dateEndCtrl: dateEnd,
-                // ),
-                SizedBox(height: 12.h),
+                SizedBox(height: 24.h),
+
                 CheckStateInPostApiDataWidget(
                   state: addLeague,
                   hasMessageSuccess: false,
                   functionSuccess: () {
-
                     SchedulerBinding.instance.addPostFrameCallback((_) {
-                      final selectedRules = rules
-                          .where((rule) => rule.selected)
-                          .map((r) => LeagueRuleModel(
-                                description: r.rule,
-                                leagueSyncId: addLeague.data,
-                              ))
-                          .toList();
-                      ref
-                          .read(addRuleProvider.notifier)
-                          .addRuleList(addLeague.data, selectedRules);
                       ref
                           .read(leaguesByPrivacyProvider(widget.isPrivate)
                               .notifier)
@@ -132,6 +106,7 @@ class _LeagueRulesPageState extends ConsumerState<LeagueRulesPage> {
                     textColor: Colors.white,
                     background: AppColors.primaryColor,
                     onPressed: () {
+                      print(widget.logoPath);
                       LeagueModel league = LeagueModel(
                         name: widget.name,
                         maxTeams: widget.maxTeams,
@@ -141,11 +116,22 @@ class _LeagueRulesPageState extends ConsumerState<LeagueRulesPage> {
                         type: widget.type,
                         scope: widget.scope,
                         subscriptionPrice: widget.subscriptionPrice,
-                        logoPath: widget.logoPath,
+                        logoLocalPath: widget.logoPath,
+                        logoPath: null,
                         startDate: DateTime.tryParse(dateStart.text),
                         endDate: DateTime.tryParse(dateEnd.text),
                       );
-                      ref.read(addLeagueProvider.notifier).addLeague(league);
+                      final selectedRules = rules
+                          .where((rule) => rule.selected)
+                          .map((r) => LeagueRuleModel(
+                                leagueSyncId: '',
+                                description: r.rule,
+                              ))
+                          .toList();
+
+                      ref
+                          .read(addLeagueProvider.notifier)
+                          .addLeague(league, selectedRules);
                     },
                   ),
                 ),

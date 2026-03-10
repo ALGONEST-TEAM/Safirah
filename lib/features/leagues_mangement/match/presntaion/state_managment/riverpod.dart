@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';
 import '../../../../../injection.dart' as di;
+import '../../../../prediction/data/model/matches_predictions_model.dart';
+import '../../../team_and_player/data/model/team_model.dart' show TeamModel;
+import '../../data/model/match_event_model.dart';
 import '../../data/model/round_model.dart';
 import '../../data/reposaitory/reposaitory.dart';
 
@@ -162,6 +165,49 @@ class ScheduleMatchNotifier extends StateNotifier<DataState<Unit>> {
     res.fold(
       (e) => state = state.copyWith(state: States.error, exception: e),
       (_) => state = state.copyWith(state: States.loaded, data: unit),
+    );
+  }
+}
+
+final getMatchDetailsProvider = StateNotifierProvider.family<
+    GetMatchDetailsNotifier,
+    DataState<MatchDetailsModel>,
+    String>((ref, matchSyncId) {
+  return GetMatchDetailsNotifier(matchSyncId);
+});
+
+class GetMatchDetailsNotifier
+    extends StateNotifier<DataState<MatchDetailsModel>> {
+  GetMatchDetailsNotifier(this.matchSyncId)
+      : super(DataState.initial(MatchDetailsModel(
+    leagueName: '',
+    roundName: '',
+    homeTeam: TeamModel(id: 0, teamName: ''),
+    awayTeam: TeamModel(id: 0, teamName: ''),
+    homeScore: 0,
+    awayScore: 0,
+    statusText: '',
+    homeScorers: [],
+    awayScorers: [],
+    events: [],
+  ))) {
+    load();
+  }
+
+  final String matchSyncId;
+  final _repo = MatchesRepository(
+      local: di.sl(),
+      syncService: di.sl(),
+      connectivity: di.sl(),
+      remote: di.sl());
+
+
+  Future<void> load() async {
+    state = state.copyWith(state: States.loading);
+    final r = await _repo.getMatchDetails(matchSyncId);
+    r.fold(
+          (e) => state = state.copyWith(state: States.error, exception: e),
+          (data) => state = state.copyWith(state: States.loaded, data: data),
     );
   }
 }

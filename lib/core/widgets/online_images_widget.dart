@@ -84,15 +84,18 @@ class OnlineImagesWidget extends StatelessWidget {
         height: size?.height,
         width: size?.width,
         decoration: BoxDecoration(
-          color: backgroundColor ?? AppColors.greySwatch.shade100,
+          color: backgroundColor ?? Colors.white,
           borderRadius: BorderRadius.circular(borderRadius ?? 8.r),
+          image: DecorationImage(image: AssetImage('assets/images/logo.jpg'))
         ),
-        child: Center(
-          child: SvgPicture.asset(
-            AppIcons.logoText,
-            width: logoWidth ?? 50.w,
-          ),
-        ),
+       // child: Center(
+          // child: SvgPicture.asset(
+          //   AppIcons.logo,
+          //   width: logoWidth ?? 50.w,
+          // ),
+         // child:
+      //  ),
+     //   ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/core/theme/app_colors.dart';
 import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 
 import '../../data/model/model.dart';
@@ -28,22 +29,26 @@ class RankingTeamWidget extends StatelessWidget {
       child: Column(
         children: [
           // رأس الجدول
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8.h),
-            child: Row(
-              children: [
-                Expanded(
-                  child: AutoSizeTextWidget(
-                    text: 'مجموعة $groupName',
-                    textAlign: TextAlign.right,
-                    fontSize: 12.sp,
+          Container(
+            color: AppColors.secondaryColor,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: AutoSizeTextWidget(
+                      text: 'مجموعة $groupName',
+                      textAlign: TextAlign.right,
+                      fontSize: 12.sp,
+                      colorText: Colors.white,
+                    ),
                   ),
-                ),
-                _headCell(context, 'لعب'),
-                _headCell(context, '-/+'),
-                _headCell(context, 'فارق'),
-                _headCell(context, 'نقاط'),
-              ],
+                  _headCell(context, 'لعب'),
+                  _headCell(context, '-/+'),
+                  _headCell(context, 'فارق'),
+                  _headCell(context, 'نقاط'),
+                ],
+              ),
             ),
           ),
           const Divider(
@@ -118,6 +123,8 @@ class RankingTeamWidget extends StatelessWidget {
     width: 35.w,
     child: AutoSizeTextWidget(
       text: text,
+      colorText: Colors.white,
+
       textAlign: TextAlign.center,
       fontSize: 11.sp,
     ),

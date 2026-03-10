@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../core/database/safirah_database.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
@@ -24,25 +25,15 @@ class ShowTeamAndPlayerPage extends ConsumerWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        appBar: AppBar(
-          leading: const BackButton(
-            color: Colors.white,
-          ),
-          title: const AutoSizeTextWidget(
-            text: 'تحديد الفرق',
-            colorText: Colors.white,
-          ),
-          centerTitle: true,
-          backgroundColor: AppColors.secondaryColor,
-        ),
+        appBar: SecondaryAppBarWidget(title: 'تحديد الفرق',),
         body: SafeArea(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Container(
-                  height: 40.h,
+                  height: 45.h,
                   width: double.infinity,
                   padding: EdgeInsets.all(4.r),
                   decoration: BoxDecoration(
@@ -56,16 +47,13 @@ class ShowTeamAndPlayerPage extends ConsumerWidget {
                       dividerColor: Colors.transparent,
                       tabAlignment: TabAlignment.fill,
                       indicator: BoxDecoration(
-                        color: AppColors.primaryColor,
+                        color: AppColors.secondaryColor,
                         borderRadius: BorderRadius.circular(8.r),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 4.5.w),
                       indicatorSize: TabBarIndicatorSize.tab,
                       overlayColor:
                           MaterialStateProperty.all(Colors.transparent),
                       labelPadding: EdgeInsets.zero,
-                      indicatorPadding:
-                          EdgeInsets.symmetric(horizontal: 4.5.w, vertical: 2),
                       labelColor: Colors.white,
                       unselectedLabelColor: AppColors.secondaryColor,
                       tabs: const [
@@ -75,7 +63,7 @@ class ShowTeamAndPlayerPage extends ConsumerWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 12.h),
+                SizedBox(height: 16.h),
                 Expanded(
                   child: TabBarView(
                     children: [

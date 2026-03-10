@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/core/theme/app_colors.dart';
 import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import 'package:safirah/core/widgets/buttons/default_button.dart';
 import 'package:safirah/core/widgets/text_form_field.dart';
@@ -31,6 +32,7 @@ class AddMoreRuleWidget extends StatelessWidget {
             fillColor: const Color(0xffF6F7F9),
             controller: controller,
             maxLine: 3,
+            hintTextColor: AppColors.fontColor.withOpacity(0.5),
             hintText: 'اضافة قاعدة',
           ),
           6.h.verticalSpace,

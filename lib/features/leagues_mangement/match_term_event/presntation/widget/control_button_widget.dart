@@ -38,7 +38,7 @@ class _ControlButtonWidgetState extends ConsumerState<ControlButtonWidget> {
     final notifier =
         ref.read(matchTermCounterProvider(widget.matchSyncId).notifier);
 
-    final termId = currentTerm.data?.id ?? 0;
+    final termSyncId = currentTerm.data?.syncId ?? '';
 
     return SafeArea(
       child: Padding(
@@ -55,7 +55,7 @@ class _ControlButtonWidgetState extends ConsumerState<ControlButtonWidget> {
                 counterState,
                 currentTerm,
                 notifier,
-                termId,
+                termSyncId,
               );
             } finally {
               _isFinishing = false;
@@ -68,6 +68,7 @@ class _ControlButtonWidgetState extends ConsumerState<ControlButtonWidget> {
 
   String _buttonText(dynamic counter, dynamic currentTerm) {
     if (currentTerm.data == null) return 'انتهت المباراة';
+
     if (counter.data.isPaused) return 'استئناف المباراة';
     if (counter.data.isRunning) return 'توقيف المباراة';
     return currentTerm.data!.termName??'';
@@ -78,7 +79,7 @@ class _ControlButtonWidgetState extends ConsumerState<ControlButtonWidget> {
     dynamic counter,
     dynamic currentTerm,
     dynamic notifier,
-    int termId,
+    String termSyncId,
   ) async {
     if (currentTerm.data == null || currentTerm.data!.termName == 'انتهت المباراة') {
       if (!mounted) return;

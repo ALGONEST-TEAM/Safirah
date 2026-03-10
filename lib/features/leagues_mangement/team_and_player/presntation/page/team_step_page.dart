@@ -8,6 +8,7 @@ import '../../../../../core/state/check_state_in_post_api_data_widget.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/buttons/default_button.dart';
+import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../core/widgets/text_form_field.dart';
 import '../../data/model/team_model.dart';
 import '../state_mangment/riverpod.dart';
@@ -58,13 +59,8 @@ class _TeamStepPageState extends ConsumerState<TeamStepPage> {
         _pickedIds.length <= remaining;
     final state = ref.watch(assignToTeamProvider(_selectedTeam?.syncId ?? ''));
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(color: Colors.white),
-        title: const AutoSizeTextWidget(
-            text: 'تحديد اللاعبين', colorText: Colors.white),
-        centerTitle: true,
-        backgroundColor: AppColors.secondaryColor,
-      ),
+      appBar:SecondaryAppBarWidget(title: 'تقسيم الفرق',),
+
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: Column(
@@ -85,29 +81,29 @@ class _TeamStepPageState extends ConsumerState<TeamStepPage> {
               hintText: 'اسم الفريق',
             ),
             8.h.verticalSpace,
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.r),
-                color: Colors.white,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const AutoSizeTextWidget(text: "البحث عن لاعب"),
-                  8.h.verticalSpace,
-                  TextFormFieldWidget(
-                    controller: _searchCtrl,
-                    hintFontSize: 12,
-                    fillColor: AppColors.scaffoldColor,
-                    hintText: "رقم المستخدم",
-                    onChanged: (_) => setState(() {
-                      print( widget.maxPlayersTeam);
-                    }),
-                  ),
-                ],
-              ),
-            ),
+            // Container(
+            //   padding: const EdgeInsets.all(12),
+            //   decoration: BoxDecoration(
+            //     borderRadius: BorderRadius.circular(12.r),
+            //     color: Colors.white,
+            //   ),
+            //   child: Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       // const AutoSizeTextWidget(text: "البحث عن لاعب"),
+            //       // 8.h.verticalSpace,
+            //       // TextFormFieldWidget(
+            //       //   controller: _searchCtrl,
+            //       //   hintFontSize: 12,
+            //       //   fillColor: AppColors.scaffoldColor,
+            //       //   hintText: "رقم المستخدم",
+            //       //   onChanged: (_) => setState(() {
+            //       //     print( widget.maxPlayersTeam);
+            //       //   }),
+            //       // ),
+            //     ],
+            //   ),
+            // ),
             8.h.verticalSpace,
             Expanded(
               child: PlayersSelectionTeamWidget(

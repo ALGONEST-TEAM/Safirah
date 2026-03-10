@@ -14,7 +14,7 @@ class CreateLeagueFormFieldsWidget extends StatelessWidget {
   final TextEditingController subPlayersController;
   final TextEditingController subscriptionPriceController;
   final LeagueModel state;
-  final dynamic notifier; // LeagueFormNotifier، يُمرر من الصفحة الأصلية
+  final dynamic notifier;
 
   const CreateLeagueFormFieldsWidget({
     super.key,
@@ -33,11 +33,6 @@ class CreateLeagueFormFieldsWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AutoSizeTextWidget(
-          text: 'إنشاء الدوري الخاص بك!',
-          fontSize: 16.sp,
-        ),
-        SizedBox(height: 16.h),
-        AutoSizeTextWidget(
           text: 'اسم الدوري',
           fontSize: 12.sp,
           colorText: Colors.black,
@@ -47,7 +42,7 @@ class CreateLeagueFormFieldsWidget extends StatelessWidget {
           controller: nameController,
           hintText: 'اسم الدوري',
           onChanged: notifier.updateName,
-          hintTextColor: Colors.grey[600],
+          hintTextColor: AppColors.fontColor,
           labelTextColor: Colors.grey[600],
           fieldValidator: (value) {
             if (value == null || value.toString().isEmpty) {

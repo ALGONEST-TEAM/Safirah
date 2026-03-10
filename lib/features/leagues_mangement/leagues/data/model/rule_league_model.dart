@@ -35,16 +35,15 @@ class LeagueRuleModel {
 
   // API JSON
   factory LeagueRuleModel.fromJson(Map<String, dynamic> j) => LeagueRuleModel(
-        id: j['id'],
         syncId: j['sync_id'] ?? j['syncId'],
-    leagueSyncId: j['league_id'] ?? j['leagueId'],
+        leagueSyncId: j['league_sync_id'],
         description: j['description'] ?? '',
         isMandatory: j['is_mandatory'] ?? j['isMandatory'] ?? false,
       );
 
   Map<String, dynamic> toJson() => {
+        'league_sync_id': leagueSyncId,
         'sync_id': syncId,
-        'league_id': leagueSyncId,
         'description': description,
         'is_mandatory': isMandatory,
       };
@@ -67,6 +66,12 @@ class LeagueRuleModel {
       isMandatory: entity.isMandatory,
     );
   }
+
+  static List<LeagueRuleModel> fromJsonList(List json) {
+    return json
+        .map((e) => LeagueRuleModel.fromJson((e ?? {}) as Map<String, dynamic>))
+        .toList();
+  }
 }
 
 class RuleUIModel {
@@ -78,7 +83,6 @@ class RuleUIModel {
   RuleUIModel({
     this.id,
     required this.rule,
-
     this.selected = false,
     this.isDefault = false,
   });

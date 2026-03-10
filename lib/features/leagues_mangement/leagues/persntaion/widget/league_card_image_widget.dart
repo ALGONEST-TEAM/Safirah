@@ -26,33 +26,9 @@ class LeagueCardImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        AspectRatio(
-          aspectRatio: 16 / 6,
-          child: _buildImage(),
-        ),
-        PositionedDirectional(
-          top: 8.h,
-          end: 8.w,
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 4.w,
-              vertical: 3.h,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xffDDE5FF),
-              borderRadius: BorderRadius.circular(6.r),
-            ),
-            child: AutoSizeTextWidget(
-              text: 'خاصة',
-              fontSize: 7.sp,
-              colorText: AppColors.fontColor,
-              maxLines: 1,
-            ),
-          ),
-        ),
-      ],
+    return AspectRatio(
+      aspectRatio: 16 / 6,
+      child: _buildImage(),
     );
   }
 

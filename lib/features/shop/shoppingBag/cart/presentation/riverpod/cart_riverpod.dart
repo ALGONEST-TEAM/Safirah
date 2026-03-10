@@ -42,6 +42,7 @@ class GetCartCountNotifier extends StateNotifier<int> {
 
   Future<void> refresh() async {
     final res = await _repo.getCartCount();
+    if (!mounted) return; // ✅ قد يكون dispose() تم أثناء الانتظار
     res.fold((_) {}, (count) => state = count);
   }
 

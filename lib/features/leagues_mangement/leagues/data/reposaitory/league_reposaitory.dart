@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../../../core/database/safirah_database.dart';
 import '../../../../../core/database/sync_service.dart';
 import '../../../../../core/database/sync_trigger.dart';
 import '../../../../../core/network/connectivity_service.dart';
@@ -10,10 +9,13 @@ import '../../../../../core/network/errors/repo_guard.dart';
 import '../../../../../core/network/errors/sync_dio_exception.dart';
 import '../../../../../core/state/pagination_data/paginated_model.dart';
 import '../../../../../injection.dart' as di;
+import '../../../home/data/models/banners_model.dart';
+import '../../../home/data/models/news_item_model.dart';
 import '../data_source/league_remote_data_source.dart';
 import '../data_source/local_data_source.dart';
 import '../model/league_model.dart';
 import '../model/league_status_model.dart';
+import '../model/report_model.dart';
 import '../model/rule_league_model.dart';
 
 class LeagueRepository {
@@ -58,7 +60,9 @@ class LeagueRepository {
         );
 
         await di.sl<SyncTrigger>().syncIfOnline();
-      } catch (_) {}
+      } catch (e, st) {
+        print('❌ getLeagues fetch failed: $e\n$st');
+      }
     });
 
     // Accumulated local stream + meta
@@ -69,15 +73,17 @@ class LeagueRepository {
     );
   }
 
-  Future<Either<DioException, String>> createLeague(LeagueModel model) async {
+  Future<Either<DioException, String>> createLeague(
+      LeagueModel model, List<LeagueRuleModel> leagueRule) async {
     try {
       final uuid = const Uuid().v7();
-      // تأكد من وجود syncId (UUID) قبل الإدخال/المزامنة
       final ensured =
           model.syncId.trim().isNotEmpty ? model : model.copyWith(syncId: uuid);
 
-      final leagueSyncId = await local.insertLeague(ensured.toCompanion());
-
+      final leagueSyncId = await local.insertLeague(
+        ensured.toCompanion(),
+        logoLocalPath: ensured.logoLocalPath,
+      );
       final teams = await local.createTeamsOnLeagueCreate(
         leagueSyncId: leagueSyncId,
         maxTeams: model.maxTeams ?? 0,
@@ -91,21 +97,29 @@ class LeagueRepository {
       await local.updateLeagueStatus(
         leagueSyncId: leagueSyncId,
         hasGroups: false,
+        hasKnockout: false,
         hasTeamsInGroups: false,
         hasMatches: false,
         hasPlayersAssigned: false,
       );
-   final rule=   await local.getRulesByLeague(leagueSyncId);
-   print(rule);
+      final rule =   await local.insertRules(
+        leagueSyncId: leagueSyncId,
+        rule: leagueRule.map((r) => r.copyWith(leagueSyncId: leagueSyncId)).toList(),
+      );
       try {
         final payloads = {
           'league_sync_id': leagueSyncId,
           'league': ensured.copyWith(syncId: leagueSyncId).toJson(),
           'team_player_categories': categories.map((c) => c.toJson()).toList(),
-        //  'league_rules':rule.map((r)=>r.toJson()),
-          'teams': teams.map((t) {
-            return t.toJson();
-          }).toList(),
+          'teams': teams.map((t) => t.toJson()).toList(),
+          'league_rules': rule.map((t) => t.toJson()).toList(),
+          if (ensured.logoLocalPath != null &&
+              ensured.logoLocalPath!.isNotEmpty)
+            '__files': [
+              {'field': 'logo', 'path': ensured.logoLocalPath},
+              {'field': 'logo_path', 'path': ensured.logoLocalPath},
+              {'field': 'league[logo_path]', 'path': ensured.logoLocalPath},
+            ]
         };
 
         await syncService.enqueueOperation(
@@ -113,8 +127,7 @@ class LeagueRepository {
           operation: SyncService.operationCreate,
           payload: payloads,
         );
-        //
-        // // ✅ هنا فقط نعرض رسالة للـUI إذا فشلت "مزامنة" فورية
+
         try {
           di.sl<SyncTrigger>().syncIfOnlineInBackground();
         } on DioException catch (e) {
@@ -135,68 +148,23 @@ class LeagueRepository {
     }
   }
 
-  /// حذف دوري محليًا + Enqueue
-  Future<Either<DioException, int>> deleteLeagueLocal(int id) async {
-    try {
-      final count = await local.deleteLeague(id);
-      return Right(count);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (_) {
-      return Left(
-          DioException(requestOptions: RequestOptions(path: '/leagues')));
-    }
-  }
-
-  Future<Either<DioException, int>> addRule(
-      LeagueRuleModel companion, String leagueSyncId) async {
-    try {
-      final id = await local.insertRule(companion.toCompanion(leagueSyncId));
-      return Right(id);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (e) {
-      return Left(
-        DioException(requestOptions: RequestOptions(path: '/league_rule')),
-      );
-    }
-  }
-
-  /// جلب القواعد الخاصة بدوري
-  Future<Either<DioException, List<LeagueRule>>> getRulesByLeague(
-      String leagueSyncId) async {
-    try {
-      final rules = await local.getRulesByLeague(leagueSyncId);
-      return Right(rules);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (_) {
-      return Left(
-        DioException(requestOptions: RequestOptions(path: '/league_rule')),
-      );
-    }
-  }
-
-  /// حذف قاعدة
-  Future<Either<DioException, int>> deleteRule(String leagueSyncId) async {
-    try {
-      final deletedCount = await local.deleteRule(leagueSyncId);
-      return Right(deletedCount);
-    } on DioException catch (e) {
-      return Left(e);
-    } catch (_) {
-      return Left(
-        DioException(requestOptions: RequestOptions(path: '/league_rule')),
-      );
-    }
-  }
-
   Future<Either<DioException, Unit>> replaceRulesForLeague(
-      String leagueSyncId, List<LeagueRuleModel> rules) async {
+      {required String leagueSyncId,
+      required List<LeagueRuleModel> rules}) async {
     try {
       await local.insertRules(
-        rules.map((r) => r.toCompanion(leagueSyncId)).toList(),
+        leagueSyncId: leagueSyncId,
+        rule: rules,
       );
+      await syncService.enqueueOperation(
+        entityType: 'rule',
+        operation: SyncService.operationCreate,
+        payload:
+
+          rules.first.toJson(),
+
+      );
+      di.sl<SyncTrigger>().syncIfOnlineInBackground();
       return right(unit); // نجاح
     } on DioException catch (e) {
       return left(e); // خطأ من نوع Dio
@@ -229,6 +197,7 @@ class LeagueRepository {
     bool? hasGroups,
     bool? hasTeamsInGroups,
     bool? hasMatches,
+    bool? hasKnockout,
     bool? hasPlayersAssigned,
   }) async {
     return RepoGuard.run<Unit>(
@@ -238,6 +207,7 @@ class LeagueRepository {
           hasGroups: hasGroups,
           hasTeamsInGroups: hasTeamsInGroups,
           hasMatches: hasMatches,
+          hasKnockout: hasKnockout,
           hasPlayersAssigned: hasPlayersAssigned,
         );
         await syncService.enqueueOperation(
@@ -249,6 +219,7 @@ class LeagueRepository {
             'has_teams_in_groups': hasTeamsInGroups,
             'has_matches': hasMatches,
             'has_players_assigned': hasPlayersAssigned,
+            'has_knockout': hasKnockout,
           },
         );
 
@@ -262,30 +233,6 @@ class LeagueRepository {
     );
   }
 
-  // Future<Either<DioException, LeagueStatusModel>> getStatus(
-  //     String leagueSyncId) async {
-  //   try {
-  //     final status = await local.getLeagueStatus(leagueSyncId);
-  //     // final remoteLeagueStatus = await remote.getStatusOfLeague(
-  //     //   leagueSyncId,
-  //     // );
-  //     // await local.updateLeagueStatus(
-  //     //   leagueSyncId: leagueSyncId,
-  //     //   hasGroups: remoteLeagueStatus.hasGroups,
-  //     //   hasTeamsInGroups: remoteLeagueStatus.hasTeamsInGroups,
-  //     //   hasMatches: remoteLeagueStatus.hasMatches,
-  //     //   hasPlayersAssigned: remoteLeagueStatus.hasPlayersInTeams,
-  //     // );
-  //     // await di.sl<SyncTrigger>().syncIfOnline();
-  //
-  //     return Right(status);
-  //   } catch (e) {
-  //     return Left(DioException(
-  //       requestOptions: RequestOptions(path: '/league/status'),
-  //       error: e,
-  //     ));
-  //   }
-  // }
 
   Stream<LeagueStatusModel> watchLeagueStatus({
     required String leagueSyncId,
@@ -305,6 +252,7 @@ class LeagueRepository {
       );
       await local.updateLeagueStatus(
         leagueSyncId: leagueSyncId,
+        hasKnockout: remoteStatus.hasKnockout,
         hasGroups: remoteStatus.hasGroups,
         hasTeamsInGroups: remoteStatus.hasTeamsInGroups,
         hasMatches: remoteStatus.hasMatches,
@@ -313,6 +261,17 @@ class LeagueRepository {
       await di.sl<SyncTrigger>().syncIfOnline();
     });
   }
+
+  Future<Either<DioException, PaginationModel<NewsItemModel>>>
+      getAllLatestLeagueNews(String leagueSyncId, int page) async {
+    try {
+      final remotes = await remote.getAllLatestLeagueNews(leagueSyncId, page);
+      return Right(remotes);
+    } on DioException catch (e) {
+      return Left(e);
+    }
+  }
+
   Future<Either<DioException, Unit>> refreshLeagueBundle({
     required String leagueSyncId,
   }) async {
@@ -330,8 +289,77 @@ class LeagueRepository {
       return unit;
     });
   }
-  Stream<LeagueModel?> watchLeague({required String leagueSyncId}) =>
-      local.watchLeague(leagueSyncId);
 
+  Stream<LeagueModel?> watchLeague({required String leagueSyncId}) {
+    return local.watchLeague(leagueSyncId);
+  }
+
+  Future<Either<DioException, Unit>> addReport(ReportModel reportModel) async {
+    try {
+      final data = await remote.addReport(reportModel);
+      return Right(data);
+    } on DioException catch (error) {
+      print('Error adding report: $error');
+      return Left(error);
+    }
+  }
+
+  Future<Either<DioException, NewsItemModel>> reportDetails({
+    required int id,
+  }) async {
+    try {
+      final remotes = await remote.reportDetails(id: id);
+      return Right(remotes);
+    } on DioException catch (e) {
+      return Left(e);
+    }
+  }
+
+  Future<Either<DioException, Unit>> orderLeagueInvitationsPlayer(
+      String leagueSyncId) {
+    return RepoGuard.run<Unit>(
+      action: () =>
+          remote.orderLeagueInvitationsPlayer(leagueSyncId: leagueSyncId),
+    );
+  }
+
+  Future<Either<DioException, List<BannerModel>>> getLeagueBanners(
+      String leagueSyncId) {
+    return RepoGuard.run<List<BannerModel>>(
+      action: () => remote.getLeagueBanners(leagueSyncId: leagueSyncId),
+    );
+  }
+
+  /// مراقبة (watch) قواعد الدوري من اللوكال.
+  Stream<List<LeagueRuleModel>> watchLeagueRules({
+    required String leagueSyncId,
+  }) {
+    return local.watchLeagueRules(leagueSyncId: leagueSyncId);
+  }
+
+  /// جلب (refresh) قواعد الدوري من الريموت ثم upsert في اللوكال.
+  ///
+  /// - Offline-first: لو الجهاز أوفلاين يرجع `unit` بدون رمي خطأ.
+  /// - [deleteMissing] لو true: يحذف من اللوكال أي قواعد ليست ضمن نتيجة الريموت.
+  Future<Either<DioException, Unit>> refreshLeagueRules({
+    required String leagueSyncId,
+    bool deleteMissing = true,
+  }) async {
+    return RepoGuard.run<Unit>(
+      action: () async {
+        if (!await connectivity.isOnline()) return unit;
+
+        final remoteRules = await remote.getLeagueRule(leagueSyncId);
+
+        await local.upsertLeagueRulesFromRemote(
+          leagueSyncId: leagueSyncId,
+          rules: remoteRules,
+          deleteMissing: deleteMissing,
+        );
+
+        await di.sl<SyncTrigger>().syncIfOnline();
+        return unit;
+      },
+    );
+  }
 }
-

@@ -67,8 +67,7 @@ class _LeaguesListWidgetState extends ConsumerState<LeaguesListWidget> {
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         itemBuilder: (_, i) => LeagueCardWidget(
           leagueModel: items[i],
-          imageUrl:
-              'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1200&auto=format&fit=crop',
+          imageUrl:items[i].logoPath??'',
         ),
         separatorBuilder: (_, __) => SizedBox(height: 12.h),
         itemCount: items.length,

@@ -73,7 +73,7 @@ class Safirah extends _$Safirah {
   Safirah._(QueryExecutor e) : super(e);
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   static Future<Safirah> create() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -85,11 +85,12 @@ class Safirah extends _$Safirah {
   MigrationStrategy get migration =>
       MigrationStrategy(
         onCreate: (m) async {
+
           await m.createAll();
+
           // ✅ بعد إنشاء الجداول لأول مرة
           final termsSource = MatchTermsEventLocalDataSource(this);
           await termsSource.seedDefaultTerms();
-
           // ملاحظة: roles/permissions سيتم تنزيلها من الـ API لاحقاً.
         },
         onUpgrade: (m, from, to) async {
@@ -116,7 +117,7 @@ class Safirah extends _$Safirah {
           if (from < 8) {
             await m.addColumn(leagues, leagues.syncId);
 
-            // تعبئة قيمة افتراضية فريدة للسجلات القديمة.
+            // تعبئة قيمة ا��تراضية فريدة للسجلات القديمة.
             // SQLite لا يملك UUID() افتراضيًا، فنضع قيمة تعتمد على id + timestamp.
             // (يكفي كمؤقت لمنع التعارض محليًا، والأفضل لاحقًا توليد UUID حقيقي عبر كود Dart في migration مخصصة.)
             await customStatement(
@@ -261,6 +262,20 @@ FROM league_players;
                 'ALTER TABLE league_players_new RENAME TO league_players;');
 
             await customStatement('PRAGMA foreign_keys=ON;');
+          }
+
+          // v19: Fix league_rules uniqueness to support upsert ON CONFLICT(league_sync_id, sync_id)
+          if (from < 19) {
+            // Create a composite unique index matching our upsert target.
+            // Use IF NOT EXISTS to be safe on repeated upgrades.
+            await customStatement(
+              'CREATE UNIQUE INDEX IF NOT EXISTS idx_league_rules_league_sync_id_sync_id '
+              'ON league_rules(league_sync_id, sync_id);',
+            );
+
+            // Old schema used UNIQUE(sync_id) which may still exist; we don't
+            // strictly need to drop it for correctness, but composite index
+            // is required for ON CONFLICT target.
           }
         },
       );

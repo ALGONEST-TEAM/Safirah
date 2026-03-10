@@ -16,7 +16,6 @@ class ListOfPlayerInEventMatchWidget extends ConsumerStatefulWidget {
     required this.matchSyncId,
     required this.matchTermSyncId,
   });
-
   final String teamSyncId;
   final String matchSyncId;
   final String matchTermSyncId;

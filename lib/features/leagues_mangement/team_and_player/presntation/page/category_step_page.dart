@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/state/check_state_in_post_api_data_widget.dart';
+import 'package:safirah/core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -49,17 +50,7 @@ class _CategoryStepPageState extends ConsumerState<CategoryStepPage> {
 
     final state = ref.watch(setPlayerCategoryProvider);
     return Scaffold(
-        appBar: AppBar(
-          leading: const BackButton(
-            color: Colors.white,
-          ),
-          title: const AutoSizeTextWidget(
-            text: 'تحديد اللعبين',
-            colorText: Colors.white,
-          ),
-          centerTitle: true,
-          backgroundColor: AppColors.secondaryColor,
-        ),
+        appBar:SecondaryAppBarWidget(title: 'تقسيم الفئات',),
         body: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child:
@@ -76,16 +67,16 @@ class _CategoryStepPageState extends ConsumerState<CategoryStepPage> {
               },
               validator: (cat) => cat == null ? 'الرجاء اختيار فئة' : null,
             ),
-            SizedBox(height: 8.h),
-            const AutoSizeTextWidget(text: "البحث عن لاعب"),
-            SizedBox(height: 8.h),
-            TextFormFieldWidget(
-              controller: _searchCtrl,
-              hintFontSize: 12,
-              fillColor: Colors.white,
-              hintText: "اسم اللعب",
-              onChanged: (_) => setState(() {}),
-            ),
+            // SizedBox(height: 8.h),
+            // const AutoSizeTextWidget(text: "البحث عن لاعب"),
+            // SizedBox(height: 8.h),
+            // TextFormFieldWidget(
+            //   controller: _searchCtrl,
+            //   hintFontSize: 12,
+            //   fillColor: Colors.white,
+            //   hintText: "اسم اللعب",
+            //   onChanged: (_) => setState(() {}),
+            // ),
             SizedBox(height: 8.h),
             Expanded(
               child: PlayersSelectionCatWidget(

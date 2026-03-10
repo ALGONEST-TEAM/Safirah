@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'leagues_table.dart';
 
 class LeagueRules extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -21,6 +20,7 @@ class LeagueRules extends Table {
 
   @override
   List<String> get customConstraints => [
-        'UNIQUE(sync_id)',
+        // ✅ لتتطابق مع upsert target: (league_sync_id, sync_id)
+        'UNIQUE(league_sync_id, sync_id)',
       ];
 }

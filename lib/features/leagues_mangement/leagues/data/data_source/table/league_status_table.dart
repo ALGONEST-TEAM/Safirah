@@ -8,6 +8,8 @@ class LeagueStatus extends Table {
 
 
   BoolColumn get hasGroups => boolean().withDefault(const Constant(false))();
+  BoolColumn get hasKnockout => boolean().withDefault(const Constant(false))();
+
   BoolColumn get hasTeamsInGroups => boolean().withDefault(const Constant(false))();
   BoolColumn get hasMatches => boolean().withDefault(const Constant(false))();
   BoolColumn get hasPlayersAssigned => boolean().withDefault(const Constant(false))();

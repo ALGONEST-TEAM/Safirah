@@ -27,6 +27,22 @@ class $LeaguesTable extends Leagues with TableInfo<$LeaguesTable, League> {
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameOrganizerMeta =
+      const VerificationMeta('nameOrganizer');
+  @override
+  late final GeneratedColumn<String> nameOrganizer = GeneratedColumn<String>(
+      'name_organizer', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _canWatchMeta =
+      const VerificationMeta('canWatch');
+  @override
+  late final GeneratedColumn<bool> canWatch = GeneratedColumn<bool>(
+      'can_watch', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("can_watch" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _subscriptionPriceMeta =
       const VerificationMeta('subscriptionPrice');
   @override
@@ -127,6 +143,8 @@ class $LeaguesTable extends Leagues with TableInfo<$LeaguesTable, League> {
         id,
         syncId,
         name,
+        nameOrganizer,
+        canWatch,
         subscriptionPrice,
         type,
         organizerId,
@@ -167,6 +185,16 @@ class $LeaguesTable extends Leagues with TableInfo<$LeaguesTable, League> {
           _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('name_organizer')) {
+      context.handle(
+          _nameOrganizerMeta,
+          nameOrganizer.isAcceptableOrUnknown(
+              data['name_organizer']!, _nameOrganizerMeta));
+    }
+    if (data.containsKey('can_watch')) {
+      context.handle(_canWatchMeta,
+          canWatch.isAcceptableOrUnknown(data['can_watch']!, _canWatchMeta));
     }
     if (data.containsKey('subscription_price')) {
       context.handle(
@@ -255,6 +283,10 @@ class $LeaguesTable extends Leagues with TableInfo<$LeaguesTable, League> {
           .read(DriftSqlType.string, data['${effectivePrefix}sync_id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      nameOrganizer: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name_organizer']),
+      canWatch: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}can_watch']),
       subscriptionPrice: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}subscription_price'])!,
       type: attachedDatabase.typeMapping
@@ -301,6 +333,8 @@ class League extends DataClass implements Insertable<League> {
   /// يجب أن يكون فريدًا على مستوى قاعدة البيانات.
   final String syncId;
   final String name;
+  final String? nameOrganizer;
+  final bool? canWatch;
   final String subscriptionPrice;
   final String? type;
   final int? organizerId;
@@ -320,6 +354,8 @@ class League extends DataClass implements Insertable<League> {
       {required this.id,
       required this.syncId,
       required this.name,
+      this.nameOrganizer,
+      this.canWatch,
       required this.subscriptionPrice,
       this.type,
       this.organizerId,
@@ -341,6 +377,12 @@ class League extends DataClass implements Insertable<League> {
     map['id'] = Variable<int>(id);
     map['sync_id'] = Variable<String>(syncId);
     map['name'] = Variable<String>(name);
+    if (!nullToAbsent || nameOrganizer != null) {
+      map['name_organizer'] = Variable<String>(nameOrganizer);
+    }
+    if (!nullToAbsent || canWatch != null) {
+      map['can_watch'] = Variable<bool>(canWatch);
+    }
     map['subscription_price'] = Variable<String>(subscriptionPrice);
     if (!nullToAbsent || type != null) {
       map['type'] = Variable<String>(type);
@@ -386,6 +428,12 @@ class League extends DataClass implements Insertable<League> {
       id: Value(id),
       syncId: Value(syncId),
       name: Value(name),
+      nameOrganizer: nameOrganizer == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nameOrganizer),
+      canWatch: canWatch == null && nullToAbsent
+          ? const Value.absent()
+          : Value(canWatch),
       subscriptionPrice: Value(subscriptionPrice),
       type: type == null && nullToAbsent ? const Value.absent() : Value(type),
       organizerId: organizerId == null && nullToAbsent
@@ -430,6 +478,8 @@ class League extends DataClass implements Insertable<League> {
       id: serializer.fromJson<int>(json['id']),
       syncId: serializer.fromJson<String>(json['syncId']),
       name: serializer.fromJson<String>(json['name']),
+      nameOrganizer: serializer.fromJson<String?>(json['nameOrganizer']),
+      canWatch: serializer.fromJson<bool?>(json['canWatch']),
       subscriptionPrice: serializer.fromJson<String>(json['subscriptionPrice']),
       type: serializer.fromJson<String?>(json['type']),
       organizerId: serializer.fromJson<int?>(json['organizerId']),
@@ -454,6 +504,8 @@ class League extends DataClass implements Insertable<League> {
       'id': serializer.toJson<int>(id),
       'syncId': serializer.toJson<String>(syncId),
       'name': serializer.toJson<String>(name),
+      'nameOrganizer': serializer.toJson<String?>(nameOrganizer),
+      'canWatch': serializer.toJson<bool?>(canWatch),
       'subscriptionPrice': serializer.toJson<String>(subscriptionPrice),
       'type': serializer.toJson<String?>(type),
       'organizerId': serializer.toJson<int?>(organizerId),
@@ -476,6 +528,8 @@ class League extends DataClass implements Insertable<League> {
           {int? id,
           String? syncId,
           String? name,
+          Value<String?> nameOrganizer = const Value.absent(),
+          Value<bool?> canWatch = const Value.absent(),
           String? subscriptionPrice,
           Value<String?> type = const Value.absent(),
           Value<int?> organizerId = const Value.absent(),
@@ -495,6 +549,9 @@ class League extends DataClass implements Insertable<League> {
         id: id ?? this.id,
         syncId: syncId ?? this.syncId,
         name: name ?? this.name,
+        nameOrganizer:
+            nameOrganizer.present ? nameOrganizer.value : this.nameOrganizer,
+        canWatch: canWatch.present ? canWatch.value : this.canWatch,
         subscriptionPrice: subscriptionPrice ?? this.subscriptionPrice,
         type: type.present ? type.value : this.type,
         organizerId: organizerId.present ? organizerId.value : this.organizerId,
@@ -519,6 +576,10 @@ class League extends DataClass implements Insertable<League> {
       id: data.id.present ? data.id.value : this.id,
       syncId: data.syncId.present ? data.syncId.value : this.syncId,
       name: data.name.present ? data.name.value : this.name,
+      nameOrganizer: data.nameOrganizer.present
+          ? data.nameOrganizer.value
+          : this.nameOrganizer,
+      canWatch: data.canWatch.present ? data.canWatch.value : this.canWatch,
       subscriptionPrice: data.subscriptionPrice.present
           ? data.subscriptionPrice.value
           : this.subscriptionPrice,
@@ -552,6 +613,8 @@ class League extends DataClass implements Insertable<League> {
           ..write('id: $id, ')
           ..write('syncId: $syncId, ')
           ..write('name: $name, ')
+          ..write('nameOrganizer: $nameOrganizer, ')
+          ..write('canWatch: $canWatch, ')
           ..write('subscriptionPrice: $subscriptionPrice, ')
           ..write('type: $type, ')
           ..write('organizerId: $organizerId, ')
@@ -576,6 +639,8 @@ class League extends DataClass implements Insertable<League> {
       id,
       syncId,
       name,
+      nameOrganizer,
+      canWatch,
       subscriptionPrice,
       type,
       organizerId,
@@ -598,6 +663,8 @@ class League extends DataClass implements Insertable<League> {
           other.id == this.id &&
           other.syncId == this.syncId &&
           other.name == this.name &&
+          other.nameOrganizer == this.nameOrganizer &&
+          other.canWatch == this.canWatch &&
           other.subscriptionPrice == this.subscriptionPrice &&
           other.type == this.type &&
           other.organizerId == this.organizerId &&
@@ -619,6 +686,8 @@ class LeaguesCompanion extends UpdateCompanion<League> {
   final Value<int> id;
   final Value<String> syncId;
   final Value<String> name;
+  final Value<String?> nameOrganizer;
+  final Value<bool?> canWatch;
   final Value<String> subscriptionPrice;
   final Value<String?> type;
   final Value<int?> organizerId;
@@ -638,6 +707,8 @@ class LeaguesCompanion extends UpdateCompanion<League> {
     this.id = const Value.absent(),
     this.syncId = const Value.absent(),
     this.name = const Value.absent(),
+    this.nameOrganizer = const Value.absent(),
+    this.canWatch = const Value.absent(),
     this.subscriptionPrice = const Value.absent(),
     this.type = const Value.absent(),
     this.organizerId = const Value.absent(),
@@ -658,6 +729,8 @@ class LeaguesCompanion extends UpdateCompanion<League> {
     this.id = const Value.absent(),
     required String syncId,
     required String name,
+    this.nameOrganizer = const Value.absent(),
+    this.canWatch = const Value.absent(),
     required String subscriptionPrice,
     this.type = const Value.absent(),
     this.organizerId = const Value.absent(),
@@ -680,6 +753,8 @@ class LeaguesCompanion extends UpdateCompanion<League> {
     Expression<int>? id,
     Expression<String>? syncId,
     Expression<String>? name,
+    Expression<String>? nameOrganizer,
+    Expression<bool>? canWatch,
     Expression<String>? subscriptionPrice,
     Expression<String>? type,
     Expression<int>? organizerId,
@@ -700,6 +775,8 @@ class LeaguesCompanion extends UpdateCompanion<League> {
       if (id != null) 'id': id,
       if (syncId != null) 'sync_id': syncId,
       if (name != null) 'name': name,
+      if (nameOrganizer != null) 'name_organizer': nameOrganizer,
+      if (canWatch != null) 'can_watch': canWatch,
       if (subscriptionPrice != null) 'subscription_price': subscriptionPrice,
       if (type != null) 'type': type,
       if (organizerId != null) 'organizer_id': organizerId,
@@ -722,6 +799,8 @@ class LeaguesCompanion extends UpdateCompanion<League> {
       {Value<int>? id,
       Value<String>? syncId,
       Value<String>? name,
+      Value<String?>? nameOrganizer,
+      Value<bool?>? canWatch,
       Value<String>? subscriptionPrice,
       Value<String?>? type,
       Value<int?>? organizerId,
@@ -741,6 +820,8 @@ class LeaguesCompanion extends UpdateCompanion<League> {
       id: id ?? this.id,
       syncId: syncId ?? this.syncId,
       name: name ?? this.name,
+      nameOrganizer: nameOrganizer ?? this.nameOrganizer,
+      canWatch: canWatch ?? this.canWatch,
       subscriptionPrice: subscriptionPrice ?? this.subscriptionPrice,
       type: type ?? this.type,
       organizerId: organizerId ?? this.organizerId,
@@ -770,6 +851,12 @@ class LeaguesCompanion extends UpdateCompanion<League> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
+    }
+    if (nameOrganizer.present) {
+      map['name_organizer'] = Variable<String>(nameOrganizer.value);
+    }
+    if (canWatch.present) {
+      map['can_watch'] = Variable<bool>(canWatch.value);
     }
     if (subscriptionPrice.present) {
       map['subscription_price'] = Variable<String>(subscriptionPrice.value);
@@ -825,6 +912,8 @@ class LeaguesCompanion extends UpdateCompanion<League> {
           ..write('id: $id, ')
           ..write('syncId: $syncId, ')
           ..write('name: $name, ')
+          ..write('nameOrganizer: $nameOrganizer, ')
+          ..write('canWatch: $canWatch, ')
           ..write('subscriptionPrice: $subscriptionPrice, ')
           ..write('type: $type, ')
           ..write('organizerId: $organizerId, ')
@@ -4379,15 +4468,6 @@ class $MatchesTable extends Matches with TableInfo<$MatchesTable, Matche> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $MatchesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
   static const VerificationMeta _syncIdMeta = const VerificationMeta('syncId');
   @override
   late final GeneratedColumn<String> syncId = GeneratedColumn<String>(
@@ -4517,7 +4597,6 @@ class $MatchesTable extends Matches with TableInfo<$MatchesTable, Matche> {
       defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns => [
-        id,
         syncId,
         leagueSyncId,
         roundSyncId,
@@ -4545,9 +4624,6 @@ class $MatchesTable extends Matches with TableInfo<$MatchesTable, Matche> {
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
     if (data.containsKey('sync_id')) {
       context.handle(_syncIdMeta,
           syncId.isAcceptableOrUnknown(data['sync_id']!, _syncIdMeta));
@@ -4642,13 +4718,11 @@ class $MatchesTable extends Matches with TableInfo<$MatchesTable, Matche> {
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => {syncId};
   @override
   Matche map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Matche(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       syncId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}sync_id'])!,
       leagueSyncId: attachedDatabase.typeMapping
@@ -4692,7 +4766,6 @@ class $MatchesTable extends Matches with TableInfo<$MatchesTable, Matche> {
 }
 
 class Matche extends DataClass implements Insertable<Matche> {
-  final int id;
   final String syncId;
   final String leagueSyncId;
 
@@ -4716,8 +4789,7 @@ class Matche extends DataClass implements Insertable<Matche> {
   final DateTime createdAt;
   final DateTime updatedAt;
   const Matche(
-      {required this.id,
-      required this.syncId,
+      {required this.syncId,
       required this.leagueSyncId,
       required this.roundSyncId,
       required this.homeTeamSyncId,
@@ -4736,7 +4808,6 @@ class Matche extends DataClass implements Insertable<Matche> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
     map['sync_id'] = Variable<String>(syncId);
     map['league_sync_id'] = Variable<String>(leagueSyncId);
     map['round_sync_id'] = Variable<String>(roundSyncId);
@@ -4768,7 +4839,6 @@ class Matche extends DataClass implements Insertable<Matche> {
 
   MatchesCompanion toCompanion(bool nullToAbsent) {
     return MatchesCompanion(
-      id: Value(id),
       syncId: Value(syncId),
       leagueSyncId: Value(leagueSyncId),
       roundSyncId: Value(roundSyncId),
@@ -4802,7 +4872,6 @@ class Matche extends DataClass implements Insertable<Matche> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Matche(
-      id: serializer.fromJson<int>(json['id']),
       syncId: serializer.fromJson<String>(json['syncId']),
       leagueSyncId: serializer.fromJson<String>(json['leagueSyncId']),
       roundSyncId: serializer.fromJson<String>(json['roundSyncId']),
@@ -4826,7 +4895,6 @@ class Matche extends DataClass implements Insertable<Matche> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
       'syncId': serializer.toJson<String>(syncId),
       'leagueSyncId': serializer.toJson<String>(leagueSyncId),
       'roundSyncId': serializer.toJson<String>(roundSyncId),
@@ -4847,8 +4915,7 @@ class Matche extends DataClass implements Insertable<Matche> {
   }
 
   Matche copyWith(
-          {int? id,
-          String? syncId,
+          {String? syncId,
           String? leagueSyncId,
           String? roundSyncId,
           String? homeTeamSyncId,
@@ -4865,7 +4932,6 @@ class Matche extends DataClass implements Insertable<Matche> {
           DateTime? createdAt,
           DateTime? updatedAt}) =>
       Matche(
-        id: id ?? this.id,
         syncId: syncId ?? this.syncId,
         leagueSyncId: leagueSyncId ?? this.leagueSyncId,
         roundSyncId: roundSyncId ?? this.roundSyncId,
@@ -4888,7 +4954,6 @@ class Matche extends DataClass implements Insertable<Matche> {
       );
   Matche copyWithCompanion(MatchesCompanion data) {
     return Matche(
-      id: data.id.present ? data.id.value : this.id,
       syncId: data.syncId.present ? data.syncId.value : this.syncId,
       leagueSyncId: data.leagueSyncId.present
           ? data.leagueSyncId.value
@@ -4923,7 +4988,6 @@ class Matche extends DataClass implements Insertable<Matche> {
   @override
   String toString() {
     return (StringBuffer('Matche(')
-          ..write('id: $id, ')
           ..write('syncId: $syncId, ')
           ..write('leagueSyncId: $leagueSyncId, ')
           ..write('roundSyncId: $roundSyncId, ')
@@ -4946,7 +5010,6 @@ class Matche extends DataClass implements Insertable<Matche> {
 
   @override
   int get hashCode => Object.hash(
-      id,
       syncId,
       leagueSyncId,
       roundSyncId,
@@ -4967,7 +5030,6 @@ class Matche extends DataClass implements Insertable<Matche> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Matche &&
-          other.id == this.id &&
           other.syncId == this.syncId &&
           other.leagueSyncId == this.leagueSyncId &&
           other.roundSyncId == this.roundSyncId &&
@@ -4987,7 +5049,6 @@ class Matche extends DataClass implements Insertable<Matche> {
 }
 
 class MatchesCompanion extends UpdateCompanion<Matche> {
-  final Value<int> id;
   final Value<String> syncId;
   final Value<String> leagueSyncId;
   final Value<String> roundSyncId;
@@ -5004,8 +5065,8 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
   final Value<String> status;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<int> rowid;
   const MatchesCompanion({
-    this.id = const Value.absent(),
     this.syncId = const Value.absent(),
     this.leagueSyncId = const Value.absent(),
     this.roundSyncId = const Value.absent(),
@@ -5022,9 +5083,9 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
     this.status = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   MatchesCompanion.insert({
-    this.id = const Value.absent(),
     required String syncId,
     required String leagueSyncId,
     required String roundSyncId,
@@ -5041,6 +5102,7 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
     this.status = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
   })  : syncId = Value(syncId),
         leagueSyncId = Value(leagueSyncId),
         roundSyncId = Value(roundSyncId),
@@ -5048,7 +5110,6 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
         awayTeamSyncId = Value(awayTeamSyncId),
         matchDate = Value(matchDate);
   static Insertable<Matche> custom({
-    Expression<int>? id,
     Expression<String>? syncId,
     Expression<String>? leagueSyncId,
     Expression<String>? roundSyncId,
@@ -5065,9 +5126,9 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
     Expression<String>? status,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (syncId != null) 'sync_id': syncId,
       if (leagueSyncId != null) 'league_sync_id': leagueSyncId,
       if (roundSyncId != null) 'round_sync_id': roundSyncId,
@@ -5085,12 +5146,12 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
       if (status != null) 'status': status,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   MatchesCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? syncId,
+      {Value<String>? syncId,
       Value<String>? leagueSyncId,
       Value<String>? roundSyncId,
       Value<String>? homeTeamSyncId,
@@ -5105,9 +5166,9 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
       Value<int>? awayScore,
       Value<String>? status,
       Value<DateTime>? createdAt,
-      Value<DateTime>? updatedAt}) {
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
     return MatchesCompanion(
-      id: id ?? this.id,
       syncId: syncId ?? this.syncId,
       leagueSyncId: leagueSyncId ?? this.leagueSyncId,
       roundSyncId: roundSyncId ?? this.roundSyncId,
@@ -5124,15 +5185,13 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
     if (syncId.present) {
       map['sync_id'] = Variable<String>(syncId.value);
     }
@@ -5182,13 +5241,15 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
   @override
   String toString() {
     return (StringBuffer('MatchesCompanion(')
-          ..write('id: $id, ')
           ..write('syncId: $syncId, ')
           ..write('leagueSyncId: $leagueSyncId, ')
           ..write('roundSyncId: $roundSyncId, ')
@@ -5204,7 +5265,8 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
           ..write('awayScore: $awayScore, ')
           ..write('status: $status, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -5215,15 +5277,6 @@ class $RoundsTable extends Rounds with TableInfo<$RoundsTable, Round> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $RoundsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
   static const VerificationMeta _syncIdMeta = const VerificationMeta('syncId');
   @override
   late final GeneratedColumn<String> syncId = GeneratedColumn<String>(
@@ -5269,7 +5322,7 @@ class $RoundsTable extends Rounds with TableInfo<$RoundsTable, Round> {
       defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, syncId, leagueSyncId, name, groupSyncId, roundType, createdAt];
+      [syncId, leagueSyncId, name, groupSyncId, roundType, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -5280,9 +5333,6 @@ class $RoundsTable extends Rounds with TableInfo<$RoundsTable, Round> {
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
     if (data.containsKey('sync_id')) {
       context.handle(_syncIdMeta,
           syncId.isAcceptableOrUnknown(data['sync_id']!, _syncIdMeta));
@@ -5323,13 +5373,11 @@ class $RoundsTable extends Rounds with TableInfo<$RoundsTable, Round> {
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => {syncId};
   @override
   Round map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Round(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       syncId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}sync_id'])!,
       leagueSyncId: attachedDatabase.typeMapping
@@ -5352,7 +5400,6 @@ class $RoundsTable extends Rounds with TableInfo<$RoundsTable, Round> {
 }
 
 class Round extends DataClass implements Insertable<Round> {
-  final int id;
   final String syncId;
   final String leagueSyncId;
   final String name;
@@ -5360,8 +5407,7 @@ class Round extends DataClass implements Insertable<Round> {
   final String roundType;
   final DateTime createdAt;
   const Round(
-      {required this.id,
-      required this.syncId,
+      {required this.syncId,
       required this.leagueSyncId,
       required this.name,
       this.groupSyncId,
@@ -5370,7 +5416,6 @@ class Round extends DataClass implements Insertable<Round> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
     map['sync_id'] = Variable<String>(syncId);
     map['league_sync_id'] = Variable<String>(leagueSyncId);
     map['round_name'] = Variable<String>(name);
@@ -5384,7 +5429,6 @@ class Round extends DataClass implements Insertable<Round> {
 
   RoundsCompanion toCompanion(bool nullToAbsent) {
     return RoundsCompanion(
-      id: Value(id),
       syncId: Value(syncId),
       leagueSyncId: Value(leagueSyncId),
       name: Value(name),
@@ -5400,7 +5444,6 @@ class Round extends DataClass implements Insertable<Round> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Round(
-      id: serializer.fromJson<int>(json['id']),
       syncId: serializer.fromJson<String>(json['syncId']),
       leagueSyncId: serializer.fromJson<String>(json['leagueSyncId']),
       name: serializer.fromJson<String>(json['name']),
@@ -5413,7 +5456,6 @@ class Round extends DataClass implements Insertable<Round> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
       'syncId': serializer.toJson<String>(syncId),
       'leagueSyncId': serializer.toJson<String>(leagueSyncId),
       'name': serializer.toJson<String>(name),
@@ -5424,15 +5466,13 @@ class Round extends DataClass implements Insertable<Round> {
   }
 
   Round copyWith(
-          {int? id,
-          String? syncId,
+          {String? syncId,
           String? leagueSyncId,
           String? name,
           Value<String?> groupSyncId = const Value.absent(),
           String? roundType,
           DateTime? createdAt}) =>
       Round(
-        id: id ?? this.id,
         syncId: syncId ?? this.syncId,
         leagueSyncId: leagueSyncId ?? this.leagueSyncId,
         name: name ?? this.name,
@@ -5442,7 +5482,6 @@ class Round extends DataClass implements Insertable<Round> {
       );
   Round copyWithCompanion(RoundsCompanion data) {
     return Round(
-      id: data.id.present ? data.id.value : this.id,
       syncId: data.syncId.present ? data.syncId.value : this.syncId,
       leagueSyncId: data.leagueSyncId.present
           ? data.leagueSyncId.value
@@ -5458,7 +5497,6 @@ class Round extends DataClass implements Insertable<Round> {
   @override
   String toString() {
     return (StringBuffer('Round(')
-          ..write('id: $id, ')
           ..write('syncId: $syncId, ')
           ..write('leagueSyncId: $leagueSyncId, ')
           ..write('name: $name, ')
@@ -5471,12 +5509,11 @@ class Round extends DataClass implements Insertable<Round> {
 
   @override
   int get hashCode => Object.hash(
-      id, syncId, leagueSyncId, name, groupSyncId, roundType, createdAt);
+      syncId, leagueSyncId, name, groupSyncId, roundType, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Round &&
-          other.id == this.id &&
           other.syncId == this.syncId &&
           other.leagueSyncId == this.leagueSyncId &&
           other.name == this.name &&
@@ -5486,79 +5523,76 @@ class Round extends DataClass implements Insertable<Round> {
 }
 
 class RoundsCompanion extends UpdateCompanion<Round> {
-  final Value<int> id;
   final Value<String> syncId;
   final Value<String> leagueSyncId;
   final Value<String> name;
   final Value<String?> groupSyncId;
   final Value<String> roundType;
   final Value<DateTime> createdAt;
+  final Value<int> rowid;
   const RoundsCompanion({
-    this.id = const Value.absent(),
     this.syncId = const Value.absent(),
     this.leagueSyncId = const Value.absent(),
     this.name = const Value.absent(),
     this.groupSyncId = const Value.absent(),
     this.roundType = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   RoundsCompanion.insert({
-    this.id = const Value.absent(),
     required String syncId,
     required String leagueSyncId,
     required String name,
     this.groupSyncId = const Value.absent(),
     required String roundType,
     this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
   })  : syncId = Value(syncId),
         leagueSyncId = Value(leagueSyncId),
         name = Value(name),
         roundType = Value(roundType);
   static Insertable<Round> custom({
-    Expression<int>? id,
     Expression<String>? syncId,
     Expression<String>? leagueSyncId,
     Expression<String>? name,
     Expression<String>? groupSyncId,
     Expression<String>? roundType,
     Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (syncId != null) 'sync_id': syncId,
       if (leagueSyncId != null) 'league_sync_id': leagueSyncId,
       if (name != null) 'round_name': name,
       if (groupSyncId != null) 'group_sync_id': groupSyncId,
       if (roundType != null) 'round_type': roundType,
       if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   RoundsCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? syncId,
+      {Value<String>? syncId,
       Value<String>? leagueSyncId,
       Value<String>? name,
       Value<String?>? groupSyncId,
       Value<String>? roundType,
-      Value<DateTime>? createdAt}) {
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
     return RoundsCompanion(
-      id: id ?? this.id,
       syncId: syncId ?? this.syncId,
       leagueSyncId: leagueSyncId ?? this.leagueSyncId,
       name: name ?? this.name,
       groupSyncId: groupSyncId ?? this.groupSyncId,
       roundType: roundType ?? this.roundType,
       createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
     if (syncId.present) {
       map['sync_id'] = Variable<String>(syncId.value);
     }
@@ -5577,19 +5611,22 @@ class RoundsCompanion extends UpdateCompanion<Round> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
   @override
   String toString() {
     return (StringBuffer('RoundsCompanion(')
-          ..write('id: $id, ')
           ..write('syncId: $syncId, ')
           ..write('leagueSyncId: $leagueSyncId, ')
           ..write('name: $name, ')
           ..write('groupSyncId: $groupSyncId, ')
           ..write('roundType: $roundType, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -6332,6 +6369,16 @@ class $LeagueStatusTable extends LeagueStatus
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("has_groups" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _hasKnockoutMeta =
+      const VerificationMeta('hasKnockout');
+  @override
+  late final GeneratedColumn<bool> hasKnockout = GeneratedColumn<bool>(
+      'has_knockout', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("has_knockout" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _hasTeamsInGroupsMeta =
       const VerificationMeta('hasTeamsInGroups');
   @override
@@ -6372,6 +6419,7 @@ class $LeagueStatusTable extends LeagueStatus
   List<GeneratedColumn> get $columns => [
         leagueSyncId,
         hasGroups,
+        hasKnockout,
         hasTeamsInGroups,
         hasMatches,
         hasPlayersAssigned,
@@ -6398,6 +6446,12 @@ class $LeagueStatusTable extends LeagueStatus
     if (data.containsKey('has_groups')) {
       context.handle(_hasGroupsMeta,
           hasGroups.isAcceptableOrUnknown(data['has_groups']!, _hasGroupsMeta));
+    }
+    if (data.containsKey('has_knockout')) {
+      context.handle(
+          _hasKnockoutMeta,
+          hasKnockout.isAcceptableOrUnknown(
+              data['has_knockout']!, _hasKnockoutMeta));
     }
     if (data.containsKey('has_teams_in_groups')) {
       context.handle(
@@ -6434,6 +6488,8 @@ class $LeagueStatusTable extends LeagueStatus
           .read(DriftSqlType.string, data['${effectivePrefix}league_sync_id'])!,
       hasGroups: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}has_groups'])!,
+      hasKnockout: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}has_knockout'])!,
       hasTeamsInGroups: attachedDatabase.typeMapping.read(
           DriftSqlType.bool, data['${effectivePrefix}has_teams_in_groups'])!,
       hasMatches: attachedDatabase.typeMapping
@@ -6456,6 +6512,7 @@ class LeagueStatusData extends DataClass
   /// الأساس الجديد: الربط عبر sync id
   final String leagueSyncId;
   final bool hasGroups;
+  final bool hasKnockout;
   final bool hasTeamsInGroups;
   final bool hasMatches;
   final bool hasPlayersAssigned;
@@ -6463,6 +6520,7 @@ class LeagueStatusData extends DataClass
   const LeagueStatusData(
       {required this.leagueSyncId,
       required this.hasGroups,
+      required this.hasKnockout,
       required this.hasTeamsInGroups,
       required this.hasMatches,
       required this.hasPlayersAssigned,
@@ -6472,6 +6530,7 @@ class LeagueStatusData extends DataClass
     final map = <String, Expression>{};
     map['league_sync_id'] = Variable<String>(leagueSyncId);
     map['has_groups'] = Variable<bool>(hasGroups);
+    map['has_knockout'] = Variable<bool>(hasKnockout);
     map['has_teams_in_groups'] = Variable<bool>(hasTeamsInGroups);
     map['has_matches'] = Variable<bool>(hasMatches);
     map['has_players_assigned'] = Variable<bool>(hasPlayersAssigned);
@@ -6485,6 +6544,7 @@ class LeagueStatusData extends DataClass
     return LeagueStatusCompanion(
       leagueSyncId: Value(leagueSyncId),
       hasGroups: Value(hasGroups),
+      hasKnockout: Value(hasKnockout),
       hasTeamsInGroups: Value(hasTeamsInGroups),
       hasMatches: Value(hasMatches),
       hasPlayersAssigned: Value(hasPlayersAssigned),
@@ -6500,6 +6560,7 @@ class LeagueStatusData extends DataClass
     return LeagueStatusData(
       leagueSyncId: serializer.fromJson<String>(json['leagueSyncId']),
       hasGroups: serializer.fromJson<bool>(json['hasGroups']),
+      hasKnockout: serializer.fromJson<bool>(json['hasKnockout']),
       hasTeamsInGroups: serializer.fromJson<bool>(json['hasTeamsInGroups']),
       hasMatches: serializer.fromJson<bool>(json['hasMatches']),
       hasPlayersAssigned: serializer.fromJson<bool>(json['hasPlayersAssigned']),
@@ -6512,6 +6573,7 @@ class LeagueStatusData extends DataClass
     return <String, dynamic>{
       'leagueSyncId': serializer.toJson<String>(leagueSyncId),
       'hasGroups': serializer.toJson<bool>(hasGroups),
+      'hasKnockout': serializer.toJson<bool>(hasKnockout),
       'hasTeamsInGroups': serializer.toJson<bool>(hasTeamsInGroups),
       'hasMatches': serializer.toJson<bool>(hasMatches),
       'hasPlayersAssigned': serializer.toJson<bool>(hasPlayersAssigned),
@@ -6522,6 +6584,7 @@ class LeagueStatusData extends DataClass
   LeagueStatusData copyWith(
           {String? leagueSyncId,
           bool? hasGroups,
+          bool? hasKnockout,
           bool? hasTeamsInGroups,
           bool? hasMatches,
           bool? hasPlayersAssigned,
@@ -6529,6 +6592,7 @@ class LeagueStatusData extends DataClass
       LeagueStatusData(
         leagueSyncId: leagueSyncId ?? this.leagueSyncId,
         hasGroups: hasGroups ?? this.hasGroups,
+        hasKnockout: hasKnockout ?? this.hasKnockout,
         hasTeamsInGroups: hasTeamsInGroups ?? this.hasTeamsInGroups,
         hasMatches: hasMatches ?? this.hasMatches,
         hasPlayersAssigned: hasPlayersAssigned ?? this.hasPlayersAssigned,
@@ -6540,6 +6604,8 @@ class LeagueStatusData extends DataClass
           ? data.leagueSyncId.value
           : this.leagueSyncId,
       hasGroups: data.hasGroups.present ? data.hasGroups.value : this.hasGroups,
+      hasKnockout:
+          data.hasKnockout.present ? data.hasKnockout.value : this.hasKnockout,
       hasTeamsInGroups: data.hasTeamsInGroups.present
           ? data.hasTeamsInGroups.value
           : this.hasTeamsInGroups,
@@ -6557,6 +6623,7 @@ class LeagueStatusData extends DataClass
     return (StringBuffer('LeagueStatusData(')
           ..write('leagueSyncId: $leagueSyncId, ')
           ..write('hasGroups: $hasGroups, ')
+          ..write('hasKnockout: $hasKnockout, ')
           ..write('hasTeamsInGroups: $hasTeamsInGroups, ')
           ..write('hasMatches: $hasMatches, ')
           ..write('hasPlayersAssigned: $hasPlayersAssigned, ')
@@ -6566,14 +6633,15 @@ class LeagueStatusData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(leagueSyncId, hasGroups, hasTeamsInGroups,
-      hasMatches, hasPlayersAssigned, updatedAt);
+  int get hashCode => Object.hash(leagueSyncId, hasGroups, hasKnockout,
+      hasTeamsInGroups, hasMatches, hasPlayersAssigned, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is LeagueStatusData &&
           other.leagueSyncId == this.leagueSyncId &&
           other.hasGroups == this.hasGroups &&
+          other.hasKnockout == this.hasKnockout &&
           other.hasTeamsInGroups == this.hasTeamsInGroups &&
           other.hasMatches == this.hasMatches &&
           other.hasPlayersAssigned == this.hasPlayersAssigned &&
@@ -6583,6 +6651,7 @@ class LeagueStatusData extends DataClass
 class LeagueStatusCompanion extends UpdateCompanion<LeagueStatusData> {
   final Value<String> leagueSyncId;
   final Value<bool> hasGroups;
+  final Value<bool> hasKnockout;
   final Value<bool> hasTeamsInGroups;
   final Value<bool> hasMatches;
   final Value<bool> hasPlayersAssigned;
@@ -6591,6 +6660,7 @@ class LeagueStatusCompanion extends UpdateCompanion<LeagueStatusData> {
   const LeagueStatusCompanion({
     this.leagueSyncId = const Value.absent(),
     this.hasGroups = const Value.absent(),
+    this.hasKnockout = const Value.absent(),
     this.hasTeamsInGroups = const Value.absent(),
     this.hasMatches = const Value.absent(),
     this.hasPlayersAssigned = const Value.absent(),
@@ -6600,6 +6670,7 @@ class LeagueStatusCompanion extends UpdateCompanion<LeagueStatusData> {
   LeagueStatusCompanion.insert({
     required String leagueSyncId,
     this.hasGroups = const Value.absent(),
+    this.hasKnockout = const Value.absent(),
     this.hasTeamsInGroups = const Value.absent(),
     this.hasMatches = const Value.absent(),
     this.hasPlayersAssigned = const Value.absent(),
@@ -6609,6 +6680,7 @@ class LeagueStatusCompanion extends UpdateCompanion<LeagueStatusData> {
   static Insertable<LeagueStatusData> custom({
     Expression<String>? leagueSyncId,
     Expression<bool>? hasGroups,
+    Expression<bool>? hasKnockout,
     Expression<bool>? hasTeamsInGroups,
     Expression<bool>? hasMatches,
     Expression<bool>? hasPlayersAssigned,
@@ -6618,6 +6690,7 @@ class LeagueStatusCompanion extends UpdateCompanion<LeagueStatusData> {
     return RawValuesInsertable({
       if (leagueSyncId != null) 'league_sync_id': leagueSyncId,
       if (hasGroups != null) 'has_groups': hasGroups,
+      if (hasKnockout != null) 'has_knockout': hasKnockout,
       if (hasTeamsInGroups != null) 'has_teams_in_groups': hasTeamsInGroups,
       if (hasMatches != null) 'has_matches': hasMatches,
       if (hasPlayersAssigned != null)
@@ -6630,6 +6703,7 @@ class LeagueStatusCompanion extends UpdateCompanion<LeagueStatusData> {
   LeagueStatusCompanion copyWith(
       {Value<String>? leagueSyncId,
       Value<bool>? hasGroups,
+      Value<bool>? hasKnockout,
       Value<bool>? hasTeamsInGroups,
       Value<bool>? hasMatches,
       Value<bool>? hasPlayersAssigned,
@@ -6638,6 +6712,7 @@ class LeagueStatusCompanion extends UpdateCompanion<LeagueStatusData> {
     return LeagueStatusCompanion(
       leagueSyncId: leagueSyncId ?? this.leagueSyncId,
       hasGroups: hasGroups ?? this.hasGroups,
+      hasKnockout: hasKnockout ?? this.hasKnockout,
       hasTeamsInGroups: hasTeamsInGroups ?? this.hasTeamsInGroups,
       hasMatches: hasMatches ?? this.hasMatches,
       hasPlayersAssigned: hasPlayersAssigned ?? this.hasPlayersAssigned,
@@ -6654,6 +6729,9 @@ class LeagueStatusCompanion extends UpdateCompanion<LeagueStatusData> {
     }
     if (hasGroups.present) {
       map['has_groups'] = Variable<bool>(hasGroups.value);
+    }
+    if (hasKnockout.present) {
+      map['has_knockout'] = Variable<bool>(hasKnockout.value);
     }
     if (hasTeamsInGroups.present) {
       map['has_teams_in_groups'] = Variable<bool>(hasTeamsInGroups.value);
@@ -6678,6 +6756,7 @@ class LeagueStatusCompanion extends UpdateCompanion<LeagueStatusData> {
     return (StringBuffer('LeagueStatusCompanion(')
           ..write('leagueSyncId: $leagueSyncId, ')
           ..write('hasGroups: $hasGroups, ')
+          ..write('hasKnockout: $hasKnockout, ')
           ..write('hasTeamsInGroups: $hasTeamsInGroups, ')
           ..write('hasMatches: $hasMatches, ')
           ..write('hasPlayersAssigned: $hasPlayersAssigned, ')
@@ -7247,6 +7326,10 @@ class $TermsTable extends Terms with TableInfo<$TermsTable, Term> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {syncId},
+      ];
+  @override
   Term map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Term(
@@ -7275,14 +7358,8 @@ class Term extends DataClass implements Insertable<Term> {
   final int id;
   final String syncId;
   final String name;
-
-  /// نوع الشوط: عادي regular، إضافي extra، ركلات ترجيح penalty
   final String type;
-
-  /// الترتيب (الشوط الأول = 1، الثاني = 2 ...)
   final int order;
-
-  /// التاريخ في حال احتجنا تحديث الأشواط مستقبلًا
   final DateTime createdAt;
   const Term(
       {required this.id,
@@ -7615,6 +7692,10 @@ class $LeagueTermsTable extends LeagueTerms
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {leagueSyncId, termSyncId},
+      ];
   @override
   LeagueTerm map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -8033,6 +8114,10 @@ class $MatchTermsTable extends MatchTerms
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {syncId},
+      ];
   @override
   MatchTerm map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -11647,6 +11732,8 @@ typedef $$LeaguesTableCreateCompanionBuilder = LeaguesCompanion Function({
   Value<int> id,
   required String syncId,
   required String name,
+  Value<String?> nameOrganizer,
+  Value<bool?> canWatch,
   required String subscriptionPrice,
   Value<String?> type,
   Value<int?> organizerId,
@@ -11667,6 +11754,8 @@ typedef $$LeaguesTableUpdateCompanionBuilder = LeaguesCompanion Function({
   Value<int> id,
   Value<String> syncId,
   Value<String> name,
+  Value<String?> nameOrganizer,
+  Value<bool?> canWatch,
   Value<String> subscriptionPrice,
   Value<String?> type,
   Value<int?> organizerId,
@@ -11720,6 +11809,12 @@ class $$LeaguesTableFilterComposer extends Composer<_$Safirah, $LeaguesTable> {
 
   ColumnFilters<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get nameOrganizer => $composableBuilder(
+      column: $table.nameOrganizer, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get canWatch => $composableBuilder(
+      column: $table.canWatch, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get subscriptionPrice => $composableBuilder(
       column: $table.subscriptionPrice,
@@ -11808,6 +11903,13 @@ class $$LeaguesTableOrderingComposer
   ColumnOrderings<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get nameOrganizer => $composableBuilder(
+      column: $table.nameOrganizer,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get canWatch => $composableBuilder(
+      column: $table.canWatch, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get subscriptionPrice => $composableBuilder(
       column: $table.subscriptionPrice,
       builder: (column) => ColumnOrderings(column));
@@ -11875,6 +11977,12 @@ class $$LeaguesTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get nameOrganizer => $composableBuilder(
+      column: $table.nameOrganizer, builder: (column) => column);
+
+  GeneratedColumn<bool> get canWatch =>
+      $composableBuilder(column: $table.canWatch, builder: (column) => column);
 
   GeneratedColumn<String> get subscriptionPrice => $composableBuilder(
       column: $table.subscriptionPrice, builder: (column) => column);
@@ -11969,6 +12077,8 @@ class $$LeaguesTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<String> syncId = const Value.absent(),
             Value<String> name = const Value.absent(),
+            Value<String?> nameOrganizer = const Value.absent(),
+            Value<bool?> canWatch = const Value.absent(),
             Value<String> subscriptionPrice = const Value.absent(),
             Value<String?> type = const Value.absent(),
             Value<int?> organizerId = const Value.absent(),
@@ -11989,6 +12099,8 @@ class $$LeaguesTableTableManager extends RootTableManager<
             id: id,
             syncId: syncId,
             name: name,
+            nameOrganizer: nameOrganizer,
+            canWatch: canWatch,
             subscriptionPrice: subscriptionPrice,
             type: type,
             organizerId: organizerId,
@@ -12009,6 +12121,8 @@ class $$LeaguesTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             required String syncId,
             required String name,
+            Value<String?> nameOrganizer = const Value.absent(),
+            Value<bool?> canWatch = const Value.absent(),
             required String subscriptionPrice,
             Value<String?> type = const Value.absent(),
             Value<int?> organizerId = const Value.absent(),
@@ -12029,6 +12143,8 @@ class $$LeaguesTableTableManager extends RootTableManager<
             id: id,
             syncId: syncId,
             name: name,
+            nameOrganizer: nameOrganizer,
+            canWatch: canWatch,
             subscriptionPrice: subscriptionPrice,
             type: type,
             organizerId: organizerId,
@@ -14140,7 +14256,6 @@ typedef $$GroupTeamTableProcessedTableManager = ProcessedTableManager<
     GroupTeamData,
     PrefetchHooks Function()>;
 typedef $$MatchesTableCreateCompanionBuilder = MatchesCompanion Function({
-  Value<int> id,
   required String syncId,
   required String leagueSyncId,
   required String roundSyncId,
@@ -14157,9 +14272,9 @@ typedef $$MatchesTableCreateCompanionBuilder = MatchesCompanion Function({
   Value<String> status,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
+  Value<int> rowid,
 });
 typedef $$MatchesTableUpdateCompanionBuilder = MatchesCompanion Function({
-  Value<int> id,
   Value<String> syncId,
   Value<String> leagueSyncId,
   Value<String> roundSyncId,
@@ -14176,6 +14291,7 @@ typedef $$MatchesTableUpdateCompanionBuilder = MatchesCompanion Function({
   Value<String> status,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
+  Value<int> rowid,
 });
 
 class $$MatchesTableFilterComposer extends Composer<_$Safirah, $MatchesTable> {
@@ -14186,9 +14302,6 @@ class $$MatchesTableFilterComposer extends Composer<_$Safirah, $MatchesTable> {
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<String> get syncId => $composableBuilder(
       column: $table.syncId, builder: (column) => ColumnFilters(column));
 
@@ -14250,9 +14363,6 @@ class $$MatchesTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<String> get syncId => $composableBuilder(
       column: $table.syncId, builder: (column) => ColumnOrderings(column));
 
@@ -14316,9 +14426,6 @@ class $$MatchesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
   GeneratedColumn<String> get syncId =>
       $composableBuilder(column: $table.syncId, builder: (column) => column);
 
@@ -14391,7 +14498,6 @@ class $$MatchesTableTableManager extends RootTableManager<
           createComputedFieldComposer: () =>
               $$MatchesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
             Value<String> syncId = const Value.absent(),
             Value<String> leagueSyncId = const Value.absent(),
             Value<String> roundSyncId = const Value.absent(),
@@ -14408,9 +14514,9 @@ class $$MatchesTableTableManager extends RootTableManager<
             Value<String> status = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
           }) =>
               MatchesCompanion(
-            id: id,
             syncId: syncId,
             leagueSyncId: leagueSyncId,
             roundSyncId: roundSyncId,
@@ -14427,9 +14533,9 @@ class $$MatchesTableTableManager extends RootTableManager<
             status: status,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            rowid: rowid,
           ),
           createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
             required String syncId,
             required String leagueSyncId,
             required String roundSyncId,
@@ -14446,9 +14552,9 @@ class $$MatchesTableTableManager extends RootTableManager<
             Value<String> status = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
           }) =>
               MatchesCompanion.insert(
-            id: id,
             syncId: syncId,
             leagueSyncId: leagueSyncId,
             roundSyncId: roundSyncId,
@@ -14465,6 +14571,7 @@ class $$MatchesTableTableManager extends RootTableManager<
             status: status,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -14486,22 +14593,22 @@ typedef $$MatchesTableProcessedTableManager = ProcessedTableManager<
     Matche,
     PrefetchHooks Function()>;
 typedef $$RoundsTableCreateCompanionBuilder = RoundsCompanion Function({
-  Value<int> id,
   required String syncId,
   required String leagueSyncId,
   required String name,
   Value<String?> groupSyncId,
   required String roundType,
   Value<DateTime> createdAt,
+  Value<int> rowid,
 });
 typedef $$RoundsTableUpdateCompanionBuilder = RoundsCompanion Function({
-  Value<int> id,
   Value<String> syncId,
   Value<String> leagueSyncId,
   Value<String> name,
   Value<String?> groupSyncId,
   Value<String> roundType,
   Value<DateTime> createdAt,
+  Value<int> rowid,
 });
 
 class $$RoundsTableFilterComposer extends Composer<_$Safirah, $RoundsTable> {
@@ -14512,9 +14619,6 @@ class $$RoundsTableFilterComposer extends Composer<_$Safirah, $RoundsTable> {
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<String> get syncId => $composableBuilder(
       column: $table.syncId, builder: (column) => ColumnFilters(column));
 
@@ -14542,9 +14646,6 @@ class $$RoundsTableOrderingComposer extends Composer<_$Safirah, $RoundsTable> {
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<String> get syncId => $composableBuilder(
       column: $table.syncId, builder: (column) => ColumnOrderings(column));
 
@@ -14574,9 +14675,6 @@ class $$RoundsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
   GeneratedColumn<String> get syncId =>
       $composableBuilder(column: $table.syncId, builder: (column) => column);
 
@@ -14619,40 +14717,40 @@ class $$RoundsTableTableManager extends RootTableManager<
           createComputedFieldComposer: () =>
               $$RoundsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
             Value<String> syncId = const Value.absent(),
             Value<String> leagueSyncId = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String?> groupSyncId = const Value.absent(),
             Value<String> roundType = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
           }) =>
               RoundsCompanion(
-            id: id,
             syncId: syncId,
             leagueSyncId: leagueSyncId,
             name: name,
             groupSyncId: groupSyncId,
             roundType: roundType,
             createdAt: createdAt,
+            rowid: rowid,
           ),
           createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
             required String syncId,
             required String leagueSyncId,
             required String name,
             Value<String?> groupSyncId = const Value.absent(),
             required String roundType,
             Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
           }) =>
               RoundsCompanion.insert(
-            id: id,
             syncId: syncId,
             leagueSyncId: leagueSyncId,
             name: name,
             groupSyncId: groupSyncId,
             roundType: roundType,
             createdAt: createdAt,
+            rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -14998,6 +15096,7 @@ typedef $$LeagueStatusTableCreateCompanionBuilder = LeagueStatusCompanion
     Function({
   required String leagueSyncId,
   Value<bool> hasGroups,
+  Value<bool> hasKnockout,
   Value<bool> hasTeamsInGroups,
   Value<bool> hasMatches,
   Value<bool> hasPlayersAssigned,
@@ -15008,6 +15107,7 @@ typedef $$LeagueStatusTableUpdateCompanionBuilder = LeagueStatusCompanion
     Function({
   Value<String> leagueSyncId,
   Value<bool> hasGroups,
+  Value<bool> hasKnockout,
   Value<bool> hasTeamsInGroups,
   Value<bool> hasMatches,
   Value<bool> hasPlayersAssigned,
@@ -15029,6 +15129,9 @@ class $$LeagueStatusTableFilterComposer
 
   ColumnFilters<bool> get hasGroups => $composableBuilder(
       column: $table.hasGroups, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get hasKnockout => $composableBuilder(
+      column: $table.hasKnockout, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get hasTeamsInGroups => $composableBuilder(
       column: $table.hasTeamsInGroups,
@@ -15061,6 +15164,9 @@ class $$LeagueStatusTableOrderingComposer
   ColumnOrderings<bool> get hasGroups => $composableBuilder(
       column: $table.hasGroups, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get hasKnockout => $composableBuilder(
+      column: $table.hasKnockout, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get hasTeamsInGroups => $composableBuilder(
       column: $table.hasTeamsInGroups,
       builder: (column) => ColumnOrderings(column));
@@ -15090,6 +15196,9 @@ class $$LeagueStatusTableAnnotationComposer
 
   GeneratedColumn<bool> get hasGroups =>
       $composableBuilder(column: $table.hasGroups, builder: (column) => column);
+
+  GeneratedColumn<bool> get hasKnockout => $composableBuilder(
+      column: $table.hasKnockout, builder: (column) => column);
 
   GeneratedColumn<bool> get hasTeamsInGroups => $composableBuilder(
       column: $table.hasTeamsInGroups, builder: (column) => column);
@@ -15132,6 +15241,7 @@ class $$LeagueStatusTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> leagueSyncId = const Value.absent(),
             Value<bool> hasGroups = const Value.absent(),
+            Value<bool> hasKnockout = const Value.absent(),
             Value<bool> hasTeamsInGroups = const Value.absent(),
             Value<bool> hasMatches = const Value.absent(),
             Value<bool> hasPlayersAssigned = const Value.absent(),
@@ -15141,6 +15251,7 @@ class $$LeagueStatusTableTableManager extends RootTableManager<
               LeagueStatusCompanion(
             leagueSyncId: leagueSyncId,
             hasGroups: hasGroups,
+            hasKnockout: hasKnockout,
             hasTeamsInGroups: hasTeamsInGroups,
             hasMatches: hasMatches,
             hasPlayersAssigned: hasPlayersAssigned,
@@ -15150,6 +15261,7 @@ class $$LeagueStatusTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String leagueSyncId,
             Value<bool> hasGroups = const Value.absent(),
+            Value<bool> hasKnockout = const Value.absent(),
             Value<bool> hasTeamsInGroups = const Value.absent(),
             Value<bool> hasMatches = const Value.absent(),
             Value<bool> hasPlayersAssigned = const Value.absent(),
@@ -15159,6 +15271,7 @@ class $$LeagueStatusTableTableManager extends RootTableManager<
               LeagueStatusCompanion.insert(
             leagueSyncId: leagueSyncId,
             hasGroups: hasGroups,
+            hasKnockout: hasKnockout,
             hasTeamsInGroups: hasTeamsInGroups,
             hasMatches: hasMatches,
             hasPlayersAssigned: hasPlayersAssigned,

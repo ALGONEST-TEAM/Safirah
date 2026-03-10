@@ -1,10 +1,5 @@
 import 'authorization_keys.dart';
 
-/// مفاتيح الصلاحيات + تحويل الأدوار (Roles) القادمة من الـ API إلى صلاحيات.
-///
-/// بما أن الـ API يرجع Roles فقط، فنحتاج Mapping محلي.
-///
-/// مهم: عدّل هذا الملف حسب نظام الصلاحيات الحقيقي عندك.
 class AuthorizationPermissions {
   static const Map<String, Set<String>> roleToPermissions = {
     'organizer': {
@@ -16,6 +11,9 @@ class AuthorizationPermissions {
     'referee': {
       AuthorizationKeys.leagueView,
       AuthorizationKeys.matchManage,
+    },
+    'media': {
+      AuthorizationKeys.matchReport,
     },
   };
 

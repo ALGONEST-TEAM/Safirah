@@ -21,4 +21,8 @@ class LeagueTerms extends Table {
 
   DateTimeColumn get updatedAt =>
       dateTime().withDefault(currentDateAndTime)();
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {leagueSyncId, termSyncId}, // ✅ المفتاح المنطقي
+  ];
 }
