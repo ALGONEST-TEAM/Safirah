@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/widgets/secondary_app_bar_widget.dart';
-import '../../../../../core/database/safirah_database.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/widgets/auto_size_text_widget.dart';
-import '../../../../../injection.dart' as di;
 import '../widget/all_players_of_league_widget.dart';
 import '../widget/all_team_of_league_widget.dart';
 

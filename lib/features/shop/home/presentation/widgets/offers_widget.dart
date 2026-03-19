@@ -24,7 +24,7 @@ class OffersWidget extends StatelessWidget {
         autoPlayCurve: Curves.fastOutSlowIn,
         scrollDirection: Axis.horizontal,
         reverse: false,
-        enableInfiniteScroll: false,
+        enableInfiniteScroll: offers.length > 1,
         viewportFraction: 0.93,
         enlargeCenterPage: false,
         padEnds: true,

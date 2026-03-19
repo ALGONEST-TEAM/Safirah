@@ -76,45 +76,12 @@ class MatchTermsEventLocalDataSource {
     print('✅ تم إدخال بيانات الأشواط الأساسية (${defaultTerms.length})');
   }
 
-  //
-  // Future<List<LeagueTermModel>> initLeagueTerms({
-  //   required String leagueSyncId,
-  //   required List<String> selectedTermIds,
-  //   required int durationMinutes,
-  // }) async {
-  //   print(selectedTermIds.length);
-  //   await db.transaction(() async {
-  //     await (db.delete(db.leagueTerms)
-  //           ..where((t) => t.leagueSyncId.equals(leagueSyncId)))
-  //         .go();
-  //
-  //     await db.batch((batch) {
-  //       batch.insertAll(
-  //         db.leagueTerms,
-  //         selectedTermIds.map((termSyncId) {
-  //           return LeagueTermsCompanion.insert(
-  //             syncId: const Uuid().v7(),
-  //             leagueSyncId: leagueSyncId,
-  //             termSyncId: termSyncId,
-  //             durationMinutes: Value(durationMinutes),
-  //           );
-  //         }).toList(),
-  //       );
-  //     });
-  //   });
-  //   final leagueTermsRows = await (db.select(db.leagueTerms)
-  //         ..where((t) => t.leagueSyncId.equals(leagueSyncId)))
-  //       .get();
-  //
-  //   return leagueTermsRows.map(LeagueTermModel.fromEntity).toList();
-  //   // ignore: avoid_print
-  // }
   Future<List<LeagueTermModel>> initLeagueTerms({
     required String leagueSyncId,
     required List<String> selectedTermIds,
     required int durationMinutes,
   }) async {
-    print(selectedTermIds.length);
+  //  print(selectedTermIds.length);
     await db.transaction(() async {
       await (db.delete(db.leagueTerms)
             ..where((t) => t.leagueSyncId.equals(leagueSyncId)))
@@ -1390,40 +1357,63 @@ class MatchTermsEventLocalDataSource {
   }
 
   Future<AssistModel> addAssist(AssistModel assist) async {
-
     if (assist.goalSyncId.trim().isEmpty || assist.playerSyncId.trim().isEmpty) {
       throw LocalAppException.userMessage('بيانات الأسيست غير مكتملة');
     }
 
-    // 1) prevent duplicate assist for the same goal
+    // Ensure goal exists and fetch scoring player.
+    final goalRow = await (db.select(db.goals)
+          ..where((g) => g.syncId.equals(assist.goalSyncId))
+          ..limit(1))
+        .getSingleOrNull();
+    if (goalRow == null) {
+      throw LocalAppException.userMessage('لا يمكن إضافة أسيست: الهدف غير موجود');
+    }
+
+    // 0) prevent assister being the same player who scored the goal
+    if (goalRow.playerSyncId == assist.playerSyncId) {
+      throw LocalAppException.userMessage('لا يمكن إضافة أسيست لنفس اللاعب صاحب الهدف');
+    }
+
+    // Ensure both players exist and belong to the same team.
+    final scorerPlayer = await (db.select(db.players)
+          ..where((p) => p.syncId.equals(goalRow.playerSyncId))
+          ..limit(1))
+        .getSingleOrNull();
+    final assistPlayer = await (db.select(db.players)
+          ..where((p) => p.syncId.equals(assist.playerSyncId))
+          ..limit(1))
+        .getSingleOrNull();
+
+    if (scorerPlayer == null || assistPlayer == null) {
+      throw LocalAppException.userMessage('لا يمكن إضافة أسيست: بيانات اللاعبين غير مكتملة');
+    }
+
+    final scorerTeam = scorerPlayer.teamSyncId.trim();
+    final assistTeam = assistPlayer.teamSyncId.trim();
+
+    if (scorerTeam.isEmpty || assistTeam.isEmpty) {
+      throw LocalAppException.userMessage('لا يمكن إضافة أسيست: فريق اللاعب غير محدد');
+    }
+
+    if (scorerTeam != assistTeam) {
+      throw LocalAppException.userMessage('لا يمكن إضافة أسيست للاعب من فريق مختلف عن فريق صاحب الهدف');
+    }
+
+    // 1) prevent duplicate assist for the same goal (active only)
     final existingForGoal = await (db.select(db.assists)
-          ..where((a) =>
-              a.goalSyncId.equals(assist.goalSyncId)
-              )
+          ..where((a) => a.goalSyncId.equals(assist.goalSyncId) & a.status.equals('active'))
           ..limit(1))
         .getSingleOrNull();
     if (existingForGoal != null) {
-      throw LocalAppException.userMessage('لا يمكن إضافة أسيستين لهدف واحد');
+      throw LocalAppException.userMessage('لا يمكن إضافة أكثر من أسيست لنفس الهدف');
     }
 
-    // 2) prevent same assister from being linked to multiple goals
-    final existingForPlayer = await (db.select(db.assists)
-          ..where((a) =>
-              a.playerSyncId.equals(assist.playerSyncId) )
 
-          ..limit(1))
-        .getSingleOrNull();
-    if (existingForPlayer != null) {
-      throw LocalAppException.userMessage('لا يمكن للأسيست أن يرتبط بأكثر من هدف');
-    }
-
-     final insertedId =
-         await db.into(db.assists).insert(assist.toCompanionInsert());
-     final entity = await (db.select(db.assists)
-           ..where((a) => a.id.equals(insertedId)))
-         .getSingle();
-     return AssistModel.fromEntity(entity);
-   }
+    final insertedId = await db.into(db.assists).insert(assist.toCompanionInsert());
+    final entity = await (db.select(db.assists)..where((a) => a.id.equals(insertedId))).getSingle();
+    return AssistModel.fromEntity(entity);
+  }
 
   Future<Unit> substitutePlayer({
     required String matchSyncId,

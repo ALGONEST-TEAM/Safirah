@@ -7,6 +7,7 @@ import '../../../../../core/state/data_state.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
+import '../../../../authorization/persntaion/widgets/authorization_gate_hide_if_denied.dart';
 import '../riverpod/riverpod.dart';
 import '../widget/add_another_rule_for_league_widget.dart';
 
@@ -32,7 +33,6 @@ class _ShowRuleLeaguePageState extends ConsumerState<ShowRuleLeaguePage> {
   @override
   Widget build(BuildContext context) {
     final rulesAsync = ref.watch(leagueRulesStreamProvider(widget.leagueSyncId));
-    final refresh = ref.watch(leagueRulesRefreshProvider(widget.leagueSyncId));
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
@@ -86,25 +86,29 @@ class _ShowRuleLeaguePageState extends ConsumerState<ShowRuleLeaguePage> {
                     badgeColor: AppColors.secondaryColor,
                     icon: Icons.edit_note_outlined,
                     rules: customRules.map((e) => e.description).toList(),
-                    trailingAction: GestureDetector(
-                      onTap: () => navigateTo(
-                        context,
-                        AddAnotherRuleForLeagueWidget(
-                          leagueSyncId: widget.leagueSyncId,
+                    trailingAction: AuthorizationGateHideIfDenied(
+                      leagueSyncId: widget.leagueSyncId,
+                      permissionKey: 'league.edit',
+                      child: GestureDetector(
+                        onTap: () => navigateTo(
+                          context,
+                          AddAnotherRuleForLeagueWidget(
+                            leagueSyncId: widget.leagueSyncId,
+                          ),
                         ),
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 10.w, vertical: 6.h),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
-                          borderRadius: BorderRadius.circular(999.r),
-                        ),
-                        child: AutoSizeTextWidget(
-                          text: 'اضافة',
-                          fontSize: 10.5.sp,
-                          colorText: Colors.white,
-                          maxLines: 1,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 10.w, vertical: 6.h),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryColor,
+                            borderRadius: BorderRadius.circular(999.r),
+                          ),
+                          child: AutoSizeTextWidget(
+                            text: 'اضافة',
+                            fontSize: 10.5.sp,
+                            colorText: Colors.white,
+                            maxLines: 1,
+                          ),
                         ),
                       ),
                     ),
@@ -115,16 +119,7 @@ class _ShowRuleLeaguePageState extends ConsumerState<ShowRuleLeaguePage> {
           ),
         ),
       ),
-      floatingActionButton: refresh.status == RefreshStatus.loading
-          ? Padding(
-              padding: EdgeInsets.only(bottom: 10.h),
-              child: const SizedBox(
-                height: 26,
-                width: 26,
-                child: CircularProgressIndicator(color: AppColors.primaryColor),
-              ),
-            )
-          : null,
+
     );
   }
 }

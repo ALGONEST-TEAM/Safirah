@@ -93,6 +93,9 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
 
     final activeVarPlayerSyncId = ref.watch(activeVarPlayerProvider);
 
+    final bool shouldShowVarButton =
+        activeVarPlayerSyncId == playerSyncId && currentVar?.type == 'goal';
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -190,7 +193,7 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
                 ),
               ),
             12.w.horizontalSpace,
-            if (activeVarPlayerSyncId == playerSyncId)
+            if (shouldShowVarButton)
               GestureDetector(
                 onTap: () {
                   final currentVarEvent = ref.read(currentVarEventProvider);
@@ -199,8 +202,7 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            VarReviewPage(varEvent: currentVarEvent),
+                        builder: (_) => VarReviewPage(varEvent: currentVarEvent),
                       ),
                     ).then((_) {
                       notifier.resume(matchTermSyncId);

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/core/widgets/bottomNavbar/bottom_navigation_bar_of_mange_league_widget.dart';
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../data/models/league_highlights_model.dart';
+import '../pages/home_page.dart';
 import '../pages/leagues_stories_page.dart';
 import 'stories_card_widget.dart';
 
@@ -40,11 +42,19 @@ class StoriesListWidget extends StatelessWidget {
             imageUrl: isVideo ? '' : (cover?.url ?? ''),
             videoUrl: isVideo ? cover?.url : null,
             isVideo: isVideo,
-            onTap: () {
-             navigateTo(context, LeaguesStoriesViewer(
-               leagues: stories,
-               startIndex: index,   // يبدأ من اللي ضغطت عليه
-             ),);
+            onTap: () async{
+              final completed = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => LeaguesStoriesViewer(
+                    leagues: stories,
+                    startIndex: index,
+                  ),
+                ),
+              );
+
+              if (!context.mounted) return;
+
+
             },
           );
         },

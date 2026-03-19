@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import '../../../../core/constants/app_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../generated/l10n.dart';
+import '../../data/model/standings_model.dart';
+import '../riverpod/prediction_riverpod.dart';
 import 'standings_sort_widget.dart';
 
-class StandingsScopeCardWidget extends StatelessWidget {
-  final String scope;
+class StandingsScopeCardWidget extends ConsumerWidget {
+  final List<RankingPeriods> scopes;
 
   const StandingsScopeCardWidget({
     super.key,
-    required this.scope,
+    required this.scopes,
   });
 
   String _scopeLabel(BuildContext context, String scope) {
@@ -31,13 +33,17 @@ class StandingsScopeCardWidget extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,ref) {
+    final scope = ref.watch(standingsScopeProvider);
+
     return InkWell(
       onTap: (){
         scrollShowModalBottomSheetWidget(
           context: context,
           title: S.of(context).title,
-          page: const StandingsSortWidget(),
+          page: StandingsSortWidget(
+            scopes: scopes,
+          ),
         );
       },
       child: Card(
@@ -50,7 +56,7 @@ class StandingsScopeCardWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               AutoSizeTextWidget(
-                text: _scopeLabel(context, scope),
+                text: _scopeLabel(context, scope??scopes[0].name),
                 fontSize: 13.sp,
                 colorText: AppColors.fontColor,
               ),

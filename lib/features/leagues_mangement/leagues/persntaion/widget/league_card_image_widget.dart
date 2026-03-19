@@ -36,7 +36,6 @@ class LeagueCardImageWidget extends StatelessWidget {
     if (_isNetworkLogo) {
       return OnlineImagesWidget(
         imageUrl: leagueModel.logoPath!,
-        fit: BoxFit.fill,
         size: Size(double.infinity, 114.h),
         borderRadius: 8.r,
       );

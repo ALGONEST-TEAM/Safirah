@@ -340,7 +340,6 @@ class LeagueLocalDataSource {
   //         ..where((l) => l.isPrivate.equals(isPrivate))
   //         ..orderBy([
   //           (l) => OrderingTerm.desc(l.createdAt),
-  //
   //         ])
   //         ..limit(limit))
   //       .watch()
@@ -395,27 +394,32 @@ class LeagueLocalDataSource {
     final limit = safePage * safePageSize;
 
     final leaguesStream = (db.select(db.leagues)
-      ..where((l) => l.isPrivate.equals(isPrivate))
-      ..orderBy([(l) => OrderingTerm.desc(l.createdAt)])
-      ..limit(limit))
+          ..where((l) => l.isPrivate.equals(isPrivate))
+          ..orderBy([
+            // الأحدث أولاً
+            (l) => OrderingTerm.desc(l.createdAt),
+            // tie-breaker لتثبيت ترتيب العناصر عند تساوي createdAt
+          //  (l) => OrderingTerm.desc(l.id),
+          ])
+          ..limit(limit))
         .watch()
         .map((rows) => rows.map(LeagueModel.fromEntity).toList())
         .startWith(const <LeagueModel>[]); // ✅ مهم
 
     final metaStream = (db.select(db.paginationMeta)
-      ..where((t) => t.resource.equals(_leaguesResource))
-      ..where((t) => t.scope.equals(_scopeFromPrivacy(isPrivate)))
-      ..where((t) => t.key.isNull())
-      ..where((t) => t.parentKey.isNull())
-
-      ..limit(1))
+          ..where((t) => t.resource.equals(_leaguesResource))
+          ..where((t) => t.scope.equals(_scopeFromPrivacy(isPrivate)))
+          ..where((t) => t.key.isNull())
+          ..where((t) => t.parentKey.isNull())
+          ..limit(1))
         .watchSingleOrNull()
         .startWith(null); // ✅ مهم
 
-    return Rx.combineLatest2<List<LeagueModel>, PaginationMetaData?, PaginationModel<LeagueModel>>(
+    return Rx.combineLatest2<List<LeagueModel>, PaginationMetaData?,
+        PaginationModel<LeagueModel>>(
       leaguesStream,
       metaStream,
-          (rows, meta) {
+      (rows, meta) {
         final total = meta?.total ?? rows.length;
         final lastPage = meta?.lastPage ??
             (total == 0 ? 0 : ((total + safePageSize - 1) ~/ safePageSize));

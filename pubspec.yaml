@@ -81,7 +81,7 @@ dependencies:
   custom_refresh_indicator:
   connectivity_plus: ^6.1.0
   crypto:
-
+  v_story_viewer: ^2.1.2
   sms_autofill: ^2.4.1
   firebase_core:
 #  flutter_local_notifications:
@@ -93,6 +93,7 @@ dependencies:
   video_player:
   chewie:
   uuid: ^4.5.1
+  flutter_story_presenter:
 
 dev_dependencies:
   flutter_test:

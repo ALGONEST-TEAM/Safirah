@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/state/check_state_in_post_api_data_widget.dart';
 import 'package:safirah/features/leagues_mangement/team_and_player/presntation/widget/tab_category_header_widget.dart';
 import '../../../../../core/helpers/flash_bar_helper.dart';
-import '../../../../../core/helpers/navigateTo.dart';
+import '../../../../../core/state/state.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/buttons/default_button.dart';
 import '../../../leagues/persntaion/page/details_league_widget.dart';
@@ -12,6 +12,7 @@ import '../../../leagues/persntaion/riverpod/riverpod.dart';
 import '../../data/model/team_model.dart';
 import '../state_mangment/riverpod.dart';
 import 'tab_category_body_widget.dart';
+import 'package:safirah/core/widgets/bottomNavbar/bottom_navigation_bar_of_mange_league_widget.dart';
 
 class CategoryTabWidget extends ConsumerStatefulWidget {
   const CategoryTabWidget(
@@ -75,16 +76,39 @@ class _CategoryTabWidgetState extends ConsumerState<CategoryTabWidget>
               state: draftState,
               functionSuccess: () {
                 ref.read(leagueStatusUpdateProvider.notifier).update(
-                    leagueSyncId:widget. leagueSyncId, hasPlayersAssigned: true);
-                // ref.read(leagueStatusProvider(widget.leagueSyncId).notifier).refresh();
-                navigateTo(
-                    context,
-                    DetailsLeagueWidget(
+                    leagueSyncId: widget.leagueSyncId,
+                    hasPlayersAssigned: true);
+
+                // ✅ حل نهائي:
+                // 1) أعد المستخدم لجذر التطبيق (BottomNavigation) بدل أن تكون Details هي آخر route.
+                // 2) اضبط تبويب الدوريات (index=2).
+                // 3) افتح تفاصيل الدوري فوق الجذر.
+                // عند الضغط على رجوع من DetailsLeagueWidget سيعود لتبويب الدوريات (LeaguesListWidget)
+                // بدل الخروج من التطبيق.
+
+                // اضبط التبويب قبل الانتقال
+                ref.read(activeIndexProvider.notifier).state = 2;
+
+                // اذهب للجذر (BottomNavigation) وامسح مسار القرعة
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (_) => const BottomNavigationBarOfMangeLeagueWidget(),
+                  ),
+                  (route) => false,
+                );
+
+                // افتح التفاصيل فوق الجذر
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => DetailsLeagueWidget(
                       leagueSyncId: widget.leagueSyncId,
-                    ));
+                    ),
+                  ),
+                );
               },
               bottonWidget: DefaultButtonWidget(
                 text: 'القرعة',
+                isLoading: draftState.stateData == States.loading,
                 onPressed: widget.numOfLeaguePlayerWithOutCate != 0
                     ? () {
                   print(widget.leagueSyncId);

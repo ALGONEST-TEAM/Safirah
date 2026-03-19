@@ -100,7 +100,7 @@ class MatchesRepository {
       }
 
 
-       print('API rounds=${remoteRounds.length}');
+   //    print('API rounds=${remoteRounds[0].groups[0].matches[0].homeTeam?.logoUrl}');
 
       await local.upsertLeagueRoundsFromApiOneResponse(
         leagueSyncId: leagueSyncId,
@@ -124,7 +124,6 @@ class MatchesRepository {
           refereeSyncId: refereeSyncId,
           mediaSyncId: mediaSyncId,
         );
-   //     print("jjh" + matches.mediaSyncId!);
         await syncService.enqueueOperation(
           entityType: 'match',
           operation: SyncService.operationUpdate,
@@ -132,7 +131,7 @@ class MatchesRepository {
         );
 
         try {
-          di.sl<SyncTrigger>().syncIfOnline();
+        await  di.sl<SyncTrigger>().syncIfOnline();
         } on DioException catch (e) {
           throw SyncDioException.from(e);
         }

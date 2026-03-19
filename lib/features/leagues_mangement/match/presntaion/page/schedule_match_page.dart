@@ -7,6 +7,7 @@ import 'package:safirah/core/widgets/buttons/default_button.dart';
 import '../../../../../core/state/state.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../core/widgets/text_form_field.dart';
 import '../../../../authorization/persntaion/riverpod/riverpod.dart';
 import '../../../leagues/persntaion/widget/date_pickers.dart';
@@ -59,14 +60,8 @@ class _ScheduleMatchPageState extends ConsumerState<ScheduleMatchPage> {
     final scheduleState = ref.watch(scheduleMatchProvider);
     ref.watch(usersHasRoleRefreshProvider(widget.leagueSyncId));
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(color: Colors.white),
-        title: const AutoSizeTextWidget(
-          text: 'جدولة المباراة',
-          colorText: Colors.white,
-        ),
-        centerTitle: true,
-        backgroundColor: AppColors.secondaryColor,
+      appBar: SecondaryAppBarWidget(
+        title: 'جدولة المباراة',
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(vertical: 8.0.h, horizontal: 8.w),
@@ -185,7 +180,7 @@ class _ScheduleMatchPageState extends ConsumerState<ScheduleMatchPage> {
                 Navigator.pop(context);
               },
               bottonWidget: DefaultButtonWidget(
-                text: '📅  جدولة المباراة ',
+                text: '  جدولة  ',
                 isLoading: scheduleState.stateData == States.loading,
                 onPressed: () async {
                   if (_selectedDate == null || _selectedTime == null) {

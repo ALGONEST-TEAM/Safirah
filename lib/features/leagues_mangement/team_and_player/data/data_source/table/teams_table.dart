@@ -12,7 +12,6 @@ class Teams extends Table {
   TextColumn get logoUrl => text().named('logo_url').nullable()();
   TextColumn get status => text().withDefault(const Constant('placeholder'))();
   TextColumn get syncId => text()();
-
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 

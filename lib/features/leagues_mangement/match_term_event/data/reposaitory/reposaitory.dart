@@ -86,7 +86,7 @@ class MatchTermsEventRepository {
         );
 
         try {
-          di.sl<SyncTrigger>().syncIfOnlineInBackground();
+          await  di.sl<SyncTrigger>().syncIfOnline();
         } on DioException catch (e) {
           throw SyncDioException.from(e);
         }
@@ -340,22 +340,34 @@ class MatchTermsEventRepository {
 
   Future<Either<DioException, AssistModel>> addAssist(
       AssistModel assist) async {
-    try {
+    return RepoGuard.run<AssistModel>(
+        allowSyncErrorsToBubble: true,
+        action: () async {
       final result = await local.addAssist(assist);
       await syncService.enqueueOperation(
           entityType: 'assist',
           operation: SyncService.operationCreate,
           payload: assist.toJson());
       di.sl<SyncTrigger>().syncIfOnlineInBackground();
-      return Right(result);
-    } catch (e) {
-      return Left(
-        DioException(
-          requestOptions: RequestOptions(path: '/match-events/add-assist'),
-          error: e,
-        ),
-      );
-    }
+      return result;
+
+        });
+    // try {
+    //   final result = await local.addAssist(assist);
+    //   await syncService.enqueueOperation(
+    //       entityType: 'assist',
+    //       operation: SyncService.operationCreate,
+    //       payload: assist.toJson());
+    //   di.sl<SyncTrigger>().syncIfOnlineInBackground();
+    //   return Right(result);
+    // } catch (e) {
+    //   return Left(
+    //     DioException(
+    //       requestOptions: RequestOptions(path: '/match-events/add-assist'),
+    //       error: e,
+    //     ),
+    //   );
+    // }
   }
 
   Future<Either<DioException, PlayerStats>> getPlayerStats({

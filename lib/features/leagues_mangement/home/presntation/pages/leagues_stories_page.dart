@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:safirah/core/widgets/auto_size_text_widget.dart';
-import 'package:story_view/story_view.dart';
+import 'package:v_story_viewer/v_story_viewer.dart';
 
 import '../../data/models/league_highlights_model.dart';
 
@@ -20,144 +18,274 @@ class LeaguesStoriesViewer extends StatefulWidget {
 }
 
 class _LeaguesStoriesViewerState extends State<LeaguesStoriesViewer> {
-  final StoryController _controller = StoryController();
-  late int _leagueIndex;
-  late List<StoryItem> _items;
+  late final List<VStoryGroup> _storyGroups;
 
-  LeagueHighlightsModel get _league => widget.leagues[_leagueIndex];
+  // Header data shown فوق الـ viewer (يثبت ولا يختفي عند الضغط)
+  late VStoryUser _headerUser;
+  DateTime? _headerStoryCreatedAt;
+  int _currentGroupIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _leagueIndex = widget.startIndex;
-    _items = _buildItemsForLeague(_league);
+    _storyGroups = _mapLeaguesToStoryGroups(widget.leagues);
+    _currentGroupIndex = widget.startIndex.clamp(0, _storyGroups.length - 1);
+    _headerUser = _storyGroups[_currentGroupIndex].user;
+    // مبدئيًا خذ وقت أول ستوري للمجموعة المختارة
+    _headerStoryCreatedAt = _storyGroups[_currentGroupIndex].sortedStories.first.createdAt;
   }
 
-  List<StoryItem> _buildItemsForLeague(LeagueHighlightsModel league) {
-    final items = <StoryItem>[];
+  void _syncHeaderIfChanged({required VStoryGroup group, required VStoryItem item}) {
+    final newIndex = _storyGroups.indexWhere((g) => g.user.id == group.user.id);
+    if (!mounted) return;
 
-    for (final h in league.highlights) {
-      for (final m in h.media) {
-        if (m.type == 'video') {
-          items.add(
-            StoryItem.pageVideo(
-              m.url,
-              controller: _controller,
-              caption: Text(
-                h.title,
-                style: const TextStyle(color: Colors.white),
-                textAlign: TextAlign.center,
+    final nextUser = group.user;
+    final nextCreatedAt = item.createdAt;
+
+    if (newIndex == -1) {
+      // ما نتوقع يصير، لكن نحافظ على تحديث الوقت لو تغيّر
+      if (_headerStoryCreatedAt != nextCreatedAt) {
+        setState(() => _headerStoryCreatedAt = nextCreatedAt);
+      }
+      return;
+    }
+
+    final shouldUpdateUser = newIndex != _currentGroupIndex;
+    final shouldUpdateTime = _headerStoryCreatedAt != nextCreatedAt;
+
+    if (!shouldUpdateUser && !shouldUpdateTime) return;
+
+    setState(() {
+      if (shouldUpdateUser) {
+        _currentGroupIndex = newIndex;
+        _headerUser = nextUser;
+      }
+      if (shouldUpdateTime) {
+        _headerStoryCreatedAt = nextCreatedAt;
+      }
+    });
+  }
+
+  String _formatRelativeTime(DateTime? dateTime) {
+    if (dateTime == null) return '';
+
+    final now = DateTime.now();
+    final diff = now.difference(dateTime);
+
+    if (diff.inSeconds < 60) return 'الآن';
+    if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} دقيقة';
+    if (diff.inHours < 24) return 'منذ ${diff.inHours} ساعة';
+    if (diff.inDays < 7) return 'منذ ${diff.inDays} يوم';
+
+    final weeks = (diff.inDays / 7).floor();
+    if (weeks < 4) return 'منذ $weeks أسبوع';
+
+    final months = (diff.inDays / 30).floor();
+    if (months < 12) return 'منذ $months شهر';
+
+    final years = (diff.inDays / 365).floor();
+    return 'منذ $years سنة';
+  }
+
+  Widget _overlayHeader(BuildContext context) {
+    final imageUrl = _headerUser.imageUrl.trim();
+    final timeText = _formatRelativeTime(_headerStoryCreatedAt);
+
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new,
+                  color: Colors.white, size: 20),
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+            ClipOval(
+              child: SizedBox(
+                width: 36,
+                height: 36,
+                child: imageUrl.isEmpty
+                    ? Container(
+                        color: Colors.grey.shade700,
+                        child: const Icon(Icons.person,
+                            color: Colors.white, size: 20),
+                      )
+                    : Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        // بدون أي Loader أثناء التحميل
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const SizedBox.expand();
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.shade700,
+                            child: const Icon(Icons.person,
+                                color: Colors.white, size: 20),
+                          );
+                        },
+                      ),
               ),
             ),
-          );
-        } else {
-          items.add(
-            StoryItem.pageImage(
-              url: m.url,
-              controller: _controller,
-              caption: Text(
-                h.title,
-                style: const TextStyle(color: Colors.white),
-                textAlign: TextAlign.center,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _headerUser.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (timeText.isNotEmpty)
+                    Text(
+                      timeText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 12,
+                      ),
+                    ),
+                ],
               ),
             ),
-          );
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.white),
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  DateTime _parsePublishedAt(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return DateTime.now();
+    }
+
+    final parsed = DateTime.tryParse(value);
+    return parsed?.toLocal() ?? DateTime.now();
+  }
+
+  List<VStoryGroup> _mapLeaguesToStoryGroups(
+      List<LeagueHighlightsModel> leagues,
+      ) {
+    return leagues.asMap().entries.map((entry) {
+      final leagueIndex = entry.key;
+      final league = entry.value;
+
+      final stories = <VStoryItem>[];
+
+      for (final highlight in league.highlights) {
+        final title = highlight.title.trim();
+        final createdAt = _parsePublishedAt(highlight.publishedAt);
+
+        for (final media in highlight.media) {
+          final url = media.url.trim();
+          if (url.isEmpty) continue;
+
+          if (media.type.toLowerCase() == 'video') {
+            stories.add(
+              VVideoStory(
+                url: url,
+                caption: title.isEmpty ? null : title,
+                createdAt: createdAt,
+                isSeen: false,
+              ),
+            );
+          } else {
+            stories.add(
+              VImageStory(
+                url: url,
+                caption: title.isEmpty ? null : title,
+                createdAt: createdAt,
+                isSeen: false,
+                duration: const Duration(seconds: 5),
+              ),
+            );
+          }
         }
       }
-    }
 
-    if (items.isEmpty) {
-      items.add(
-        StoryItem.text(
-          title: 'لا توجد وسائط',
-          backgroundColor: Colors.black,
+      if (stories.isEmpty) {
+        stories.add(
+          VTextStory(
+            text: 'لا توجد وسائط',
+            backgroundColor: Colors.black,
+            textStyle: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
+            createdAt: DateTime.now(),
+            isSeen: false,
+          ),
+        );
+      }
+
+      return VStoryGroup(
+        user: VStoryUser(
+          id: 'league_$leagueIndex',
+          name: league.name,
+          imageUrl: (league.logoUrl != null && league.logoUrl!.isNotEmpty)
+              ? league.logoUrl!
+              : '',
         ),
+        stories: stories,
       );
-    }
-
-    return items;
+    }).toList();
   }
 
-  void _goNextLeagueOrClose() {
-    if (_leagueIndex < widget.leagues.length - 1) {
-      setState(() {
-        _leagueIndex++;
-        _items = _buildItemsForLeague(_league);
-      });
-      _controller.play();
-    } else {
-      Navigator.pop(context);
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    final lang = Localizations
-        .localeOf(context)
-        .languageCode;
-    final isRtl = ['ar', 'en'].contains(lang);
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              StoryView(
-                storyItems: _items,
-                controller: _controller,
-                repeat: false,
-                progressPosition: ProgressPosition.top,
-                indicatorHeight: IndicatorHeight.medium,
-                onComplete: _goNextLeagueOrClose,
-                onVerticalSwipeComplete: (direction) {
-                  if (direction == Direction.down) Navigator.pop(context);
-                },
-              ),
-              Directionality(
-                textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
-                child: Positioned(
-                  top: 18.h,
-                  left: 12,
-                  right: 12,
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.white12,
-                        backgroundImage: _league.logoUrl == null
-                            ? null
-                            : NetworkImage(_league.logoUrl!),
-                        child: _league.logoUrl == null
-                            ? const Icon(Icons.sports_soccer,
-                            color: Colors.white)
-                            : null,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: AutoSizeTextWidget(
-                          text: _league.name,
-                          fontSize: 13.4.sp,
-                          maxLines: 2,
-                          colorText: Colors.white,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          VStoryViewer(
+            key: ValueKey(
+                'story_viewer_${widget.startIndex}_${widget.leagues.length}'),
+            storyGroups: _storyGroups,
+            initialGroupIndex: widget.startIndex,
+            onProgress: (group, item, progress) {
+              _syncHeaderIfChanged(group: group, item: item);
+            },
+            onLoad: (group, item) {
+              _syncHeaderIfChanged(group: group, item: item);
+            },
+            config: VStoryConfig(
+              defaultDuration: const Duration(seconds: 5),
+              progressColor: Colors.white,
+              progressBackgroundColor: Colors.white24,
+              enableCaching: true,
+              enablePreloading: true,
+              showReplyField: false,
+              // نلغي هيدر الباكيج لأنه يختفي عند لمس الشاشة
+              showHeader: false,
+              maxCacheSize: 300 * 1024 * 1024,
+              maxCacheAge: const Duration(days: 7),
+              maxCacheObjects: 80,
+            ),
           ),
-        ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _overlayHeader(context),
+          ),
+        ],
       ),
     );
   }

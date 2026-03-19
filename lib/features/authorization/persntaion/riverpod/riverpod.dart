@@ -103,7 +103,7 @@ StreamProvider.family<List<UserHasRoleModel>, UsersRoleParam>((ref, param) {
   );
 });
 
-final usersHasRoleRefreshProvider = StateNotifierProvider.family<
+final usersHasRoleRefreshProvider = StateNotifierProvider.family.autoDispose<
     UsersHasRoleRefreshNotifier,
     RefreshState,
     String>((ref, leagueSyncId) {

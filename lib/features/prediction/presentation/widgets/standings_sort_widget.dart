@@ -5,10 +5,14 @@ import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/radio_widget.dart';
 import '../../../../../../generated/l10n.dart';
+import '../../data/model/standings_model.dart';
 import '../riverpod/prediction_riverpod.dart';
 
 class StandingsSortWidget extends ConsumerWidget {
+  final List<RankingPeriods> scopes;
+
   const StandingsSortWidget({
+    required this.scopes,
     super.key,
   });
 
@@ -16,21 +20,21 @@ class StandingsSortWidget extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final currentScope = ref.watch(standingsScopeProvider);
 
-    final options = [
-      {'scope': 'week', 'label': S.of(context).weekly},
-      {'scope': 'month', 'label': S.of(context).monthly},
-      {'scope': 'season', 'label': S.of(context).season},
-    ];
+    // final scopes = [
+    //   {'scope': 'week', 'label': S.of(context).weekly},
+    //   {'scope': 'month', 'label': S.of(context).monthly},
+    //   {'scope': 'season', 'label': S.of(context).season},
+    // ];
 
     return ListView.separated(
       shrinkWrap: true,
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      itemCount: options.length,
+      itemCount: scopes.length,
       separatorBuilder: (_, __) => SizedBox(height: 10.h),
       itemBuilder: (context, index) {
-        final opt = options[index];
-        final scope = opt['scope'] as String;
-        final label = opt['label'] as String;
+        final opt = scopes[index];
+        final scope = opt.name ;
+        final label = opt.label;
 
         final selected = currentScope == scope;
         return InkWell(

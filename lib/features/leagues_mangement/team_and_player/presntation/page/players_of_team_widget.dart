@@ -6,12 +6,10 @@ import 'package:safirah/core/widgets/secondary_app_bar_widget.dart';
 import 'package:safirah/features/leagues_mangement/team_and_player/data/model/team_model.dart';
 import 'package:safirah/features/leagues_mangement/team_and_player/presntation/page/team_editor_page.dart';
 import 'package:safirah/features/leagues_mangement/team_and_player/presntation/widget/all_players_of_league_widget.dart';
-
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
-import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/buttons/default_button.dart';
-import '../../../match_term_event/presntation/widget/player_tile_with_event_widget.dart';
+import '../../../../authorization/persntaion/widgets/authorization_gate_hide_if_denied.dart';
 import '../state_mangment/riverpod.dart';
 
 class PlayersOfTeamWidget extends ConsumerWidget {
@@ -51,14 +49,18 @@ class PlayersOfTeamWidget extends ConsumerWidget {
                   ),
                 ),
               ),
-              DefaultButtonWidget(
-                text: 'تعديل بيانات الفريق',
-                onPressed: () {
-                 navigateTo(context, TeamEditorPage(
-                   leagueSyncId: leagueSyncId,
-                   team: teamModel,
-                 ));
-                },
+              AuthorizationGateHideIfDenied(
+                leagueSyncId: leagueSyncId,
+                permissionKey: 'league.edit',
+                child: DefaultButtonWidget(
+                  text: 'تعديل بيانات الفريق',
+                  onPressed: () {
+                   navigateTo(context, TeamEditorPage(
+                     leagueSyncId: leagueSyncId,
+                     team: teamModel,
+                   ));
+                  },
+                ),
               ),
             ],
           ),

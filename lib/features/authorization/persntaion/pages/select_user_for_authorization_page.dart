@@ -6,6 +6,7 @@ import 'package:safirah/features/leagues_mangement/team_and_player/presntation/w
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../core/widgets/text_form_field.dart';
 import '../../data/model/authorization_models.dart';
@@ -37,16 +38,8 @@ class _SelectUserForAuthorizationPageState
     final searchState = ref.watch(searchUserProvider(query));
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.secondaryColor,
-        leading: const BackButton(
-          color: Colors.white,
-        ),
-        title: const AutoSizeTextWidget(
-          text: "منظمين الدوري",
-          colorText: Colors.white,
-        ),
-        centerTitle: true,
+      appBar: SecondaryAppBarWidget(
+        title: 'إضافة منظم',
       ),
       body: Padding(
         padding: EdgeInsets.all(12.0.w),
@@ -67,7 +60,7 @@ class _SelectUserForAuthorizationPageState
               child: query.isEmpty
                   ? Center(
                       child: AutoSizeTextWidget(
-                        text: 'قم بالبحث عن لاعبين',
+                        text: 'قم بالبحث عن مستخدمين لإضافتهم كمنظمين',
                         colorText: AppColors.secondaryColor,
                         fontSize: 16,
                       ),

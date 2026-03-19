@@ -693,7 +693,37 @@ class KnockoutGeneratorLocalDataSource {
     if (matches.isEmpty) return null;
     if (matches.any((m) => m.status != 'finished')) return null;
 
-   return await createNextKnockoutRoundFromFinished(
+    final finishedCount = matches.length;
+
+    // ✅ Extra idempotency: if any knockout round exists with fewer matches,
+    // the next round was already created.
+    final knockoutRounds = await (db.select(db.rounds)
+          ..where((r) =>
+              r.leagueSyncId.equals(leagueSyncId) &
+              r.roundType.equals('knockout')))
+        .get();
+
+    for (final r in knockoutRounds) {
+      if (r.syncId == finishedRoundSyncId) continue;
+      final otherMatches = await (db.select(db.matches)
+            ..where((m) => m.roundSyncId.equals(r.syncId)))
+          .get();
+      if (otherMatches.isEmpty) continue;
+      if (otherMatches.length < finishedCount) return null;
+    }
+
+    // ...keep existing createdAt-based guard (optional) or remove it...
+    final existingNext = await (db.select(db.rounds)
+          ..where((r) => r.leagueSyncId.equals(leagueSyncId))
+          ..where((r) => r.roundType.equals('knockout'))
+          ..where((r) =>
+              r.createdAt.isBiggerThanValue(finishedRoundEntity.createdAt))
+          ..orderBy([(r) => OrderingTerm.asc(r.createdAt)])
+          ..limit(1))
+        .getSingleOrNull();
+    if (existingNext != null) return null;
+
+    return await createNextKnockoutRoundFromFinished(
       leagueSyncId: leagueSyncId,
       finishedRoundSyncId: finishedRoundSyncId,
     );
@@ -912,10 +942,12 @@ class KnockoutGeneratorLocalDataSource {
   }
 // -------- Locks: First Knockout (مرة لكل League) --------
   Future<bool> _isFirstKnockoutLocked(String leagueSyncId) async {
+
     final row = await (db.select(db.leagueKnockoutFlags)
       ..where((t) => t.leagueSyncId.equals(leagueSyncId)))
         .getSingleOrNull();
     return row?.firstKnockoutCreated ?? false;
+
   }
 
   Future<void> _lockFirstKnockout(String leagueSyncId) async {
@@ -993,61 +1025,84 @@ class KnockoutGeneratorLocalDataSource {
       // =========================
       // KNOCKOUT => Generate Next KO (ممكن أكثر من جولة)
       // =========================
-      // سابقاً: كانت الدالة تنشئ جولة واحدة كحد أقصى في كل استدعاء.
-      // الآن: نكرر طالما يمكن التقدم (مثلاً إذا كانت نتائج دور 16 و8 جاهزة بالفعل).
-
       const int maxSteps = 10; // أمان ضد أي loop غير متوقع
       for (var step = 0; step < maxSteps; step++) {
-        // 2) نحتاج نعرف آخر Round Knockout مكتمل
         final finishedRoundSyncId =
             await _getLastFinishedKnockoutRoundSyncId(leagueSyncId);
         if (finishedRoundSyncId == null) return;
 
-        // 3) lock per finishedRoundSyncId
         final hasLock = await _hasNextLock(
           leagueSyncId: leagueSyncId,
           finishedRoundSyncId: finishedRoundSyncId,
         );
         if (hasLock) return;
 
-        // 4) أنشئ التالي (لو ينطبق)
         final nextRound = await checkAndCreateNextKnockoutRoundIfNeeded(
           leagueSyncId,
           finishedRoundSyncId,
         );
 
-        // إذا لا يوجد شيء جديد لإنشائه -> توقف.
         if (nextRound == null) return;
 
-        // 5) اقفل بعد النجاح
         await _addNextLock(
           leagueSyncId: leagueSyncId,
           finishedRoundSyncId: finishedRoundSyncId,
         );
 
-        // آخر شيء تم إنشاؤه هو النتيجة
         result = nextRound;
-        // ثم نكمل loop: ربما الجولة الجديدة منتهية (مثلاً synced من السيرفر) ويمكن إنشاء اللي بعدها
       }
     });
 
     return result;
   }
+
+  /// اختيار الجولة المنتهية للتقدم منها بدون الاعتماد على createdAt.
+  ///
+  /// الفكرة:
+  /// - كل تقدم يقلل عدد مباريات الجولة (مثلاً 4 -> 2 -> 1)
+  /// - إذا كانت هناك جولة أصغر (بعدد مباريات أقل) موجودة بالفعل، فهذا يعني أنه تم التقدم بالفعل
+  ///   من الجولة الأكبر.
+  ///
+  /// بالتالي نختار: جولة Knockout "منتهية" ولا يوجد في نفس الدوري جولة Knockout بعدد مباريات أقل.
   Future<String?> _getLastFinishedKnockoutRoundSyncId(String leagueSyncId) async {
-    // جلب كل جولات knockout
     final rounds = await (db.select(db.rounds)
-      ..where((r) => r.leagueSyncId.equals(leagueSyncId) & r.roundType.equals('knockout'))
-      ..orderBy([(r) => OrderingTerm.desc(r.createdAt)]))
-        .get();
+          ..where((r) =>
+              r.leagueSyncId.equals(leagueSyncId) &
+              r.roundType.equals('knockout'))).get();
+
+    if (rounds.isEmpty) return null;
 
     for (final r in rounds) {
       final matches = await (db.select(db.matches)
-        ..where((m) => m.roundSyncId.equals(r.syncId)))
+            ..where((m) => m.roundSyncId.equals(r.syncId)))
           .get();
 
       if (matches.isEmpty) continue;
       final allFinished = matches.every((m) => m.status == 'finished');
-      if (allFinished) return r.syncId;
+      if (!allFinished) continue;
+
+      final finishedCount = matches.length;
+
+      // هل يوجد round آخر بعدد مباريات أقل؟ إذا نعم -> هذا round تم التقدم منه مسبقاً.
+      var hasSmallerRound = false;
+      for (final other in rounds) {
+        if (other.syncId == r.syncId) continue;
+
+        final otherMatches = await (db.select(db.matches)
+              ..where((m) => m.roundSyncId.equals(other.syncId)))
+            .get();
+
+        if (otherMatches.isEmpty) continue;
+
+        if (otherMatches.length < finishedCount) {
+          hasSmallerRound = true;
+          break;
+        }
+      }
+
+      if (!hasSmallerRound) {
+        return r.syncId;
+      }
     }
 
     return null;

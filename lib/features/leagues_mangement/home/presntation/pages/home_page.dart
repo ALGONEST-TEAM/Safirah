@@ -6,7 +6,6 @@ import 'package:safirah/core/constants/app_icons.dart';
 import 'package:safirah/core/helpers/navigateTo.dart';
 import 'package:safirah/core/widgets/logo_shimmer_widget.dart';
 import 'package:safirah/features/leagues_mangement/leagues/persntaion/page/create_league_page.dart';
-
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
@@ -19,6 +18,7 @@ import '../../../../user/presentation/pages/log_in_page.dart';
 import '../riverpod/home_riverpod.dart';
 import '../widgets/banners_widget.dart';
 import '../widgets/latest_news_card_widget.dart';
+import '../widgets/short_card_of_news_widget.dart';
 import '../widgets/stories_list_widget.dart';
 import '../widgets/upcoming_match_card_widget.dart';
 import 'latest_news_page.dart';
@@ -32,20 +32,20 @@ class HomePages extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldColor,
-      floatingActionButton: FloatingActionButton.extended(
-        tooltip: 'انشاء دوري',
-        elevation: 0,
-        onPressed: () {
-          navigateTo(context, const CreateLeaguePage());
-        },
-        backgroundColor: AppColors.primaryColor,
-        label: AutoSizeTextWidget(
-          text: 'انشاء دوري',
-          colorText: Colors.white,
-          fontSize: 10.sp,
+        floatingActionButton: FloatingActionButton.extended(
+          tooltip: 'انشاء دوري',
+          elevation: 0,
+          onPressed: () {
+            navigateTo(context, const CreateLeaguePage());
+          },
+          backgroundColor: AppColors.primaryColor,
+          label: AutoSizeTextWidget(
+            text: 'انشاء دوري',
+            colorText: Colors.white,
+            fontSize: 10.sp,
+          ),
+          icon: const Icon(Icons.add, color: Colors.white, size: 16),
         ),
-        icon: const Icon(Icons.add, color: Colors.white, size: 16),
-      ),
       appBar: AppBar(
         backgroundColor: AppColors.transparent,
         leadingWidth: 60.w,
@@ -182,36 +182,50 @@ class HomePages extends ConsumerWidget {
                           const AutoSizeTextWidget(
                             text: 'آخر الأخبار',
                           ),
-                          InkWell(
-                            onTap: () {
-                              navigateTo(context, const LatestNewsPage());
-                            },
-                            child: AutoSizeTextWidget(
-                              text: 'عرض الكل',
-                              fontSize: 10.5.sp,
-                              colorText: AppColors.fontColor2,
-                            ),
-                          ),
+
                         ],
                       ),
                     ),
                     SizedBox(
-                      height: 240.h,
                       child: ListView.separated(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w),
-                        scrollDirection: Axis.horizontal,
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
                         itemCount: state.data.news.length,
-                        separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                        separatorBuilder: (_, __) => SizedBox(height: 8.w),
                         itemBuilder: (context, index) {
-                          return LatestNewsCardWidget(
-                            news: state.data.news[index],
-                            size: Size(300.w, 180.h),
+                          final item = state.data.news[index];
+
+                          if (index == 0) {
+                            return LatestNewsCardWidget(
+                              news: item,
+                              size: Size(double.infinity, 180.h),
+                            );
+                          }
+
+                          return ShortCardOfNewsWidget(
+                            name: item.title,
+                            date: item.publishedAt??'',
+                            imageUrl: item.primaryMedia.url,
+                            id: item.id??0,
                           );
                         },
                       ),
                     ),
                   ],
-                  SizedBox(height: 40.h),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12.h)
+                        .copyWith(bottom: 10.h, top: 12.h),                    child: InkWell(
+                      onTap: () {
+                        navigateTo(context, const LatestNewsPage());
+                      },
+                      child: AutoSizeTextWidget(
+                        text: 'جميع الأخبار',
+                        fontSize: 12.5.sp,
+                        colorText: AppColors.secondaryColor,
+                      ),
+                    ),
+                  ),
+          //        SizedBox(height: 40.h),
                 ],
               ),
             ),

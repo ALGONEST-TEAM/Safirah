@@ -129,10 +129,12 @@ class MatchTileWidget extends StatelessWidget {
                           text: match.homeTeam!.teamName, fontSize: 11.5.sp),
                        SizedBox(width: 6.w),
                       OnlineImagesWidget(
-                        imageUrl: '',
-                        fit: BoxFit.cover,
-                        size: Size(23.w, 23.h),
-                        borderRadius: 12.r,
+                        imageUrl: match.homeTeam!.logoUrl??'',
+                        fit: BoxFit.contain,
+                        circularImage: true,
+
+                        size: Size(25.w, 25.h),
+                        borderRadius: 20.r,
                       ),
                     ],
                   ),
@@ -146,10 +148,11 @@ class MatchTileWidget extends StatelessWidget {
                   child: Row(
                     children: [
                       OnlineImagesWidget(
-                        imageUrl: '',
-                        fit: BoxFit.cover,
-                        size: Size(23.w, 23.h),
-                        borderRadius: 8.r,
+                        imageUrl: match.awayTeam!.logoUrl??'',
+                        fit: BoxFit.contain,
+                        size: Size(25.w, 25.h),
+                        borderRadius: 20.r,
+                        circularImage: true,
                       ),
                       const SizedBox(width: 6),
                       AutoSizeTextWidget(

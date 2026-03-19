@@ -11,6 +11,7 @@ import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import 'package:safirah/core/widgets/secondary_app_bar_widget.dart';
 import 'package:safirah/features/leagues_mangement/leagues/data/model/league_model.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:safirah/features/leagues_mangement/leagues/data/model/rule_league_model.dart';
 import '../../../../../core/state/data_state.dart';
 
 import '../../../../../core/helpers/navigateTo.dart';
@@ -20,25 +21,30 @@ import '../../../home/presntation/widgets/banners_widget.dart';
 import '../riverpod/riverpod.dart';
 import 'details_league_widget.dart';
 
-class DetailsLeagueUserPage extends ConsumerWidget {
+class DetailsLeagueUserPage extends ConsumerStatefulWidget {
   const DetailsLeagueUserPage({super.key, required this.leagueSyncId});
+
   final String leagueSyncId;
 
   @override
-  Widget build(BuildContext context, ref) {
-    final addOrderLeagueInvitationsPlayerState =
-        ref.watch(orderLeagueInvitationsPlayerProvider(leagueSyncId));
-    final detailsLeague = ref.watch(leagueStreamProvider(leagueSyncId));
-    final bannersState = ref.watch(getLeagueBannersProvider(leagueSyncId));
-    final leagueRulesAsync = ref.watch(leagueRulesStreamProvider(leagueSyncId));
-    final leagueRulesRefresh = ref.watch(leagueRulesRefreshProvider(leagueSyncId));
+  ConsumerState<DetailsLeagueUserPage> createState() => _DetailsLeagueUserPageState();
+}
 
-    // trigger refresh once (post frame) - similar to other pages
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (leagueRulesRefresh.status == RefreshStatus.idle) {
-        ref.read(leagueRulesRefreshProvider(leagueSyncId).notifier).refresh();
-      }
-    });
+class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(leagueRulesRefreshProvider(widget.leagueSyncId).notifier).refresh();    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    final addOrderLeagueInvitationsPlayerState =
+        ref.watch(orderLeagueInvitationsPlayerProvider(widget.leagueSyncId));
+    final detailsLeague = ref.watch(leagueStreamProvider(widget.leagueSyncId));
+    final bannersState = ref.watch(getLeagueBannersProvider(widget.leagueSyncId));
+    final leagueRulesAsync = ref.watch(leagueRulesStreamProvider(widget.leagueSyncId));
+
 
     return Scaffold(
       appBar: const SecondaryAppBarWidget(
@@ -109,68 +115,83 @@ class DetailsLeagueUserPage extends ConsumerWidget {
                                         '${data.subscriptionPrice ?? ''} / اللعب ',
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 8.h),
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 8.h),
                                     child: Container(
                                       decoration: BoxDecoration(
                                         color: const Color(0xffEDF0FF),
-                                        borderRadius: BorderRadius.circular(12.r),
+                                        borderRadius:
+                                            BorderRadius.circular(12.r),
                                       ),
                                       child: Padding(
                                         padding: EdgeInsets.all(10.0.w),
                                         child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Row(
-                                              children: [
-                                                const AutoSizeTextWidget(text: 'قواعد الدوري'),
-                                                const Spacer(),
-                                                if (leagueRulesRefresh.status == RefreshStatus.loading)
-                                                  SizedBox(
-                                                    height: 14.r,
-                                                    width: 14.r,
-                                                    child: const CircularProgressIndicator(
-                                                      strokeWidth: 2,
-                                                      color: AppColors.primaryColor,
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
+                                            SizedBox(
+                                                width: double.infinity,
+                                                child: const AutoSizeTextWidget(
+                                                    text: 'قواعد الدوري')),
                                             6.h.verticalSpace,
-                                            CheckStateInStreamWidget(
+                                            CheckStateInStreamWidget<
+                                                List<LeagueRuleModel>>(
                                               async: leagueRulesAsync,
                                               isEmpty: (rules) => rules.isEmpty,
-                                              emptyBuilder: () => AutoSizeTextWidget(
+                                              emptyBuilder: () =>
+                                                  AutoSizeTextWidget(
                                                 fontSize: 10.sp,
-                                                text: 'لا توجد قواعد لهذا الدوري بعد.',
+                                                text:
+                                                    'لا توجد قواعد لهذا الدوري بعد.',
                                               ),
                                               dataBuilder: (rules) {
                                                 // تصنيف ديناميكي بدون رقم ثابت
-                                                final anyMandatory = rules.any((e) => e.isMandatory);
-                                                final defaultRulesText = RulesNotifier.defaultRulesText;
+                                                final anyMandatory = rules
+                                                    .any((e) => e.isMandatory);
+                                                final defaultRulesText =
+                                                    RulesNotifier
+                                                        .defaultRulesText;
 
                                                 final defaultRules = anyMandatory
-                                                    ? rules.where((e) => e.isMandatory).toList()
+                                                    ? rules
+                                                        .where((e) =>
+                                                            e.isMandatory)
+                                                        .toList()
                                                     : rules
-                                                        .where((e) => defaultRulesText.contains(e.description))
+                                                        .where((e) =>
+                                                            defaultRulesText
+                                                                .contains(e
+                                                                    .description))
                                                         .toList();
 
                                                 final customRules = anyMandatory
-                                                    ? rules.where((e) => !e.isMandatory).toList()
+                                                    ? rules
+                                                        .where((e) =>
+                                                            !e.isMandatory)
+                                                        .toList()
                                                     : rules
-                                                        .where((e) => !defaultRulesText.contains(e.description))
+                                                        .where((e) =>
+                                                            !defaultRulesText
+                                                                .contains(e
+                                                                    .description))
                                                         .toList();
 
                                                 int i = 0;
                                                 final all = <String>[
-                                                  ...defaultRules.map((e) => e.description),
-                                                  ...customRules.map((e) => e.description),
+                                                  ...defaultRules.map(
+                                                      (e) => e.description),
+                                                  ...customRules.map(
+                                                      (e) => e.description),
                                                 ];
 
                                                 return Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
-                                                    if (defaultRules.isNotEmpty) ...[
+                                                    if (defaultRules
+                                                        .isNotEmpty) ...[
                                                       AutoSizeTextWidget(
                                                         fontSize: 10.sp,
                                                         text: 'الأساسية:',
@@ -180,13 +201,15 @@ class DetailsLeagueUserPage extends ConsumerWidget {
                                                         i++;
                                                         return AutoSizeTextWidget(
                                                           fontSize: 10.sp,
-                                                          text: '$i- ${r.description}',
+                                                          text:
+                                                              '$i- ${r.description}',
                                                           maxLines: 4,
                                                         );
                                                       }),
                                                       6.h.verticalSpace,
                                                     ],
-                                                    if (customRules.isNotEmpty) ...[
+                                                    if (customRules
+                                                        .isNotEmpty) ...[
                                                       AutoSizeTextWidget(
                                                         fontSize: 10.sp,
                                                         text: 'المخصصة:',
@@ -196,7 +219,8 @@ class DetailsLeagueUserPage extends ConsumerWidget {
                                                         i++;
                                                         return AutoSizeTextWidget(
                                                           fontSize: 10.sp,
-                                                          text: '$i- ${r.description}',
+                                                          text:
+                                                              '$i- ${r.description}',
                                                           maxLines: 4,
                                                         );
                                                       }),
@@ -204,15 +228,11 @@ class DetailsLeagueUserPage extends ConsumerWidget {
                                                     if (all.isEmpty)
                                                       AutoSizeTextWidget(
                                                         fontSize: 10.sp,
-                                                        text: 'لا توجد قواعد لهذا الدوري بعد.',
+                                                        text:
+                                                            'لا توجد قواعد لهذا الدوري بعد.',
                                                       ),
                                                   ],
                                                 );
-                                              },
-                                              onRefresh: () async {
-                                                await ref
-                                                    .read(leagueRulesRefreshProvider(leagueSyncId).notifier)
-                                                    .refresh();
                                               },
                                             ),
                                           ],
@@ -268,7 +288,9 @@ class DetailsLeagueUserPage extends ConsumerWidget {
                                                 ),
                                                 6.w.horizontalSpace,
                                                 AutoSizeTextWidget(
-                                                    text:data.nameOrganizer ?? '',),
+                                                  text:
+                                                      data.nameOrganizer ?? '',
+                                                ),
                                               ],
                                             ),
                                           ],
@@ -305,10 +327,11 @@ class DetailsLeagueUserPage extends ConsumerWidget {
                                         ),
                                       ),
                                       4.w.horizontalSpace,
-                                      AutoSizeTextWidget(text: 'عدد اللعابين :'),
+                                      AutoSizeTextWidget(
+                                          text: 'عدد اللعابين :'),
                                       4.w.horizontalSpace,
                                       AutoSizeTextWidget(
-                                        text:"${ totalPlayers.toString()} لاعب",
+                                        text: "${totalPlayers.toString()} لاعب",
                                         fontSize: 11.sp,
                                         colorText: AppColors.fontColor,
                                       ),
@@ -368,7 +391,7 @@ class DetailsLeagueUserPage extends ConsumerWidget {
                                       final uri = Uri(
                                         scheme: 'https',
                                         host: 'saferah.dev-station.com',
-                                        pathSegments: ['league', leagueSyncId],
+                                        pathSegments: ['league', widget.leagueSyncId],
                                       );
 
                                       await Clipboard.setData(
@@ -385,7 +408,6 @@ class DetailsLeagueUserPage extends ConsumerWidget {
                                       }
 
                                       // Optional share.
-
                                     },
                                   ),
                                   6.h.verticalSpace,
@@ -404,11 +426,11 @@ class DetailsLeagueUserPage extends ConsumerWidget {
                                       background: const Color(0xffEDF0FF),
                                       onPressed: () {
                                         // ignore: avoid_print
-                                        print(leagueSyncId);
+                                        print(widget.leagueSyncId);
                                         ref
                                             .read(
                                               orderLeagueInvitationsPlayerProvider(
-                                                leagueSyncId,
+                                                widget.leagueSyncId,
                                               ).notifier,
                                             )
                                             .add();
@@ -422,20 +444,22 @@ class DetailsLeagueUserPage extends ConsumerWidget {
                               padding: const EdgeInsets.all(8.0),
                               child: DefaultButtonWidget(
                                 text: 'الانتقال الى الدوري',
-                                isLoading:
-                                addOrderLeagueInvitationsPlayerState
-                                    .stateData ==
+                                isLoading: addOrderLeagueInvitationsPlayerState
+                                        .stateData ==
                                     States.loading,
                                 icon: AppIcons.league,
                                 withIcon: true,
                                 iconColor: Colors.white,
                                 background: AppColors.primaryColor,
                                 onPressed: () {
-                              navigateTo(context, DetailsLeagueWidget(leagueSyncId: leagueSyncId,));
+                                  navigateTo(
+                                      context,
+                                      DetailsLeagueWidget(
+                                        leagueSyncId: widget.leagueSyncId,
+                                      ));
                                 },
                               ),
                             ),
-
                           ],
                         ),
                       ],

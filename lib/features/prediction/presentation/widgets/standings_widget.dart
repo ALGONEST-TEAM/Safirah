@@ -22,20 +22,20 @@ class StandingsWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scope = ref.watch(standingsScopeProvider);
-    final state = ref.watch(standingsProvider(scope));
+    final state = ref.watch(standingsProvider(scope??''));
     return !Auth().loggedIn
         ? const DesignPleaseLoginWidget()
         : CheckStateInGetApiDataWidget(
             state: state,
             refresh: () {
-              ref.invalidate(standingsProvider(scope));
+              ref.invalidate(standingsProvider(scope??''));
             },
             widgetOfLoading: const LogoShimmerWidget(),
             widgetOfData: RefreshIndicator(
               backgroundColor: Colors.white,
               color: AppColors.primaryColor,
               onRefresh: () async {
-                ref.invalidate(standingsProvider(scope));
+                ref.invalidate(standingsProvider(scope??''));
               },
               child: Stack(
                 children: [
@@ -66,7 +66,7 @@ class StandingsWidget extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        StandingsScopeCardWidget(scope: scope),
+                        StandingsScopeCardWidget(scopes: state.data.rankingPeriods),
                         StandingsListCardWidget(items: state.data.items),
                       ],
                     ),

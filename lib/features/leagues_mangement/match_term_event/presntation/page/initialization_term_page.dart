@@ -87,21 +87,22 @@ class _LeagueTermSetupPageState extends ConsumerState<LeagueTermSetupPage> {
                           hasMatches: true,
                         );
                         //  ref.read(leagueStatusStreamProvider(widget.leagueSyncId));
-                        ref
-                            .read(leagueStatusProvider(widget.leagueSyncId)
-                            .notifier)
-                            .refresh();
-                        ref
-                            .read(roundsRefreshProvider(
-                                    Tuple3(widget.leagueSyncId, 'unscheduled','organizer'))
-                                .notifier)
-                            .refresh();
+                        // ref
+                        //     .read(leagueStatusProvider(widget.leagueSyncId)
+                        //     .notifier)
+                        //     .refresh();
+                        // ref
+                        //     .read(roundsRefreshProvider(
+                        //             Tuple3(widget.leagueSyncId, 'unscheduled','organizer'))
+                        //         .notifier)
+                        //     .refresh();
                         Navigator.pop(context);
                       },
                       messageSuccess:
                           'تم تهيئة الأشواط الخاصة بالدوري بنجاح',
                       bottonWidget: DefaultButtonWidget(
                         text: 'تم',
+                        isLoading: leagueTermState.stateData == States.loading,
                         onPressed: () async {
                           await ref
                               .read(leagueTermProvider(widget.leagueSyncId).notifier)

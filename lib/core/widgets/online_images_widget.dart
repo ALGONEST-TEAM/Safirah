@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import '../constants/app_icons.dart';
+import '../network/urls.dart';
 import '../theme/app_colors.dart';
+import 'offline_images_widget.dart';
 
 class OnlineImagesWidget extends StatelessWidget {
   final String imageUrl;
@@ -30,10 +30,59 @@ class OnlineImagesWidget extends StatelessWidget {
     this.backgroundColor,
   });
 
+  String? _normalizeUrl(String raw) {
+    final url = raw.trim();
+    if (url.isEmpty) return null;
+
+    // Already absolute
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+
+    // Protocol-relative
+    if (url.startsWith('//')) return 'https:$url';
+
+    // Relative path -> attach to API base domain
+    final base = AppURL.base.replaceAll(RegExp(r"/+$"), '');
+    final path = url.replaceAll(RegExp(r"^/+"), '');
+    return '$base/$path';
+  }
+
+  Widget _fallback() {
+    return Container(
+      height: size?.height,
+      width: size?.width,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? Colors.white,
+        borderRadius: BorderRadius.circular(borderRadius ?? 8.r),
+        image: const DecorationImage(
+          image: AssetImage('assets/images/logo.jpg'),
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Local file path
+    if (OfflineImagesWidget.isOfflinePath(imageUrl)) {
+      return OfflineImagesWidget(
+        path: imageUrl,
+        circularImage: circularImage,
+        circularRadius: circularRadius,
+        size: size,
+        fit: fit,
+        borderRadius: borderRadius,
+        backgroundColor: backgroundColor,
+        fallback: _fallback(),
+      );
+    }
+
+    // Network URL (absolute or relative)
+    final normalized = _normalizeUrl(imageUrl);
+    if (normalized == null) return _fallback();
+
     return CachedNetworkImage(
-      imageUrl: imageUrl,
+      imageUrl: normalized,
       placeholder: (context, value) {
         return Container(
           height: size?.height,
@@ -49,7 +98,7 @@ class OnlineImagesWidget extends StatelessWidget {
         );
       },
       imageBuilder: (context, imageProvider) {
-        var image = DecorationImage(
+        final image = DecorationImage(
           image: imageProvider,
           fit: fit ?? BoxFit.cover,
         );
@@ -80,23 +129,7 @@ class OnlineImagesWidget extends StatelessWidget {
           ),
         );
       },
-      errorWidget: (context, url, error) => Container(
-        height: size?.height,
-        width: size?.width,
-        decoration: BoxDecoration(
-          color: backgroundColor ?? Colors.white,
-          borderRadius: BorderRadius.circular(borderRadius ?? 8.r),
-          image: DecorationImage(image: AssetImage('assets/images/logo.jpg'))
-        ),
-       // child: Center(
-          // child: SvgPicture.asset(
-          //   AppIcons.logo,
-          //   width: logoWidth ?? 50.w,
-          // ),
-         // child:
-      //  ),
-     //   ),
-      ),
+      errorWidget: (context, url, error) => _fallback(),
     );
   }
 }

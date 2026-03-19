@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/state/state.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/widgets/auto_size_text_widget.dart';
-import '../../../../../core/widgets/secondary_app_bar_widget.dart';
+  import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../state_mangment/riverpod.dart';
 import '../widget/category_tab_widget.dart';
 

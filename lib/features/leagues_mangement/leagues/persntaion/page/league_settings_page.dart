@@ -245,34 +245,36 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
           AuthorizationGateHideIfDenied(
             leagueSyncId: widget.leagueSyncId,
             permissionKey: 'league.edit',
-            child: ButtonOfOrganizerWidget(
-              title: 'جدولة المباريات',
-              onTap: () {
-                if ((leagueStatus.asData?.value!.hasMatches ?? false) ==
-                    false) {
-                  showFlashBarError(
-                    context: context,
-                    title: 'اكمل كل عمليات انشاء الدوري  ',
-                    text:
-                        'قم باتمام كل عمليات انشاء الدوري لبدا جدولة المباريات',
-                  );
-                } else {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ref
-                        .read(ensureKnockoutProgressProvider(
-                        widget.leagueSyncId)
-                        .notifier)
-                        .run(qualifiedPerGroup: 4);
-                  });
-                  navigateTo(
-                    context,
-                    MatchesSchedulingPage(
-                      role: 'organizer',
-                      leagueSyncId: widget.leagueSyncId,
-                    ),
-                  );
-                }
-              },
+            child: Visibility(
+              child: ButtonOfOrganizerWidget(
+                title: 'جدولة المباريات',
+                onTap: () {
+                  if ((leagueStatus.asData?.value!.hasMatches ?? false) ==
+                      false) {
+                    showFlashBarError(
+                      context: context,
+                      title: 'اكمل كل عمليات انشاء الدوري  ',
+                      text:
+                          'قم باتمام كل عمليات انشاء الدوري لبدا جدولة المباريات',
+                    );
+                  } else {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ref
+                          .read(ensureKnockoutProgressProvider(
+                          widget.leagueSyncId)
+                          .notifier)
+                          .run(qualifiedPerGroup: 4);
+                    });
+                    navigateTo(
+                      context,
+                      MatchesSchedulingPage(
+                        role: 'organizer',
+                        leagueSyncId: widget.leagueSyncId,
+                      ),
+                    );
+                  }
+                },
+              ),
             ),
           ),
           ButtonOfOrganizerWidget(

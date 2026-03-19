@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/helpers/navigateTo.dart';
-
 import '../../../../../core/extension/string.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
@@ -22,65 +21,71 @@ class LatestNewsCardWidget extends StatelessWidget {
     required this.size,
   });
 
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        navigateTo(context, NewsDetailsPage(id: news.id));
-      },
-      child: Container(
-        height: size.height,
-        decoration: BoxDecoration(
-          color: AppColors.whiteColor,
-          borderRadius: BorderRadius.circular(18.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AutoSizeTextWidget(
-                    text: news.title,
-                    fontSize: 11.sp,
-                  ),
-                  SizedBox(height: 4.h),
-                  AutoSizeTextWidget(
-                    text: formatDate(news.publishedAt),
-                    fontSize: 10.sp,
-                    colorText: AppColors.fontColor2,
-                  ),
-                  SizedBox(height: 4.h),
-                ],
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+      child: GestureDetector(
+        onTap: () {
+          navigateTo(context, NewsDetailsPage(id: news.id));
+        },
+        child: Container(
+          height: size.height,
+          decoration: BoxDecoration(
+            color: AppColors.whiteColor,
+            borderRadius: BorderRadius.circular(18.r),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AutoSizeTextWidget(
+                      text: news.title,
+                      fontSize: 11.sp,
+                    ),
+                    SizedBox(height: 4.h),
+                    AutoSizeTextWidget(
+                      text: formatDate(news.publishedAt),
+                      fontSize: 10.sp,
+                      colorText: AppColors.fontColor2,
+                    ),
+                    SizedBox(height: 4.h),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: MediaPreviewWidget(
-                media: news.primaryMedia,
-                size: size,
-                onTap: () {
-                  if (news.primaryMedia.type == 'video') {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            VideoPlayerPage(url: news.primaryMedia.url),
-                      ),
-                    );
-                  } else {
-                    navigateTo(context, NewsDetailsPage(id: news.id));
-                  }
-                },
+              Expanded(
+                child: MediaPreviewWidget(
+                  media: news.primaryMedia,
+                  size: size,
+                  onTap: () {
+                    if (news.primaryMedia.type == 'video') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              VideoPlayerPage(url: news.primaryMedia.url),
+                        ),
+                      );
+                    } else {
+                      navigateTo(context, NewsDetailsPage(id: news.id));
+                    }
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+
 
 class MediaPreviewWidget extends StatelessWidget {
   final MediaItemModel media;

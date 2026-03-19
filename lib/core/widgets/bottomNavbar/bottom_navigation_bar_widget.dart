@@ -57,7 +57,7 @@ class _BottomNavigationBarWidgetState
           height: 57.h,
           child: FloatingActionButton.large(
             onPressed: () {
-              navigateTo(
+              navigateReplacement(
                   context, const BottomNavigationBarOfMangeLeagueWidget());
             },
             backgroundColor: AppColors.whiteColor,

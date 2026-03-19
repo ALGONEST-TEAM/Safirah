@@ -612,16 +612,18 @@ class _TeamNameOnly extends StatelessWidget {
     final logo = SizedBox(
       width: 45.w,
       height:  45.h,
-      child: normalizedUrl == null
-          ? _TeamLogoFallback(name: name)
-          : OnlineImagesWidget(
-              imageUrl: normalizedUrl,
-              circularImage: true,
-              circularRadius: 9.r,
-              size: Size(18.r, 18.r),
-              fit: BoxFit.cover,
-              backgroundColor: Colors.white.withValues(alpha: 0.18),
-            ),
+      child:
+      //normalizedUrl == null
+        //  ?
+      _TeamLogoFallback(name: name)
+          // : OnlineImagesWidget(
+          //     imageUrl: normalizedUrl,
+          //     circularImage: true,
+          //     circularRadius: 9.r,
+          //     size: Size(18.w, 18.h),
+          //     fit: BoxFit.cover,
+          //     backgroundColor: Colors.white.withValues(alpha: 0.18),
+          //   ),
     );
 
     return Align(

@@ -29,7 +29,8 @@ class MatchPointsStatusWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isOpened ? 8.w : 4.w,
+        // horizontal: isOpened ? 8.w : 4.w,
+        horizontal: 8.w,
         vertical: 3.h,
       ),
       decoration: BoxDecoration(
@@ -58,20 +59,26 @@ class MatchPointsStatusWidget extends StatelessWidget {
             ],
           ),
           2.h.verticalSpace,
-          Visibility(
-            visible: isOpened,
-            replacement: SvgPicture.asset(
-              rtl ? AppIcons.arrowBackEn : AppIcons.arrowBack,
-              color: Colors.white,
-              height: 15.h,
-            ),
-            child: AutoSizeTextWidget(
-              text: "${homeScore ?? 0} - ${awayScore ?? 0}",
-              colorText: Colors.white,
-              fontSize: 10.sp,
-              fontWeight: FontWeight.w700,
-            ),
+          AutoSizeTextWidget(
+            text: "${homeScore ?? 0} - ${awayScore ?? 0}",
+            colorText: Colors.white,
+            fontSize: 10.sp,
+            fontWeight: FontWeight.w700,
           ),
+          // Visibility(
+          //   visible: isOpened,
+          //   replacement: SvgPicture.asset(
+          //     rtl ? AppIcons.arrowBackEn : AppIcons.arrowBack,
+          //     color: Colors.white,
+          //     height: 15.h,
+          //   ),
+          //   child: AutoSizeTextWidget(
+          //     text: "${homeScore ?? 0} - ${awayScore ?? 0}",
+          //     colorText: Colors.white,
+          //     fontSize: 10.sp,
+          //     fontWeight: FontWeight.w700,
+          //   ),
+          // ),
         ],
       ),
     );

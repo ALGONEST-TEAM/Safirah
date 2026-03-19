@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:safirah/features/leagues_mangement/match_term_event/presntation/widget/player_tile_with_event_widget.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../../core/helpers/flash_bar_helper.dart';
+import '../../../../../core/network/errors/app_exception_message.dart';
 import '../../../../../core/state/state.dart';
 import '../../../team_and_player/presntation/state_mangment/riverpod.dart';
 import '../../data/model/assist_model.dart';
@@ -202,14 +203,15 @@ class PlayerEventHandler {
       assistTime: DateTime.now().minute,
     );
 
-    await ref.read(addAssistNotifierProvider(assist).notifier).run();
-    final result = ref.read(addAssistNotifierProvider(assist));
+    final provider = addAssistNotifierProvider(assist);
+    await ref.read(provider.notifier).run();
+    final result = ref.read(provider);
 
     if (result.stateData == States.error) {
       showFlashBarError(
         context: context,
-        text: '',
-        title: 'فشل في إضافة الأسيست',
+        title: MessageOfError.get(result.exception as Object).first,
+        text: MessageOfError.get(result.exception as Object).last,
       );
       return;
     }
@@ -217,6 +219,7 @@ class PlayerEventHandler {
     await ref
         .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
         .load();
+
 
     showFlashBarSuccess(
       context: context,

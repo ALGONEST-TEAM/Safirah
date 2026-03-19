@@ -10,58 +10,17 @@ import 'package:rxdart/rxdart.dart';
 class TeamAndPlayerLocalDataSource {
   final Safirah db;
   final TeamPlayerDraftService _draftService;
-  bool _hasRepairedDateTimes = false;
 
   TeamAndPlayerLocalDataSource(this.db)
       : _draftService = const TeamPlayerDraftService();
 
-  /// A one-time, best-effort repair for legacy rows where datetimes were stored as text.
-  // Future<void> _repairDateTimeColumnsIfNeeded() async {
-  //   if (_hasRepairedDateTimes) return;
-  //
-  //   try {
-  //     // ISO strings look like: 2026-01-20T...
-  //     // Using LIKE is more reliable than typeof() for this check.
-  //     const isoLikePattern = "____-__-__T%";
-  //
-  //     Future<void> repair(String column) async {
-  //       final badRows = await db.customSelect(
-  //         'SELECT id, $column AS value FROM league_players WHERE $column LIKE ?',
-  //         variables: [Variable.withString(isoLikePattern)],
-  //       ).get();
-  //
-  //       for (final row in badRows) {
-  //         final id = row.data['id'];
-  //         final textValue = row.data['value'];
-  //         if (id is! int || textValue is! String) continue;
-  //
-  //         final dt = DateTime.tryParse(textValue);
-  //         if (dt == null) continue;
-  //
-  //         await db.customUpdate(
-  //           'UPDATE league_players SET $column = ? WHERE id = ?',
-  //           variables: [
-  //             Variable.withInt(dt.millisecondsSinceEpoch),
-  //             Variable.withInt(id),
-  //           ],
-  //         );
-  //       }
-  //     }
-  //
-  //     await repair('created_at');
-  //     await repair('updated_at');
-  //   } finally {
-  //     // Ensure this runs only once per instance to avoid performance hits.
-  //     _hasRepairedDateTimes = true;
-  //   }
-  // }
 
 Future<TeamModel?> updateTeam(TeamModel team) async {
-    await (db.update(db.teams)..where((t) => t.id.equals(team.id!)))
+    await (db.update(db.teams)..where((t) => t.syncId.equals(team.syncId)))
         .write(team.toCompanion());
 
     final updatedRow = await (db.select(db.teams)
-      ..where((t) => t.id.equals(team.id!)))
+      ..where((t) => t.syncId.equals(team.syncId)))
         .getSingleOrNull();
 
     return updatedRow != null ? TeamModel.fromEntity(updatedRow) : null;
@@ -358,7 +317,7 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
   Future<void> upsertLeaguePlayers(List<LeaguePlayerModel> players) async {
     if (players.isEmpty) return;
 
-    print('Upserting ${players[0].leagueSyncId} league players locally.');
+
     await db.transaction(() async {
       for (final p in players) {
         await db.into(db.leaguePlayers).insertOnConflictUpdate(
@@ -542,49 +501,7 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
     }
 
     debugPrint('upsertTeams done');
-  }  // Future<void> upsertTeams(List<TeamModel> teams) async {
-  //   if (teams.isEmpty) return;
-  //
-  //   await db.transaction(() async {
-  //     for (final team in teams) {
-  //       await db.into(db.teams).insert(
-  //         TeamsCompanion(
-  //           syncId: Value(team.syncId),
-  //           leagueSyncId: Value(team.leagueSyncId!),
-  //           teamName: Value((team.teamName ?? '').trim()),
-  //         ),
-  //         onConflict: DoUpdate(
-  //               (old) => TeamsCompanion(
-  //             leagueSyncId: Value(team.leagueSyncId!),
-  //             teamName: Value((team.teamName ?? '').trim()),
-  //           ),
-  //           target: [db.teams.syncId],
-  //         ),
-  //       );
-  //
-  //       for (final player in (team.player ?? [])) {
-  //         await db.into(db.players).insert(
-  //           PlayersCompanion(
-  //             syncId: Value(player.syncId ?? ''),
-  //             teamSyncId: Value(player.teamSyncId ?? ''),
-  //             fullName: Value((player.fullName ?? '').trim()),
-  //             status: Value(player.status),
-  //             playerLeagueSyncId: Value(player.playerLeagueSyncId ?? ''),
-  //           ),
-  //           onConflict: DoUpdate(
-  //                 (old) => PlayersCompanion(
-  //               teamSyncId: Value(player.teamSyncId ?? ''),
-  //               fullName: Value((player.fullName ?? '').trim()),
-  //               status: Value(player.status),
-  //               playerLeagueSyncId: Value(player.playerLeagueSyncId ?? ''),
-  //             ),
-  //             target: [db.players.syncId],
-  //           ),
-  //         );
-  //       }
-  //     }
-  //   });
-  // }
+  }
   Future<bool> upsertPlayerAndVerify(PlayersCompanion companion, String syncId) async {
     try {
       await db.into(db.players).insert(
@@ -607,7 +524,7 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
   Future<void> upsertPlayersTeam(List<PlayerModel> player) async {
     if (player.isEmpty) return;
 
-    print('Upserting ${player[0].syncId} league players locally.');
+   // print('Upserting ${player[0].syncId} league players locally.');
     await db.transaction(() async {
       // Group incoming players by team
       final byTeam = <String, List<PlayerModel>>{};

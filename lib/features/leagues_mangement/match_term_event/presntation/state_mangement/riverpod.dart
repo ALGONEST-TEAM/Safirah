@@ -399,7 +399,7 @@ class MatchTermCounterNotifier extends StateNotifier<DataState<CounterData>> {
       }
 
       // 🎯 تحقق من نهاية الوقت الكلي (الرسمي + الإضافي)
-    // if (newElapsed >= (baseDuration + additional)) {
+  //   if (newElapsed >= (baseDuration + additional)) {
       if (newElapsed >= (baseDuration + additional) * 60) {
         await _finishCurrentTerm(roundSyncId, leagueSyncId, currentTerm);
       }

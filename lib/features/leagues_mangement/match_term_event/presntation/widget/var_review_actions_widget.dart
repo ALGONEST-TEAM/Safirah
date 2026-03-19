@@ -54,25 +54,28 @@ class VarReviewActionsWidget extends ConsumerWidget {
               if (isGoal) {
                 final goal = varEvent.event as GoalModel;
 
-                await ref
-                    .read(deleteGoalNotifierProvider(goal.syncId).notifier)
-                    .run();
+                await ref.read(deleteGoalNotifierProvider(goal.syncId).notifier).run();
 
-                final deleteState =
-                    ref.read(deleteGoalNotifierProvider(goal.syncId));
+                final deleteState = ref.read(deleteGoalNotifierProvider(goal.syncId));
                 if (deleteState.stateData == States.error) {
                   // ignore: avoid_print
                   print('فشل في حذف الهدف');
                   return;
                 }
 
+                // Reload scorer stats (goal owner).
                 await ref
-                    .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
+                    .read(
+                      playerStatsProvider((
+                        matchSyncId: matchSyncId,
+                        playerSyncId: goal.playerSyncId,
+                      )).notifier,
+                    )
                     .load();
 
+                // Reload assister stats (if goal had an assist).
                 final String? assistPlayerSyncId = deleteState.data;
-
-                if (assistPlayerSyncId != null) {
+                if (assistPlayerSyncId != null && assistPlayerSyncId.trim().isNotEmpty) {
                   await ref
                       .read(
                         playerStatsProvider((

@@ -45,15 +45,27 @@ class TeamAndPlayerRepository {
     return RepoGuard.run<Unit>(
       action: () async {
        final teams =  await   local.updateTeam(team);
-         print(team.syncId);
-        await syncService.enqueueOperation(
+         print(teams!.syncId);
+       print(teams!.syncId);
+
+       final payload = {
+         'team_sync_id': team.syncId,
+         'team_name': team.teamName,
+
+         if (team.logoUrl != null &&
+             team.logoUrl!.isNotEmpty)
+           '__files': [
+             {'field': 'logo_url', 'path': team.logoUrl},
+             {'field': 'logo_url', 'path': team.logoUrl},
+             {'field': 'team[logo_url]', 'path': team.logoUrl},
+           ]
+
+       };
+       await syncService.enqueueOperation(
           entityType: 'team',
-          operation: SyncService.operationUpdate,
-          payload: {
-           'team_sync_id': teams!.syncId,
-            'team_name': teams.teamName,
-          },
-        );
+          operation: SyncService.operationCreate,
+          payload: payload
+       );
 
         try {
           await di.sl<SyncTrigger>().syncIfOnline();

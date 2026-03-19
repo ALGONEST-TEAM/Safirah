@@ -183,10 +183,10 @@ EntitySyncEndpoint _resolveMatchEndpoint(String operation) {
 
 EntitySyncEndpoint _resolveTeamEndpoint(String operation) {
   switch (operation) {
-    case SyncService.operationUpdate:
+    case SyncService.operationCreate:
       return EntitySyncEndpoint(
-        path: '${AppURL.baseURL}/league-application/teams',
-        method: HttpMethod.put,
+        path: '${AppURL.baseURL}/league-application/teams/update',
+        method: HttpMethod.post,
       );
     default:
       throw UnsupportedError('Unknown operation for league: $operation');

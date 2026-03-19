@@ -171,7 +171,7 @@ class StandingsNotifier extends StateNotifier<DataState<StandingsData>> {
   }
 }
 
-final standingsScopeProvider = StateProvider<String>((ref) => 'week');
+final standingsScopeProvider = StateProvider<String?>((ref) => null);
 
 //Choose the sorting method
 // ===================== Match Status Helpers (Riverpod) =====================
