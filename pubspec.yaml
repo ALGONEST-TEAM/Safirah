@@ -81,10 +81,10 @@ dependencies:
   custom_refresh_indicator:
   connectivity_plus: ^6.1.0
   crypto:
+
   v_story_viewer: ^2.1.2
   sms_autofill: ^2.4.1
   firebase_core:
-#  flutter_local_notifications:
   awesome_notifications:
   firebase_messaging:
   extended_nested_scroll_view: ^6.2.1
@@ -108,8 +108,10 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
+dependency_overrides:
+  test_api: 0.7.10
+  matcher: 0.12.19
+  analyzer: ^6.4.1
 
 # The following section is specific to Flutter packages.
 flutter:

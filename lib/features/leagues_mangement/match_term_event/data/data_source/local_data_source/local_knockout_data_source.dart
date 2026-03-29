@@ -397,7 +397,7 @@ class KnockoutGeneratorLocalDataSource {
     final matchTermLocal = MatchTermsEventLocalDataSource(db);
 
     bool isFinished(String s) => s.toLowerCase().trim() == 'finished';
-
+    print("11");
     return db.transaction<RoundModel?>(() async {
       final finishedRoundEntity = await (db.select(db.rounds)
         ..where((r) => r.syncId.equals(finishedRoundSyncId)))

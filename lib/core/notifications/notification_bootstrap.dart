@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import '../../firebase_options.dart';
 import 'awesome_notification_service.dart';
 import 'firebase_messaging_service.dart';
 
@@ -11,8 +12,10 @@ class NotificationBootstrap {
   Future<void> init({bool debug = true}) async {
     if (_bootstrapped) return;
 
-    // Firebase أولاً
-    await Firebase.initializeApp();
+    // Firebase أولاً مع الخيارات الصحيحة لكل منصة
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
     // Awesome Notifications (القنوات)
     await AwesomeNotificationService.I.initialize(debug: debug);
