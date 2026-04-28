@@ -9,10 +9,12 @@ class TermCountSelectorWidget extends StatelessWidget {
     super.key,
     required this.selectedTermsCount,
     required this.onChanged,
+    this.enabled = true,
   });
 
   final int? selectedTermsCount;
   final ValueChanged<int?> onChanged;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,7 @@ class TermCountSelectorWidget extends StatelessWidget {
               value: 1,
               groupValue: selectedTermsCount,
               onChanged: onChanged,
+              enabled: enabled,
             ),
             12.w.horizontalSpace,
             _RadioOptionWidget(
@@ -39,6 +42,7 @@ class TermCountSelectorWidget extends StatelessWidget {
               value: 2,
               groupValue: selectedTermsCount,
               onChanged: onChanged,
+              enabled: enabled,
             ),
           ],
         ),
@@ -53,12 +57,14 @@ class _RadioOptionWidget extends StatelessWidget {
     required this.value,
     required this.groupValue,
     required this.onChanged,
+    required this.enabled,
   });
 
   final String title;
   final int value;
   final int? groupValue;
   final ValueChanged<int?> onChanged;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -66,26 +72,36 @@ class _RadioOptionWidget extends StatelessWidget {
 
     return Expanded(
       child: InkWell(
-        onTap: () => onChanged(value),
+        onTap: enabled ? () => onChanged(value) : null,
         borderRadius: BorderRadius.circular(12.r),
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
           decoration: BoxDecoration(
-            color:
-            selected ? AppColors.secondaryColor.withOpacity(0.1) : Colors.white,
+            color: selected
+                ? AppColors.secondaryColor.withValues(
+                    alpha: enabled ? 0.1 : 0.06,
+                  )
+                : Colors.white,
             border: Border.all(
-              color:
-              selected ? AppColors.secondaryColor : Colors.grey.shade300,
+              color: selected
+                  ? AppColors.secondaryColor
+                  : Colors.grey.shade300,
             ),
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Row(
             children: [
-              Radio<int?>(
-                value: value,
-                groupValue: groupValue,
-                onChanged: onChanged,
-                activeColor: AppColors.secondaryColor,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                child: Icon(
+                  selected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
+                  color: selected
+                      ? AppColors.secondaryColor
+                      : Colors.grey.shade400,
+                  size: 22.sp,
+                ),
               ),
               Expanded(
                 child: Text(
@@ -94,7 +110,9 @@ class _RadioOptionWidget extends StatelessWidget {
                     fontSize: 12.sp,
                     color: selected
                         ? AppColors.secondaryColor
-                        : Colors.black87,
+                        : enabled
+                            ? Colors.black87
+                            : Colors.black54,
                   ),
                 ),
               ),

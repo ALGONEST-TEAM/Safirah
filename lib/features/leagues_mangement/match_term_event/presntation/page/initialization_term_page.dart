@@ -1,12 +1,9 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/state/check_state_in_post_api_data_widget.dart';
 import 'package:safirah/core/widgets/buttons/default_button.dart';
 import '../../../../../core/state/state.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../leagues/persntaion/riverpod/riverpod.dart';
 import '../../../match/presntaion/state_managment/riverpod.dart';
@@ -26,7 +23,7 @@ class LeagueTermSetupPage extends ConsumerStatefulWidget {
 }
 
 class _LeagueTermSetupPageState extends ConsumerState<LeagueTermSetupPage> {
-  int? selectedTermsCount; // 1 = شوط, 2 = شوطين
+  int? selectedTermsCount = 2; // شوطين إلزامي
   bool includeExtraAndPenalties = false;
   int matchDuration = 60; // الوقت الافتراضي بالدقائق
 
@@ -36,7 +33,7 @@ class _LeagueTermSetupPageState extends ConsumerState<LeagueTermSetupPage> {
     final leagueTermState = ref.watch(leagueTermProvider(widget.leagueSyncId));
 
     return Scaffold(
-      appBar: SecondaryAppBarWidget(
+      appBar: const SecondaryAppBarWidget(
         title: 'تهيئة الاشواط',
       ),
       body: SafeArea(
@@ -47,10 +44,11 @@ class _LeagueTermSetupPageState extends ConsumerState<LeagueTermSetupPage> {
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                   TermCountSelectorWidget(
-                        selectedTermsCount: selectedTermsCount,
-                        onChanged: (v) => setState(() => selectedTermsCount = v),
-                      ),
+                    TermCountSelectorWidget(
+                      selectedTermsCount: selectedTermsCount,
+                      onChanged: (_) {},
+                      enabled: false,
+                    ),
 
                     20.h.verticalSpace,
 
