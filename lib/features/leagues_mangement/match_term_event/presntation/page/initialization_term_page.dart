@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/state/check_state_in_post_api_data_widget.dart';
 import 'package:safirah/core/widgets/buttons/default_button.dart';
 import '../../../../../core/state/state.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../leagues/persntaion/riverpod/riverpod.dart';
 import '../../../match/presntaion/state_managment/riverpod.dart';
@@ -48,6 +50,12 @@ class _LeagueTermSetupPageState extends ConsumerState<LeagueTermSetupPage> {
                       selectedTermsCount: selectedTermsCount,
                       onChanged: (_) {},
                       enabled: false,
+                    ),
+                    8.h.verticalSpace,
+                    AutoSizeTextWidget(
+                      text: 'عدد الأشواط ثابت على شوطين ولا يمكن تعديله',
+                      fontSize: 10.sp,
+                      colorText: AppColors.fontColor2,
                     ),
 
                     20.h.verticalSpace,
