@@ -61,6 +61,7 @@ class CardInvitationsPlayerWidget extends StatelessWidget {
                       Expanded(
                         child: CheckStateInPostApiDataWidget(
                           state: state,
+                          messageSuccess: 'تم قبول انضمام اللاعب للدوري بنجاح',
                           functionSuccess: () {
                             ref.invalidate(invitationsPlayersProvider);
                             ref.invalidate(leaguePlayerStreamProvider);

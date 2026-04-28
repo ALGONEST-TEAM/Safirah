@@ -24,7 +24,7 @@ class CheckStateInPostApiDataWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(state.stateData.toString());
+    //print(state.stateData.toString());
     if (state.stateData == States.loaded) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         functionSuccess!();

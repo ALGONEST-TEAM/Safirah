@@ -20,6 +20,7 @@ class InvitationsPlayersPage extends ConsumerWidget {
       appBar: SecondaryAppBarWidget( title: 'طلبات الانضمام',),
       body: CheckStateInGetApiDataWidget(
         state: invitationsPlayersState,
+
         widgetOfData: ListView.builder(
           itemCount: invitationsPlayersState.data.length,
           itemBuilder: (context, index) {

@@ -160,14 +160,25 @@ class PlayerModel {
 
   // -------- JSON (API / local cache) ----------
   factory PlayerModel.fromJson(Map<String, dynamic> j) {
+    final rawSyncId = (j['sync_id'] ?? j['syncId'])?.toString().trim();
+    final dynamic leaguePlayerRaw = j['league_player'] ?? j['leaguePlayer'];
+    String? nestedLeaguePlayerSyncId;
+
+    if (leaguePlayerRaw is Map) {
+      final map = Map<String, dynamic>.from(leaguePlayerRaw);
+      nestedLeaguePlayerSyncId =
+          (map['sync_id'] ?? map['syncId'])?.toString().trim();
+    }
+
     final playerLeagueSyncId =
         (j['player_league_sync_id'] ??
                 j['league_player_sync_id'] ??
                 j['leaguePlayerSyncId'] ??
+                nestedLeaguePlayerSyncId ??
+                rawSyncId ??
                 '')
             .toString()
             .trim();
-    final rawSyncId = (j['sync_id'] ?? j['syncId'])?.toString().trim();
     final dynamic teamRaw = j['team'];
     String? parsedTeamName;
 
@@ -423,12 +434,19 @@ class LeaguePlayerModel {
   factory LeaguePlayerModel.fromJson(Map<String, dynamic> j) {
     final dynamic user = j['user'];
     final String? userName =
-        user is Map<String, dynamic> ? user['name']?.toString() : null;
+        user is Map<String, dynamic>
+            ? (user['name'] ??
+                    user['full_name'] ??
+                    user['fullName'] ??
+                    user['username'])
+                ?.toString()
+            : null;
 
     final String? fallbackName = (j['name'] ??
             j['user_name'] ??
             j['username'] ??
-            j['full_name'])
+            j['full_name'] ??
+            j['fullName'])
         ?.toString();
 
     return LeaguePlayerModel(

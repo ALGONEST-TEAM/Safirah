@@ -367,14 +367,45 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
 
     await db.transaction(() async {
       for (final p in players) {
-        await db.into(db.leaguePlayers).insertOnConflictUpdate(
-              LeaguePlayersCompanion(
-                name: Value((p.name ?? '').trim()),
-                syncId: Value(p.syncId),
-                leagueSyncId: Value(p.leagueSyncId!),
-                teamPlayerCategoryId: Value(p.teamPlayerCategoryId),
-              ),
-            );
+        final normalizedLeagueSyncId = p.leagueSyncId?.trim();
+        if (normalizedLeagueSyncId == null || normalizedLeagueSyncId.isEmpty) {
+          continue;
+        }
+
+        final normalizedName = (p.name ?? '').trim();
+        final existing = await (db.select(db.leaguePlayers)
+              ..where((row) =>
+                  row.leagueSyncId.equals(normalizedLeagueSyncId) &
+                  row.syncId.equals(p.syncId))
+              ..limit(1))
+            .getSingleOrNull();
+
+        final existingName = existing?.name?.trim();
+        final effectiveName = normalizedName.isNotEmpty
+            ? normalizedName
+            : ((existingName != null && existingName.isNotEmpty)
+                ? existingName
+                : null);
+
+        await db.into(db.leaguePlayers).insert(
+          LeaguePlayersCompanion(
+            name: Value(effectiveName),
+            syncId: Value(p.syncId),
+            leagueSyncId: Value(normalizedLeagueSyncId),
+            teamPlayerCategoryId: Value(p.teamPlayerCategoryId),
+          ),
+          onConflict: DoUpdate(
+            (old) => LeaguePlayersCompanion(
+              name: Value(effectiveName),
+              teamPlayerCategoryId: Value(p.teamPlayerCategoryId),
+              updatedAt: Value(DateTime.now()),
+            ),
+            target: [
+              db.leaguePlayers.leagueSyncId,
+              db.leaguePlayers.syncId,
+            ],
+          ),
+        );
       }
     });
   }
@@ -732,9 +763,17 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
   }
 
   Future<void> addLeaguePlayer(LeaguePlayerModel player) async {
-    final leagueSyncId = player.leagueSyncId;
-    if (leagueSyncId == null || leagueSyncId.trim().isEmpty) return;
+    final leagueSyncId = player.leagueSyncId?.trim();
+    if (leagueSyncId == null || leagueSyncId.isEmpty) return;
     if (player.syncId.trim().isEmpty) return;
+
+    final existing = await (db.select(db.leaguePlayers)
+          ..where((row) =>
+              row.leagueSyncId.equals(leagueSyncId) &
+              row.syncId.equals(player.syncId))
+          ..limit(1))
+        .getSingleOrNull();
+
     final leagueRow = await (db.select(db.leagues)
           ..where((l) => l.syncId.equals(leagueSyncId))
           ..limit(1))
@@ -747,7 +786,7 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
     final maxPlayersPerTeam = (maxMainPlayers + maxSubPlayers);
     final capacity = maxTeams * maxPlayersPerTeam;
 
-    if (capacity > 0) {
+    if (capacity > 0 && existing == null) {
       // 2) عدّ اللاعبين الحاليين في الدوري (league_players)
       final countExp = db.leaguePlayers.syncId.count();
       final countQuery = db.selectOnly(db.leaguePlayers)
@@ -764,15 +803,34 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
       }
     }
 
+    final normalizedName = (player.name ?? '').trim();
+    final existingName = existing?.name?.trim();
+    final effectiveName = normalizedName.isNotEmpty
+        ? normalizedName
+        : ((existingName != null && existingName.isNotEmpty)
+            ? existingName
+            : null);
+
     // 4) إدخال / تحديث اللاعب
-    await db.into(db.leaguePlayers).insertOnConflictUpdate(
-          LeaguePlayersCompanion(
-            syncId: Value(player.syncId),
-            leagueSyncId: Value(leagueSyncId),
-            name: Value(player.name),
-            teamPlayerCategoryId: Value(player.teamPlayerCategoryId),
-          ),
-        );
+    await db.into(db.leaguePlayers).insert(
+      LeaguePlayersCompanion(
+        syncId: Value(player.syncId),
+        leagueSyncId: Value(leagueSyncId),
+        name: Value(effectiveName),
+        teamPlayerCategoryId: Value(player.teamPlayerCategoryId),
+      ),
+      onConflict: DoUpdate(
+        (old) => LeaguePlayersCompanion(
+          name: Value(effectiveName),
+          teamPlayerCategoryId: Value(player.teamPlayerCategoryId),
+          updatedAt: Value(DateTime.now()),
+        ),
+        target: [
+          db.leaguePlayers.leagueSyncId,
+          db.leaguePlayers.syncId,
+        ],
+      ),
+    );
   }
 
   Future<int> deleteLeaguePlayerBySyncId(String playerSyncId) async {

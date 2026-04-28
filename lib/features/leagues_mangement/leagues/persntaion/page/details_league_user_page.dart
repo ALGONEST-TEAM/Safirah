@@ -413,6 +413,8 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                                   6.h.verticalSpace,
                                   CheckStateInPostApiDataWidget(
                                     state: addOrderLeagueInvitationsPlayerState,
+                                    functionSuccess: (){},
+                                    messageSuccess: "تم ارسال طلب الانضمام الى الدوري بنجاح انتظر رد المنظم",
                                     bottonWidget: DefaultButtonWidget(
                                       text: 'ارسال طلب الانضمام',
                                       isLoading:

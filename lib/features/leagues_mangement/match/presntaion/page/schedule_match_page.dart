@@ -207,12 +207,6 @@ class _ScheduleMatchPageState extends ConsumerState<ScheduleMatchPage> {
 
                   print(_referee!.syncId);
                   print(_media!.syncId);
-                  // ✅ هنا لديك syncIds جاهزة للرفع مع الجدولة:
-                  // _referee?.syncId
-                  // _organizer?.syncId
-                  // _media?.syncId
-                  //
-                  // إذا API الجدولة يحتاجهم، أضفهم داخل run() عندما تعدل notifier لاحقًا.
 
                   ref.read(scheduleMatchProvider.notifier).run(
                         matchSyncId: widget.matchSyncId,
