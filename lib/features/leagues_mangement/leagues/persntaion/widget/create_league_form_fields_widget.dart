@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../../core/helpers/localized_number_helper.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
@@ -26,6 +27,15 @@ class CreateLeagueFormFieldsWidget extends StatelessWidget {
     required this.state,
     required this.notifier,
   });
+
+  String? _validateRequiredNumber(String? value, String message) {
+    final normalized = LocalizedNumberHelper.normalizeNumericText(value ?? '');
+    if (normalized.isEmpty) return message;
+    if (!LocalizedNumberHelper.isValidInteger(normalized)) {
+      return 'ادخل رقماً صحيحاً';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,13 +72,11 @@ class CreateLeagueFormFieldsWidget extends StatelessWidget {
           controller: teamsController,
           hintText: 'عدد الفرق',
           type: TextInputType.number,
-          onChanged: (v) => notifier.updateMaxTeams(int.tryParse(v) ?? 0),
+          onChanged: (v) =>
+              notifier.updateMaxTeams(LocalizedNumberHelper.parseInt(v) ?? 0),
           hintTextColor: Colors.grey[600],
           fieldValidator: (value) {
-            if (value == null || value.toString().isEmpty) {
-              return 'ادخل عدد الفرق في الدوري';
-            }
-            return null;
+            return _validateRequiredNumber(value, 'ادخل عدد الفرق في الدوري');
           },
         ),
         SizedBox(height: 16.h),
@@ -81,14 +89,12 @@ class CreateLeagueFormFieldsWidget extends StatelessWidget {
         TextFormFieldWidget(
           controller: subscriptionPriceController,
           hintText: 'سعر الاشتراك',
+          type: TextInputType.number,
           onChanged: notifier.updateName,
           hintTextColor: Colors.grey[600],
           labelTextColor: Colors.grey[600],
           fieldValidator: (value) {
-            if (value == null || value.toString().isEmpty) {
-              return 'ادخل سعر الاشتراك';
-            }
-            return null;
+            return _validateRequiredNumber(value, 'ادخل سعر الاشتراك');
           },
         ),
         SizedBox(height: 12.h),
@@ -120,12 +126,12 @@ class CreateLeagueFormFieldsWidget extends StatelessWidget {
                 type: TextInputType.number,
                 hintTextColor: Colors.grey[600],
                 onChanged: (v) =>
-                    notifier.updateMaxMainPlayers(int.tryParse(v) ?? 0),
+                    notifier.updateMaxMainPlayers(LocalizedNumberHelper.parseInt(v) ?? 0),
                 fieldValidator: (value) {
-                  if (value == null || value.toString().isEmpty) {
-                    return 'ادخل عدد اللاعبين الاساسيين للفريق';
-                  }
-                  return null;
+                  return _validateRequiredNumber(
+                    value,
+                    'ادخل عدد اللاعبين الاساسيين للفريق',
+                  );
                 },
               ),
             ),
@@ -137,12 +143,12 @@ class CreateLeagueFormFieldsWidget extends StatelessWidget {
                 type: TextInputType.number,
                 hintTextColor: Colors.grey[600],
                 onChanged: (v) =>
-                    notifier.updateMaxSubPlayers(int.tryParse(v) ?? 0),
+                    notifier.updateMaxSubPlayers(LocalizedNumberHelper.parseInt(v) ?? 0),
                 fieldValidator: (value) {
-                  if (value == null || value.toString().isEmpty) {
-                    return 'ادخل عدد اللاعبين الاحتياط للفريق';
-                  }
-                  return null;
+                  return _validateRequiredNumber(
+                    value,
+                    'ادخل عدد اللاعبين الاحتياط للفريق',
+                  );
                 },
               ),
             ),

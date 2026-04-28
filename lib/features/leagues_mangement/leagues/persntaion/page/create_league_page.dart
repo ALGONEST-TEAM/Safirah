@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:safirah/core/helpers/navigateTo.dart';
+import 'package:safirah/core/helpers/localized_number_helper.dart';
 import 'package:safirah/core/widgets/buttons/default_button.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -102,19 +103,32 @@ class _LeagueFormPageState extends ConsumerState<CreateLeaguePage> {
                   final isValid = formKey.currentState!.validate();
 
                   if (isValid) {
+                    final normalizedTeams = LocalizedNumberHelper.parseInt(
+                      teamsController.text,
+                    );
+                    final normalizedMainPlayers =
+                        LocalizedNumberHelper.parseInt(
+                      mainPlayersController.text,
+                    );
+                    final normalizedSubPlayers = LocalizedNumberHelper.parseInt(
+                      subPlayersController.text,
+                    );
+                    final normalizedSubscriptionPrice =
+                        LocalizedNumberHelper.normalizeNumericText(
+                      subscriptionPriceController.text,
+                    );
+
                     navigateTo(
                       context,
                       LeagueRulesPage(
                         name: nameController.text,
-                        maxTeams: int.tryParse(teamsController.text),
-                        maxSubPlayers:
-                            int.tryParse(subPlayersController.text),
-                        maxMainPlayers:
-                            int.tryParse(mainPlayersController.text),
+                        maxTeams: normalizedTeams,
+                        maxSubPlayers: normalizedSubPlayers,
+                        maxMainPlayers: normalizedMainPlayers,
                         isPrivate: state.isPrivate,
                         type: state.type,
                         scope: state.scope,
-                        subscriptionPrice: subscriptionPriceController.text,
+                        subscriptionPrice: normalizedSubscriptionPrice,
                         logoPath: _logoLocalPath,
                       ),
                     );

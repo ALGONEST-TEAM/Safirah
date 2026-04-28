@@ -40,24 +40,33 @@ class SyncFailedNotifier {
   void _onFailedRows(List<SyncQueueData> rows) {
     if (rows.isEmpty) return;
 
+    final newlyFailed = <SyncQueueData>[];
+
     for (final row in rows) {
       if (_shown.contains(row.id)) continue;
       _shown.add(row.id);
+      newlyFailed.add(row);
 
       // ✅ Rollback محلي (احترافي) لحالات فشل دائم
       _handleRollbackIfNeeded(row);
-
-      final ctx = _navigatorKey.currentContext;
-      if (ctx == null) return;
-
-      // نعرض رسالة واحدة واضحة للمستخدم.
-      final title = 'فشل في المزامنة';
-      final text = (row.lastError ?? '').trim().isNotEmpty
-          ? row.lastError!.trim()
-          : 'تعذر رفع البيانات إلى الخادم. الرجاء المحاولة لاحقاً.';
-
-      showFlashBarError(context: ctx, title: title, text: text);
     }
+
+    if (newlyFailed.isEmpty) return;
+
+    final ctx = _navigatorKey.currentContext;
+    if (ctx == null) return;
+
+    final failedCount = newlyFailed.length;
+    final sampleError = newlyFailed
+        .map((e) => (e.lastError ?? '').trim())
+        .firstWhere((e) => e.isNotEmpty, orElse: () => '');
+
+    final title = failedCount == 1 ? 'تعذر رفع بعض البيانات' : 'توجد عمليات مزامنة تحتاج مراجعة';
+    final text = sampleError.isNotEmpty && failedCount == 1
+        ? '$sampleError\nيمكنك إعادة الإرسال من الإعدادات > حالة المزامنة.'
+        : 'يوجد $failedCount من عمليات المزامنة التي تحتاج مراجعة. يمكنك إعادة الإرسال من الإعدادات > حالة المزامنة.';
+
+    showFlashBarError(context: ctx, title: title, text: text);
   }
 
   Future<void> _handleRollbackIfNeeded(SyncQueueData row) async {

@@ -5,7 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../team_and_player/data/model/team_model.dart';
-import '../../../team_and_player/presntation/state_mangment/riverpod.dart';
+import '../../../team_and_player/presntation/state_mangment/riverpod.dart'
+    as team_player_riverpod;
 import '../state_mangement/riverpod.dart';
 import 'player_tile_with_event_widget.dart';
 
@@ -29,20 +30,19 @@ class _ListOfPlayerInEventMatchWidgetState
     extends ConsumerState<ListOfPlayerInEventMatchWidget> {
   @override
   Widget build(BuildContext context) {
-    final playerOfTeam = ref.watch(playersOfTeamProvider(widget.teamSyncId));
+    final playerOfTeam =
+        ref.watch(team_player_riverpod.playersOfTeamStreamProvider(widget.teamSyncId));
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8.0.w, vertical: 8.h),
-      child: CheckStateInGetApiDataWidget(
-        state: playerOfTeam,
-        widgetOfData: Builder(
-          builder: (_) {
+      child: CheckStateInStreamWidget<List<PlayerModel>>(
+        async: playerOfTeam,
+        isEmpty: (players) => players.isEmpty,
+        dataBuilder: (players) {
             final matchTermSyncId = widget.matchTermSyncId;
             if (matchTermSyncId.isEmpty) {
               return const SizedBox.shrink();
             }
-
-            final players = playerOfTeam.data;
 
             final participating = <PlayerModel>[];
             final bench = <PlayerModel>[];
@@ -123,8 +123,7 @@ class _ListOfPlayerInEventMatchWidgetState
                 ),
               ],
             );
-          },
-        ),
+        },
       ),
     );
   }

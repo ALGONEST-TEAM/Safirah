@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../../core/widgets/online_images_widget.dart';
 
 class TeamTileWidget extends StatelessWidget {
   final String name;
@@ -17,6 +16,8 @@ class TeamTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = avatarUrl?.trim() ?? '';
+
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -27,11 +28,17 @@ class TeamTileWidget extends StatelessWidget {
         ),
         child: Row(
           children: [
-            CircleAvatar(
-              backgroundImage:
-              avatarUrl != null ? FileImage(File(avatarUrl!)) : null,
-              backgroundColor: Colors.grey[300],
-            ),
+            imageUrl.isEmpty
+                ? CircleAvatar(
+                    backgroundColor: Colors.grey[300],
+                  )
+                : OnlineImagesWidget(
+                    imageUrl: imageUrl,
+                    circularImage: true,
+                    circularRadius: 20.r,
+                    size: Size(40.r, 40.r),
+                    backgroundColor: Colors.grey[300],
+                  ),
             const SizedBox(width: 10),
             Expanded(child: AutoSizeTextWidget(text: name, fontSize: 14.sp)),
           ],

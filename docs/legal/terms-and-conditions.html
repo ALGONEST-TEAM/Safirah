@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>الشروط والأحكام | تطبيق صافرة</title>
+    <meta name="description" content="الشروط والأحكام الخاصة باستخدام تطبيق صافرة، بما يشمل المتجر الإلكتروني والتوقعات والدوريات الرياضية.">
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --surface: #ffffff;
+        --surface-soft: #f8fafc;
+        --text: #1f2937;
+        --muted: #667085;
+        --primary: #ca9a2c;
+        --primary-soft: rgba(202, 154, 44, 0.12);
+        --secondary: #1d1750;
+        --secondary-soft: rgba(29, 23, 80, 0.08);
+        --border: rgba(29, 23, 80, 0.08);
+        --shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        --radius: 20px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Tahoma, Arial, sans-serif;
+        background: linear-gradient(180deg, #fbfbfd 0%, var(--bg) 100%);
+        color: var(--text);
+        line-height: 1.9;
+      }
+
+      body[dir="rtl"] {
+        text-align: right;
+      }
+
+      .container {
+        width: min(100% - 32px, 980px);
+        margin: 0 auto;
+      }
+
+      .page {
+        padding: 32px 0 48px;
+      }
+
+      .hero {
+        background: linear-gradient(135deg, var(--secondary) 0%, #312a84 100%);
+        color: #fff;
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        padding: 32px;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset-inline-start: -40px;
+        bottom: -60px;
+        width: 180px;
+        height: 180px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 50%;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        color: rgba(255, 255, 255, 0.92);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 14px;
+        margin-bottom: 18px;
+      }
+
+      .hero h1 {
+        margin: 0 0 12px;
+        font-size: clamp(30px, 4vw, 42px);
+        line-height: 1.3;
+      }
+
+      .hero p {
+        margin: 0;
+        font-size: 17px;
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 760px;
+      }
+
+      .meta-row,
+      .quick-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .meta-chip,
+      .quick-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      .quick-link {
+        background: var(--surface);
+        color: var(--secondary);
+        border-color: var(--border);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+      }
+
+      .notice,
+      .section,
+      .footer-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      .notice {
+        margin-bottom: 20px;
+        padding: 22px 24px;
+        background: linear-gradient(180deg, #fffdf7 0%, #fff 100%);
+        border-color: rgba(202, 154, 44, 0.18);
+      }
+
+      .notice h2,
+      .section h2,
+      .footer-card h2 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        line-height: 1.4;
+        color: var(--secondary);
+      }
+
+      .notice p,
+      .footer-card p,
+      .section p {
+        margin: 0;
+        color: var(--text);
+      }
+
+      .sections {
+        display: grid;
+        gap: 16px;
+      }
+
+      .section {
+        padding: 22px 24px;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 12px;
+      }
+
+      .section-number {
+        flex: 0 0 auto;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--secondary);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .section h2 {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      .section-intro {
+        margin-bottom: 12px;
+        color: var(--muted);
+      }
+
+      .list,
+      .sub-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .list li,
+      .sub-list li {
+        position: relative;
+        padding-inline-start: 18px;
+        margin-bottom: 8px;
+      }
+
+      .list li::before,
+      .sub-list li::before {
+        content: "";
+        position: absolute;
+        inset-inline-start: 0;
+        top: 12px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+
+      .group {
+        margin-top: 14px;
+        padding: 16px;
+        border-radius: 16px;
+        background: var(--surface-soft);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+      }
+
+      .group h3 {
+        margin: 0 0 8px;
+        color: var(--secondary);
+        font-size: 18px;
+      }
+
+      .footer-card {
+        margin-top: 20px;
+        padding: 24px;
+      }
+
+      .footer-card a {
+        color: var(--secondary);
+        font-weight: 700;
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .footer-links a {
+        text-decoration: none;
+        color: var(--secondary);
+        background: var(--secondary-soft);
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+      }
+
+      .site-footer {
+        padding: 18px 0 0;
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 640px) {
+        .page {
+          padding-top: 16px;
+        }
+
+        .container {
+          width: min(100% - 20px, 980px);
+        }
+
+        .hero,
+        .notice,
+        .section,
+        .footer-card {
+          border-radius: 18px;
+          padding: 18px;
+        }
+
+        .hero h1 {
+          font-size: 28px;
+        }
+
+        .hero p {
+          font-size: 15px;
+        }
+
+        .section h2,
+        .notice h2,
+        .footer-card h2 {
+          font-size: 20px;
+        }
+      }
+
+      @media print {
+        body {
+          background: #fff;
+        }
+
+        .hero,
+        .notice,
+        .section,
+        .footer-card {
+          box-shadow: none;
+          border: 1px solid #ddd;
+        }
+
+        .quick-links,
+        .footer-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="container">
+        <header class="hero">
+          <div class="eyebrow">⚖️ وثيقة قانونية</div>
+          <h1>الشروط والأحكام</h1>
+          <p>
+            يرجى قراءة هذه الشروط والأحكام بعناية قبل استخدام تطبيق صافرة.
+            باستخدامك للتطبيق فإنك توافق على الالتزام بما يلي.
+          </p>
+          <div class="meta-row">
+            <span class="meta-chip">📅 آخر تحديث: 18 أبريل 2026</span>
+            <span class="meta-chip">✅ يسري على جميع مستخدمي التطبيق</span>
+            <a class="meta-chip" href="mailto:spport@safira.com">✉️ spport@safira.com</a>
+          </div>
+          <nav class="quick-links" aria-label="روابط سريعة">
+            <a class="quick-link" href="./privacy-policy.html">الانتقال إلى سياسة الخصوصية</a>
+          </nav>
+        </header>
+
+        <section class="notice" aria-labelledby="user-commitment">
+          <h2 id="user-commitment">التزام المستخدم</h2>
+          <ul class="list">
+            <li>يجب استخدام تطبيق صافرة لأغراض مشروعة فقط ووفقًا للأنظمة المعمول بها.</li>
+            <li>يمنع إساءة استخدام التطبيق أو محاولة التلاعب بالطلبات أو النتائج أو النقاط أو الجوائز أو أنظمة الدوريات.</li>
+            <li>أي استخدام يضر بسلامة النظام أو بحقوق المستخدمين الآخرين يعد مخالفة لهذه الشروط.</li>
+          </ul>
+        </section>
+
+        <div class="sections">
+          <section class="section" id="terms-1">
+            <div class="section-header">
+              <span class="section-number">1</span>
+              <h2>استخدام التطبيق</h2>
+            </div>
+            <ul class="list">
+              <li>تطبيق صافرة منصة رياضية متكاملة تشمل متجرًا إلكترونيًا للمنتجات الرياضية، نظام التوقعات الرياضية، ونظام إنشاء وإدارة الدوريات الرياضية.</li>
+              <li>يجب استخدام التطبيق لأغراض مشروعة فقط ووفقًا للأنظمة المعمول بها.</li>
+              <li>يمنع إساءة استخدام التطبيق أو محاولة التلاعب بالطلبات أو النتائج أو النقاط أو الجوائز أو أنظمة الدوريات.</li>
+              <li>يمنع استخدام التطبيق بأي طريقة قد تؤثر على سلامة النظام أو حقوق المستخدمين الآخرين.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="terms-2">
+            <div class="section-header">
+              <span class="section-number">2</span>
+              <h2>الحسابات</h2>
+            </div>
+            <ul class="list">
+              <li>المستخدم مسؤول عن صحة البيانات المدخلة عند إنشاء الحساب.</li>
+              <li>يتحمل المستخدم مسؤولية الحفاظ على سرية معلومات حسابه ورقم التحقق (OTP).</li>
+              <li>يحق لإدارة التطبيق تعليق أو إيقاف أي حساب مخالف أو يثبت استخدامه بشكل غير مشروع.</li>
+              <li>يحق للإدارة مراجعة أو إيقاف الحسابات التي يشتبه في وجود تلاعب أو إساءة استخدام فيها.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="terms-3">
+            <div class="section-header">
+              <span class="section-number">3</span>
+              <h2>المتجر الإلكتروني والطلبات</h2>
+            </div>
+            <ul class="list">
+              <li>جميع الطلبات تخضع لتوفر المنتجات في المخزون وقت تأكيد الطلب.</li>
+              <li>يتم تنفيذ الطلبات داخل اليمن فقط وفقًا لسياسة الشحن والتوصيل المعتمدة.</li>
+              <li>المستخدم مسؤول عن صحة بيانات التوصيل والعنوان المدخل.</li>
+              <li>يحق لإدارة التطبيق إلغاء الطلب في حال وجود بيانات غير صحيحة أو تعذر التواصل مع العميل.</li>
+              <li>الأسعار المعروضة قابلة للتحديث وفقًا لتغيرات السوق أو التوفر.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="terms-4">
+            <div class="section-header">
+              <span class="section-number">4</span>
+              <h2>الدفع والاستلام</h2>
+            </div>
+            <ul class="list">
+              <li>تتوفر وسائل الدفع عبر الدفع عند الاستلام أو من خلال المحافظ الإلكترونية اليمنية المعتمدة مثل محفظة بنك الكريمي ومحفظة جوالي وغيرها من الوسائل المتاحة داخل التطبيق.</li>
+              <li>يتم تأكيد الطلب بعد استكمال بيانات الطلب واعتماد وسيلة الدفع المناسبة.</li>
+              <li>التطبيق غير مسؤول عن أي تأخير أو مشكلة ناتجة عن مزود خدمة الدفع الخارجي.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="terms-5">
+            <div class="section-header">
+              <span class="section-number">5</span>
+              <h2>سياسة الاسترجاع والاستبدال</h2>
+            </div>
+            <ul class="list">
+              <li>يمكن طلب استرجاع أو استبدال المنتجات خلال مدة أقصاها يومان من تاريخ الاستلام.</li>
+              <li>يشترط أن تكون المنتجات بحالتها الأصلية وغير مستخدمة وقابلة لإعادة البيع.</li>
+              <li>لا يشمل الاسترجاع أو الاستبدال المنتجات المتضررة بسبب سوء الاستخدام من قبل العميل.</li>
+              <li>يحق للإدارة مراجعة طلب الاسترجاع أو الاستبدال واعتماده وفقًا للسياسة المعتمدة.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="terms-6">
+            <div class="section-header">
+              <span class="section-number">6</span>
+              <h2>نظام التوقعات والجوائز</h2>
+            </div>
+            <ul class="list">
+              <li>يتيح التطبيق للمستخدمين المشاركة في توقع نتائج البطولات والمباريات الرياضية وجمع النقاط بناءً على دقة التوقعات.</li>
+              <li>يتم تحديد الفائزين بناءً على أعلى عدد من النقاط وفق ترتيب المراكز (الأول، الثاني، الثالث) حسب ما يتم تحديده من إدارة التطبيق عبر لوحة التحكم.</li>
+              <li>الجوائز قد تكون كوبونات خصم، منتجات رياضية، جوائز عينية، أو مبالغ مالية وفقًا لما يتم الإعلان عنه.</li>
+              <li>لا يحق للمستخدم المطالبة بجائزة غير معلنة أو المطالبة بتحويل الجوائز إلى شكل آخر إلا إذا تم النص على ذلك رسميًا.</li>
+              <li>يحق للإدارة استبعاد أي مستخدم يثبت قيامه بالغش أو التلاعب في نظام التوقعات.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="terms-7">
+            <div class="section-header">
+              <span class="section-number">7</span>
+              <h2>نظام الدوريات</h2>
+            </div>
+            <ul class="list">
+              <li>يوفر التطبيق نظامًا يساعد المستخدمين على إنشاء وتنظيم الدوريات الرياضية وإدارة المباريات بين المشاركين.</li>
+              <li>يمكن لمنظم الدوري دعوة المستخدمين والمشرفين وتعيين حكم لإدارة المباريات وإدخال النتائج والإحصائيات مثل الأهداف، الأخطاء، البطاقات الصفراء والحمراء وغيرها.</li>
+              <li>التطبيق يعمل كأداة تنظيمية فقط ولا يتحمل مسؤولية التحكيم أو صحة النتائج المدخلة.</li>
+              <li>يتحمل منظم الدوري المسؤولية الكاملة عن إدارة الدوري وحل النزاعات بين المشاركين واعتماد النتائج النهائية.</li>
+              <li>جميع الاشتراكات في الدوريات مجانية.</li>
+              <li>في حال رغبة منظم الدوري بإضافة راعٍ رسمي وإظهار إعلان داخل تفاصيل الدوري، يتم تطبيق رسوم مالية حسب نوع الرعاية التي يتم اختيارها.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="terms-8">
+            <div class="section-header">
+              <span class="section-number">8</span>
+              <h2>الإعلانات والرعايات</h2>
+            </div>
+            <ul class="list">
+              <li>يحق لمنظم الدوري طلب إضافة راعٍ أو إعلان تجاري داخل الدوري وفق الباقات المتاحة داخل التطبيق.</li>
+              <li>تخضع الإعلانات للمراجعة والموافقة من إدارة التطبيق.</li>
+              <li>يحق للإدارة رفض أي إعلان مخالف للسياسات أو غير مناسب لطبيعة التطبيق.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="terms-9">
+            <div class="section-header">
+              <span class="section-number">9</span>
+              <h2>إخلاء المسؤولية</h2>
+            </div>
+            <ul class="list">
+              <li>التطبيق غير مسؤول عن أي نزاعات مباشرة بين المشترين والبائعين أو بين المشاركين في الدوريات.</li>
+              <li>التطبيق غير مسؤول عن أي قرارات تحكيمية أو نتائج يتم إدخالها من قبل المستخدمين أو الحكام المعينين.</li>
+              <li>لا نتحمل مسؤولية أي خسائر ناتجة عن ظروف خارجة عن السيطرة مثل الأعطال التقنية أو مشاكل الشبكات أو التأخير الناتج عن جهات خارجية.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="terms-10">
+            <div class="section-header">
+              <span class="section-number">10</span>
+              <h2>سياسة المحتوى والمشاركات</h2>
+            </div>
+            <ul class="list">
+              <li>يحق للمستخدمين إضافة المحتوى المرتبط بالدوريات أو التقييمات أو المشاركات الرياضية وفقًا لضوابط الاستخدام.</li>
+              <li>يقر المستخدم بأن أي صور أو فيديوهات أو شعارات أو نصوص يقوم برفعها داخل التطبيق مملوكة له أو لديه الحق النظامي في استخدامها ونشرها.</li>
+              <li>يمنح المستخدم التطبيق ترخيصًا غير حصري لعرض هذا المحتوى ومعالجته وتخزينه بالقدر اللازم لتشغيل الخدمة وتحسين تجربة الاستخدام داخل التطبيق.</li>
+              <li>يمنع نشر أي محتوى مسيء أو مضلل أو مخالف للآداب العامة أو يحتوي على معلومات غير صحيحة.</li>
+              <li>يمنع رفع أي محتوى ينتهك حقوق الملكية الفكرية أو الخصوصية أو حقوق أي طرف ثالث، ويحق لإدارة التطبيق إزالة المحتوى المخالف واتخاذ الإجراء المناسب.</li>
+              <li>يحق لإدارة التطبيق حذف أي محتوى مخالف دون إشعار مسبق.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="terms-11">
+            <div class="section-header">
+              <span class="section-number">11</span>
+              <h2>سياسة الدعم والتواصل</h2>
+            </div>
+            <ul class="list">
+              <li>يوفر التطبيق قنوات دعم فني للمستخدمين فيما يتعلق بالطلبات أو الحسابات أو المشكلات التقنية.</li>
+              <li>يتم الرد على الاستفسارات خلال أوقات العمل الرسمية.</li>
+              <li>يحق للإدارة تعليق أو إيقاف الحسابات المخالفة للسياسات أو الشروط المعتمدة.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="terms-12">
+            <div class="section-header">
+              <span class="section-number">12</span>
+              <h2>القانون الحاكم</h2>
+            </div>
+            <p>تخضع هذه الشروط والأحكام لقوانين الجمهورية اليمنية، ويتم الفصل في أي نزاع عبر الجهات القضائية المختصة داخل الجمهورية اليمنية.</p>
+          </section>
+
+          <section class="section" id="terms-13">
+            <div class="section-header">
+              <span class="section-number">13</span>
+              <h2>التعديلات على الشروط</h2>
+            </div>
+            <p>يحق لإدارة التطبيق تحديث هذه الشروط والأحكام في أي وقت عند الحاجة، ويتم نشر النسخة المحدثة داخل التطبيق، ويعد استمرار استخدام التطبيق بعد التحديث موافقة ضمنية على التعديلات الجديدة.</p>
+          </section>
+          <section class="section" id="terms-14">
+            <div class="section-header">
+              <span class="section-number">14</span>
+              <h2>التواصل والاستفسارات</h2>
+            </div>
+            <p class="section-intro">للاستفسارات المتعلقة بهذه الشروط والأحكام أو الطلبات أو الحسابات أو البلاغات القانونية المرتبطة باستخدام التطبيق، يمكنك التواصل معنا عبر البريد الإلكتروني التالي:</p>
+            <ul class="list">
+              <li>البريد الإلكتروني: <a href="mailto:spport@safira.com">spport@safira.com</a></li>
+            </ul>
+          </section>
+        </div>
+
+        <section class="footer-card">
+          <h2>الوثائق المرتبطة</h2>
+          <p>يمكنك أيضًا مراجعة صفحة سياسة الخصوصية الخاصة بتطبيق صافرة.</p>
+          <div class="footer-links">
+            <a href="./privacy-policy.html">سياسة الخصوصية</a>
+          </div>
+        </section>
+
+        <footer class="site-footer">
+          <p>© Safirah App — وثائق قانونية للاستخدام والنشر.</p>
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>
+
+
+

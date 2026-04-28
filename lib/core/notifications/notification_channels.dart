@@ -11,7 +11,6 @@ class NotificationChannels {
       importance: NotificationImportance.Max,
       channelShowBadge: true,
       playSound: true,
-      criticalAlerts: true,
       defaultColor: const Color(0xFF9D50DD),
       ledColor: Colors.white,
     ),

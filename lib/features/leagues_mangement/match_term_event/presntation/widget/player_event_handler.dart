@@ -5,7 +5,8 @@ import 'package:uuid/uuid.dart';
 import '../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../core/network/errors/app_exception_message.dart';
 import '../../../../../core/state/state.dart';
-import '../../../team_and_player/presntation/state_mangment/riverpod.dart';
+import '../../../team_and_player/presntation/state_mangment/riverpod.dart'
+    as team_player_riverpod;
 import '../../data/model/assist_model.dart';
 import '../../data/model/goal_model.dart';
 import '../../data/model/warring_model.dart';
@@ -76,6 +77,8 @@ class PlayerEventHandler {
     await ref.read(addGoalNotifierProvider(goal).notifier).run();
     final result = ref.read(addGoalNotifierProvider(goal));
 
+    if (!context.mounted) return;
+
     if (result.stateData == States.error) {
       showFlashBarError(
         context: context,
@@ -88,6 +91,7 @@ class PlayerEventHandler {
     await ref
         .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
         .load();
+    if (!context.mounted) return;
     ref.read(currentVarEventProvider.notifier).state = VarEvent(
       type: 'goal',
       event: result.data,
@@ -117,6 +121,8 @@ class PlayerEventHandler {
     await ref.read(addWarningNotifierProvider(warning).notifier).run();
     final result = ref.read(addWarningNotifierProvider(warning));
 
+    if (!context.mounted) return;
+
     if (result.stateData == States.error) {
       showFlashBarError(
         context: context,
@@ -129,6 +135,7 @@ class PlayerEventHandler {
     await ref
         .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
         .load();
+    if (!context.mounted) return;
 
     ref.read(currentVarEventProvider.notifier).state = VarEvent(
       type: 'warning',
@@ -161,6 +168,8 @@ class PlayerEventHandler {
     await ref.read(addWarningNotifierProvider(warning).notifier).run();
     final result = ref.read(addWarningNotifierProvider(warning));
 
+    if (!context.mounted) return;
+
     if (result.stateData == States.error) {
       showFlashBarError(
         context: context,
@@ -173,6 +182,7 @@ class PlayerEventHandler {
     await ref
         .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
         .load();
+    if (!context.mounted) return;
 
     ref.read(currentVarEventProvider.notifier).state = VarEvent(
       type: 'warning',
@@ -207,6 +217,8 @@ class PlayerEventHandler {
     await ref.read(provider.notifier).run();
     final result = ref.read(provider);
 
+    if (!context.mounted) return;
+
     if (result.stateData == States.error) {
       showFlashBarError(
         context: context,
@@ -219,6 +231,7 @@ class PlayerEventHandler {
     await ref
         .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
         .load();
+    if (!context.mounted) return;
 
 
     showFlashBarSuccess(
@@ -234,6 +247,7 @@ class PlayerEventHandler {
   }) async {
     if (!_canProceed(context)) return;
 
+    final container = ProviderScope.containerOf(context, listen: false);
     final currentTimer = ref.read(matchTimerProvider);
 
     final subNotifier = ref.read(substitutePlayerNotifierProvider.notifier);
@@ -247,22 +261,24 @@ class PlayerEventHandler {
 
     await subNotifier.run();
 
-    ref.invalidate(getPlayerParticipationStatusProvider((
+    container.invalidate(getPlayerParticipationStatusProvider((
       matchSyncId: matchSyncId,
       matchTermSyncId: matchTermSyncId,
       playerSyncId: playerSyncId,
     )));
-    ref.invalidate(getPlayerParticipationStatusProvider((
+    container.invalidate(getPlayerParticipationStatusProvider((
       matchSyncId: matchSyncId,
       matchTermSyncId: matchTermSyncId,
       playerSyncId: incomingPlayerSyncId,
     )));
 
-    ref.read(playersOfTeamProvider(teamSyncId).notifier).load();
+    container.invalidate(team_player_riverpod.playersOfTeamStreamProvider(teamSyncId));
 
-    await ref
+    await container
         .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
         .load();
+
+    if (!context.mounted) return;
 
     showFlashBarSuccess(
       context: context,

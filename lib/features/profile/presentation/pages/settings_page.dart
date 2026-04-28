@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/constants/app_icons.dart';
+import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../../generated/l10n.dart';
 import '../../../../../services/auth/auth.dart';
+import '../../../sync_status/presentation/pages/sync_status_page.dart';
 import '../widgets/change_phone_number_widget.dart';
 import '../widgets/list_tile_profile_widget.dart';
 import '../widgets/change_currency_bottom_sheet.dart';
@@ -48,16 +50,24 @@ class _SettingsPageState extends State<SettingsPage> {
                 );
               },
             ),
+            // ListTileProfileWidget(
+            //   title: S.of(context).language,
+            //   icon: AppIcons.translate,
+            //   onTap: () {
+            //     scrollShowModalBottomSheetWidget(
+            //       title: S.of(context).applicationLanguage,
+            //       fontSize: 15.sp,
+            //       context: context,
+            //       page: const LanguageBottomSheet(),
+            //     );
+            //   },
+            // ),
             ListTileProfileWidget(
-              title: S.of(context).language,
-              icon: AppIcons.translate,
+              title: 'حالة المزامنة',
+              icon: AppIcons.warning,
+
               onTap: () {
-                scrollShowModalBottomSheetWidget(
-                  title: S.of(context).applicationLanguage,
-                  fontSize: 15.sp,
-                  context: context,
-                  page: const LanguageBottomSheet(),
-                );
+                navigateTo(context, const SyncStatusPage());
               },
             ),
             Visibility(

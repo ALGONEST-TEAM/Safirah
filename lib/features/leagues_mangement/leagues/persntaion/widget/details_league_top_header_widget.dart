@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../core/helpers/navigateTo.dart';
-import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../core/state/check_state_in_post_api_data_widget.dart';
 import '../../../../../injection.dart' as di;
 import '../../../../authorization/authorization_sync_runner.dart';
@@ -17,7 +16,6 @@ import '../../../match/presntaion/state_managment/riverpod.dart';
 import '../../../match_term_event/presntation/state_mangement/riverpod.dart';
 import '../../../team_and_player/presntation/page/show_team_and_player_page.dart';
 import '../../../team_and_player/presntation/page/teams_with_players_widget.dart';
-import '../../data/model/league_status_model.dart';
 import '../riverpod/riverpod.dart';
 import 'button_of_organizer_widget.dart';
 
@@ -59,7 +57,8 @@ class _DetailsLeagueTopHeaderWidgetState
 
     final leagueStatus =
         ref.watch(leagueStatusStreamProvider(widget.leagueSyncId));
-    ref.watch(leaguePermissionsProvider(widget.leagueSyncId));
+    final leaguePermissions = ref.watch(leaguePermissionsProvider(widget.leagueSyncId));
+    final canEditLeague = leaguePermissions.asData?.value.contains('league.edit') ?? false;
 
     // ref.watch(leagueStatusProvider(widget.leagueSyncId));
     //  ref.watch(usersHasRoleRefreshProvider(widget.leagueSyncId));
@@ -78,31 +77,22 @@ class _DetailsLeagueTopHeaderWidgetState
                 ButtonOfOrganizerWidget(
                   title: "الفرق واللعبين",
                   onTap: () {
-                    print(leagueStatus.asData!.value!.hasPlayersInTeams);
-                    print((detailsLeague.asData!.value!.maxSubPlayers ?? 0) +
-                        (detailsLeague.asData!.value!.maxMainPlayers ?? 0));
+                    final details = detailsLeague.asData?.value;
+                    final status = leagueStatus.asData?.value;
+                    if (details == null || status == null) return;
+
                     navigateTo(
                       context,
-                      leagueStatus.asData!.value!.hasPlayersInTeams
+                      status.hasPlayersInTeams || !canEditLeague
                           ? TeamsWithPlayersPage(
-                              leagueSyncId: detailsLeague.asData!.value!.syncId,
+                              leagueSyncId: details.syncId,
                             )
-                          : AuthorizationGateHideIfDenied(
-                              leagueSyncId: widget.leagueSyncId,
-                              permissionKey: 'league.edit',
-                              child: ShowTeamAndPlayerPage(
-                                leagueSyncId:
-                                    detailsLeague.asData!.value!.syncId,
-                                maxTeam:
-                                    detailsLeague.asData!.value!.maxTeams ?? 0,
-                                maxPlayer: (detailsLeague
-                                            .asData!.value!.maxSubPlayers ??
-                                        0) +
-                                    (detailsLeague
-                                            .asData!.value!.maxMainPlayers ??
-                                        0),
-                                //   detailsLeague.data!.maxMainPlayers,
-                              ),
+                          : ShowTeamAndPlayerPage(
+                              leagueSyncId: details.syncId,
+                              maxTeam: details.maxTeams ?? 0,
+                              maxPlayer: (details.maxSubPlayers ?? 0) +
+                                  (details.maxMainPlayers ?? 0),
+                              //   detailsLeague.data!.maxMainPlayers,
                             ),
                     );
                   },

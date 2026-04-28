@@ -1,15 +1,32 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../main.dart';
 import '../../generated/l10n.dart';
 import '../theme/app_colors.dart';
 import '../widgets/auto_size_text_widget.dart';
+
+BuildContext? _resolveFlashbarContext(BuildContext context) {
+  final rootContext = appNavigatorKey.currentContext;
+  if (rootContext != null) {
+    return rootContext;
+  }
+
+  if (context.mounted) {
+    return context;
+  }
+
+  return null;
+}
 
 // /// Success ///
 void showFlashBarSuccess({
   required BuildContext context,
   required String message,
 }) {
+  final targetContext = _resolveFlashbarContext(context);
+  if (targetContext == null) return;
+
   Flushbar(
     duration: const Duration(seconds: 3),
     message: message,
@@ -29,7 +46,7 @@ void showFlashBarSuccess({
     borderRadius: BorderRadius.circular(8.r),
     flushbarPosition: FlushbarPosition.TOP,
     flushbarStyle: FlushbarStyle.FLOATING,
-  ).show(context);
+  ).show(targetContext);
 }
 
 /// Error ///
@@ -38,6 +55,8 @@ void showFlashBarSuccess({
   required String title,
   required String text,
 }) {
+  final targetContext = _resolveFlashbarContext(context);
+  if (targetContext == null) return;
 
   Flushbar(
     duration: const Duration(seconds: 3),
@@ -69,7 +88,7 @@ void showFlashBarSuccess({
     borderRadius: BorderRadius.circular(8.r),
     flushbarPosition: FlushbarPosition.TOP,
     flushbarStyle: FlushbarStyle.FLOATING,
-  ).show(context);
+  ).show(targetContext);
 }
 
 // Warring
@@ -77,6 +96,9 @@ void showFlashBarWarring({
   required BuildContext context,
   required String message,
 }) {
+  final targetContext = _resolveFlashbarContext(context);
+  if (targetContext == null) return;
+
   Flushbar(
     duration: const Duration(seconds: 3),
     message: message,
@@ -97,7 +119,7 @@ void showFlashBarWarring({
     borderRadius: BorderRadius.circular(8.r),
     flushbarPosition: FlushbarPosition.TOP,
     flushbarStyle: FlushbarStyle.FLOATING,
-  ).show(context);
+  ).show(targetContext);
 }
 
 /// Exit ///

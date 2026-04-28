@@ -9,6 +9,11 @@ import 'package:safirah/core/database/table/sync_queue_table.dart';
 
 import 'maltipart_payload.dart';
 
+typedef SyncRemoteSender = Future<void> Function(
+  EntitySyncEndpoint endpoint,
+  Map<String, dynamic> data,
+);
+
 /// خدمة عامة لإدارة المزامنة بين قاعدة البيانات المحلية والخادم.
 ///
 /// الفكرة:
@@ -18,8 +23,12 @@ import 'maltipart_payload.dart';
 ///   ليقوم بإرسال كل العمليات غير المزامنة للخادم، وعند نجاحها نحدّث السجل كـ synced.
 class SyncService {
   final Safirah db;
+  final SyncRemoteSender? _remoteSender;
 
-  SyncService({required this.db});
+  static const Duration staleInProgressAfter = Duration(minutes: 5);
+
+  SyncService({required this.db, SyncRemoteSender? remoteSender})
+      : _remoteSender = remoteSender;
 
   /// أنواع العمليات المدعومة في طابور المزامنة
   static const String operationCreate = 'create';
@@ -34,6 +43,41 @@ class SyncService {
   static const Duration _maxBackoff = Duration(seconds: 60);
 
   bool _isSyncing = false;
+
+  static const Set<String> _benignConflictHints = <String>{
+    'already exists',
+    'already exist',
+    'already processed',
+    'already created',
+    'already been taken',
+    'has already been taken',
+    'duplicate',
+    'duplicated',
+    'request already processed',
+    'has been handled',
+    'already responded',
+    'already accepted',
+    'already rejected',
+    'already invited',
+    'already synced',
+    'موجود بالفعل',
+    'موجود مسبقا',
+    'موجود مسبقاً',
+    'تمت معالجته',
+    'تمت المعالجة',
+    'تم انشاؤه مسبقا',
+    'تم إنشاؤه مسبقاً',
+    'تم الرد مسبقا',
+    'تم الرد مسبقاً',
+    'تم قبوله مسبقا',
+    'تم قبوله مسبقاً',
+    'تم رفضه مسبقا',
+    'تم رفضه مسبقاً',
+    'تمت مزامنته مسبقا',
+    'تمت مزامنته مسبقاً',
+    'مكرر',
+    'مكررة',
+  };
 
   /// إضافة عملية إلى جدول المزامنة.
   ///
@@ -75,6 +119,124 @@ class SyncService {
         .get();
   }
 
+  /// يراقب العمليات التي ما تزال تحتاج انتباه المستخدم أو النظام.
+  ///
+  /// يشمل:
+  /// - pending
+  /// - in_progress
+  /// - failed
+  Stream<List<SyncQueueData>> watchActionableQueue() {
+    final q = db.select(db.syncQueue)
+      ..where(
+        (t) =>
+            t.status.equals(SyncQueueStatus.pending) |
+            t.status.equals(SyncQueueStatus.inProgress) |
+            t.status.equals(SyncQueueStatus.failed),
+      )
+      ..orderBy([
+        (t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc),
+      ]);
+
+    return q.watch();
+  }
+
+  /// يعيد الصفوف العالقة في [in_progress] إلى [pending] إذا مرّ عليها وقت طويل
+  /// (مثلاً بسبب crash / force close أثناء الإرسال).
+  ///
+  /// لا نلمس الصفوف الحديثة حتى لا نكسر مزامنة جارية داخل نفس الجلسة.
+  Future<int> recoverStaleInProgressOperations({
+    Duration staleAfter = staleInProgressAfter,
+  }) async {
+    final cutoff = DateTime.now().subtract(staleAfter);
+
+    final staleRows = await (db.select(db.syncQueue)
+          ..where(
+            (tbl) =>
+                tbl.status.equals(SyncQueueStatus.inProgress) &
+                (tbl.lastAttemptAt.isNull() |
+                    tbl.lastAttemptAt.isSmallerThanValue(cutoff)),
+          ))
+        .get();
+
+    if (staleRows.isEmpty) return 0;
+
+    await (db.update(db.syncQueue)
+          ..where(
+            (tbl) =>
+                tbl.status.equals(SyncQueueStatus.inProgress) &
+                (tbl.lastAttemptAt.isNull() |
+                    tbl.lastAttemptAt.isSmallerThanValue(cutoff)),
+          ))
+        .write(
+      const SyncQueueCompanion(
+        synced: Value(false),
+        status: Value(SyncQueueStatus.pending),
+        lastError: Value(null),
+      ),
+    );
+
+    return staleRows.length;
+  }
+
+  /// يحول السجلات الفاشلة القديمة التي تبيّن أنها ليست أخطاء حقيقية
+  /// (مثل الرد على دعوة تمت معالجته مسبقاً على السيرفر) إلى synced
+  /// حتى لا تستمر بالظهور للمستخدم.
+  Future<int> resolveBenignFailedOperations() async {
+    final failedRows = await (db.select(db.syncQueue)
+          ..where((t) => t.status.equals(SyncQueueStatus.failed)))
+        .get();
+
+    final idsToResolve = <int>[];
+    for (final row in failedRows) {
+      if (_isBenignStoredFailure(row)) {
+        idsToResolve.add(row.id);
+      }
+    }
+
+    if (idsToResolve.isEmpty) return 0;
+
+    await (db.update(db.syncQueue)..where((t) => t.id.isIn(idsToResolve))).write(
+      const SyncQueueCompanion(
+        synced: Value(true),
+        status: Value(SyncQueueStatus.synced),
+        lastError: Value(null),
+      ),
+    );
+
+    return idsToResolve.length;
+  }
+
+  /// يعيد سجل فاشل واحد إلى الطابور من جديد مع تصفير عدد المحاولات
+  /// حتى يمكن للمستخدم تنفيذ Retry يدوي.
+  Future<bool> retryFailedOperation(int id) async {
+    final updated = await (db.update(db.syncQueue)
+          ..where((t) => t.id.equals(id) & t.status.equals(SyncQueueStatus.failed)))
+        .write(
+      const SyncQueueCompanion(
+        synced: Value(false),
+        status: Value(SyncQueueStatus.pending),
+        attemptCount: Value(0),
+        lastError: Value(null),
+      ),
+    );
+
+    return updated > 0;
+  }
+
+  /// يعيد جميع السجلات الفاشلة إلى الطابور من جديد.
+  Future<int> retryAllFailedOperations() {
+    return (db.update(db.syncQueue)
+          ..where((t) => t.status.equals(SyncQueueStatus.failed)))
+        .write(
+      const SyncQueueCompanion(
+        synced: Value(false),
+        status: Value(SyncQueueStatus.pending),
+        attemptCount: Value(0),
+        lastError: Value(null),
+      ),
+    );
+  }
+
   /// تنفيذ كل العمليات غير المزامنة.
   ///
   /// [maxAttempts] عدد المحاولات قبل اعتبار العملية failed.
@@ -89,6 +251,9 @@ class SyncService {
     _isSyncing = true;
 
     try {
+      await recoverStaleInProgressOperations();
+      await resolveBenignFailedOperations();
+
       final pending = await getPendingOperations(maxAttempts: maxAttempts);
 
       for (var i = 0; i < pending.length; i++) {
@@ -114,14 +279,14 @@ class SyncService {
           ),
         );
 
+        final Map<String, dynamic> data =
+            jsonDecode(item.payload) as Map<String, dynamic>;
+
         try {
           final endpoint =
               await entityEndpointResolver(item.entityType, item.operation);
 
-          final Map<String, dynamic> data =
-              jsonDecode(item.payload) as Map<String, dynamic>;
-
-          await _sendToRemote(
+          await _dispatchToRemote(
             endpoint: endpoint,
             data: data,
           );
@@ -138,6 +303,9 @@ class SyncService {
             e,
             attemptCount: item.attemptCount,
             maxAttempts: maxAttempts,
+            entityType: item.entityType,
+            operation: item.operation,
+            payload: data,
           );
 
           // إذا السيرفر رجّع Retry-After (خصوصاً 429)، احترمه قبل تحديث السجل
@@ -150,12 +318,19 @@ class SyncService {
           await (db.update(db.syncQueue)..where((tbl) => tbl.id.equals(item.id)))
               .write(
             SyncQueueCompanion(
+              synced: Value(decision.markSynced),
               attemptCount: Value(decision.nextAttemptCount),
               status: Value(decision.status),
-              lastError: Value(_truncateError(decision.message)),
+              lastError: Value(
+                decision.markSynced ? null : _truncateError(decision.message),
+              ),
               lastAttemptAt: Value(DateTime.now()),
             ),
           );
+
+          if (decision.markSynced) {
+            continue;
+          }
 
           if (throwOnFirstError) {
             if (e is DioException) {
@@ -166,7 +341,7 @@ class SyncService {
             }
             // ignore: avoid_print
             print('[SyncService] immediate sync failed: $e');
-            throw e;
+            rethrow;
           }
         }
       }
@@ -228,11 +403,26 @@ class SyncService {
     Object error, {
     required int attemptCount,
     required int maxAttempts,
+    required String entityType,
+    required String operation,
+    required Map<String, dynamic> payload,
   }) {
     final nextAttemptCount = attemptCount + 1;
 
     if (error is DioException) {
       final status = error.response?.statusCode;
+
+      if (_isBenignServerDuplicate(
+        error,
+        entityType: entityType,
+        operation: operation,
+        payload: payload,
+      )) {
+        return _RetryDecision.synced(
+          nextAttemptCount: nextAttemptCount,
+          message: 'Resolved duplicate/already-processed request on server.',
+        );
+      }
 
       // 1) أخطاء شبكة/انقطاع/timeout => مؤقتة
       final isTimeout = error.type == DioExceptionType.connectionTimeout ||
@@ -303,6 +493,184 @@ class SyncService {
     );
   }
 
+  bool _isBenignServerDuplicate(
+    DioException error, {
+    required String entityType,
+    required String operation,
+    required Map<String, dynamic> payload,
+  }) {
+    if (entityType.trim().isEmpty) {
+      return false;
+    }
+
+    final status = error.response?.statusCode;
+    if (status != 409 && status != 400 && status != 422) {
+      return false;
+    }
+
+    if (operation != operationCreate && operation != operationUpdate) {
+      return false;
+    }
+
+    if (!_payloadContainsSyncId(payload)) {
+      return false;
+    }
+
+    if (_isBenignGuaranteedConflict(
+      status: status,
+      entityType: entityType,
+      operation: operation,
+      payload: payload,
+    )) {
+      return true;
+    }
+
+    final text = _normalizeServerErrorText(error);
+    if (text.isEmpty) return false;
+
+    return _containsBenignConflictHint(text);
+  }
+
+  bool _isBenignStoredFailure(SyncQueueData row) {
+    final payload = _decodePayloadSafely(row.payload);
+    final status = _extractStatusCodeFromText(row.lastError);
+
+    if (_isBenignGuaranteedConflict(
+      status: _extractStatusCodeFromText(row.lastError),
+      entityType: row.entityType,
+      operation: row.operation,
+      payload: payload,
+    )) {
+      return true;
+    }
+
+    final text = (row.lastError ?? '').trim().toLowerCase();
+    if (_containsBenignConflictHint(text)) {
+      return true;
+    }
+
+    return text.contains('request already processed or data conflict') &&
+        status == 409 &&
+        row.operation == operationCreate &&
+        _payloadContainsSyncId(payload);
+  }
+
+  bool _isBenignGuaranteedConflict({
+    required int? status,
+    required String entityType,
+    required String operation,
+    required Map<String, dynamic> payload,
+  }) {
+    if (status != 409) return false;
+
+    if (entityType == 'invitations' && operation == operationCreate) {
+      final invitationId = payload['invitation_id'];
+      final syncId = payload['league_player_sync_id'] ?? payload['sync_id'];
+
+      final hasInvitationId = invitationId is int ||
+          (invitationId is String && invitationId.trim().isNotEmpty);
+      final hasSyncId = syncId is String && syncId.trim().isNotEmpty;
+
+      return hasInvitationId && hasSyncId;
+    }
+
+    return false;
+  }
+
+  bool _containsBenignConflictHint(String text) {
+    if (text.trim().isEmpty) return false;
+    return _benignConflictHints.any(text.contains);
+  }
+
+  bool _payloadContainsSyncId(Map<String, dynamic> payload) {
+    bool scan(dynamic value, [String? key]) {
+      if (key != null && key.toLowerCase().contains('sync_id')) {
+        if (value is String) return value.trim().isNotEmpty;
+        if (value != null) return true;
+      }
+
+      if (value is Map) {
+        for (final entry in value.entries) {
+          if (scan(entry.value, entry.key.toString())) return true;
+        }
+      }
+
+      if (value is List) {
+        for (final item in value) {
+          if (scan(item)) return true;
+        }
+      }
+
+      return false;
+    }
+
+    return scan(payload);
+  }
+
+  int? _extractStatusCodeFromText(String? text) {
+    if (text == null || text.trim().isEmpty) return null;
+    final match = RegExp(r'\b(\d{3})\b').firstMatch(text);
+    if (match == null) return null;
+    return int.tryParse(match.group(1)!);
+  }
+
+  Map<String, dynamic> _decodePayloadSafely(String raw) {
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) {
+        return decoded.map(
+          (key, value) => MapEntry(key.toString(), value),
+        );
+      }
+    } catch (_) {
+      // ignore
+    }
+
+    return const <String, dynamic>{};
+  }
+
+  String _normalizeServerErrorText(DioException error) {
+    final parts = <String>[];
+
+    final message = error.message?.trim();
+    if (message != null && message.isNotEmpty) {
+      parts.add(message);
+    }
+
+    final data = error.response?.data;
+    void extract(dynamic value) {
+      if (value == null) return;
+      if (value is String) {
+        final trimmed = value.trim();
+        if (trimmed.isNotEmpty) parts.add(trimmed);
+        return;
+      }
+      if (value is Map) {
+        for (final entry in value.entries) {
+          final key = entry.key.toString().toLowerCase();
+          if (key == 'message' || key == 'error' || key == 'detail') {
+            extract(entry.value);
+          } else {
+            extract(entry.value);
+          }
+        }
+        return;
+      }
+      if (value is List) {
+        for (final item in value) {
+          extract(item);
+        }
+        return;
+      }
+      parts.add(value.toString());
+    }
+
+    extract(data);
+
+    return parts.join(' ').toLowerCase();
+  }
+
   String _truncateError(String message, {int max = 500}) {
     if (message.length <= max) return message;
     return message.substring(0, max);
@@ -328,6 +696,18 @@ class SyncService {
   //       break;
   //   }
   // }
+  Future<void> _dispatchToRemote({
+    required EntitySyncEndpoint endpoint,
+    required Map<String, dynamic> data,
+  }) async {
+    if (_remoteSender != null) {
+      await _remoteSender(endpoint, data);
+      return;
+    }
+
+    await _sendToRemote(endpoint: endpoint, data: data);
+  }
+
   Future<void> _sendToRemote({
     required EntitySyncEndpoint endpoint,
     required Map<String, dynamic> data,
@@ -420,12 +800,14 @@ class _RetryDecision {
   final int nextAttemptCount;
   final String message;
   final Duration? recommendedWait;
+  final bool markSynced;
 
   const _RetryDecision({
     required this.status,
     required this.nextAttemptCount,
     required this.message,
     this.recommendedWait,
+    this.markSynced = false,
   });
 
   factory _RetryDecision.pending({
@@ -453,6 +835,18 @@ class _RetryDecision {
       status: SyncQueueStatus.failed,
       nextAttemptCount: nextAttemptCount,
       message: message,
+    );
+  }
+
+  factory _RetryDecision.synced({
+    required int nextAttemptCount,
+    required String message,
+  }) {
+    return _RetryDecision(
+      status: SyncQueueStatus.synced,
+      nextAttemptCount: nextAttemptCount,
+      message: message,
+      markSynced: true,
     );
   }
 }

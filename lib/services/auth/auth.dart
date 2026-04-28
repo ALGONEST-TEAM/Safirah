@@ -16,9 +16,7 @@ class Auth {
   final String _key = 'user';
   final WingsSecureStorage secureStorage = sl<WingsSecureStorage>();
 
-  Auth._() {
-    onInit();
-  }
+  Auth._();
 
   Future<void> onInit() async {
     try {

@@ -41,12 +41,16 @@ class TeamAndPlayerRepository {
     );
   }
 
+  Stream<List<PlayerModel>> watchPlayersOfTeam({
+    required String teamSyncId,
+  }) {
+    return local.watchPlayersOfTeam(teamSyncId: teamSyncId);
+  }
+
   Future<Either<DioException, Unit>> updateTeam(TeamModel team) {
     return RepoGuard.run<Unit>(
       action: () async {
-       final teams =  await   local.updateTeam(team);
-         print(teams!.syncId);
-       print(teams!.syncId);
+       await local.updateTeam(team);
 
        final payload = {
          'team_sync_id': team.syncId,
@@ -259,11 +263,18 @@ class TeamAndPlayerRepository {
     );
   }
 
+  Stream<List<LeaguePlayerModel>> watchLeaguePlayersWithoutTeam({
+    required String leagueSyncId,
+  }) {
+    return local.watchLeaguePlayersWithoutTeam(leagueSyncId);
+  }
+
   Future<Either<DioException, Unit>> addLeaguePlayer(
       InvitationsPlayersModel leagueInvitationPlayer) {
     return RepoGuard.run<Unit>(
       allowSyncErrorsToBubble: true,
       action: () async {
+
         final leaguePlayerSyncId = const Uuid().v7();
         print(
             'addLeaguePlayer called for invitation ${leagueInvitationPlayer.id} '

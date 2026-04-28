@@ -35,6 +35,7 @@ class ListTileProfileWidget extends StatelessWidget {
           leading: SvgPicture.asset(
             icon,
             color: AppColors.secondaryColor,
+            height: 12.5.h,
           ),
           trailing: Padding(
             padding: EdgeInsets.symmetric(horizontal: 3.w),

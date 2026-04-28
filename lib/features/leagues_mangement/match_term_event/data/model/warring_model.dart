@@ -97,6 +97,10 @@ class WarningModel {
         'status': status,
       };
 
+  Map<String, dynamic> toCancelJson() => {
+        'warning_sync_id': syncId,
+      };
+
   WarningModel copyWith({
     int? id,
     String? syncId,

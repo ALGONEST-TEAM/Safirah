@@ -111,6 +111,9 @@ class AppIcons {
 
   static const String ball =
       '${_iconsPath}ball.svg';
+
+  static const String assist =
+      '${_iconsPath}assist.svg';
   static const String redWarring =
       '${_iconsPath}red_warring.svg';
 

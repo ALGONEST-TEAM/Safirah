@@ -129,8 +129,7 @@ class LeagueModel {
         logoPath: (json['logo_path'] ?? json['logoPath'] ?? json['logo_url'])
             as String?,
         canWatch: (json['can_watch'] ?? json['canWatch']) as bool? ?? false,
-        nameOrganizer:
-            (json['organizer']['name'] ?? json['nameOrganizer']) as String?,
+        nameOrganizer: (json['organizer_name'] as String?)?.trim(),
         // logoLocalPath: لا يأتي من API
       );
 
@@ -161,7 +160,6 @@ class LeagueModel {
 
   LeaguesCompanion toCompanion() => LeaguesCompanion.insert(
         syncId: syncId,
-        id: id != null ? Value(id!) : const Value.absent(),
         name: name ?? '',
         type: type != null ? Value(type!) : const Value.absent(),
         organizerId:
@@ -182,6 +180,39 @@ class LeagueModel {
         subscriptionPrice: subscriptionPrice ?? '',
         logoPath: logoPath != null ? Value(logoPath!) : const Value.absent(),
         // ✅ NEW: لا تكتبها إلا إذا عندك قيمة (حتى ما تمسحها)
+        logoLocalPath:
+            logoLocalPath != null ? Value(logoLocalPath!) : const Value.absent(),
+        nameOrganizer:
+            nameOrganizer != null ? Value(nameOrganizer!) : const Value.absent(),
+        canWatch: Value(canWatch ?? false),
+      );
+
+  /// Companion مخصص للبيانات القادمة من الريموت.
+  ///
+  /// مهم: لا نسمح أبدًا بتمرير `id` القادم من السيرفر إلى SQLite،
+  /// لأن `leagues.id` محلي auto-increment ويجب أن يبقى تحت إدارة قاعدة البيانات.
+  LeaguesCompanion toRemoteCompanion() => LeaguesCompanion(
+        id: const Value.absent(),
+        syncId: Value(syncId),
+        name: Value(name ?? ''),
+        type: type != null ? Value(type!) : const Value.absent(),
+        organizerId:
+            organizerId != null ? Value(organizerId!) : const Value.absent(),
+        scope: scope != null ? Value(scope!) : const Value.absent(),
+        startDate: startDate != null ? Value(startDate!) : const Value.absent(),
+        endDate: endDate != null ? Value(endDate!) : const Value.absent(),
+        maxTeams: maxTeams != null ? Value(maxTeams!) : const Value.absent(),
+        maxMainPlayers: maxMainPlayers != null
+            ? Value(maxMainPlayers!)
+            : const Value.absent(),
+        maxSubPlayers: maxSubPlayers != null
+            ? Value(maxSubPlayers!)
+            : const Value.absent(),
+        isPrivate: Value(isPrivate),
+        status: Value(status),
+        createdAt: createdAt != null ? Value(createdAt!) : const Value.absent(),
+        subscriptionPrice: Value(subscriptionPrice ?? ''),
+        logoPath: logoPath != null ? Value(logoPath!) : const Value.absent(),
         logoLocalPath:
             logoLocalPath != null ? Value(logoLocalPath!) : const Value.absent(),
         nameOrganizer:
@@ -220,6 +251,35 @@ class LeagueModel {
         canWatch: Value(canWatch ?? false),
       );
 
+  LeaguesCompanion toRemoteCompanionUpsert() => LeaguesCompanion(
+        id: const Value.absent(),
+        syncId: Value(syncId),
+        name: Value(name ?? ''),
+        type: type != null ? Value(type!) : const Value.absent(),
+        organizerId:
+            organizerId != null ? Value(organizerId!) : const Value.absent(),
+        scope: scope != null ? Value(scope!) : const Value.absent(),
+        startDate: startDate != null ? Value(startDate!) : const Value.absent(),
+        endDate: endDate != null ? Value(endDate!) : const Value.absent(),
+        maxTeams: maxTeams != null ? Value(maxTeams!) : const Value.absent(),
+        maxMainPlayers: maxMainPlayers != null
+            ? Value(maxMainPlayers!)
+            : const Value.absent(),
+        maxSubPlayers: maxSubPlayers != null
+            ? Value(maxSubPlayers!)
+            : const Value.absent(),
+        isPrivate: Value(isPrivate),
+        status: Value(status),
+        createdAt: createdAt != null ? Value(createdAt!) : const Value.absent(),
+        subscriptionPrice: Value(subscriptionPrice ?? ''),
+        logoPath: logoPath != null ? Value(logoPath!) : const Value.absent(),
+        logoLocalPath:
+            logoLocalPath != null ? Value(logoLocalPath!) : const Value.absent(),
+        nameOrganizer:
+            nameOrganizer != null ? Value(nameOrganizer!) : const Value.absent(),
+        canWatch: Value(canWatch ?? false),
+      );
+
   static LeagueModel fromEntity(League e) => LeagueModel(
         id: e.id,
         syncId: e.syncId,
@@ -239,6 +299,8 @@ class LeagueModel {
         createdAt: e.createdAt,
         // ✅ NEW
         logoLocalPath: e.logoLocalPath,
+        nameOrganizer: e.nameOrganizer,
+        canWatch: e.canWatch,
       );
 }
 

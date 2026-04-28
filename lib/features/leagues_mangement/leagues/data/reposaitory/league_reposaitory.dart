@@ -8,7 +8,9 @@ import '../../../../../core/network/connectivity_service.dart';
 import '../../../../../core/network/errors/repo_guard.dart';
 import '../../../../../core/network/errors/sync_dio_exception.dart';
 import '../../../../../core/state/pagination_data/paginated_model.dart';
+import '../../../../../features/authorization/data/data_source/authorization_local_data_source.dart';
 import '../../../../../injection.dart' as di;
+import '../../../../../services/auth/auth.dart';
 import '../../../home/data/models/banners_model.dart';
 import '../../../home/data/models/news_item_model.dart';
 import '../data_source/league_remote_data_source.dart';
@@ -75,25 +77,68 @@ class LeagueRepository {
 
   Future<Either<DioException, String>> createLeague(
       LeagueModel model, List<LeagueRuleModel> leagueRule) async {
+    String stage = 'start';
+    String? createdLeagueSyncId;
     try {
+      stage = 'prepare_model';
       final uuid = const Uuid().v7();
       final ensured =
           model.syncId.trim().isNotEmpty ? model : model.copyWith(syncId: uuid);
 
+      print(
+        'ℹ️ createLeague start: syncId=${ensured.syncId}, '
+        'name=${ensured.name}, rules=${leagueRule.length}, '
+        'maxTeams=${ensured.maxTeams}, maxMainPlayers=${ensured.maxMainPlayers}, '
+        'maxSubPlayers=${ensured.maxSubPlayers}, isPrivate=${ensured.isPrivate}, '
+        'hasLogo=${(ensured.logoLocalPath ?? '').trim().isNotEmpty}',
+      );
+
+      stage = 'insert_league';
       final leagueSyncId = await local.insertLeague(
         ensured.toCompanion(),
         logoLocalPath: ensured.logoLocalPath,
       );
+      createdLeagueSyncId = leagueSyncId;
+      print('✅ createLeague insertLeague done: leagueSyncId=$leagueSyncId');
+
+      stage = 'seed_creator_as_organizer';
+      final auth = Auth();
+      if (auth.loggedIn) {
+        await di.sl<AuthorizationLocalDataSource>().seedCreatorAsOrganizer(
+          leagueSyncId: leagueSyncId,
+          userName: auth.name,
+          userId: auth.user.user.id,
+        );
+        print(
+          '✅ createLeague seedCreatorAsOrganizer done: '
+          'leagueSyncId=$leagueSyncId, userId=${auth.user.user.id}',
+        );
+      } else {
+        print('ℹ️ createLeague skipped organizer seeding: user not logged in');
+      }
+
+      stage = 'create_teams';
       final teams = await local.createTeamsOnLeagueCreate(
         leagueSyncId: leagueSyncId,
         maxTeams: model.maxTeams ?? 0,
       );
+      print(
+        '✅ createLeague createTeamsOnLeagueCreate done: '
+        'leagueSyncId=$leagueSyncId, teams=${teams.length}',
+      );
 
+      stage = 'create_categories';
       final categories = await local.createCategoriesOnLeagueCreate(
         leagueSyncId: leagueSyncId,
         maxSubPlayers: model.maxSubPlayers ?? 0,
         maxMainPlayers: model.maxMainPlayers ?? 0,
       );
+      print(
+        '✅ createLeague createCategoriesOnLeagueCreate done: '
+        'leagueSyncId=$leagueSyncId, categories=${categories.length}',
+      );
+
+      stage = 'update_league_status';
       await local.updateLeagueStatus(
         leagueSyncId: leagueSyncId,
         hasGroups: false,
@@ -102,11 +147,19 @@ class LeagueRepository {
         hasMatches: false,
         hasPlayersAssigned: false,
       );
+      print('✅ createLeague updateLeagueStatus done: leagueSyncId=$leagueSyncId');
+
+      stage = 'insert_rules';
       final rule =   await local.insertRules(
         leagueSyncId: leagueSyncId,
         rule: leagueRule.map((r) => r.copyWith(leagueSyncId: leagueSyncId)).toList(),
       );
+      print(
+        '✅ createLeague insertRules done: '
+        'leagueSyncId=$leagueSyncId, rules=${rule.length}',
+      );
       try {
+        stage = 'prepare_sync_payload';
         final payloads = {
           'league_sync_id': leagueSyncId,
           'league': ensured.copyWith(syncId: leagueSyncId).toJson(),
@@ -122,28 +175,55 @@ class LeagueRepository {
             ]
         };
 
+        stage = 'enqueue_sync_operation';
         await syncService.enqueueOperation(
           entityType: 'league',
           operation: SyncService.operationCreate,
           payload: payloads,
         );
+        print('✅ createLeague enqueueOperation done: leagueSyncId=$leagueSyncId');
 
         try {
+          stage = 'trigger_background_sync';
           di.sl<SyncTrigger>().syncIfOnlineInBackground();
+          print('ℹ️ createLeague background sync triggered: leagueSyncId=$leagueSyncId');
         } on DioException catch (e) {
+          print(
+            '❌ createLeague background sync DioException '
+            '[stage=$stage, leagueSyncId=$leagueSyncId]: '
+            '${e.message} path=${e.requestOptions.path} response=${e.response?.data}',
+          );
           return Left(SyncDioException.from(e));
         }
-      } catch (_) {
+      } catch (e, st) {
+        print(
+          '❌ createLeague sync preparation/enqueue failed '
+          '[stage=$stage, leagueSyncId=$leagueSyncId]: $e\n$st',
+        );
         // keep offline-first stable
       }
 
+      print('✅ createLeague success: leagueSyncId=$leagueSyncId');
       return Right(leagueSyncId);
-    } on DioException catch (e) {
+    } on DioException catch (e, st) {
+      print(
+        '❌ createLeague DioException '
+        '[stage=$stage, leagueSyncId=$createdLeagueSyncId]: '
+        '${e.message} path=${e.requestOptions.path} response=${e.response?.data}\n$st',
+      );
       // خطأ عادي (ليس من محاولات المزامنة الفورية هنا)
       return Left(e);
-    } catch (_) {
+    } catch (e, st) {
+      print(
+        '❌ createLeague failed '
+        '[stage=$stage, leagueSyncId=$createdLeagueSyncId]: $e\n$st',
+      );
       return Left(
-        DioException(requestOptions: RequestOptions(path: '/league/create')),
+        DioException(
+          requestOptions: RequestOptions(path: '/league/create'),
+          error: e,
+          stackTrace: st,
+        ),
       );
     }
   }

@@ -70,10 +70,14 @@ part 'safirah_database.g.dart';
   ],
 )
 class Safirah extends _$Safirah {
-  Safirah._(QueryExecutor e) : super(e);
+  Safirah._(super.e);
+
+  factory Safirah.forTesting([QueryExecutor? executor]) {
+    return Safirah._(executor ?? NativeDatabase.memory());
+  }
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   static Future<Safirah> create() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -146,7 +150,7 @@ class Safirah extends _$Safirah {
           // إضافة نظام الأدوار والصلاحيات (schema v10)
           // إضافة جدول صلاحيات المستخدم داخل الدوري (schema v11)
           if (from < 11) {
-            await m.createTable(this.userLeaguePermissions);
+            await m.createTable(userLeaguePermissions);
           }
 
           // إضافة جدول مفاتيح أدوار المستخدم داخل الدوري (schema v12)
@@ -276,6 +280,139 @@ FROM league_players;
             // Old schema used UNIQUE(sync_id) which may still exist; we don't
             // strictly need to drop it for correctness, but composite index
             // is required for ON CONFLICT target.
+          }
+
+          // v20: Treat player_league_sync_id as the logical identity of players.
+          if (from < 20) {
+            await customStatement(
+              "UPDATE players SET player_league_sync_id = sync_id "
+              "WHERE player_league_sync_id IS NULL OR TRIM(player_league_sync_id) = ''",
+            );
+
+            await customStatement('''
+UPDATE goals
+SET player_sync_id = (
+  SELECT keeper.sync_id
+  FROM players AS keeper
+  WHERE keeper.player_league_sync_id = (
+    SELECT current_player.player_league_sync_id
+    FROM players AS current_player
+    WHERE current_player.sync_id = goals.player_sync_id
+    LIMIT 1
+  )
+  ORDER BY keeper.updated_at DESC, keeper.id DESC
+  LIMIT 1
+)
+WHERE EXISTS (
+  SELECT 1
+  FROM players AS current_player
+  WHERE current_player.sync_id = goals.player_sync_id
+    AND TRIM(current_player.player_league_sync_id) != ''
+);
+''');
+
+            await customStatement('''
+UPDATE assists
+SET player_sync_id = (
+  SELECT keeper.sync_id
+  FROM players AS keeper
+  WHERE keeper.player_league_sync_id = (
+    SELECT current_player.player_league_sync_id
+    FROM players AS current_player
+    WHERE current_player.sync_id = assists.player_sync_id
+    LIMIT 1
+  )
+  ORDER BY keeper.updated_at DESC, keeper.id DESC
+  LIMIT 1
+)
+WHERE EXISTS (
+  SELECT 1
+  FROM players AS current_player
+  WHERE current_player.sync_id = assists.player_sync_id
+    AND TRIM(current_player.player_league_sync_id) != ''
+);
+''');
+
+            await customStatement('''
+UPDATE warnings
+SET player_sync_id = (
+  SELECT keeper.sync_id
+  FROM players AS keeper
+  WHERE keeper.player_league_sync_id = (
+    SELECT current_player.player_league_sync_id
+    FROM players AS current_player
+    WHERE current_player.sync_id = warnings.player_sync_id
+    LIMIT 1
+  )
+  ORDER BY keeper.updated_at DESC, keeper.id DESC
+  LIMIT 1
+)
+WHERE EXISTS (
+  SELECT 1
+  FROM players AS current_player
+  WHERE current_player.sync_id = warnings.player_sync_id
+    AND TRIM(current_player.player_league_sync_id) != ''
+);
+''');
+
+            await customStatement('''
+UPDATE player_match_participation
+SET player_sync_id = (
+  SELECT keeper.sync_id
+  FROM players AS keeper
+  WHERE keeper.player_league_sync_id = (
+    SELECT current_player.player_league_sync_id
+    FROM players AS current_player
+    WHERE current_player.sync_id = player_match_participation.player_sync_id
+    LIMIT 1
+  )
+  ORDER BY keeper.updated_at DESC, keeper.id DESC
+  LIMIT 1
+)
+WHERE EXISTS (
+  SELECT 1
+  FROM players AS current_player
+  WHERE current_player.sync_id = player_match_participation.player_sync_id
+    AND TRIM(current_player.player_league_sync_id) != ''
+);
+''');
+
+            await customStatement('''
+UPDATE player_match_participation
+SET substituted_player_sync_id = (
+  SELECT keeper.sync_id
+  FROM players AS keeper
+  WHERE keeper.player_league_sync_id = (
+    SELECT current_player.player_league_sync_id
+    FROM players AS current_player
+    WHERE current_player.sync_id = player_match_participation.substituted_player_sync_id
+    LIMIT 1
+  )
+  ORDER BY keeper.updated_at DESC, keeper.id DESC
+  LIMIT 1
+)
+WHERE substituted_player_sync_id IS NOT NULL
+  AND EXISTS (
+    SELECT 1
+    FROM players AS current_player
+    WHERE current_player.sync_id = player_match_participation.substituted_player_sync_id
+      AND TRIM(current_player.player_league_sync_id) != ''
+  );
+''');
+
+            await customStatement('''
+DELETE FROM players
+WHERE id NOT IN (
+  SELECT MAX(id)
+  FROM players
+  GROUP BY player_league_sync_id
+);
+''');
+
+            await customStatement(
+              'CREATE UNIQUE INDEX IF NOT EXISTS idx_players_player_league_sync_id '
+              'ON players(player_league_sync_id);',
+            );
           }
         },
       );

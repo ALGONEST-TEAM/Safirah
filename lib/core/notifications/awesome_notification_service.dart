@@ -14,10 +14,11 @@ class AwesomeNotificationService {
   Future<void> initialize({bool debug = kDebugMode}) async {
     if (_initialized) return;
     await AwesomeNotifications().initialize(
-      null, // أو ضع أيقونة: 'resource://drawable/ic_stat_notification'
+      null,
       NotificationChannels.channels,
       channelGroups: NotificationChannels.groups,
       debug: debug,
+
     );
     _initialized = true;
   }
@@ -33,6 +34,25 @@ class AwesomeNotificationService {
   int generateId() {
     final now = DateTime.now().microsecondsSinceEpoch;
     return now & 0x7fffffff;
+  }
+
+  String? _extractRemoteImage(RemoteMessage message) {
+    final androidImage = message.notification?.android?.imageUrl;
+    if (androidImage != null && androidImage.isNotEmpty) {
+      return androidImage;
+    }
+
+    final appleImage = message.notification?.apple?.imageUrl;
+    if (appleImage != null && appleImage.isNotEmpty) {
+      return appleImage;
+    }
+
+    final rawImage =
+        message.data['imageUrl'] ?? message.data['image'] ?? message.data['bigPicture'];
+    if (rawImage == null) return null;
+
+    final normalized = rawImage.trim();
+    return normalized.isEmpty ? null : normalized;
   }
 
   Future<void> show({
@@ -56,6 +76,11 @@ class AwesomeNotificationService {
       return;
     }
 
+    final effectiveLayout =
+    (bigPicture != null && bigPicture.trim().isNotEmpty)
+        ? layout
+        : NotificationLayout.Default;
+
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: id ?? generateId(),
@@ -65,14 +90,12 @@ class AwesomeNotificationService {
         summary: summary,
         largeIcon: largeIcon,
         payload: payload,
-        notificationLayout: layout,
+        notificationLayout: effectiveLayout,
         bigPicture: bigPicture,
         displayOnBackground: displayOnBackground,
         displayOnForeground: displayOnForeground,
         wakeUpScreen: wakeUpScreen,
-        fullScreenIntent: true,
-        criticalAlert: true
-
+        category: category,
       ),
     );
   }
@@ -80,11 +103,18 @@ class AwesomeNotificationService {
 
 
   Future<void> showFromRemote(
-    RemoteMessage message, {
-    String channelKey = NotifKeys.highChannel,
-  }) async {
+      RemoteMessage message, {
+        String channelKey = NotifKeys.highChannel,
+      }) async {
+    if (kDebugMode) {
+      print('[FCM] Background Message Received!');
+      print('[FCM] Message Title: ${message.notification?.title}');
+      print('[FCM] Message Body: ${message.notification?.body}');
+      print('[FCM] Message Data: ${message.messageId}');
+    }
     final title = message.notification?.title ?? 'إشعار';
     final body = message.notification?.body ?? '';
+    final image = _extractRemoteImage(message);
 
     await show(
       title: title,
@@ -93,7 +123,8 @@ class AwesomeNotificationService {
       payload: (message.data.isNotEmpty)
           ? message.data.map((k, v) => MapEntry(k, '$v'))
           : null,
-      bigPicture: message.notification!.android!.imageUrl,
+      layout: image != null ? NotificationLayout.BigPicture : NotificationLayout.Default,
+      bigPicture: image,
     );
   }
 }

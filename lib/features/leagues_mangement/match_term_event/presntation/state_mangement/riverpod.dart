@@ -747,32 +747,6 @@ class DeleteGoalNotifier extends StateNotifier<DataState<String?>> {
   }
 }
 
-/// Legacy: delete by numeric id.
-final deleteGoalByIdNotifierProvider = StateNotifierProvider.family<
-    DeleteGoalByIdNotifier, DataState<String?>, int>((ref, goalId) {
-  return DeleteGoalByIdNotifier(goalId);
-});
-
-class DeleteGoalByIdNotifier extends StateNotifier<DataState<String?>> {
-  DeleteGoalByIdNotifier(this.goalId) : super(DataState.initial(null));
-
-  final int goalId;
-  final _repo = MatchTermsEventRepository(
-      local: di.sl(), syncService: di.sl(), connectivity: di.sl());
-
-  Future<void> run() async {
-    state = state.copyWith(state: States.loading);
-    final r = await _repo.deleteGoal(goalId);
-    r.fold(
-      (e) => state = state.copyWith(state: States.error, exception: e),
-      (data) => state = state.copyWith(state: States.loaded, data: data),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Delete warning (sync-based)
-// ---------------------------------------------------------------------------
 
 final deleteWarningNotifierProvider = StateNotifierProvider.family<
     DeleteWarningNotifier, DataState<Unit>, String>((ref, warningSyncId) {
@@ -797,27 +771,6 @@ class DeleteWarningNotifier extends StateNotifier<DataState<Unit>> {
 }
 
 /// Legacy: delete warning by numeric id.
-final deleteWarningByIdNotifierProvider = StateNotifierProvider.family<
-    DeleteWarningByIdNotifier, DataState<Unit>, int>((ref, warningId) {
-  return DeleteWarningByIdNotifier(warningId);
-});
-
-class DeleteWarningByIdNotifier extends StateNotifier<DataState<Unit>> {
-  DeleteWarningByIdNotifier(this.warningId) : super(DataState.initial(unit));
-
-  final int warningId;
-  final _repo = MatchTermsEventRepository(
-      local: di.sl(), syncService: di.sl(), connectivity: di.sl());
-
-  Future<void> run() async {
-    state = state.copyWith(state: States.loading);
-    final r = await _repo.deleteWarning(warningId);
-    r.fold(
-      (e) => state = state.copyWith(state: States.error, exception: e),
-      (_) => state = state.copyWith(state: States.loaded, data: unit),
-    );
-  }
-}
 
 // Update match-based providers to use matchSyncId
 final getFullMatchDataProvider = StateNotifierProvider.family<

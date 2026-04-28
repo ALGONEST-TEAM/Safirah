@@ -24,6 +24,11 @@ typedef UpdatedGoalWithQualifiedTeams = ({
   QualifiedTeamModel? opttend,
   GoalModel goal
 });
+typedef DeletedGoalSyncResult = ({
+  GoalModel goal,
+  AssistModel? assist,
+  String? assistPlayerSyncId
+});
 
 class MatchTermsEventLocalDataSource {
   final Safirah db;
@@ -1304,22 +1309,29 @@ class MatchTermsEventLocalDataSource {
     return WarningModel.fromEntity(entity);
   }
 
-  Future<void> deleteWarningBySyncId(String warningSyncId) async {
+  Future<WarningModel?> deleteWarningBySyncId(String warningSyncId) async {
+    final row = await (db.select(db.warnings)
+          ..where((w) => w.syncId.equals(warningSyncId)))
+        .getSingleOrNull();
+    if (row == null) return null;
+
     await (db.update(db.warnings)..where((w) => w.syncId.equals(warningSyncId)))
         .write(const WarningsCompanion(status: Value('deleted')));
+
+    return WarningModel.fromEntity(row).copyWith(status: 'deleted');
   }
 
   /// Backward-compatible: legacy delete by numeric id.
-  Future<void> deleteWarning(int warningId) async {
+  Future<WarningModel?> deleteWarning(int warningId) async {
     final row = await (db.select(db.warnings)
           ..where((w) => w.id.equals(warningId)))
         .getSingleOrNull();
-    if (row == null) return;
-    await deleteWarningBySyncId(row.syncId);
+    if (row == null) return null;
+    return deleteWarningBySyncId(row.syncId);
   }
 
   /// Deletes a goal by syncId and returns the assister playerSyncId if any (so UI can update assist stats).
-  Future<String?> deleteGoalBySyncId(String goalSyncId) async {
+  Future<DeletedGoalSyncResult?> deleteGoalBySyncId(String goalSyncId) async {
     return db.transaction(() async {
       final goalRow = await (db.select(db.goals)
             ..where((g) => g.syncId.equals(goalSyncId)))
@@ -1342,13 +1354,19 @@ class MatchTermsEventLocalDataSource {
         const GoalsCompanion(status: Value('deleted')),
       );
 
-      return assistRow?.playerSyncId;
+      return (
+        goal: GoalModel.fromEntity(goalRow).copyWith(status: 'deleted'),
+        assist: assistRow != null
+            ? AssistModel.fromEntity(assistRow).copyWith(status: 'deleted')
+            : null,
+        assistPlayerSyncId: assistRow?.playerSyncId,
+      );
     });
   }
 
   /// Backward-compatible: delete by numeric id (UI might still pass it).
   /// Internally resolves syncId then deletes by syncId.
-  Future<String?> deleteGoal(int goalId) async {
+  Future<DeletedGoalSyncResult?> deleteGoal(int goalId) async {
     final goalRow = await (db.select(db.goals)
           ..where((g) => g.id.equals(goalId)))
         .getSingleOrNull();

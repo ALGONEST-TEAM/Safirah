@@ -390,6 +390,18 @@ final leaguePlayersWithoutTeamProvider = StateNotifierProvider.family<
   return LeaguePlayersWithoutTeamNotifier(leagueSyncId);
 });
 
+final leaguePlayersWithoutTeamStreamProvider =
+    StreamProvider.family<List<LeaguePlayerModel>, String>((ref, leagueSyncId) {
+  final repo = ref.read(teamsAndPlayerRepoProvider);
+  return repo.watchLeaguePlayersWithoutTeam(leagueSyncId: leagueSyncId);
+});
+
+final leaguePlayersWithoutTeamCountProvider =
+    Provider.family<int?, String>((ref, leagueSyncId) {
+  final async = ref.watch(leaguePlayersWithoutTeamStreamProvider(leagueSyncId));
+  return async.asData?.value.length;
+});
+
 class LeaguePlayersWithoutTeamNotifier
     extends StateNotifier<DataState<List<LeaguePlayerModel>>> {
   LeaguePlayersWithoutTeamNotifier(this.leagueSyncId)
@@ -414,40 +426,16 @@ class LeaguePlayersWithoutTeamNotifier
   }
 }
 
-final playersOfTeamProvider = StateNotifierProvider.family<
-    PlayersOfTeamNotifier,
-    DataState<List<PlayerModel>>,
-    String>((ref, teamSyncId) {
-  return PlayersOfTeamNotifier(teamSyncId);
-});
-final playersCountOfTeamProvider =
-    Provider.family<int, String>((ref, idSyncTeam) {
-  final state = ref.watch(playersOfTeamProvider(idSyncTeam));
-  return state.data.length;
+final playersOfTeamStreamProvider =
+    StreamProvider.family<List<PlayerModel>, String>((ref, teamSyncId) {
+  final repo = ref.read(teamsAndPlayerRepoProvider);
+  return repo.watchPlayersOfTeam(teamSyncId: teamSyncId);
 });
 
-class PlayersOfTeamNotifier
-    extends StateNotifier<DataState<List<PlayerModel>>> {
-  PlayersOfTeamNotifier(this.teamSyncId) : super(DataState.initial(const [])) {
-    load();
-  }
-
-  final String teamSyncId;
-  final _repo = TeamAndPlayerRepository(
-      local: di.sl(),
-      remote: di.sl(),
-      connectivity: di.sl(),
-      syncService: di.sl());
-
-  Future<void> load() async {
-    state = state.copyWith(state: States.loading);
-    final r = await _repo.getPlayersOfTeam(teamSyncId);
-    r.fold(
-      (e) => state = state.copyWith(state: States.error, exception: e),
-      (list) => state = state.copyWith(state: States.loaded, data: list),
-    );
-  }
-}
+final playersCountOfTeamProvider = Provider.family<int, String>((ref, idSyncTeam) {
+  final async = ref.watch(playersOfTeamStreamProvider(idSyncTeam));
+  return async.asData?.value.length ?? 0;
+});
 
 final getLeaguePlayersStatisticsProvider = StateNotifierProvider.family<
     GetLeaguePlayersStatisticsNotifier,

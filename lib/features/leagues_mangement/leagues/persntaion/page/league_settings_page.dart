@@ -4,7 +4,6 @@ import 'package:safirah/features/leagues_mangement/leagues/persntaion/page/repor
 import 'package:safirah/features/leagues_mangement/leagues/persntaion/page/show_rule_league_page.dart';
 import '../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../core/helpers/navigateTo.dart';
-import '../../../../../core/state/check_state_in_post_api_data_widget.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../injection.dart' as di;
 import '../../../../authorization/authorization_sync_runner.dart';
@@ -14,7 +13,6 @@ import '../../../../authorization/persntaion/widgets/authorization_gate_hide_if_
 import '../../../group/presntaion/page/divide_group_page.dart';
 import '../../../match/presntaion/page/matches_scheduling_page.dart';
 import '../../../match/presntaion/page/refereer_matches_page.dart';
-import '../../../match/presntaion/state_managment/riverpod.dart';
 import '../../../match_term_event/presntation/page/initialization_term_page.dart';
 import '../../../match_term_event/presntation/state_mangement/riverpod.dart';
 import '../../../team_and_player/presntation/page/show_team_and_player_page.dart';
@@ -54,19 +52,19 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final detailsLeague = ref.watch(leagueStreamProvider(widget.leagueSyncId));
-    final scheduleGroupStageMatchesState = ref.watch(
-        scheduleGroupStageMatchesRRProvider((widget.leagueSyncId, false)));
     ref.watch(leagueStatusProvider(widget.leagueSyncId));
 
     final leagueStatus =
         ref.watch(leagueStatusStreamProvider(widget.leagueSyncId));
     ref.watch(leaguePermissionsProvider(widget.leagueSyncId));
+    final leaguePermissions = ref.watch(leaguePermissionsProvider(widget.leagueSyncId));
+    final canEditLeague = leaguePermissions.asData?.value.contains('league.edit') ?? false;
 
     // ref.watch(leagueStatusProvider(widget.leagueSyncId));
     //  ref.watch(usersHasRoleRefreshProvider(widget.leagueSyncId));
     //print(teamState.asData!.value[0].teamName);
     return Scaffold(
-      appBar: SecondaryAppBarWidget(
+      appBar: const SecondaryAppBarWidget(
         title: 'اعدادات الدوري',
       ),
       body: Column(
@@ -75,28 +73,22 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
           ButtonOfOrganizerWidget(
             title: "الفرق واللعبين",
             onTap: () {
-              print(leagueStatus.asData!.value!.hasPlayersInTeams);
-              print((detailsLeague.asData!.value!.maxSubPlayers ?? 0) +
-                  (detailsLeague.asData!.value!.maxMainPlayers ?? 0));
+              final details = detailsLeague.asData?.value;
+              final status = leagueStatus.asData?.value;
+              if (details == null || status == null) return;
+
               navigateTo(
                 context,
-                leagueStatus.asData!.value!.hasPlayersInTeams
+                status.hasPlayersInTeams || !canEditLeague
                     ? TeamsWithPlayersPage(
-                        leagueSyncId: detailsLeague.asData!.value!.syncId,
+                        leagueSyncId: details.syncId,
                       )
-                    : AuthorizationGateHideIfDenied(
-                        leagueSyncId: widget.leagueSyncId,
-                        permissionKey: 'league.edit',
-                        child: ShowTeamAndPlayerPage(
-                          leagueSyncId: detailsLeague.asData!.value!.syncId,
-                          maxTeam: detailsLeague.asData!.value!.maxTeams ?? 0,
-                          maxPlayer: (detailsLeague
-                                      .asData!.value!.maxSubPlayers ??
-                                  0) +
-                              (detailsLeague.asData!.value!.maxMainPlayers ??
-                                  0),
-                          //   detailsLeague.data!.maxMainPlayers,
-                        ),
+                    : ShowTeamAndPlayerPage(
+                        leagueSyncId: details.syncId,
+                        maxTeam: details.maxTeams ?? 0,
+                        maxPlayer: (details.maxSubPlayers ?? 0) +
+                            (details.maxMainPlayers ?? 0),
+                        //   detailsLeague.data!.maxMainPlayers,
                       ),
               );
             },

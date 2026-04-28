@@ -8,6 +8,7 @@ import '../../../../../core/widgets/online_images_widget.dart';
 import '../../../match_term_event/presntation/page/add_event_match_page.dart';
 import '../../../leagues/persntaion/page/report_of_match_in_league_page.dart';
 import '../../data/model/match_model.dart';
+import '../page/edit_schedule_match_page.dart';
 import '../page/match_details_page.dart';
 import '../page/schedule_match_page.dart';
 
@@ -58,6 +59,16 @@ class MatchTileWidget extends StatelessWidget {
         ReportOfMatchInLeaguePage(
           leagueSyncId: leagueSyncId,
           matchSyncId: (match.syncId ?? 0).toString(),
+        ),
+      );
+      return;
+    }
+    if (role == 'organizer' && match.status == 'scheduled') {
+      navigateTo(
+        context,
+        EditScheduleMatchPage(
+          leagueSyncId: leagueSyncId,
+          matchSyncId: match.syncId!,
         ),
       );
       return;

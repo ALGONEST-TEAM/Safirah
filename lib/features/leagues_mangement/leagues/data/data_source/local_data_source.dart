@@ -36,6 +36,7 @@ class LeagueLocalDataSource {
       LeaguesCompanion league, {
         String? logoLocalPath,
       }) async {
+
     final syncId =
     league.syncId.present && league.syncId.value.trim().isNotEmpty
         ? league.syncId.value.trim()
@@ -50,10 +51,12 @@ class LeagueLocalDataSource {
               ? Value(logoLocalPath.trim())
               : league.logoLocalPath,
         ),
+
       );
       print(x.logoLocalPath);
       return syncId;
     } catch (e, st) {
+
       // ignore: avoid_print
       print('❌ insertLeague failed: $e\n$st');
       rethrow;
@@ -124,7 +127,7 @@ class LeagueLocalDataSource {
       batch.deleteWhere(db.leagues, (t) => const Constant(true));
       batch.insertAll(
         db.leagues,
-        leagues.map((m) => m.toCompanion()).toList(),
+        leagues.map((m) => m.toRemoteCompanion()).toList(),
       );
     });
   }
@@ -265,15 +268,16 @@ class LeagueLocalDataSource {
     await db.transaction(() async {
       for (final m in leagues) {
         await db.into(db.leagues).insert(
-          m.toCompanion(), // companion للحقول
+          m.toRemoteCompanion(),
           onConflict: DoUpdate(
-                (old) => m.toCompanionUpsert(),
+                (old) => m.toRemoteCompanionUpsert(),
             target: [db.leagues.syncId], // 👈 هذا المهم
           ),
         );
       }
     });
   }
+
   Stream<LeagueStatusModel> watchLeagueStatus({
     required String leagueSyncId,
   }) {
@@ -326,63 +330,6 @@ class LeagueLocalDataSource {
         .getSingleOrNull();
   }
 
-  // Stream<PaginationModel<LeagueModel>> watchLeaguesAccumulatedPagination({
-  //   required bool isPrivate,
-  //   required int currentPage,
-  //   int pageSize = 20,
-  // }) {
-  //   final safePage = currentPage < 1 ? 1 : currentPage;
-  //   final safePageSize = pageSize < 1 ? 1 : pageSize;
-  //
-  //   final limit = safePage * safePageSize;
-  //
-  //   final leaguesStream = (db.select(db.leagues)
-  //         ..where((l) => l.isPrivate.equals(isPrivate))
-  //         ..orderBy([
-  //           (l) => OrderingTerm.desc(l.createdAt),
-  //         ])
-  //         ..limit(limit))
-  //       .watch()
-  //       .map((rows) => rows.map(LeagueModel.fromEntity).toList());
-  //
-  //   final metaStream = (db.select(db.paginationMeta)
-  //         ..where((t) => t.resource.equals(_leaguesResource))
-  //         ..where((t) => t.scope.equals(_scopeFromPrivacy(isPrivate)))
-  //         ..where((t) => t.key.isNull())
-  //         ..where((t) => t.parentKey.isNull())
-  //         ..orderBy([
-  //           (t) => OrderingTerm.desc(t.updatedAt),
-  //           (t) => OrderingTerm.desc(t.id),
-  //         ])
-  //         ..limit(1))
-  //       .watchSingleOrNull();
-  //
-  //   return leaguesStream.asyncMap((rows) async {
-  //     final meta = await metaStream.first;
-  //
-  //     final localTotal = await db
-  //         .customSelect(
-  //           'SELECT COUNT(*) AS c FROM leagues WHERE is_private = ?',
-  //           variables: [Variable.withBool(isPrivate)],
-  //           readsFrom: {db.leagues},
-  //         )
-  //         .getSingle()
-  //         .then((r) => (r.data['c'] as int?) ?? 0);
-  //
-  //     final total = meta?.total ?? localTotal;
-  //     final lastPage = meta?.lastPage ??
-  //         (total == 0 ? 0 : ((total + safePageSize - 1) ~/ safePageSize));
-  //     final perPage = meta?.perPage ?? safePageSize;
-  //
-  //     return PaginationModel<LeagueModel>(
-  //       currentPage: safePage,
-  //       lastPage: lastPage,
-  //       perPage: perPage,
-  //       total: total,
-  //       data: rows,
-  //     );
-  //   });
-  // }
 
   Stream<PaginationModel<LeagueModel>> watchLeaguesAccumulatedPagination({
     required bool isPrivate,
@@ -445,9 +392,9 @@ class LeagueLocalDataSource {
     await db.transaction(() async {
       // 1) League upsert
       await db.into(db.leagues).insert(
-        bundle.league.toCompanion(),
+        bundle.league.toRemoteCompanion(),
         onConflict: DoUpdate(
-              (old) => bundle.league.toCompanionUpsert(),
+              (old) => bundle.league.toRemoteCompanionUpsert(),
           target: [db.leagues.syncId],
         ),
       );

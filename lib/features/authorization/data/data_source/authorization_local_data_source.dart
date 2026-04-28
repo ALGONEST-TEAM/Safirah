@@ -1,11 +1,62 @@
 import 'package:drift/drift.dart';
 import 'package:safirah/core/database/safirah_database.dart';
+import 'package:uuid/uuid.dart';
 
+import '../../authorization_permissions.dart';
+import '../../authorization_roles.dart';
 import '../model/user_has_role_model.dart';
 
 class AuthorizationLocalDataSource {
   final Safirah db;
   const AuthorizationLocalDataSource(this.db);
+
+  static final Uuid _uuid = const Uuid();
+
+  Future<void> seedCreatorAsOrganizer({
+    required String leagueSyncId,
+    required String userName,
+    int? userId,
+  }) async {
+    final lid = leagueSyncId.trim();
+    if (lid.isEmpty) return;
+
+    final organizerPermissions = AuthorizationPermissions.permissionsForRoles(
+      const [AuthorizationRoles.organizer],
+    );
+    final existingPermissions = await getLeaguePermissionKeys(
+      leagueSyncId: lid,
+    );
+
+    await replaceLeaguePermissions(
+      leagueSyncId: lid,
+      permissionKeys: {...existingPermissions, ...organizerPermissions}.toList(),
+      syncIdFactory: () => _uuid.v7(),
+    );
+
+    final cleanedUserName = userName.trim();
+    if (cleanedUserName.isEmpty) return;
+
+    final stableSyncId = 'local-organizer-$lid-${userId ?? cleanedUserName}';
+
+    await db.into(db.usersHasRole).insert(
+      UsersHasRoleCompanion.insert(
+        syncId: stableSyncId,
+        leagueSyncId: lid,
+        name: cleanedUserName,
+        role: AuthorizationRoles.organizer,
+        roleOrder: const Value(1),
+      ),
+      onConflict: DoUpdate(
+        (old) => UsersHasRoleCompanion(
+          leagueSyncId: Value(lid),
+          name: Value(cleanedUserName),
+          role: const Value(AuthorizationRoles.organizer),
+          roleOrder: const Value(1),
+        ),
+        target: [db.usersHasRole.syncId],
+      ),
+    );
+  }
 
   // ---------------- UserLeaguePermissions ----------------
   Future<void> replaceLeaguePermissions({
@@ -19,25 +70,27 @@ class AuthorizationLocalDataSource {
         .toSet()
         .toList();
 
-    await (db.delete(db.userLeaguePermissions)
-          ..where((t) => t.leagueSyncId.equals(leagueSyncId)))
-        .go();
+    await db.transaction(() async {
+      await (db.delete(db.userLeaguePermissions)
+            ..where((t) => t.leagueSyncId.equals(leagueSyncId)))
+          .go();
 
-    if (cleaned.isEmpty) return;
+      if (cleaned.isEmpty) return;
 
-    await db.batch((b) {
-      b.insertAll(
-        db.userLeaguePermissions,
-        cleaned
-            .map(
-              (k) => UserLeaguePermissionsCompanion.insert(
-                syncId: syncIdFactory(),
-                leagueSyncId: leagueSyncId,
-                permissionKey: k,
-              ),
-            )
-            .toList(),
-      );
+      await db.batch((b) {
+        b.insertAll(
+          db.userLeaguePermissions,
+          cleaned
+              .map(
+                (k) => UserLeaguePermissionsCompanion.insert(
+                  syncId: syncIdFactory(),
+                  leagueSyncId: leagueSyncId,
+                  permissionKey: k,
+                ),
+              )
+              .toList(),
+        );
+      });
     });
 
   }

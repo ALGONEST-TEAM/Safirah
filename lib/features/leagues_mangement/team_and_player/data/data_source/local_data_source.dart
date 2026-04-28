@@ -126,9 +126,27 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
     required String teamSyncId,
   }) async {
     final rows = await (db.select(db.players)
-          ..where((t) => t.teamSyncId.equals(teamSyncId)))
+          ..where((t) => t.teamSyncId.equals(teamSyncId))
+          ..orderBy([
+            (t) => OrderingTerm.asc(t.createdAt),
+            (t) => OrderingTerm.asc(t.id),
+          ]))
         .get();
     return rows.map((e) => PlayerModel.fromEntity(e)).toList();
+  }
+
+  Stream<List<PlayerModel>> watchPlayersOfTeam({
+    required String teamSyncId,
+  }) {
+    final playersTrigger = (db.select(db.players)
+          ..where((p) => p.teamSyncId.equals(teamSyncId)))
+        .watch()
+        .map((_) => null);
+
+    return MergeStream([playersTrigger])
+        .startWith(null)
+        .debounceTime(const Duration(milliseconds: 120))
+        .asyncMap((_) => getPlayerTeam(teamSyncId: teamSyncId));
   }
 
   Future<List<PlayerModel>> runDraft({
@@ -218,17 +236,31 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
 
         final generatedSyncId = p.syncId ?? const Uuid().v4();
 
-        final newId = await db.into(db.players).insert(
-              PlayersCompanion.insert(
-                teamSyncId: teamSyncId,
-                playerLeagueSyncId: leaguePlayerSyncId!,
-                fullName: p.fullName ?? "",
-                status: Value(p.status),
-                syncId: generatedSyncId,
-              ),
-            );
+        await db.into(db.players).insert(
+          PlayersCompanion.insert(
+            teamSyncId: teamSyncId,
+            playerLeagueSyncId: leaguePlayerSyncId,
+            fullName: p.fullName ?? "",
+            status: Value(p.status),
+            syncId: generatedSyncId,
+          ),
+          onConflict: DoUpdate(
+            (old) => PlayersCompanion(
+              teamSyncId: Value(teamSyncId),
+              fullName: Value(p.fullName ?? ""),
+              status: Value(p.status),
+              updatedAt: Value(DateTime.now()),
+            ),
+            target: [db.players.playerLeagueSyncId],
+          ),
+        );
 
-        inserted.add(p.copyWith(id: newId, syncId: generatedSyncId));
+        final stored = await (db.select(db.players)
+              ..where((row) => row.playerLeagueSyncId.equals(leaguePlayerSyncId))
+              ..limit(1))
+            .getSingle();
+
+        inserted.add(PlayerModel.fromEntity(stored));
       }
 
       return inserted;
@@ -298,16 +330,31 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
       for (final p in logicalPlayers) {
         if (taken.contains(p.playerLeagueSyncId)) continue;
 
-        final newId = await db.into(db.players).insert(
-              PlayersCompanion.insert(
-                  playerLeagueSyncId: p.playerLeagueSyncId!,
-                  teamSyncId: teamSyncId,
-                  fullName: p.fullName ?? '',
-                  status: Value(p.status),
-                  syncId: const Uuid().v4()),
-            );
+        await db.into(db.players).insert(
+          PlayersCompanion.insert(
+            playerLeagueSyncId: p.playerLeagueSyncId!,
+            teamSyncId: teamSyncId,
+            fullName: p.fullName ?? '',
+            status: Value(p.status),
+            syncId: const Uuid().v4(),
+          ),
+          onConflict: DoUpdate(
+            (old) => PlayersCompanion(
+              teamSyncId: Value(teamSyncId),
+              fullName: Value(p.fullName ?? ''),
+              status: Value(p.status),
+              updatedAt: Value(DateTime.now()),
+            ),
+            target: [db.players.playerLeagueSyncId],
+          ),
+        );
 
-        inserted.add(p.copyWith(id: newId));
+        final stored = await (db.select(db.players)
+              ..where((row) => row.playerLeagueSyncId.equals(p.playerLeagueSyncId!))
+              ..limit(1))
+            .getSingle();
+
+        inserted.add(PlayerModel.fromEntity(stored));
       }
 
       return inserted;
@@ -384,11 +431,15 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
                 syncId: Value(team.syncId),
                 leagueSyncId: Value(team.leagueSyncId!),
                 teamName: Value((team.teamName).trim()),
+                logoUrl: Value(team.logoUrl),
+                status: Value(team.status),
               ),
               onConflict: DoUpdate(
                 (old) => TeamsCompanion(
                   leagueSyncId: Value(team.leagueSyncId!),
                   teamName: Value((team.teamName).trim()),
+                  logoUrl: Value(team.logoUrl),
+                  status: Value(team.status),
                   updatedAt: Value(DateTime.now()),
                 ),
                 target: [db.teams.syncId],
@@ -419,25 +470,34 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
 
           // 4) Upsert players with computed status
           for (final player in (team.player ?? [])) {
-            final sid = (player.syncId ?? '').trim();
-            if (sid.isEmpty) {
-              debugPrint('PLAYER SKIPPED empty syncId name=${player.fullName}');
+            final playerLeagueSyncId = (player.playerLeagueSyncId ?? '').trim();
+            if (playerLeagueSyncId.isEmpty) {
+              debugPrint('PLAYER SKIPPED empty playerLeagueSyncId name=${player.fullName}');
               continue;
             }
+            final sid = (player.syncId ?? '').trim().isNotEmpty
+                ? (player.syncId ?? '').trim()
+                : 'league-player:$playerLeagueSyncId';
 
-            // If player already exists, keep its current status.
-            final existing = existingPlayers
-                .where((p) => p.syncId == sid)
-                .cast<dynamic>()
-                .toList();
+            final existing = await (db.select(db.players)
+                  ..where((p) =>
+                      p.playerLeagueSyncId.equals(playerLeagueSyncId))
+                  ..limit(1))
+                .getSingleOrNull();
 
             String computedStatus;
-            if (existing.isNotEmpty) {
+            if (existing != null) {
               // keep existing status if it's main/sub, otherwise normalize below
-              final s = (existingPlayers.firstWhere((p) => p.syncId == sid).status)
-                  .trim()
-                  .toLowerCase();
+              final s = existing.status.trim().toLowerCase();
               computedStatus = (s == 'sub') ? 'sub' : 'main';
+
+              if (existing.teamSyncId != team.syncId) {
+                if (computedStatus == 'sub') {
+                  currentSub++;
+                } else {
+                  currentMain++;
+                }
+              }
             } else {
               if (maxMainPlayers <= 0 && maxSubPlayers <= 0) {
                 computedStatus = 'main';
@@ -454,39 +514,43 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
             }
 
             try {
+              final normalizedTeamSyncId =
+                  (player.teamSyncId ?? '').trim().isNotEmpty
+                      ? (player.teamSyncId ?? '').trim()
+                      : team.syncId;
+              final normalizedName = (player.fullName ?? '').trim();
+
               await db.into(db.players).insert(
                 PlayersCompanion(
-                  syncId: Value(sid),
-                  teamSyncId: Value((player.teamSyncId ?? '').trim()),
-                  playerLeagueSyncId:
-                      Value((player.playerLeagueSyncId ?? '').trim()),
-                  fullName: Value((player.fullName ?? '').trim()),
+                  syncId: Value(existing?.syncId ?? sid),
+                  teamSyncId: Value(normalizedTeamSyncId),
+                  playerLeagueSyncId: Value(playerLeagueSyncId),
+                  fullName: Value(normalizedName),
                   status: Value(computedStatus),
                   updatedAt: Value(DateTime.now()),
                 ),
                 onConflict: DoUpdate(
                   (old) => PlayersCompanion(
-                    teamSyncId: Value((player.teamSyncId ?? '').trim()),
-                    playerLeagueSyncId:
-                        Value((player.playerLeagueSyncId ?? '').trim()),
-                    fullName: Value((player.fullName ?? '').trim()),
+                    teamSyncId: Value(normalizedTeamSyncId),
+                    fullName: Value(normalizedName),
                     status: Value(computedStatus),
                     updatedAt: Value(DateTime.now()),
                   ),
-                  target: [db.players.syncId],
+                  target: [db.players.playerLeagueSyncId],
                 ),
               );
 
-              final stored = await (db.select(db.players)
-                    ..where((t) => t.syncId.equals(sid)))
-                  .getSingleOrNull();
+              final stored = await ((db.select(db.players)
+                    ..where((t) =>
+                        t.playerLeagueSyncId.equals(playerLeagueSyncId)))
+                  .getSingleOrNull());
 
               debugPrint(stored == null
-                  ? 'VERIFY FAILED: ${player.fullName} ($sid)'
-                  : 'VERIFY OK: ${player.fullName} ($sid) status=$computedStatus');
+                  ? 'VERIFY FAILED: ${player.fullName} ($sid/$playerLeagueSyncId)'
+                  : 'VERIFY OK: ${player.fullName} ($sid/$playerLeagueSyncId) status=$computedStatus');
             } catch (e, s) {
               debugPrint(
-                  'PLAYER UPSERT FAILED sid=$sid name=${player.fullName} err=$e');
+                  'PLAYER UPSERT FAILED sid=$sid lp=$playerLeagueSyncId name=${player.fullName} err=$e');
               debugPrint('$s');
             }
           }
@@ -502,110 +566,111 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
 
     debugPrint('upsertTeams done');
   }
-  Future<bool> upsertPlayerAndVerify(PlayersCompanion companion, String syncId) async {
-    try {
-      await db.into(db.players).insert(
-        companion,
-        onConflict: DoUpdate(
-              (old) => companion,
-          target: [db.players.syncId], // عدّلها إذا عندك unique مركب
-        ),
-      );
-
-      final stored = await (db.select(db.players)
-        ..where((t) => t.syncId.equals(syncId)))
-          .getSingleOrNull();
-
-      return stored != null;
-    } catch (_) {
-      return false;
-    }
-  }
-  Future<void> upsertPlayersTeam(List<PlayerModel> player) async {
-    if (player.isEmpty) return;
-
-   // print('Upserting ${player[0].syncId} league players locally.');
-    await db.transaction(() async {
-      // Group incoming players by team
-      final byTeam = <String, List<PlayerModel>>{};
-      for (final p in player) {
-        final teamId = (p.teamSyncId ?? '').trim();
-        if (teamId.isEmpty) continue;
-        byTeam.putIfAbsent(teamId, () => <PlayerModel>[]).add(p);
-      }
-
-      for (final entry in byTeam.entries) {
-        final teamSyncId = entry.key;
-        final list = entry.value;
-
-        // Read team to get leagueSyncId
-        final teamRow = await (db.select(db.teams)
-              ..where((t) => t.syncId.equals(teamSyncId))
-              ..limit(1))
-            .getSingleOrNull();
-        final leagueSyncId = teamRow?.leagueSyncId;
-
-        final leagueRow = leagueSyncId == null
-            ? null
-            : await (db.select(db.leagues)
-                  ..where((l) => l.syncId.equals(leagueSyncId))
-                  ..limit(1))
-                .getSingleOrNull();
-        final maxMainPlayers = leagueRow?.maxMainPlayers ?? 0;
-        final maxSubPlayers = leagueRow?.maxSubPlayers ?? 0;
-
-        // Existing players for this team
-        final existingPlayers = await (db.select(db.players)
-              ..where((p) => p.teamSyncId.equals(teamSyncId)))
-            .get();
-
-        var currentMain =
-            existingPlayers.where((p) => p.status == 'main').length;
-        var currentSub = existingPlayers.where((p) => p.status == 'sub').length;
-
-        for (final p in list) {
-          final sid = (p.syncId ?? '').trim();
-          if (sid.isEmpty) continue;
-
-          final already = existingPlayers.any((e) => e.syncId == sid);
-
-          String computedStatus;
-          if (already) {
-            final s = existingPlayers
-                .firstWhere((e) => e.syncId == sid)
-                .status
-                .trim()
-                .toLowerCase();
-            computedStatus = (s == 'sub') ? 'sub' : 'main';
-          } else {
-            if (maxMainPlayers <= 0 && maxSubPlayers <= 0) {
-              computedStatus = 'main';
-            } else if (maxMainPlayers > 0 && currentMain < maxMainPlayers) {
-              computedStatus = 'main';
-              currentMain++;
-            } else if (maxSubPlayers > 0 && currentSub < maxSubPlayers) {
-              computedStatus = 'sub';
-              currentSub++;
-            } else {
-              computedStatus = maxSubPlayers > 0 ? 'sub' : 'main';
-            }
-          }
-
-          await db.into(db.players).insertOnConflictUpdate(
-                PlayersCompanion(
-                  fullName: Value((p.fullName ?? '').trim()),
-                  syncId: Value(sid),
-                  teamSyncId: Value(teamSyncId),
-                  status: Value(computedStatus),
-                  playerLeagueSyncId: Value((p.playerLeagueSyncId ?? '').trim()),
-                  id: p.id == null ? const Value.absent() : Value(p.id!),
-                  updatedAt: Value(DateTime.now()),
-                ),
-              );
-        }
-      }
-    });
-  }
+  // Future<bool> upsertPlayerAndVerify(PlayersCompanion companion, String syncId) async {
+  //   try {
+  //     await db.into(db.players).insert(
+  //       companion,
+  //       onConflict: DoUpdate(
+  //             (old) => companion,
+  //         target: [db.players.syncId], // عدّلها إذا عندك unique مركب
+  //       ),
+  //     );
+  //
+  //     final stored = await (db.select(db.players)
+  //       ..where((t) => t.syncId.equals(syncId)))
+  //         .getSingleOrNull();
+  //
+  //     return stored != null;
+  //   } catch (_) {
+  //     return false;
+  //   }
+  // }
+  // Future<void> upsertPlayersTeam(List<PlayerModel> player) async {
+  //   if (player.isEmpty) return;
+  //
+  //  // print('Upserting ${player[0].syncId} league players locally.');
+  //   await db.transaction(() async {
+  //     // Group incoming players by team
+  //     final byTeam = <String, List<PlayerModel>>{};
+  //     for (final p in player) {
+  //       final teamId = (p.teamSyncId ?? '').trim();
+  //       if (teamId.isEmpty) continue;
+  //       byTeam.putIfAbsent(teamId, () => <PlayerModel>[]).add(p);
+  //     }
+  //
+  //     for (final entry in byTeam.entries) {
+  //       final teamSyncId = entry.key;
+  //       final list = entry.value;
+  //
+  //       // Read team to get leagueSyncId
+  //       final teamRow = await (db.select(db.teams)
+  //             ..where((t) => t.syncId.equals(teamSyncId))
+  //             ..limit(1))
+  //           .getSingleOrNull();
+  //       final leagueSyncId = teamRow?.leagueSyncId;
+  //
+  //       final leagueRow = leagueSyncId == null
+  //           ? null
+  //           : await (db.select(db.leagues)
+  //                 ..where((l) => l.syncId.equals(leagueSyncId))
+  //                 ..limit(1))
+  //               .getSingleOrNull();
+  //       final maxMainPlayers = leagueRow?.maxMainPlayers ?? 0;
+  //       final maxSubPlayers = leagueRow?.maxSubPlayers ?? 0;
+  //
+  //       // Existing players for this team
+  //       final existingPlayers = await (db.select(db.players)
+  //             ..where((p) => p.teamSyncId.equals(teamSyncId)))
+  //           .get();
+  //
+  //       var currentMain =
+  //           existingPlayers.where((p) => p.status == 'main').length;
+  //       var currentSub = existingPlayers.where((p) => p.status == 'sub').length;
+  //
+  //       for (final p in list) {
+  //         final sid = (p.syncId ?? '').trim();
+  //         if (sid.isEmpty) continue;
+  //
+  //         final already = existingPlayers.any((e) => e.syncId == sid);
+  //
+  //         String computedStatus;
+  //         if (already) {
+  //           final s = existingPlayers
+  //               .firstWhere((e) => e.syncId == sid)
+  //               .status
+  //               .trim()
+  //               .toLowerCase();
+  //           computedStatus = (s == 'sub') ? 'sub' : 'main';
+  //         } else {
+  //           if (maxMainPlayers <= 0 && maxSubPlayers <= 0) {
+  //             computedStatus = 'main';
+  //           } else if (maxMainPlayers > 0 && currentMain < maxMainPlayers) {
+  //             computedStatus = 'main';
+  //             currentMain++;
+  //           } else if (maxSubPlayers > 0 && currentSub < maxSubPlayers) {
+  //             computedStatus = 'sub';
+  //             currentSub++;
+  //           } else {
+  //             computedStatus = maxSubPlayers > 0 ? 'sub' : 'main';
+  //           }
+  //         }
+  //
+  //         await db.into(db.players).insertOnConflictUpdate(
+  //               PlayersCompanion(
+  //                 fullName: Value((p.fullName ?? '').trim()),
+  //                 syncId: Value(sid),
+  //                 teamSyncId: Value(teamSyncId),
+  //
+  //                 status: Value(computedStatus),
+  //                 playerLeagueSyncId: Value((p.playerLeagueSyncId ?? '').trim()),
+  //                 id: p.id == null ? const Value.absent() : Value(p.id!),
+  //                 updatedAt: Value(DateTime.now()),
+  //               ),
+  //             );
+  //       }
+  //     }
+  //   });
+  // }
   Future<List<LeaguePlayerModel>> leaguePlayersWithoutCategory(
       String leagueSyncId) async {
     // await _repairDateTimeColumnsIfNeeded();
@@ -639,6 +704,31 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
         .map((row) => row.readTable(db.leaguePlayers))
         .map(LeaguePlayerModel.fromEntity)
         .toList();
+  }
+
+  Stream<List<LeaguePlayerModel>> watchLeaguePlayersWithoutTeam(
+      String leagueSyncId) {
+    final q = db.select(db.leaguePlayers).join([
+      leftOuterJoin(
+        db.players,
+        db.players.playerLeagueSyncId.equalsExp(db.leaguePlayers.syncId),
+      ),
+    ])
+      ..where(
+        db.leaguePlayers.leagueSyncId.equals(leagueSyncId) &
+            db.players.id.isNull(),
+      )
+      ..orderBy([
+        OrderingTerm.asc(db.leaguePlayers.createdAt),
+        OrderingTerm.asc(db.leaguePlayers.id),
+      ]);
+
+    return q.watch().map(
+          (rows) => rows
+              .map((row) => row.readTable(db.leaguePlayers))
+              .map(LeaguePlayerModel.fromEntity)
+              .toList(),
+        );
   }
 
   Future<void> addLeaguePlayer(LeaguePlayerModel player) async {

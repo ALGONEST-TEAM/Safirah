@@ -18,6 +18,7 @@ class Players extends Table {
   @override
   List<String> get customConstraints => [
     'UNIQUE(sync_id)',
+    'UNIQUE(player_league_sync_id)',
   ];
 }
 

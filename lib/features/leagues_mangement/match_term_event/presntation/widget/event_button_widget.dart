@@ -1,6 +1,7 @@
 // presentation/widgets/event_button.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class EventButtonWidget extends ConsumerWidget {
@@ -24,7 +25,7 @@ class EventButtonWidget extends ConsumerWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          SvgPicture.asset(iconPath, color: color),
+          SvgPicture.asset(iconPath, color: color,height: 11.5.h,),
           if (count > 0)
             Positioned(
               right: -5,

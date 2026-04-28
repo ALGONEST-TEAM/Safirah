@@ -36,7 +36,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
   ]);
   await NotificationBootstrap.I.init(debug: kDebugMode);
 
@@ -161,7 +160,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         ],
         supportedLocales: const [
           Locale('ar'),
-          Locale('en'),
+          //Locale('en'),
         ],
         theme: lightTheme,
         home: const BottomNavigationBarOfMangeLeagueWidget(),

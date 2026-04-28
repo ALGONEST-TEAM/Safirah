@@ -22,7 +22,7 @@ class PlayersOfTeamWidget extends ConsumerWidget {
   final TeamModel teamModel;
   @override
   Widget build(BuildContext context, ref) {
-    final playerOfTeam = ref.watch(playersOfTeamProvider(teamSyncId));
+    final playerOfTeam = ref.watch(playersOfTeamStreamProvider(teamSyncId));
     return Scaffold(
       appBar:SecondaryAppBarWidget(title: teamName,),
       body: SafeArea(
@@ -33,14 +33,15 @@ class PlayersOfTeamWidget extends ConsumerWidget {
             children: [
               const AutoSizeTextWidget(text: 'لاعبين الفريق'),
               4.h.verticalSpace,
-              CheckStateInGetApiDataWidget(
-                state: playerOfTeam,
-                widgetOfData: Expanded(
-                  child: ListView.separated(
-                    itemCount: playerOfTeam.data.length,
+              Expanded(
+                child: CheckStateInStreamWidget<List<PlayerModel>>(
+                  async: playerOfTeam,
+                  isEmpty: (players) => players.isEmpty,
+                  dataBuilder: (players) => ListView.separated(
+                    itemCount: players.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (_, i) {
-                      final p = playerOfTeam.data[i];
+                      final p = players[i];
                       return PlayerTile(
                         name: p.fullName.toString(),
                         avatar: '',

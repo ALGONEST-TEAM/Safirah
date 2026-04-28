@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>سياسة الخصوصية | تطبيق صافرة</title>
+    <meta name="description" content="سياسة الخصوصية الخاصة بتطبيق صافرة، وتشمل كيفية جمع المعلومات واستخدامها وحمايتها عند استخدام التطبيق.">
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --surface: #ffffff;
+        --surface-soft: #f8fafc;
+        --text: #1f2937;
+        --muted: #667085;
+        --primary: #ca9a2c;
+        --primary-soft: rgba(202, 154, 44, 0.12);
+        --secondary: #1d1750;
+        --secondary-soft: rgba(29, 23, 80, 0.08);
+        --border: rgba(29, 23, 80, 0.08);
+        --shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        --radius: 20px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Tahoma, Arial, sans-serif;
+        background: linear-gradient(180deg, #fbfbfd 0%, var(--bg) 100%);
+        color: var(--text);
+        line-height: 1.9;
+      }
+
+      body[dir="rtl"] {
+        text-align: right;
+      }
+
+      .container {
+        width: min(100% - 32px, 980px);
+        margin: 0 auto;
+      }
+
+      .page {
+        padding: 32px 0 48px;
+      }
+
+      .hero {
+        background: linear-gradient(135deg, var(--secondary) 0%, #312a84 100%);
+        color: #fff;
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        padding: 32px;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset-inline-start: -40px;
+        bottom: -60px;
+        width: 180px;
+        height: 180px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 50%;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        color: rgba(255, 255, 255, 0.92);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 14px;
+        margin-bottom: 18px;
+      }
+
+      .hero h1 {
+        margin: 0 0 12px;
+        font-size: clamp(30px, 4vw, 42px);
+        line-height: 1.3;
+      }
+
+      .hero p {
+        margin: 0;
+        font-size: 17px;
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 760px;
+      }
+
+      .meta-row,
+      .quick-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .meta-chip,
+      .quick-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      .quick-link {
+        background: var(--surface);
+        color: var(--secondary);
+        border-color: var(--border);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+      }
+
+      .notice,
+      .section,
+      .footer-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      .notice {
+        margin-bottom: 20px;
+        padding: 22px 24px;
+        background: linear-gradient(180deg, #fffdf7 0%, #fff 100%);
+        border-color: rgba(202, 154, 44, 0.18);
+      }
+
+      .notice h2,
+      .section h2,
+      .footer-card h2 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        line-height: 1.4;
+        color: var(--secondary);
+      }
+
+      .notice p,
+      .footer-card p,
+      .section p {
+        margin: 0;
+        color: var(--text);
+      }
+
+      .sections {
+        display: grid;
+        gap: 16px;
+      }
+
+      .section {
+        padding: 22px 24px;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 12px;
+      }
+
+      .section-number {
+        flex: 0 0 auto;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--secondary);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .section h2 {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      .section-intro {
+        margin-bottom: 12px;
+        color: var(--muted);
+      }
+
+      .list,
+      .sub-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .list li,
+      .sub-list li {
+        position: relative;
+        padding-inline-start: 18px;
+        margin-bottom: 8px;
+      }
+
+      .list li::before,
+      .sub-list li::before {
+        content: "";
+        position: absolute;
+        inset-inline-start: 0;
+        top: 12px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+
+      .group {
+        margin-top: 14px;
+        padding: 16px;
+        border-radius: 16px;
+        background: var(--surface-soft);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+      }
+
+      .group h3 {
+        margin: 0 0 8px;
+        color: var(--secondary);
+        font-size: 18px;
+      }
+
+      .footer-card {
+        margin-top: 20px;
+        padding: 24px;
+      }
+
+      .footer-card a {
+        color: var(--secondary);
+        font-weight: 700;
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .footer-links a {
+        text-decoration: none;
+        color: var(--secondary);
+        background: var(--secondary-soft);
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+      }
+
+      .site-footer {
+        padding: 18px 0 0;
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 640px) {
+        .page {
+          padding-top: 16px;
+        }
+
+        .container {
+          width: min(100% - 20px, 980px);
+        }
+
+        .hero,
+        .notice,
+        .section,
+        .footer-card {
+          border-radius: 18px;
+          padding: 18px;
+        }
+
+        .hero h1 {
+          font-size: 28px;
+        }
+
+        .hero p {
+          font-size: 15px;
+        }
+
+        .section h2,
+        .notice h2,
+        .footer-card h2 {
+          font-size: 20px;
+        }
+      }
+
+      @media print {
+        body {
+          background: #fff;
+        }
+
+        .hero,
+        .notice,
+        .section,
+        .footer-card {
+          box-shadow: none;
+          border: 1px solid #ddd;
+        }
+
+        .quick-links,
+        .footer-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="container">
+        <header class="hero">
+          <div class="eyebrow">🔒 وثيقة قانونية</div>
+          <h1>سياسة الخصوصية</h1>
+          <p>
+            توضح هذه السياسة كيفية جمع واستخدام وحماية المعلومات عند استخدامك لتطبيق صافرة.
+            تطبيق صافرة مملوك ومدار من قبل متجر صافرة. باستخدامك للتطبيق فإنك توافق على هذه السياسة.
+          </p>
+          <div class="meta-row">
+            <span class="meta-chip">📅 آخر تحديث: 18 أبريل 2026</span>
+            <a class="meta-chip" href="mailto:spport@safira.com">✉️ spport@safira.com</a>
+          </div>
+          <nav class="quick-links" aria-label="روابط سريعة">
+            <a class="quick-link" href="./account-deletion.html">حذف الحساب والبيانات</a>
+            <a class="quick-link" href="./terms-and-conditions.html">الانتقال إلى الشروط والأحكام</a>
+          </nav>
+        </header>
+
+        <section class="notice" aria-labelledby="important-pledge">
+          <h2 id="important-pledge">تعهد مهم</h2>
+          <ul class="list">
+            <li>نقوم بجمع موقعك الجغرافي عند الحاجة لتقديم خدمات التوصيل وتحديد عنوان الاستلام بدقة، ويتم ذلك فقط بعد موافقتك ومنح إذن الموقع (GPS) من خلال الجهاز.</li>
+            <li>كما يتم استخدام الموقع الجغرافي لتحسين تجربة المستخدم في خدمات التوصيل وعرض الخدمات المناسبة حسب المنطقة.</li>
+            <li>لا نستخدم بيانات الموقع لأغراض إعلانية غير مرتبطة بخدمات التطبيق، ولا نقوم ببيع بيانات موقعك لأي طرف خارجي.</li>
+          </ul>
+        </section>
+
+        <div class="sections">
+          <section class="section" id="section-1">
+            <div class="section-header">
+              <span class="section-number">1</span>
+              <h2>المعلومات التي نجمعها</h2>
+            </div>
+            <p class="section-intro">نجمع فقط المعلومات اللازمة لإنشاء الحساب، إتمام الطلبات، المشاركة في التوقعات، إدارة الدوريات، وتقديم الدعم الفني.</p>
+            <div class="group">
+              <h3>معلومات الحساب والمعلومات الإضافية</h3>
+              <ul class="sub-list">
+                <li>الاسم (إلزامي).</li>
+                <li>رقم الهاتف (إلزامي) لتسجيل الدخول عبر رمز تحقق (OTP) وتأمين الحساب والتواصل الضروري.</li>
+                <li>تاريخ الميلاد (اختياري) لتحسين تجربة المستخدم وبعض التخصيص داخل التطبيق.</li>
+                <li>المدينة / المنطقة السكنية (إلزامي).</li>
+                <li>العنوان التفصيلي للتوصيل (إلزامي عند الطلب من المتجر).</li>
+                <li>الموقع الجغرافي (GPS) عند الحاجة لتحديد موقع التوصيل بدقة.</li>
+                <li>النوع (الجنس) (اختياري) لتحسين بعض إعدادات التخصيص.</li>
+              </ul>
+            </div>
+            <div class="group">
+              <h3>الوسائط والمحتوى الذي تقوم برفعه</h3>
+              <ul class="sub-list">
+                <li>قد نجمع الصور أو الفيديوهات أو الشعارات التي تختار رفعها داخل التطبيق، مثل صور وفيديوهات التقارير والمراجعات وشعارات الدوري أو الفريق.</li>
+                <li>عند تصوير فيديو من داخل التطبيق قد يتم تسجيل الصوت المصاحب له فقط لعرضه أو رفعه ضمن الوظيفة التي اخترتها.</li>
+              </ul>
+            </div>
+            <div class="group">
+              <h3>معلومات الطلبات والمتجر الإلكتروني</h3>
+              <ul class="sub-list">
+                <li>تفاصيل الطلبات مثل المنتجات المطلوبة، الكمية، السعر، عنوان التوصيل، طريقة الدفع، وملاحظات الطلب (إلزامية عند الشراء لإتمام الطلب وخدمة العملاء).</li>
+              </ul>
+            </div>
+            <div class="group">
+              <h3>معلومات قسم التوقعات</h3>
+              <ul class="sub-list">
+                <li>بيانات التوقعات الخاصة بالمباريات والبطولات، النقاط المكتسبة، الجوائز، وسجل المشاركات.</li>
+              </ul>
+            </div>
+            <div class="group">
+              <h3>معلومات قسم الدوريات</h3>
+              <ul class="sub-list">
+                <li>بيانات إنشاء الدوريات، أسماء المشاركين، نتائج المباريات، الجداول، الترتيب، وسجل المنافسات.</li>
+              </ul>
+            </div>
+            <div class="group">
+              <h3>معلومات تقنية (تُسجَّل تلقائيًا)</h3>
+              <ul class="sub-list">
+                <li>قد يتم تسجيل بعض البيانات التقنية تلقائيًا مثل عنوان IP، نوع الجهاز، نظام التشغيل، وتاريخ ووقت الطلب.</li>
+                <li>لا نستخدم هذه البيانات لتتبع غير ضروري أو لعرض إعلانات موجهة خارج نطاق خدمات التطبيق.</li>
+              </ul>
+            </div>
+            <div class="group">
+              <h3>رمز التحقق (OTP)</h3>
+              <ul class="sub-list">
+                <li>يتم إرسال رمز تسجيل الدخول عبر SMS وقد يقوم التطبيق بملء الرمز تلقائيًا لتسهيل الدخول.</li>
+                <li>لا نقوم بقراءة محتوى رسائلك أو تخزينها، ولا نطلب إذن قراءة الرسائل القصيرة.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="section" id="section-2">
+            <div class="section-header">
+              <span class="section-number">2</span>
+              <h2>الأذونات أو إمكانات الوصول التي قد يحتاجها التطبيق</h2>
+            </div>
+            <ul class="list">
+              <li>لا نطلب إذن الوصول إلى جهات الاتصال، ولا إذن قراءة الرسائل القصيرة، ولا إذن الوصول غير الضروري للملفات.</li>
+              <li>أي صلاحية أو وصول مرتبط بالوسائط أو الموقع يتم فقط عند اختيارك استخدام الوظيفة المرتبطة به داخل التطبيق.</li>
+            </ul>
+            <div class="group">
+              <h3>إذن الإنترنت</h3>
+              <ul class="sub-list">
+                <li>للاتصال بخوادمنا، عرض المحتوى، تنفيذ الطلبات، تشغيل خدمات المتجر، التوقعات، والدوريات.</li>
+              </ul>
+            </div>
+            <div class="group">
+              <h3>إذن الموقع (GPS)</h3>
+              <ul class="sub-list">
+                <li>قد يحتاج التطبيق إلى الوصول إلى موقعك عند استخدام ميزة تحديد موقعك الحالي على الخريطة أو عند إضافة أو تعديل عنوان التوصيل، وذلك للمساعدة في تحديد المدينة والمنطقة بدقة وتحسين خدمات الشحن والاستلام.</li>
+              </ul>
+            </div>
+            <div class="group">
+              <h3>إذن الكاميرا</h3>
+              <ul class="sub-list">
+                <li>قد يحتاج التطبيق إلى الوصول إلى الكاميرا عندما تختار التقاط صورة أو تصوير فيديو من داخل التطبيق، مثل التقارير والمراجعات وشعارات الدوري أو الفريق.</li>
+              </ul>
+            </div>
+            <div class="group">
+              <h3>إذن مكتبة الصور</h3>
+              <ul class="sub-list">
+                <li>قد يحتاج التطبيق إلى الوصول إلى مكتبة الصور أو المعرض عندما تختار رفع صورة أو فيديو من جهازك داخل التطبيق في المراجعات والتقارير وشعارات الدوري أو الفريق.</li>
+              </ul>
+            </div>
+            <div class="group">
+              <h3>إذن الميكروفون</h3>
+              <ul class="sub-list">
+                <li>قد يحتاج التطبيق إلى الوصول إلى الميكروفون فقط عند تصوير فيديو من داخل التطبيق إذا كان تسجيل الصوت المصاحب للفيديو مطلوبًا من النظام، ولا يتم استخدامه كوظيفة مستقلة خارج هذه الحالة.</li>
+              </ul>
+            </div>
+            <div class="group">
+              <h3>الإشعارات (Push Notifications)</h3>
+              <ul class="sub-list">
+                <li>قد يطلب التطبيق إذن إرسال الإشعارات لتمكين إشعارات الطلبات وتحديثات الشحن ونتائج التوقعات والجوائز وتحديثات الدوريات والتنبيهات المهمة.</li>
+                <li>يمكنك إيقاف الإشعارات من إعدادات الجهاز.</li>
+                <li>لا يتم الوصول إلى الكاميرا أو الصور أو الميكروفون أو الموقع إلا عند استخدامك للميزة المرتبطة بها ووفق أذونات جهازك وإعدادات النظام.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="section" id="section-3">
+            <div class="section-header">
+              <span class="section-number">3</span>
+              <h2>كيف نستخدم المعلومات</h2>
+            </div>
+            <ul class="list">
+              <li>إنشاء الحساب وإدارته وتسجيل الدخول عبر OTP.</li>
+              <li>إتمام الطلبات وإدارة عمليات الشراء والشحن والتوصيل.</li>
+              <li>إدارة عمليات الدفع والاستلام.</li>
+              <li>معالجة الصور والفيديوهات والشعارات التي ترفعها وعرضها ضمن التقارير والمراجعات وصفحات الدوريات والفرق.</li>
+              <li>تشغيل نظام التوقعات واحتساب النقاط وإدارة الجوائز.</li>
+              <li>إدارة الدوريات والمباريات وتنظيم المشاركات والنتائج.</li>
+              <li>خدمة العملاء والدعم الفني.</li>
+              <li>الأمان ومنع الاحتيال وسوء الاستخدام.</li>
+              <li>تحسين الأداء والاستقرار وتجربة الاستخدام بشكل عام.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="section-4">
+            <div class="section-header">
+              <span class="section-number">4</span>
+              <h2>مشاركة المعلومات</h2>
+            </div>
+            <p class="section-intro">لا نبيع بياناتك ولا نؤجرها. قد نشارك معلومات محدودة عند الحاجة وفي الحدود التالية:</p>
+            <ul class="list">
+              <li>مع مزودي التوصيل: مشاركة بيانات الطلب اللازمة لإتمام التوصيل مثل الاسم، رقم الهاتف، العنوان، وموقع التسليم.</li>
+              <li>مع مزودي المحافظ الإلكترونية: عند تنفيذ الدفع الإلكتروني عبر المحافظ مثل محفظة بنك الكريمي أو محفظة جوالي، وتخضع عمليات الدفع لسياسات مزود الخدمة المالية.</li>
+              <li>مع مزودي خدمات التشغيل: مثل الاستضافة والبنية التحتية وخدمات الإشعارات، وبالحد الأدنى اللازم لتشغيل التطبيق.</li>
+              <li>التزامات قانونية: إذا طُلِب منا ذلك بموجب القانون أو أوامر الجهات المختصة.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="section-5">
+            <div class="section-header">
+              <span class="section-number">5</span>
+              <h2>خدمات الطرف الثالث</h2>
+            </div>
+            <p class="section-intro">قد يستخدم التطبيق خدمات طرف ثالث مثل:</p>
+            <ul class="list">
+              <li>خدمات الخرائط مثل Google Maps لتحديد مواقع التوصيل وعرض المواقع عند الحاجة.</li>
+              <li>خدمات الإشعارات مثل Firebase Cloud Messaging لإرسال إشعارات الطلبات والتحديثات.</li>
+              <li>خدمات الدفع الخاصة بالمحافظ الإلكترونية المعتمدة.</li>
+              <li>قد تستخدم هذه الخدمات بعض المعرفات التقنية مثل توكن الإشعارات أو بيانات تشغيلية ضرورية وفقًا لسياسات مزودي الخدمة.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="section-6">
+            <div class="section-header">
+              <span class="section-number">6</span>
+              <h2>الاحتفاظ بالبيانات</h2>
+            </div>
+            <ul class="list">
+              <li>نحتفظ ببيانات الحساب والطلبات والتوقعات والدوريات طالما كان الحساب نشطًا أو حسب الحاجة لتقديم الخدمة.</li>
+              <li>قد نحتفظ ببعض البيانات لفترة إضافية إذا تطلبت ذلك المتطلبات القانونية أو لتسوية النزاعات.</li>
+              <li>بعد طلب حذف الحساب، نقوم بحذف البيانات أو إخفاء هويتها خلال مدة معقولة ما لم يوجد التزام قانوني بالاحتفاظ.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="section-7">
+            <div class="section-header">
+              <span class="section-number">7</span>
+              <h2>حماية البيانات</h2>
+            </div>
+            <ul class="list">
+              <li>نطبق إجراءات تقنية وتنظيمية مناسبة لحماية البيانات من الوصول غير المصرح به أو التعديل أو الفقدان.</li>
+              <li>يتم نقل البيانات عبر اتصال مشفر عند توفره مثل HTTPS.</li>
+              <li>لا توجد طريقة نقل أو تخزين آمنة بنسبة 100%، لكننا نعمل باستمرار على تحسين الضوابط الأمنية.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="section-8">
+            <div class="section-header">
+              <span class="section-number">8</span>
+              <h2>حقوقك (الوصول / التعديل / الحذف)</h2>
+            </div>
+            <p class="section-intro">يحق لك:</p>
+            <ul class="list">
+              <li>تحديث بياناتك داخل التطبيق.</li>
+              <li>طلب تصحيح البيانات غير الدقيقة.</li>
+              <li>طلب حذف الحساب والبيانات المرتبطة به.</li>
+              <li>إيقاف الإشعارات من إعدادات الجهاز.</li>
+            </ul>
+            <div class="group">
+              <h3>حذف الحساب</h3>
+              <ul class="sub-list">
+                <li>يمكنك حذف الحساب من داخل التطبيق عبر: الإعدادات العامة ← حذف الحساب.</li>
+                <li>تظهر أيضًا صفحة مخصصة لحذف الحساب والبيانات المرتبطة به داخل التطبيق.</li>
+                <li>يمكنك أيضًا مراجعة صفحة <a href="./account-deletion.html">حذف الحساب والبيانات</a> لمعرفة خطوات الحذف والتفاصيل المرتبطة بها.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="section" id="section-9">
+            <div class="section-header">
+              <span class="section-number">9</span>
+              <h2>سياسة الأطفال</h2>
+            </div>
+            <ul class="list">
+              <li>التطبيق غير موجه للأطفال دون سن 13 عامًا.</li>
+              <li>لا نجمع بيانات شخصية للأطفال عن قصد.</li>
+              <li>إذا تبيّن لنا جمع بيانات لطفل، سنقوم بحذفها فورًا.</li>
+            </ul>
+          </section>
+
+          <section class="section" id="section-10">
+            <div class="section-header">
+              <span class="section-number">10</span>
+              <h2>التعديلات على السياسة</h2>
+            </div>
+            <ul class="list">
+              <li>قد نقوم بتحديث هذه السياسة من وقت لآخر.</li>
+              <li>سيتم نشر النسخة المحدثة مع تحديث تاريخ "آخر تحديث"، وعند إجراء تغييرات جوهرية قد نقوم بإشعار المستخدم داخل التطبيق.</li>
+            </ul>
+          </section>
+        </div>
+
+        <section class="footer-card">
+          <h2>11. التواصل معنا</h2>
+          <p>للاستفسارات المتعلقة بسياسة الخصوصية أو طلبات حذف الحساب والبيانات أو أي طلب قانوني مرتبط بخصوصية الاستخدام، يمكنك التواصل معنا عبر البريد الإلكتروني التالي:</p>
+          <p><a href="mailto:spport@safira.com">spport@safira.com</a></p>
+          <div class="footer-links">
+            <a href="./account-deletion.html">حذف الحساب والبيانات</a>
+            <a href="./terms-and-conditions.html">الشروط والأحكام</a>
+          </div>
+        </section>
+
+        <footer class="site-footer">
+          <p>© Safirah App — وثائق قانونية للاستخدام والنشر.</p>
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>
+
+

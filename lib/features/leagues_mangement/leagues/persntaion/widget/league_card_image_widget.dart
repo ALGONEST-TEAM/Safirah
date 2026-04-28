@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/online_images_widget.dart';
 import '../../data/model/league_model.dart';
 
@@ -26,8 +24,9 @@ class LeagueCardImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 16 / 6,
+    return SizedBox(
+      height: 150.h,
+      width: double.infinity,
       child: _buildImage(),
     );
   }
@@ -36,7 +35,8 @@ class LeagueCardImageWidget extends StatelessWidget {
     if (_isNetworkLogo) {
       return OnlineImagesWidget(
         imageUrl: leagueModel.logoPath!,
-        size: Size(double.infinity, 114.h),
+        fit: BoxFit.cover,
+        size: Size(double.infinity, 150.h),
         borderRadius: 8.r,
       );
     }
@@ -47,14 +47,14 @@ class LeagueCardImageWidget extends StatelessWidget {
           File(leagueModel.logoPath!),
           fit: BoxFit.cover,
           width: double.infinity,
-          height: 114.h,
+          height: 150.h,
         ),
       );
     }
     return OnlineImagesWidget(
       imageUrl: fallbackImageUrl,
       fit: BoxFit.cover,
-      size: Size(double.infinity, 114.h),
+      size: Size(double.infinity, 150.h),
       borderRadius: 8.r,
     );
   }

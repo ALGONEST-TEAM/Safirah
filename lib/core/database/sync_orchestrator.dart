@@ -7,6 +7,14 @@ class SyncOrchestrator {
 
   const SyncOrchestrator(this._syncService);
 
+  Future<int> recoverStaleQueue() {
+    return _syncService.recoverStaleInProgressOperations();
+  }
+
+  Future<int> resolveBenignFailedQueue() {
+    return _syncService.resolveBenignFailedOperations();
+  }
+
   Future<void> syncAll({bool throwOnFirstError = false}) async {
     await _syncService.syncPendingOperations(
       entityEndpointResolver: defaultEntityEndpointResolver,

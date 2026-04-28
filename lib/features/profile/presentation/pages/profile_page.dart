@@ -10,7 +10,9 @@ import '../../../../core/widgets/main_app_bar_widget.dart';
 import '../../../shop/address/presentation/pages/view_all_address_page.dart';
 import '../../../shop/productManagement/wishlist/presentation/pages/wishlist_page.dart';
 import '../../../shop/productManagement/wishlist/presentation/riverpod/wishlist_riverpod.dart';
+import 'privacy_policy_page.dart';
 import 'settings_page.dart';
+import 'terms_and_conditions_page.dart';
 import '../widgets/app_intro_card_widget.dart';
 import '../widgets/list_tile_profile_widget.dart';
 import '../widgets/profile_header_card_widget.dart';
@@ -90,9 +92,18 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
             ListTileProfileWidget(
-              title: S.of(context).faq,
+              title: 'سياسة الخصوصية',
               icon: AppIcons.faq,
-              onTap: () {},
+              onTap: () {
+                navigateTo(context, const PrivacyPolicyPage());
+              },
+            ),
+            ListTileProfileWidget(
+              title: 'الشروط والأحكام',
+              icon: AppIcons.faq,
+              onTap: () {
+                navigateTo(context, const TermsAndConditionsPage());
+              },
             ),
             ListTileProfileWidget(
               title: S.of(context).support,

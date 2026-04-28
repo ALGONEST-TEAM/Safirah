@@ -6,7 +6,6 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../../core/state/check_state_in_post_api_data_widget.dart';
 import '../../../../../core/state/state.dart';
-import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/buttons/default_button.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
@@ -71,7 +70,7 @@ class _TeamEditorPageState extends ConsumerState<TeamEditorPage> {
                           controller: _nameCtrl, hintText: 'اسم الفريق'),
                       SizedBox(height: 10.h),
                       EditTeamLogoPickerWidget(
-                        logoLocalPath: _logoLocalPath,
+                        logoLocalPath: _logoLocalPath ?? widget.team.logoUrl,
                         picker: _picker,
                         draftKey: _draftKey,
                         imageStore: _imageStore,
@@ -87,7 +86,6 @@ class _TeamEditorPageState extends ConsumerState<TeamEditorPage> {
                   text: 'حفظ الفريق',
                   isLoading: saver.stateData == States.loading,
                   onPressed: () {
-                    print(_logoLocalPath);
 
                     final team = TeamModel(
                         leagueSyncId: widget.leagueSyncId,

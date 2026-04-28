@@ -33,7 +33,18 @@ class SyncAutoRunner {
     if (_started) return;
     _started = true;
 
-    // 1) عند التشغيل: مزامنة مرة واحدة إذا كان النت متاح
+    // 1) عند التشغيل: استرجاع أي صفوف قديمة عالقة بسبب crash / force close.
+    try {
+      await _orchestrator.recoverStaleQueue();
+      await _orchestrator.resolveBenignFailedQueue();
+    } catch (e) {
+      if (kDebugMode) {
+        // ignore: avoid_print
+        print('[SyncAutoRunner] stale queue recovery error: $e');
+      }
+    }
+
+    // 2) عند التشغيل: مزامنة مرة واحدة إذا كان النت متاح
     try {
       if (await _connectivity.isOnline()) {
         await _orchestrator.syncAll();
@@ -45,7 +56,7 @@ class SyncAutoRunner {
       }
     }
 
-    // 2) عند رجوع النت: مزامنة فورية (مع debounce)
+    // 3) عند رجوع النت: مزامنة فورية (مع debounce)
     _sub = _connectivity.onOnline.listen((_) {
       _debounceTimer?.cancel();
       _debounceTimer = Timer(debounce, () async {

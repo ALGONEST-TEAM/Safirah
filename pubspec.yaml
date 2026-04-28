@@ -101,12 +101,14 @@ dev_dependencies:
   drift_dev:
   build_runner:
   rxdart:
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
+  flutter_launcher_icons:
+
   flutter_lints: ^4.0.0
+flutter_launcher_icons:
+  android: false
+  ios: true
+  image_path: "assets/images/logo_for_app.png"
+  remove_alpha_ios: true
 
 dependency_overrides:
   test_api: 0.7.10

@@ -34,11 +34,11 @@ class _AllPlayersOfLeagueWidgetState
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      ref
-          .read(playerLeagueRefreshProvider(widget.leagueSyncId).notifier)
-          .refresh();
-    });
+    // Future.microtask(() {
+    //   // ref
+    //   //     .read(playerLeagueRefreshProvider(widget.leagueSyncId).notifier)
+    //   //     .refresh();
+    // });
   }
 
   @override

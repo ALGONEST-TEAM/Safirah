@@ -43,6 +43,21 @@ class TeamModel {
     player: player??this.player
       );
 
+  static String? _readLogoUrl(Map<String, dynamic> j) {
+    final raw = j['logo_url'] ?? j['logo_path'] ?? j['logo'];
+    if (raw == null) return null;
+
+    if (raw is Map) {
+      final map = Map<String, dynamic>.from(raw);
+      final nested = map['url'] ?? map['path'] ?? map['logo_url'] ?? map['logo_path'];
+      final value = nested?.toString().trim();
+      return (value == null || value.isEmpty) ? null : value;
+    }
+
+    final value = raw.toString().trim();
+    return value.isEmpty ? null : value;
+  }
+
   // API JSON
   factory TeamModel.fromJson(Map<String, dynamic> j) =>
       TeamModel(
@@ -54,8 +69,8 @@ class TeamModel {
            .map((e) => PlayerModel.fromJson(e as Map<String, dynamic>))
            .toList()
            : [],
-        logoUrl: j['logo_url'] ??'',
-        status: j['status'] ??'',
+        logoUrl: _readLogoUrl(j),
+        status: (j['status'] ?? '').toString(),
       );
 
   Map<String, dynamic> toJson() =>
@@ -145,6 +160,14 @@ class PlayerModel {
 
   // -------- JSON (API / local cache) ----------
   factory PlayerModel.fromJson(Map<String, dynamic> j) {
+    final playerLeagueSyncId =
+        (j['player_league_sync_id'] ??
+                j['league_player_sync_id'] ??
+                j['leaguePlayerSyncId'] ??
+                '')
+            .toString()
+            .trim();
+    final rawSyncId = (j['sync_id'] ?? j['syncId'])?.toString().trim();
     final dynamic teamRaw = j['team'];
     String? parsedTeamName;
 
@@ -163,8 +186,13 @@ class PlayerModel {
 
     return PlayerModel(
       id: j['id'] as int?,
-      playerLeagueSyncId: (j['player_league_sync_id'] ?? '').toString(),
-      syncId: j['sync_id']?.toString(),
+      playerLeagueSyncId:
+          playerLeagueSyncId.isEmpty ? null : playerLeagueSyncId,
+      syncId: (rawSyncId != null && rawSyncId.isNotEmpty)
+          ? rawSyncId
+          : (playerLeagueSyncId.isNotEmpty
+              ? 'league-player:$playerLeagueSyncId'
+              : null),
       teamSyncId: (j['team_sync_id'] ?? '').toString(),
       fullName: (j['full_name'] ?? j['fullName'] ?? j['name'])?.toString(),
       position: j['position'] as String?,

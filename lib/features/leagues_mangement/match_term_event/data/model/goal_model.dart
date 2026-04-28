@@ -88,6 +88,10 @@ class GoalModel {
         'status': status,
       };
 
+  Map<String, dynamic> toCancelJson() => {
+        'goal_sync_id': syncId,
+      };
+
   GoalModel copyWith({
     int? id,
     String? syncId,

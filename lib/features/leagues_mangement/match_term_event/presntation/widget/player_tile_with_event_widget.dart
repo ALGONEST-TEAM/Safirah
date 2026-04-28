@@ -93,8 +93,16 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
 
     final activeVarPlayerSyncId = ref.watch(activeVarPlayerProvider);
 
+    final currentWarning = currentVar?.type == 'warning'
+        ? currentVar?.event as dynamic
+        : null;
+    final currentWarningType = currentWarning?.warningType as String?;
+
     final bool shouldShowVarButton =
-        activeVarPlayerSyncId == playerSyncId && currentVar?.type == 'goal';
+        activeVarPlayerSyncId == playerSyncId &&
+            (currentVar?.type == 'goal' ||
+                currentWarningType == 'yellow' ||
+                currentWarningType == 'red');
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -132,7 +140,10 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
             ),
             12.w.horizontalSpace,
             EventButtonWidget(
-              iconPath: AppIcons.ball,
+              iconPath: AppIcons.assist,
+
+
+
               color: AppColors.secondaryColor,
               count: assist,
               onPressed: (ctx, r) async {
@@ -170,14 +181,16 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
                 selectedIncoming.teamSyncId == teamSyncId)
               GestureDetector(
                 onTap: () async {
-                  await handler.substituteWith(
-                    context,
-                    ref,
-                    incomingPlayerSyncId: selectedIncoming.playerSyncId,
-                  );
+                  final incomingPlayerSyncId = selectedIncoming.playerSyncId;
                   ref
                       .read(selectedIncomingSubstitutePlayerProvider.notifier)
                       .state = null;
+
+                  await handler.substituteWith(
+                    context,
+                    ref,
+                    incomingPlayerSyncId: incomingPlayerSyncId,
+                  );
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),

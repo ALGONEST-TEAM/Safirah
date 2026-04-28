@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../helpers/localized_number_helper.dart';
 import '../theme/app_colors.dart';
 
 class TextFormFieldWidget extends StatefulWidget {
@@ -36,6 +37,7 @@ class TextFormFieldWidget extends StatefulWidget {
   final bool preserveFocusOnResume;
   final bool underlineInputBorder;
   final bool? buildCounter;
+  final List<TextInputFormatter>? inputFormatters;
 
   const TextFormFieldWidget({
     super.key,
@@ -70,6 +72,7 @@ class TextFormFieldWidget extends StatefulWidget {
     this.preserveFocusOnResume = true,
     this.underlineInputBorder = false,
     this.buildCounter = true,
+    this.inputFormatters,
 
   });
 
@@ -84,6 +87,38 @@ class _TextFormFieldWidgetState extends State<TextFormFieldWidget>
   FocusNode get _focus => widget.focusNode ?? _internalFocus!;
 
   bool _wasFocused = false;
+
+  bool get _shouldNormalizeLocalizedDigits {
+    final type = widget.type;
+    if (type == null) return false;
+
+    final typeString = type.toString();
+    return type == TextInputType.number ||
+        type == TextInputType.phone ||
+        typeString.contains('TextInputType.number') ||
+        typeString.contains('numberWithOptions') ||
+        typeString.contains('TextInputType.phone');
+  }
+
+  List<TextInputFormatter>? get _effectiveInputFormatters {
+    final current = widget.inputFormatters ?? const <TextInputFormatter>[];
+
+    if (!_shouldNormalizeLocalizedDigits) {
+      return widget.inputFormatters;
+    }
+
+    final hasLocalizedFormatter =
+        current.any((formatter) => formatter is LocalizedDigitsFormatter);
+
+    if (hasLocalizedFormatter) {
+      return current;
+    }
+
+    return <TextInputFormatter>[
+      const LocalizedDigitsFormatter(),
+      ...current,
+    ];
+  }
 
   @override
   void initState() {
@@ -137,6 +172,7 @@ class _TextFormFieldWidgetState extends State<TextFormFieldWidget>
         return null;
       },
       controller: widget.controller,
+      inputFormatters: _effectiveInputFormatters,
       keyboardType: widget.type ?? TextInputType.text,
       validator: widget.fieldValidator,
       obscureText: widget.isPassword ?? false,

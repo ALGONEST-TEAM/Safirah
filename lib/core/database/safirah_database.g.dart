@@ -11711,13 +11711,6 @@ abstract class _$Safirah extends GeneratedDatabase {
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
           WritePropagation(
-            on: TableUpdateQuery.onTableName('leagues',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('league_rules', kind: UpdateKind.delete),
-            ],
-          ),
-          WritePropagation(
             on: TableUpdateQuery.onTableName('team_player_categories',
                 limitUpdateKind: UpdateKind.delete),
             result: [
@@ -11772,26 +11765,6 @@ typedef $$LeaguesTableUpdateCompanionBuilder = LeaguesCompanion Function({
   Value<DateTime?> updatedAt,
   Value<String?> logoLocalPath,
 });
-
-final class $$LeaguesTableReferences
-    extends BaseReferences<_$Safirah, $LeaguesTable, League> {
-  $$LeaguesTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$LeagueRulesTable, List<LeagueRule>>
-      _leagueRulesRefsTable(_$Safirah db) =>
-          MultiTypedResultKey.fromTable(db.leagueRules,
-              aliasName: $_aliasNameGenerator(
-                  db.leagues.syncId, db.leagueRules.leagueSyncId));
-
-  $$LeagueRulesTableProcessedTableManager get leagueRulesRefs {
-    final manager = $$LeagueRulesTableTableManager($_db, $_db.leagueRules)
-        .filter((f) => f.leagueSyncId.syncId($_item.syncId));
-
-    final cache = $_typedResult.readTableOrNull(_leagueRulesRefsTable($_db));
-    return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: cache));
-  }
-}
 
 class $$LeaguesTableFilterComposer extends Composer<_$Safirah, $LeaguesTable> {
   $$LeaguesTableFilterComposer({
@@ -11862,27 +11835,6 @@ class $$LeaguesTableFilterComposer extends Composer<_$Safirah, $LeaguesTable> {
 
   ColumnFilters<String> get logoLocalPath => $composableBuilder(
       column: $table.logoLocalPath, builder: (column) => ColumnFilters(column));
-
-  Expression<bool> leagueRulesRefs(
-      Expression<bool> Function($$LeagueRulesTableFilterComposer f) f) {
-    final $$LeagueRulesTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.syncId,
-        referencedTable: $db.leagueRules,
-        getReferencedColumn: (t) => t.leagueSyncId,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$LeagueRulesTableFilterComposer(
-              $db: $db,
-              $table: $db.leagueRules,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return f(composer);
-  }
 }
 
 class $$LeaguesTableOrderingComposer
@@ -12028,27 +11980,6 @@ class $$LeaguesTableAnnotationComposer
 
   GeneratedColumn<String> get logoLocalPath => $composableBuilder(
       column: $table.logoLocalPath, builder: (column) => column);
-
-  Expression<T> leagueRulesRefs<T extends Object>(
-      Expression<T> Function($$LeagueRulesTableAnnotationComposer a) f) {
-    final $$LeagueRulesTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.syncId,
-        referencedTable: $db.leagueRules,
-        getReferencedColumn: (t) => t.leagueSyncId,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$LeagueRulesTableAnnotationComposer(
-              $db: $db,
-              $table: $db.leagueRules,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return f(composer);
-  }
 }
 
 class $$LeaguesTableTableManager extends RootTableManager<
@@ -12060,9 +11991,9 @@ class $$LeaguesTableTableManager extends RootTableManager<
     $$LeaguesTableAnnotationComposer,
     $$LeaguesTableCreateCompanionBuilder,
     $$LeaguesTableUpdateCompanionBuilder,
-    (League, $$LeaguesTableReferences),
+    (League, BaseReferences<_$Safirah, $LeaguesTable, League>),
     League,
-    PrefetchHooks Function({bool leagueRulesRefs})> {
+    PrefetchHooks Function()> {
   $$LeaguesTableTableManager(_$Safirah db, $LeaguesTable table)
       : super(TableManagerState(
           db: db,
@@ -12162,32 +12093,9 @@ class $$LeaguesTableTableManager extends RootTableManager<
             logoLocalPath: logoLocalPath,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) =>
-                  (e.readTable(table), $$LeaguesTableReferences(db, table, e)))
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({leagueRulesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (leagueRulesRefs) db.leagueRules],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (leagueRulesRefs)
-                    await $_getPrefetchedData(
-                        currentTable: table,
-                        referencedTable:
-                            $$LeaguesTableReferences._leagueRulesRefsTable(db),
-                        managerFromTypedResult: (p0) =>
-                            $$LeaguesTableReferences(db, table, p0)
-                                .leagueRulesRefs,
-                        referencedItemsForCurrentItem:
-                            (item, referencedItems) => referencedItems
-                                .where((e) => e.leagueSyncId == item.syncId),
-                        typedResults: items)
-                ];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ));
 }
 
@@ -12200,9 +12108,9 @@ typedef $$LeaguesTableProcessedTableManager = ProcessedTableManager<
     $$LeaguesTableAnnotationComposer,
     $$LeaguesTableCreateCompanionBuilder,
     $$LeaguesTableUpdateCompanionBuilder,
-    (League, $$LeaguesTableReferences),
+    (League, BaseReferences<_$Safirah, $LeaguesTable, League>),
     League,
-    PrefetchHooks Function({bool leagueRulesRefs})>;
+    PrefetchHooks Function()>;
 typedef $$LeagueRulesTableCreateCompanionBuilder = LeagueRulesCompanion
     Function({
   Value<int> id,
@@ -12222,25 +12130,6 @@ typedef $$LeagueRulesTableUpdateCompanionBuilder = LeagueRulesCompanion
   Value<DateTime> createdAt,
 });
 
-final class $$LeagueRulesTableReferences
-    extends BaseReferences<_$Safirah, $LeagueRulesTable, LeagueRule> {
-  $$LeagueRulesTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $LeaguesTable _leagueSyncIdTable(_$Safirah db) =>
-      db.leagues.createAlias(
-          $_aliasNameGenerator(db.leagueRules.leagueSyncId, db.leagues.syncId));
-
-  $$LeaguesTableProcessedTableManager? get leagueSyncId {
-    if ($_item.leagueSyncId == null) return null;
-    final manager = $$LeaguesTableTableManager($_db, $_db.leagues)
-        .filter((f) => f.syncId($_item.leagueSyncId!));
-    final item = $_typedResult.readTableOrNull(_leagueSyncIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: [item]));
-  }
-}
-
 class $$LeagueRulesTableFilterComposer
     extends Composer<_$Safirah, $LeagueRulesTable> {
   $$LeagueRulesTableFilterComposer({
@@ -12253,6 +12142,9 @@ class $$LeagueRulesTableFilterComposer
   ColumnFilters<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get leagueSyncId => $composableBuilder(
+      column: $table.leagueSyncId, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<String> get syncId => $composableBuilder(
       column: $table.syncId, builder: (column) => ColumnFilters(column));
 
@@ -12264,26 +12156,6 @@ class $$LeagueRulesTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
-
-  $$LeaguesTableFilterComposer get leagueSyncId {
-    final $$LeaguesTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.leagueSyncId,
-        referencedTable: $db.leagues,
-        getReferencedColumn: (t) => t.syncId,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$LeaguesTableFilterComposer(
-              $db: $db,
-              $table: $db.leagues,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return composer;
-  }
 }
 
 class $$LeagueRulesTableOrderingComposer
@@ -12298,6 +12170,10 @@ class $$LeagueRulesTableOrderingComposer
   ColumnOrderings<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get leagueSyncId => $composableBuilder(
+      column: $table.leagueSyncId,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get syncId => $composableBuilder(
       column: $table.syncId, builder: (column) => ColumnOrderings(column));
 
@@ -12309,26 +12185,6 @@ class $$LeagueRulesTableOrderingComposer
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
-
-  $$LeaguesTableOrderingComposer get leagueSyncId {
-    final $$LeaguesTableOrderingComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.leagueSyncId,
-        referencedTable: $db.leagues,
-        getReferencedColumn: (t) => t.syncId,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$LeaguesTableOrderingComposer(
-              $db: $db,
-              $table: $db.leagues,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return composer;
-  }
 }
 
 class $$LeagueRulesTableAnnotationComposer
@@ -12343,6 +12199,9 @@ class $$LeagueRulesTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<String> get leagueSyncId => $composableBuilder(
+      column: $table.leagueSyncId, builder: (column) => column);
+
   GeneratedColumn<String> get syncId =>
       $composableBuilder(column: $table.syncId, builder: (column) => column);
 
@@ -12354,26 +12213,6 @@ class $$LeagueRulesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  $$LeaguesTableAnnotationComposer get leagueSyncId {
-    final $$LeaguesTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.leagueSyncId,
-        referencedTable: $db.leagues,
-        getReferencedColumn: (t) => t.syncId,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $$LeaguesTableAnnotationComposer(
-              $db: $db,
-              $table: $db.leagues,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
-    return composer;
-  }
 }
 
 class $$LeagueRulesTableTableManager extends RootTableManager<
@@ -12385,9 +12224,9 @@ class $$LeagueRulesTableTableManager extends RootTableManager<
     $$LeagueRulesTableAnnotationComposer,
     $$LeagueRulesTableCreateCompanionBuilder,
     $$LeagueRulesTableUpdateCompanionBuilder,
-    (LeagueRule, $$LeagueRulesTableReferences),
+    (LeagueRule, BaseReferences<_$Safirah, $LeagueRulesTable, LeagueRule>),
     LeagueRule,
-    PrefetchHooks Function({bool leagueSyncId})> {
+    PrefetchHooks Function()> {
   $$LeagueRulesTableTableManager(_$Safirah db, $LeagueRulesTable table)
       : super(TableManagerState(
           db: db,
@@ -12431,47 +12270,9 @@ class $$LeagueRulesTableTableManager extends RootTableManager<
             createdAt: createdAt,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (
-                    e.readTable(table),
-                    $$LeagueRulesTableReferences(db, table, e)
-                  ))
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({leagueSyncId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins: <
-                  T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic>>(state) {
-                if (leagueSyncId) {
-                  state = state.withJoin(
-                    currentTable: table,
-                    currentColumn: table.leagueSyncId,
-                    referencedTable:
-                        $$LeagueRulesTableReferences._leagueSyncIdTable(db),
-                    referencedColumn: $$LeagueRulesTableReferences
-                        ._leagueSyncIdTable(db)
-                        .syncId,
-                  ) as T;
-                }
-
-                return state;
-              },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ));
 }
 
@@ -12484,9 +12285,9 @@ typedef $$LeagueRulesTableProcessedTableManager = ProcessedTableManager<
     $$LeagueRulesTableAnnotationComposer,
     $$LeagueRulesTableCreateCompanionBuilder,
     $$LeagueRulesTableUpdateCompanionBuilder,
-    (LeagueRule, $$LeagueRulesTableReferences),
+    (LeagueRule, BaseReferences<_$Safirah, $LeagueRulesTable, LeagueRule>),
     LeagueRule,
-    PrefetchHooks Function({bool leagueSyncId})>;
+    PrefetchHooks Function()>;
 typedef $$TeamsTableCreateCompanionBuilder = TeamsCompanion Function({
   Value<int> id,
   required String leagueSyncId,

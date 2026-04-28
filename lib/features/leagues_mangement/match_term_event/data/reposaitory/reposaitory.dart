@@ -109,7 +109,6 @@ class MatchTermsEventRepository {
       }
       return Right(duration);
     } catch (e, s) {
-      print(e);
       return Left(DioException(
         error: e,
         stackTrace: s,
@@ -184,7 +183,6 @@ class MatchTermsEventRepository {
         matchSyncId: matchSyncId,
         matchTermSyncId: matchTermSyncId,
       );
-      print(matchTermSyncId);
       // 2) مزامنة الشوط الذي تم إنهاؤه فقط (بدون قيم خاطئة)
       // ملاحظة: سابقًا كان يتم إرسال start_time = end_time وبـ additional_minutes = 0 دائمًا
       // مما قد يسبب سلوك غريب عند إعادة بناء الواجهة أو عند المزامنة.
@@ -252,6 +250,7 @@ class MatchTermsEventRepository {
   Future<Either<DioException, GoalModel>> addGoal(GoalModel goal) async {
     try {
       final goals = await local.insertGoalAndUpdateQualifiedTeams(goal);
+      print(goal.playerSyncId);
       await syncService.enqueueOperation(
           entityType: 'goal',
           operation: SyncService.operationCreate,
@@ -299,44 +298,7 @@ class MatchTermsEventRepository {
     }
   }
 
-  Future<Either<DioException, String?>> deleteGoal(int goalId) async {
-    try {
-      final assistPlayer = await local.deleteGoal(goalId);
-      await syncService.enqueueOperation(
-          entityType: 'goal',
-          operation: SyncService.operationUpdate,
-          payload: {'goal_sync_id': assistPlayer});
-      // ignore: avoid_print
-      di.sl<SyncTrigger>().syncIfOnlineInBackground();
 
-      print(assistPlayer);
-      return Right(assistPlayer);
-    } catch (e) {
-      return Left(DioException(
-        requestOptions: RequestOptions(path: '/goals/delete'),
-        error: e,
-      ));
-    }
-  }
-
-  Future<Either<DioException, Unit>> deleteWarning(int warningId) async {
-    try {
-      await local.deleteWarning(warningId);
-      // await syncService.enqueueOperation(
-      //     entityType: 'goal',
-      //     operation: SyncService.operationUpdate,
-      //     payload:{
-      //       'goal_sync_id':assistPlayer
-      //     }
-      // );
-      return const Right(unit);
-    } catch (e) {
-      return Left(DioException(
-        requestOptions: RequestOptions(path: '/warnings/delete'),
-        error: e,
-      ));
-    }
-  }
 
   Future<Either<DioException, AssistModel>> addAssist(
       AssistModel assist) async {
@@ -406,7 +368,6 @@ class MatchTermsEventRepository {
       );
       return Right(result);
     } catch (e) {
-      print(e);
       return Left(
         DioException(
           requestOptions: RequestOptions(path: '/player/substitute'),
@@ -460,8 +421,24 @@ class MatchTermsEventRepository {
   Future<Either<DioException, String?>> deleteGoalBySyncId(
       String goalSyncId) async {
     try {
-      final assistPlayer = await local.deleteGoalBySyncId(goalSyncId);
-      return Right(assistPlayer);
+      final deleted = await local.deleteGoalBySyncId(goalSyncId);
+      if (deleted == null) return const Right(null);
+
+      print(deleted.goal.playerSyncId);
+      await syncService.enqueueOperation(
+        entityType: 'goal',
+        operation: SyncService.operationUpdate,
+        payload: deleted.goal.toCancelJson(),
+      );
+      // if (deleted.assist != null) {
+      //   await syncService.enqueueOperation(
+      //     entityType: 'assist',
+      //     operation: SyncService.operationUpdate,
+      //     payload: deleted.assist!.toJson(),
+      //   );
+      // }
+      // di.sl<SyncTrigger>().syncIfOnlineInBackground();
+      return Right(deleted.assistPlayerSyncId);
     } catch (e) {
       return Left(DioException(
         requestOptions:
@@ -494,7 +471,15 @@ class MatchTermsEventRepository {
   Future<Either<DioException, Unit>> deleteWarningBySyncId(
       String warningSyncId) async {
     try {
-      await local.deleteWarningBySyncId(warningSyncId);
+      final deleted = await local.deleteWarningBySyncId(warningSyncId);
+      if (deleted == null) return const Right(unit);
+
+      await syncService.enqueueOperation(
+        entityType: 'warning',
+        operation: SyncService.operationUpdate,
+        payload: deleted.toCancelJson(),
+      );
+      di.sl<SyncTrigger>().syncIfOnlineInBackground();
       return const Right(unit);
     } catch (e) {
       return Left(DioException(

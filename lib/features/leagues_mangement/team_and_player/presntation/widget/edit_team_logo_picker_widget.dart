@@ -198,12 +198,11 @@
 //   }
 // }
 //
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
-import 'package:uuid/uuid.dart';
+import '../../../../../core/widgets/online_images_widget.dart';
 
 import '../../../leagues/persntaion/page/create_league_page.dart';
 
@@ -301,16 +300,19 @@ class EditTeamLogoPickerWidget extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12.r),
-              image: path.isNotEmpty
-                  ? DecorationImage(
-                image: FileImage(File(path)),
-                fit: BoxFit.cover,
-              )
-                  : null,
             ),
             child: path.isEmpty
                 ? const Icon(Icons.upload, color: Colors.grey)
-                : const SizedBox.shrink(),
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(12.r),
+                    child: OnlineImagesWidget(
+                      imageUrl: path,
+                      size: Size(double.infinity, 90.h),
+                      fit: BoxFit.cover,
+                      borderRadius: 12.r,
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ],
