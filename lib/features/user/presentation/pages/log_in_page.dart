@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../core/widgets/buttons/default_button.dart';
 import '../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../core/widgets/text_form_field.dart';
+import '../../../../firebase_options.dart';
 import '../../../../generated/l10n.dart';
 import '../riverpod/user_riverpod.dart';
 import '../widgets/user_page_titles_widget.dart';
@@ -130,6 +132,8 @@ class _LogInPageState extends ConsumerState<LogInPage> {
                               height: 40.h,
                               isLoading: state.stateData == States.loading,
                               onPressed: () {
+                                print(       defaultTargetPlatform.name
+                                );
                                 final isValid =
                                     formKey.currentState!.validate();
 

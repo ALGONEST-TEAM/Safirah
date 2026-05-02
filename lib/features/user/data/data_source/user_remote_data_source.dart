@@ -1,10 +1,23 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
 import '../../../../core/network/remote_request.dart';
 import '../../../../core/network/urls.dart';
 import '../model/auth_model.dart';
 
 class UserRemoteDataSource {
   UserRemoteDataSource();
+
+  String get _platformParam {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return 'android';
+      case TargetPlatform.iOS:
+        return 'ios';
+      default:
+        return 'other';
+    }
+  }
 
   Future<Unit> logIn(String phoneNumber) async {
     await RemoteRequest.postData(
@@ -35,6 +48,7 @@ class UserRemoteDataSource {
         "city_id": cityId,
         if (dateOfBirth != null) "date_of_birth": dateOfBirth.toIso8601String(),
         "fcm_token": fcmToken,
+        'platform': _platformParam,
       },
     );
     return AuthModel.fromJson(response.data['data']);
@@ -51,6 +65,7 @@ class UserRemoteDataSource {
         "login": phoneNumber,
         "otp": otp,
         "fcm_token": fcmToken,
+        'platform': _platformParam,
       },
     );
     return AuthModel.fromJson(response.data['data']);
