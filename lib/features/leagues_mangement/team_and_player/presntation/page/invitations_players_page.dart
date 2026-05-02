@@ -17,7 +17,7 @@ class InvitationsPlayersPage extends ConsumerWidget {
     final invitationsPlayersState =
     ref.watch(invitationsPlayersProvider(leagueSyncId));
     return Scaffold(
-      appBar: SecondaryAppBarWidget( title: 'طلبات الانضمام',),
+      appBar: const SecondaryAppBarWidget( title: 'طلبات الانضمام',),
       body: CheckStateInGetApiDataWidget(
         state: invitationsPlayersState,
 

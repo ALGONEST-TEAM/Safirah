@@ -17,6 +17,7 @@ import '../../../features/shop/shoppingBag/cart/presentation/riverpod/cart_river
 import '../../../features/user/presentation/pages/log_in_page.dart';
 import '../../../generated/l10n.dart';
 import '../../../services/auth/auth.dart';
+import '../../state/app_startup_shell.dart';
 import '../../constants/app_icons.dart';
 import '../../helpers/exit_from_the_app.dart';
 import '../../theme/app_colors.dart';
@@ -43,6 +44,13 @@ class _BottomNavigationBarWidgetState
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // ignore: discarded_futures
+    AppStartupShellPreference.markCurrentShell(AppStartupSection.leagues);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final activeIndex = ref.watch(activeIndexProvider);
 
@@ -61,6 +69,7 @@ class _BottomNavigationBarWidgetState
           height: 56.h,
           child: FloatingActionButton.large(
             onPressed: () {
+              AppStartupShellPreference.markCurrentShell(AppStartupSection.shop);
               navigateReplacement(context, const BottomNavigationBarWidget());
             },
             backgroundColor: AppColors.whiteColor,

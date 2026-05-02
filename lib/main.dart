@@ -10,11 +10,13 @@ import 'core/network/remote_request.dart';
 import 'core/notifications/firebase_messaging_service.dart';
 import 'core/notifications/notification_bootstrap.dart';
 import 'core/state/app_restart_controller.dart';
+import 'core/state/app_startup_shell.dart';
 import 'package:safirah/injection.dart' as di;
 import 'core/database/sync_auto_runner.dart';
 import 'core/database/sync_failed_notifier.dart';
 import 'core/theme/theme.dart';
 import 'core/widgets/bottomNavbar/bottom_navigation_bar_of_mange_league_widget.dart';
+import 'core/widgets/bottomNavbar/bottom_navigation_bar_widget.dart';
 import 'features/notifications/presentation/state_mangment/notifications_riverpod.dart';
 import 'features/profile/presentation/riverpod/setting_riverpod.dart';
 import 'features/shop/category/data/model/category_data.dart';
@@ -29,6 +31,7 @@ import 'generated/l10n.dart';
 import 'services/auth/auth.dart';
 import 'features/authorization/authorization_sync_runner.dart';
 import 'core/deep_links/deep_link_service.dart';
+import 'features/splash/presentation/pages/app_launch_splash_page.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -163,8 +166,51 @@ class _MyAppState extends ConsumerState<MyApp> {
           //Locale('en'),
         ],
         theme: lightTheme,
-        home: const BottomNavigationBarOfMangeLeagueWidget(),
+        home: const AppLaunchSplashPage(
+          child: _StartupAppShellGate(),
+        ),
       ),
     );
   }
 }
+
+class _StartupAppShellGate extends StatefulWidget {
+  const _StartupAppShellGate();
+
+  @override
+  State<_StartupAppShellGate> createState() => _StartupAppShellGateState();
+}
+
+class _StartupAppShellGateState extends State<_StartupAppShellGate> {
+  AppStartupSection? _startupSection;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_loadStartupSection);
+  }
+
+  Future<void> _loadStartupSection() async {
+    final startupSection = await AppStartupShellPreference.resolveInitialSection();
+    if (!mounted) return;
+
+    setState(() {
+      _startupSection = startupSection;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    switch (_startupSection) {
+      case AppStartupSection.shop:
+        return const BottomNavigationBarWidget();
+      case AppStartupSection.leagues:
+        return const BottomNavigationBarOfMangeLeagueWidget();
+      case null:
+        return const SizedBox.expand(
+          key: ValueKey('startup-shell-loading'),
+        );
+    }
+  }
+}
+

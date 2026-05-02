@@ -13,6 +13,7 @@ import '../../../features/shop/shoppingBag/cart/presentation/riverpod/cart_river
 import '../../../features/user/presentation/pages/log_in_page.dart';
 import '../../../generated/l10n.dart';
 import '../../../services/auth/auth.dart';
+import '../../state/app_startup_shell.dart';
 import '../../constants/app_icons.dart';
 import '../../helpers/exit_from_the_app.dart';
 import '../../theme/app_colors.dart';
@@ -22,7 +23,16 @@ import 'design_for_bottom_navigation_bar_widget.dart';
 
 final activeIndexShopProvider = StateProvider<int>((ref) => 0);
 
+enum LeaguesEntryAction { openLogin, openLeagues }
+
+LeaguesEntryAction resolveLeaguesEntryAction({required bool loggedIn}) {
+  return loggedIn
+      ? LeaguesEntryAction.openLeagues
+      : LeaguesEntryAction.openLogin;
+}
+
 class BottomNavigationBarWidget extends ConsumerStatefulWidget {
+
   const BottomNavigationBarWidget({super.key});
 
   @override
@@ -37,6 +47,30 @@ class _BottomNavigationBarWidgetState
     const ExitFromAppWidget(child: CartPage()),
     const ExitFromAppWidget(child: ProfilePage()),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // ignore: discarded_futures
+    AppStartupShellPreference.markCurrentShell(AppStartupSection.shop);
+  }
+
+  void _openLeaguesSection() {
+    switch (resolveLeaguesEntryAction(loggedIn: Auth().loggedIn)) {
+      case LeaguesEntryAction.openLogin:
+        navigateTo(context, const LogInPage());
+        return;
+      case LeaguesEntryAction.openLeagues:
+        AppStartupShellPreference.markCurrentShell(
+          AppStartupSection.leagues,
+        );
+        navigateReplacement(
+          context,
+          const BottomNavigationBarOfMangeLeagueWidget(),
+        );
+        return;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,10 +90,7 @@ class _BottomNavigationBarWidgetState
         floatingActionButton: SizedBox(
           height: 57.h,
           child: FloatingActionButton.large(
-            onPressed: () {
-              navigateReplacement(
-                  context, const BottomNavigationBarOfMangeLeagueWidget());
-            },
+            onPressed: _openLeaguesSection,
             backgroundColor: AppColors.whiteColor,
             splashColor: AppColors.primaryColor,
             elevation: 0,

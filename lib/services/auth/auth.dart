@@ -14,6 +14,7 @@ class Auth {
   static Auth? _instance;
 
   final String _key = 'user';
+  final String _lastAppShellKey = 'LAST_APP_SHELL_V1';
   final WingsSecureStorage secureStorage = sl<WingsSecureStorage>();
 
   Auth._();
@@ -59,6 +60,19 @@ class Auth {
     // await secureStorage.delete(key: 'fcmToken');
     user = AuthModel.empty();
     await secureStorage.delete(key: _key);
+    await clearLastAppShell();
+  }
+
+  Future<void> setLastAppShell(String shell) async {
+    await secureStorage.write(key: _lastAppShellKey, value: shell);
+  }
+
+  Future<String?> getLastAppShell() async {
+    return secureStorage.read(key: _lastAppShellKey);
+  }
+
+  Future<void> clearLastAppShell() async {
+    await secureStorage.delete(key: _lastAppShellKey);
   }
 
   Future<void> setFcmToken(String fcmToken) async {
