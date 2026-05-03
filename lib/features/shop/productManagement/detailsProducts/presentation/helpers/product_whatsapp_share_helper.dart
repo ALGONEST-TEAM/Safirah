@@ -11,8 +11,18 @@ String buildProductDeepLink(int productId) =>
 String buildProductAppFallbackDeepLink(int productId) =>
     'safirah://product/$productId';
 
-Uri buildSupportWhatsAppUri({String phone = '775076388'}) =>
-    Uri.parse('https://wa.me/$phone');
+Uri buildSupportWhatsAppUri({
+  String phone = '775076388',
+  String? message,
+}) {
+  final normalizedMessage = message?.trim() ?? '';
+
+  return Uri.https(
+    'wa.me',
+    '/$phone',
+    normalizedMessage.isEmpty ? null : {'text': normalizedMessage},
+  );
+}
 
 String? normalizeProductShareImageUrl(String? imageUrl) {
   final raw = imageUrl?.trim() ?? '';

@@ -122,9 +122,20 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
     }
   }
 
-  Future<void> _openSupportWhatsApp() async {
+  String _buildProductShareMessage(ProductData product) {
+    return buildProductWhatsAppMessage(
+      productId: widget.idProduct,
+      name: _resolveShareName(product),
+      price: _resolveSharePrice(product),
+      imageUrl: _resolveShareImage(product),
+    );
+  }
+
+  Future<void> _openSupportWhatsApp(ProductData product) async {
     final launched = await launchUrl(
-      buildSupportWhatsAppUri(),
+      buildSupportWhatsAppUri(
+        message: _buildProductShareMessage(product),
+      ),
       mode: LaunchMode.externalApplication,
     );
 
@@ -206,7 +217,7 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
       floatingActionButton: _shouldShowWhatsAppButton(state)
           ? FloatingActionButton(
               heroTag: 'product-whatsapp-share-${widget.idProduct}',
-              onPressed: _openSupportWhatsApp,
+              onPressed: () => _openSupportWhatsApp(state.data),
               backgroundColor: const Color(0xFF25D366),
               foregroundColor: Colors.white,
               child: SvgPicture.asset(
