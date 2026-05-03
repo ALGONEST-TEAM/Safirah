@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -8,6 +9,7 @@ import '../../../../../../core/state/data_state.dart';
 import '../../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../../core/state/state.dart';
 import '../../../../../../core/theme/app_colors.dart';
+import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../shoppingBag/cart/presentation/pages/add_to_cart_page.dart';
 import '../../../../shoppingBag/cart/presentation/widgets/add_to_cart_or_favorites_widget.dart';
@@ -148,6 +150,49 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
     }
   }
 
+  void _showWhatsAppActions(ProductData product) {
+    showModalBottomSheetWidget(
+      context: context,
+      page: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AutoSizeTextWidget(
+                text: 'خيارات الواتساب',
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+              ),
+              12.h.verticalSpace,
+              _WhatsAppActionTile(
+                iconPath: AppIcons.whatsapp,
+                title: 'فتح واتساب مع الرسالة الجاهزة',
+                subtitle: '775076388',
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _openSupportWhatsApp(product);
+                },
+              ),
+              8.h.verticalSpace,
+              _WhatsAppActionTile(
+                iconPath: AppIcons.sharing,
+                title: 'مشاركة المنتج بالصورة',
+                subtitle: 'يفتح صفحة المشاركة مع النص والصورة',
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _shareProduct(product);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(detailsProvider(widget.idProduct));
@@ -217,7 +262,7 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
       floatingActionButton: _shouldShowWhatsAppButton(state)
           ? FloatingActionButton(
               heroTag: 'product-whatsapp-share-${widget.idProduct}',
-              onPressed: () => _openSupportWhatsApp(state.data),
+              onPressed: () => _showWhatsAppActions(state.data),
               backgroundColor: const Color(0xFF25D366),
               foregroundColor: Colors.white,
               child: SvgPicture.asset(
@@ -231,3 +276,75 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
     );
   }
 }
+
+class _WhatsAppActionTile extends StatelessWidget {
+  const _WhatsAppActionTile({
+    required this.iconPath,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final String iconPath;
+  final String title;
+  final String subtitle;
+  final Future<void> Function() onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14.r),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14.r),
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14.r),
+            border: Border.all(color: const Color(0xFFE8E8E8)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF6F6F6),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    iconPath,
+                    width: 20.w,
+                    height: 20.w,
+                  ),
+                ),
+              ),
+              10.w.horizontalSpace,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AutoSizeTextWidget(
+                      text: title,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    4.h.verticalSpace,
+                    AutoSizeTextWidget(
+                      text: subtitle,
+                      fontSize: 10.5.sp,
+                      colorText: AppColors.fontColor.withValues(alpha: 0.65),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
