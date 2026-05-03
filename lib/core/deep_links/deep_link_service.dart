@@ -92,7 +92,10 @@ class DeepLinkService {
     // 2) Path-based: /league/<id>
     final segments = uri.pathSegments;
     if (segments.length >= 2 && segments.first == 'league') {
-      return segments[1];
+      final pathId = segments[1];
+      if (pathId.isNotEmpty && pathId != 'index.html') {
+        return pathId;
+      }
     }
 
     // 3) Custom scheme host-based: safirah://league/<id>  => host=league, pathSegments=[<id>]
@@ -116,7 +119,13 @@ class DeepLinkService {
     final segments = uri.pathSegments;
 
     if (segments.length >= 2 && segments.first == 'product') {
-      return int.tryParse(segments[1]);
+      final pathId = int.tryParse(segments[1]);
+      if (pathId != null) return pathId;
+
+      final q = uri.queryParameters['productId'] ?? uri.queryParameters['id'];
+      if (q != null && q.isNotEmpty) {
+        return int.tryParse(q);
+      }
     }
 
     if (uri.scheme == 'safirah' && uri.host == 'product') {

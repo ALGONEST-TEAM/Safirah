@@ -4,15 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:safirah/core/constants/app_icons.dart';
+import 'package:safirah/core/network/urls.dart';
 import 'package:safirah/core/state/check_state_in_post_api_data_widget.dart';
 import 'package:safirah/core/state/state.dart';
 import 'package:safirah/core/theme/app_colors.dart';
 import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import 'package:safirah/core/widgets/secondary_app_bar_widget.dart';
 import 'package:safirah/features/leagues_mangement/leagues/data/model/league_model.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:safirah/features/leagues_mangement/leagues/data/model/rule_league_model.dart';
-import '../../../../../core/state/data_state.dart';
 
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
@@ -386,12 +385,13 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                                     textColor: AppColors.secondaryColor,
                                     background: const Color(0xffEDF0FF),
                                     onPressed: () async {
-                                      // WhatsApp and many apps don't always make custom schemes clickable.
-                                      // So we share an HTTPS link and let Android App Links / iOS Universal Links open the app.
                                       final uri = Uri(
                                         scheme: 'https',
-                                        host: 'saferah.dev-station.com',
-                                        pathSegments: ['league', widget.leagueSyncId],
+                                        host: Uri.parse(AppURL.base).host,
+                                        pathSegments: ['league', 'index.html'],
+                                        queryParameters: {
+                                          'id': widget.leagueSyncId,
+                                        },
                                       );
 
                                       await Clipboard.setData(
