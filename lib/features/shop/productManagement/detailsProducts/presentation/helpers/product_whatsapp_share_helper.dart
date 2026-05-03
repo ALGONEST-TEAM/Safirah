@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../../../../core/network/urls.dart';
 
-String buildProductDeepLink(int productId) => '${AppURL.base}/product/$productId';
+String buildProductDeepLink(int productId) => 'safirah://product/$productId';
 
 String? normalizeProductShareImageUrl(String? imageUrl) {
   final raw = imageUrl?.trim() ?? '';
