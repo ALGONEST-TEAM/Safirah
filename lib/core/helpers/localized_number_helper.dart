@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 class LocalizedNumberHelper {
   const LocalizedNumberHelper._();
 
+  static const _arabicDecimalSeparator = '٫';
+  static const _arabicThousandsSeparator = '٬';
+
   static const _arabicIndicDigits = <String>[
     '٠',
     '١',
@@ -42,6 +45,21 @@ class LocalizedNumberHelper {
 
   static String normalizeNumericText(String input) {
     return normalizeDigits(input).trim();
+  }
+
+  static double? parseDouble(String input) {
+    var normalized = normalizeNumericText(input);
+    if (normalized.isEmpty) return null;
+
+    normalized = normalized
+        .replaceAll(_arabicThousandsSeparator, '')
+        .replaceAll(_arabicDecimalSeparator, '.')
+        .replaceAll('،', '')
+        .replaceAll(',', '')
+        .replaceAll(' ', '');
+
+    if (normalized.isEmpty) return null;
+    return double.tryParse(normalized);
   }
 
   static int? parseInt(String input) {

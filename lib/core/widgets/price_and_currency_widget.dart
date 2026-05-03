@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
+import '../helpers/localized_number_helper.dart';
 import '../../features/profile/presentation/riverpod/currency_riverpod.dart';
 import '../theme/app_colors.dart';
 import 'auto_size_text_widget.dart';
@@ -37,10 +38,20 @@ class PriceAndCurrencyWidget extends ConsumerWidget {
       this.textWeight1,
       this.textWeight2});
 
+  double _normalizePriceValue() {
+    final rawPrice = price;
+    if (rawPrice == null) return 0;
+    if (rawPrice is num) return rawPrice.toDouble();
+
+    final parsedPrice = LocalizedNumberHelper.parseDouble(rawPrice.toString());
+    return parsedPrice ?? 0;
+  }
+
   @override
   Widget build(BuildContext context, ref) {
     var currencyState = ref.watch(currencyProvider);
     final NumberFormat formatter = NumberFormat('#,##0', 'en_US');
+    final normalizedPrice = _normalizePriceValue();
 
     return Row(
       crossAxisAlignment: crossAxisAlignment ?? CrossAxisAlignment.center,
@@ -49,7 +60,7 @@ class PriceAndCurrencyWidget extends ConsumerWidget {
       children: [
         Flexible(
           child: AutoSizeTextWidget(
-            text: formatter.format(double.tryParse(price.toString())),
+            text: formatter.format(normalizedPrice),
             colorText: colorText1 ?? AppColors.primaryColor,
             fontSize: fontSize1 ?? 11.4.sp,
             fontWeight: textWeight1 ?? FontWeight.w500,
