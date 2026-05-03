@@ -5,7 +5,9 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../../../../core/network/urls.dart';
 
-String buildProductDeepLink(int productId) => 'safirah://product/$productId';
+String buildProductDeepLink(int productId) => '${AppURL.base}/product/$productId';
+
+String buildProductAppFallbackDeepLink(int productId) => 'safirah://product/$productId';
 
 String? normalizeProductShareImageUrl(String? imageUrl) {
   final raw = imageUrl?.trim() ?? '';
@@ -75,11 +77,17 @@ String buildProductWhatsAppMessage({
 }) {
   final normalizedName = name.trim();
   final normalizedPrice = price.trim();
+  final webLink = buildProductDeepLink(productId);
+  final appLink = buildProductAppFallbackDeepLink(productId);
 
   return <String>[
     'منتج من صافرة',
     if (normalizedName.isNotEmpty) 'الاسم: $normalizedName',
     if (normalizedPrice.isNotEmpty) 'السعر: $normalizedPrice',
-    'رابط المنتج: ${buildProductDeepLink(productId)}',
+    'افتح المنتج مباشرة:',
+    webLink,
+    '',
+    'إذا لم يفتح الرابط داخل التطبيق تلقائيًا، استخدم هذا الرابط داخل التطبيق:',
+    appLink,
   ].join('\n');
 }
