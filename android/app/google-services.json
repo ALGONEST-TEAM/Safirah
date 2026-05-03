@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "853154480613",
-    "project_id": "safirahh-f428f",
-    "storage_bucket": "safirahh-f428f.firebasestorage.app"
+    "project_number": "251938550116",
+    "project_id": "safirah-android",
+    "storage_bucket": "safirah-android.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:853154480613:android:2b1ab1dc818e76869aaf0c",
+        "mobilesdk_app_id": "1:251938550116:android:7d590aad20bb62ba67ca71",
         "android_client_info": {
-          "package_name": "com.devstation.safirah"
+          "package_name": "com.algonest.safirah"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAufYLxiR89avqwZqBVDbIeDdhmm-XwOcg"
+          "current_key": "AIzaSyBEYFJ0rubxBn2lkgyO3I7tu6LKfU3cUbg"
         }
       ],
       "services": {
