@@ -13,6 +13,7 @@ class AppBarOfDetailsWidget extends StatelessWidget
   final String price;
   final int idProductForShare;
   final bool hideShareButton;
+  final VoidCallback? onSharePressed;
 
   const AppBarOfDetailsWidget({
     super.key,
@@ -22,6 +23,7 @@ class AppBarOfDetailsWidget extends StatelessWidget
     required this.nameForShare,
     required this.price,
     this.hideShareButton = true,
+    this.onSharePressed,
   });
 
   @override
@@ -41,8 +43,14 @@ class AppBarOfDetailsWidget extends StatelessWidget
         AppIcons.logo,
         height: 40.h,
       ),
-      actions: const [
-        CartBadgeIconWidget(),
+      actions: [
+        if (!hideShareButton)
+          IconButtonWidget(
+            icon: AppIcons.sharing,
+            height: 20.h,
+            onPressed: onSharePressed,
+          ),
+        const CartBadgeIconWidget(),
       ],
     );
   }

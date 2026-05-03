@@ -25,7 +25,10 @@ class ListRankingGroupWidget extends ConsumerWidget {
       children: [
         Padding(
           padding: EdgeInsets.symmetric(vertical: 12.h),
-          child: BannersWidget(banners: bannersState.data ?? []),
+          child: BannersWidget(
+            banners: bannersState.data,
+            currentLeagueSyncId: leagueSyncId,
+          ),
         ),
         Expanded(
           child: CheckStateInStreamWidget<List<GroupModel>>(

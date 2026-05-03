@@ -11,6 +11,9 @@ String buildProductDeepLink(int productId) =>
 String buildProductAppFallbackDeepLink(int productId) =>
     'safirah://product/$productId';
 
+Uri buildSupportWhatsAppUri({String phone = '775076388'}) =>
+    Uri.parse('https://wa.me/$phone');
+
 String? normalizeProductShareImageUrl(String? imageUrl) {
   final raw = imageUrl?.trim() ?? '';
   if (raw.isEmpty) return null;
@@ -88,5 +91,7 @@ String buildProductWhatsAppMessage({
     if (normalizedPrice.isNotEmpty) 'السعر: $normalizedPrice',
     'افتح المنتج مباشرة:',
     webLink,
+    'إذا لم يفتح الرابط داخل التطبيق تلقائيًا، استخدم هذا الرابط داخل التطبيق:',
+    appLink,
   ].join('\n');
 }

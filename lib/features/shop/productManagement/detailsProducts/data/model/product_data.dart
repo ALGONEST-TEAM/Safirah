@@ -25,6 +25,7 @@ class ProductData {
   @HiveField(5)
   final String? description;
   final bool? isPrintable;
+  final bool? showWhatsapp;
 
   // الصور
   @HiveField(9)
@@ -77,6 +78,7 @@ class ProductData {
     this.categoryId,
     this.description,
     this.isPrintable,
+    this.showWhatsapp,
     this.mainImage,
     this.allImage,
     this.colorHasImage,
@@ -110,6 +112,7 @@ class ProductData {
       categoryId: json['category_id'] ?? 0,
       description: json['description'] ?? "",
       isPrintable: json['is_printable'] ?? false,
+      showWhatsapp: json['show_whatsapp'] ?? false,
 
       // الصور
       mainImage: List<String>.from(
@@ -169,6 +172,7 @@ class ProductData {
         name: "",
         price: 0,
         categoryId: 0,
+        showWhatsapp: false,
         coponData: [],
       );
 }

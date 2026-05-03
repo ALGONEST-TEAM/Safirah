@@ -131,6 +131,8 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   void dispose() {
+    FirebaseMessagingService.I.onRefreshUnread = null;
+    FirebaseMessagingService.I.onSetUnread = null;
     // ignore: discarded_futures
     DeepLinkService.I.dispose();
     // ignore: unawaited_futures

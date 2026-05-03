@@ -67,8 +67,7 @@ class NotificationNotifier
 }
 
 final unreadCountProvider =
-    StateNotifierProvider.autoDispose<UnreadNotifier, int>(
-        (ref) => UnreadNotifier());
+    StateNotifierProvider<UnreadNotifier, int>((ref) => UnreadNotifier());
 
 class UnreadNotifier extends StateNotifier<int> {
   UnreadNotifier() : super(0);
@@ -77,10 +76,17 @@ class UnreadNotifier extends StateNotifier<int> {
 
   Future<void> refresh() async {
     final res = await _repo.getUnreadCount();
+    if (!mounted) return;
     res.fold((_) {}, (count) => state = count);
   }
 
-  void set(int value) => state = value;
+  void set(int value) {
+    if (!mounted) return;
+    state = value;
+  }
 
-  void clear() => state = 0;
+  void clear() {
+    if (!mounted) return;
+    state = 0;
+  }
 }

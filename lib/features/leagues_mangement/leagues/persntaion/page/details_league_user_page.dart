@@ -84,7 +84,10 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                   children: [
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 12.h),
-                      child: BannersWidget(banners: bannersState.data),
+                      child: BannersWidget(
+                        banners: bannersState.data,
+                        currentLeagueSyncId: widget.leagueSyncId,
+                      ),
                     ),
                     Column(
                       children: [
