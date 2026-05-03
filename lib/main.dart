@@ -166,7 +166,8 @@ class _MyAppState extends ConsumerState<MyApp> {
           //Locale('en'),
         ],
         theme: lightTheme,
-        home: const AppLaunchSplashPage(
+        home: AppLaunchSplashPage(
+          onSplashFinished: DeepLinkService.I.markSplashCompleted,
           child: _StartupAppShellGate(),
         ),
       ),
@@ -183,6 +184,7 @@ class _StartupAppShellGate extends StatefulWidget {
 
 class _StartupAppShellGateState extends State<_StartupAppShellGate> {
   AppStartupSection? _startupSection;
+  bool _didReportDeepLinkReady = false;
 
   @override
   void initState() {
@@ -201,6 +203,14 @@ class _StartupAppShellGateState extends State<_StartupAppShellGate> {
 
   @override
   Widget build(BuildContext context) {
+    if (_startupSection != null && !_didReportDeepLinkReady) {
+      _didReportDeepLinkReady = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        DeepLinkService.I.markStartupShellReady();
+      });
+    }
+
     switch (_startupSection) {
       case AppStartupSection.shop:
         return const BottomNavigationBarWidget();

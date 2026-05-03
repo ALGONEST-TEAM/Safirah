@@ -8,10 +8,12 @@ class AppLaunchSplashPage extends StatefulWidget {
     super.key,
     required this.child,
     this.animationBuilder,
+    this.onSplashFinished,
   });
 
   final Widget child;
   final Widget Function(VoidCallback onAnimationFinished)? animationBuilder;
+  final VoidCallback? onSplashFinished;
 
   @override
   State<AppLaunchSplashPage> createState() => _AppLaunchSplashPageState();
@@ -40,6 +42,7 @@ class _AppLaunchSplashPageState extends State<AppLaunchSplashPage>
     setState(() {
       _showSplash = false;
     });
+    widget.onSplashFinished?.call();
   }
 
   void _handleCompositionLoaded(LottieComposition composition) {

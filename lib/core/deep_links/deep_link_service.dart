@@ -26,10 +26,18 @@ class DeepLinkService {
   StreamSubscription<Uri>? _sub;
 
   bool _started = false;
+  bool _splashCompleted = false;
+  bool _startupShellReady = false;
+  _DeepLinkTarget? _pendingTarget;
+  String? _activeNavigationKey;
 
   Future<void> start() async {
     if (_started) return;
     _started = true;
+    _splashCompleted = false;
+    _startupShellReady = false;
+    _pendingTarget = null;
+    _activeNavigationKey = null;
 
     // Handle cold-start.
     try {
@@ -52,20 +60,79 @@ class DeepLinkService {
     await _sub?.cancel();
     _sub = null;
     _started = false;
+    _splashCompleted = false;
+    _startupShellReady = false;
+    _pendingTarget = null;
+    _activeNavigationKey = null;
+  }
+
+  void markSplashCompleted() {
+    _splashCompleted = true;
+    _flushPendingNavigation();
+  }
+
+  void markStartupShellReady() {
+    _startupShellReady = true;
+    _flushPendingNavigation();
   }
 
   void _handleUri(Uri uri) {
-    final productId = _parseProductId(uri);
-    if (productId != null) {
-      _navigateToProduct(productId);
+    final target = _parseTarget(uri);
+    if (target == null) return;
+
+    if (_canNavigateNow) {
+      _dispatchTarget(target);
       return;
     }
 
-    final leagueSyncId = _parseLeagueId(uri);
-    if (leagueSyncId == null || leagueSyncId.isEmpty) return;
+    _pendingTarget = target;
+  }
 
-    // If navigator isn't ready yet, retry after first frame.
-    _navigateToLeague(leagueSyncId);
+  bool get _canNavigateNow => _splashCompleted && _startupShellReady;
+
+  _DeepLinkTarget? _parseTarget(Uri uri) {
+    final productId = _parseProductId(uri);
+    if (productId != null) {
+      return _DeepLinkTarget.product(productId);
+    }
+
+    final leagueSyncId = _parseLeagueId(uri);
+    if (leagueSyncId == null || leagueSyncId.isEmpty) return null;
+
+    return _DeepLinkTarget.league(leagueSyncId);
+  }
+
+  void _flushPendingNavigation() {
+    if (!_canNavigateNow) return;
+
+    final target = _pendingTarget;
+    if (target == null) return;
+
+    _pendingTarget = null;
+    _dispatchTarget(target);
+  }
+
+  void _dispatchTarget(_DeepLinkTarget target) {
+    if (_activeNavigationKey == target.key) return;
+
+    if (_activeNavigationKey != null) {
+      _pendingTarget = target;
+      return;
+    }
+
+    _activeNavigationKey = target.key;
+
+    switch (target) {
+      case _LeagueDeepLinkTarget(:final leagueSyncId):
+        _navigateToLeague(leagueSyncId);
+      case _ProductDeepLinkTarget(:final productId):
+        _navigateToProduct(productId);
+    }
+  }
+
+  void _completeNavigationDispatch() {
+    _activeNavigationKey = null;
+    _flushPendingNavigation();
   }
 
   bool _isAllowedHttpsHost(Uri uri) {
@@ -171,6 +238,7 @@ class DeepLinkService {
             reverseTransitionDuration: Duration.zero,
           ),
         );
+        _completeNavigationDispatch();
       });
     }
 
@@ -209,9 +277,40 @@ class DeepLinkService {
             reverseTransitionDuration: Duration.zero,
           ),
         );
+        _completeNavigationDispatch();
       });
     }
 
     go();
   }
 }
+
+sealed class _DeepLinkTarget {
+  const _DeepLinkTarget();
+
+  String get key;
+
+  const factory _DeepLinkTarget.league(String leagueSyncId) =
+      _LeagueDeepLinkTarget;
+  const factory _DeepLinkTarget.product(int productId) =
+      _ProductDeepLinkTarget;
+}
+
+class _LeagueDeepLinkTarget extends _DeepLinkTarget {
+  const _LeagueDeepLinkTarget(this.leagueSyncId);
+
+  final String leagueSyncId;
+
+  @override
+  String get key => 'league:$leagueSyncId';
+}
+
+class _ProductDeepLinkTarget extends _DeepLinkTarget {
+  const _ProductDeepLinkTarget(this.productId);
+
+  final int productId;
+
+  @override
+  String get key => 'product:$productId';
+}
+
