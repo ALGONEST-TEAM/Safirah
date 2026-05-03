@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../../../../../core/state/data_state.dart';
 import '../../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../../core/state/state.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../shoppingBag/cart/presentation/pages/add_to_cart_page.dart';
 import '../../../../shoppingBag/cart/presentation/widgets/add_to_cart_or_favorites_widget.dart';
+import '../../data/model/product_data.dart';
+import '../helpers/product_whatsapp_share_helper.dart';
 import '../state_mangment/riverpod_details.dart';
 import '../widget/app_bar_of_details_widget.dart';
 import '../widget/product_reviews_widget.dart';
@@ -32,6 +36,8 @@ class DetailsPage extends ConsumerStatefulWidget {
 
 class _DetailsPageState extends ConsumerState<DetailsPage>
     with TickerProviderStateMixin {
+  List<String> get _initialImages => widget.image ?? const <String>[];
+
   @override
   void initState() {
     super.initState();
@@ -39,13 +45,84 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
 
   final GlobalKey contentKey = GlobalKey();
 
+  bool _canShareProduct(DataState<ProductData> state) {
+    if (state.stateData == States.loaded) return true;
+
+    return widget.name.trim().isNotEmpty || _initialImages.isNotEmpty;
+  }
+
+  String _resolveShareName(ProductData product) {
+    final remoteName = product.name?.trim() ?? '';
+    if (remoteName.isNotEmpty) return remoteName;
+    return widget.name.trim();
+  }
+
+  String _resolveSharePrice(ProductData product) {
+    final remotePrice = '${product.price ?? ''}'.trim();
+    if (remotePrice.isNotEmpty && remotePrice != 'null') return remotePrice;
+
+    final initialPrice = '${widget.price}'.trim();
+    return initialPrice == 'null' ? '' : initialPrice;
+  }
+
+  String? _resolveShareImage(ProductData product) {
+    final candidates = <String>[
+      ...?product.mainImage,
+      ...?product.allImage,
+      ..._initialImages,
+    ];
+
+    for (final image in candidates) {
+      final normalized = image.trim();
+      if (normalized.isNotEmpty) return normalized;
+    }
+
+    return null;
+  }
+
+  Future<void> _shareOnWhatsApp(ProductData product) async {
+    final shareImage = await cacheProductShareImage(
+      productId: widget.idProduct,
+      imageUrl: _resolveShareImage(product),
+    );
+    final message = buildProductWhatsAppMessage(
+      productId: widget.idProduct,
+      name: _resolveShareName(product),
+      price: _resolveSharePrice(product),
+      imageUrl: _resolveShareImage(product),
+    );
+
+    try {
+      if (shareImage != null) {
+        await SharePlus.instance.share(
+          ShareParams(
+            text: message,
+            files: [XFile(shareImage.path)],
+          ),
+        );
+      } else {
+        await SharePlus.instance.share(
+          ShareParams(text: message),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('حدث خطأ أثناء محاولة مشاركة المنتج'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(detailsProvider(widget.idProduct));
+    final initialImageForShare = _initialImages.isNotEmpty ? _initialImages[0] : '';
 
     return Scaffold(
       appBar: AppBarOfDetailsWidget(
-        imageForShare: widget.image!.isNotEmpty ? widget.image![0] : '',
+        imageForShare: initialImageForShare,
         descriptionForShare: state.data.description ?? '',
         idProductForShare: state.data.id ?? 0,
         nameForShare: state.data.name ?? '',
@@ -58,13 +135,15 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
           key: contentKey,
           price: widget.price,
           name: widget.name,
-          image: widget.image!,
+          image: _initialImages,
         ),
         widgetOfData: RefreshIndicator(
           color: AppColors.primaryColor,
           backgroundColor: Colors.white,
           onRefresh: () async {
-            ref.refresh(detailsProvider(widget.idProduct));
+            await ref
+                .read(detailsProvider(widget.idProduct).notifier)
+                .getDetailsOfProduct();
           },
           child: SingleChildScrollView(
             child: Column(
@@ -100,6 +179,17 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
               clearValidation: null,
             )
           : null,
+      floatingActionButton: _canShareProduct(state)
+          ? FloatingActionButton.extended(
+              heroTag: 'product-whatsapp-share-${widget.idProduct}',
+              onPressed: () => _shareOnWhatsApp(state.data),
+              backgroundColor: const Color(0xFF25D366),
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.chat_rounded),
+              label: const Text('واتساب'),
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

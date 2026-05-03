@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:app_links/app_links.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:safirah/core/widgets/bottomNavbar/bottom_navigation_bar_of_mange_league_widget.dart';
+import 'package:safirah/core/widgets/bottomNavbar/bottom_navigation_bar_widget.dart';
 import 'package:safirah/features/leagues_mangement/leagues/persntaion/page/details_league_widget.dart';
+import 'package:safirah/features/shop/productManagement/detailsProducts/presentation/page/details_page.dart';
 import 'package:safirah/main.dart';
 
 import '../../features/leagues_mangement/leagues/persntaion/page/details_league_user_page.dart';
@@ -54,11 +55,28 @@ class DeepLinkService {
   }
 
   void _handleUri(Uri uri) {
+    final productId = _parseProductId(uri);
+    if (productId != null) {
+      _navigateToProduct(productId);
+      return;
+    }
+
     final leagueSyncId = _parseLeagueId(uri);
     if (leagueSyncId == null || leagueSyncId.isEmpty) return;
 
     // If navigator isn't ready yet, retry after first frame.
     _navigateToLeague(leagueSyncId);
+  }
+
+  bool _isAllowedHttpsHost(Uri uri) {
+    if (uri.scheme != 'https') return true;
+
+    const allowedHosts = <String>{
+      'saferah.dev-station.com',
+      'safirah.app', // legacy
+    };
+
+    return allowedHosts.contains(uri.host);
   }
 
   String? _parseLeagueId(Uri uri) {
@@ -69,13 +87,7 @@ class DeepLinkService {
     // (legacy) https://safirah.app/league/<id>
 
     // 1) Enforce allowed hosts for HTTPS so random domains can't trigger in-app navigation.
-    if (uri.scheme == 'https') {
-      const allowedHosts = <String>{
-        'saferah.dev-station.com',
-        'safirah.app', // legacy
-      };
-      if (!allowedHosts.contains(uri.host)) return null;
-    }
+    if (!_isAllowedHttpsHost(uri)) return null;
 
     // 2) Path-based: /league/<id>
     final segments = uri.pathSegments;
@@ -94,6 +106,29 @@ class DeepLinkService {
         uri.queryParameters['id'] ??
         uri.queryParameters['leagueId'];
     if (q != null && q.isNotEmpty) return q;
+
+    return null;
+  }
+
+  int? _parseProductId(Uri uri) {
+    if (!_isAllowedHttpsHost(uri)) return null;
+
+    final segments = uri.pathSegments;
+
+    if (segments.length >= 2 && segments.first == 'product') {
+      return int.tryParse(segments[1]);
+    }
+
+    if (uri.scheme == 'safirah' && uri.host == 'product') {
+      if (segments.isNotEmpty) {
+        return int.tryParse(segments.first);
+      }
+
+      final q = uri.queryParameters['productId'] ?? uri.queryParameters['id'];
+      if (q != null && q.isNotEmpty) {
+        return int.tryParse(q);
+      }
+    }
 
     return null;
   }
@@ -123,6 +158,44 @@ class DeepLinkService {
         nav.currentState?.push(
           PageRouteBuilder(
             pageBuilder: (_, __, ___) => DetailsLeagueUserPage(leagueSyncId: leagueSyncId),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
+        );
+      });
+    }
+
+    go();
+  }
+
+  void _navigateToProduct(int productId) {
+    final nav = appNavigatorKey;
+
+    void go() {
+      final ctx = nav.currentContext;
+      if (ctx == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => go());
+        return;
+      }
+
+      nav.currentState?.pushAndRemoveUntil(
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const BottomNavigationBarWidget(),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
+        (route) => false,
+      );
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        nav.currentState?.push(
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => DetailsPage(
+              idProduct: productId,
+              image: const [],
+              name: '',
+              price: '',
+            ),
             transitionDuration: Duration.zero,
             reverseTransitionDuration: Duration.zero,
           ),
