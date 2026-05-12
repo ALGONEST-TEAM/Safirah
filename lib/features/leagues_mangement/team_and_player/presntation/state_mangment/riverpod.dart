@@ -116,7 +116,7 @@ class CategoriesNotifier
   }
 }
 
-final invitationsPlayersProvider = StateNotifierProvider.family<
+final invitationsPlayersProvider = StateNotifierProvider.family.autoDispose<
     LeagueInvitationsPlayersNotifier,
     DataState<List<InvitationsPlayersModel>>,
     String>((ref, syncLeagueId) {

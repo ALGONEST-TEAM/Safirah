@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../data/model/team_model.dart';
 import '../state_mangment/riverpod.dart';
+import 'player_avatar_widget.dart';
 
 class PlayerTilesWidget extends ConsumerWidget {
   const PlayerTilesWidget(this.player,
@@ -23,10 +24,7 @@ class PlayerTilesWidget extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 22,
-            backgroundImage: AssetImage('assets/images/avatar_placeholder.png'),
-          ),
+          const PlayerAvatarWidget(),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

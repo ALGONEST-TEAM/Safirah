@@ -4,12 +4,15 @@ import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/main_app_bar_widget.dart';
 import '../../../../generated/l10n.dart';
+import '../widgets/awards_widget.dart';
 import '../widgets/standings_widget.dart';
 import '../widgets/matches_widget.dart';
 import '../widgets/prediction_list_widget.dart';
 
 class PredictionPage extends StatefulWidget {
-  const PredictionPage({super.key});
+  const PredictionPage({super.key, this.tabChildren});
+
+  final List<Widget>? tabChildren;
 
   @override
   State<PredictionPage> createState() => _PredictionPageState();
@@ -22,12 +25,13 @@ class _PredictionPageState extends State<PredictionPage>
     S.current.matches,
     S.current.my_predictions,
     S.current.standings,
+    'الجوائز',
   ];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: _tabs.length, vsync: this);
   }
 
   @override
@@ -38,10 +42,19 @@ class _PredictionPageState extends State<PredictionPage>
 
   @override
   Widget build(BuildContext context) {
+    final tabChildren =
+        widget.tabChildren ??
+        const [
+          MatchesWidget(),
+          PredictionListWidget(),
+          StandingsWidget(),
+          AwardsWidget(),
+        ];
+
     return Scaffold(
       appBar: MainAppBarWidget(title: S.of(context).expectations),
       body: DefaultTabController(
-        length: 3,
+        length: _tabs.length,
         child: SafeArea(
           top: false,
           child: Column(
@@ -105,11 +118,7 @@ class _PredictionPageState extends State<PredictionPage>
                 child: TabBarView(
                   controller: _tabController,
                   physics: const BouncingScrollPhysics(),
-                  children: const [
-                    MatchesWidget(),
-                    PredictionListWidget(),
-                    StandingsWidget(),
-                  ],
+                  children: tabChildren,
                 ),
               ),
             ],

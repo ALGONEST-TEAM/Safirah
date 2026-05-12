@@ -8,6 +8,7 @@ import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/buttons/default_button.dart';
 import '../../data/model/team_model.dart';
 import '../state_mangment/riverpod.dart';
+import 'player_avatar_widget.dart';
 
 class CardInvitationsPlayerWidget extends StatelessWidget {
   const CardInvitationsPlayerWidget(
@@ -37,11 +38,7 @@ class CardInvitationsPlayerWidget extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const CircleAvatar(
-                      radius: 24,
-                      backgroundImage:
-                          AssetImage('assets/images/player_avatar.png'),
-                    ),
+                    const PlayerAvatarWidget(radius: 24),
                     SizedBox(width: 12.w),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,7 +68,6 @@ class CardInvitationsPlayerWidget extends StatelessWidget {
                             textSize: 11.sp,
                             height: 35.h,
                             onPressed: () {
-                              print(idInvitation);
                               final player = InvitationsPlayersModel(
                                 id: idInvitation,
                                 action: 'accepted',

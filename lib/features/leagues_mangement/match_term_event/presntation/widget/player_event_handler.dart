@@ -80,10 +80,11 @@ class PlayerEventHandler {
     if (!context.mounted) return;
 
     if (result.stateData == States.error) {
+      final parts = MessageOfError.get(result.exception as Object);
       showFlashBarError(
         context: context,
-        title: '',
-        text: 'فشل في إضافة الهدف',
+        title: parts.first,
+        text: parts.last,
       );
       return;
     }
@@ -91,6 +92,7 @@ class PlayerEventHandler {
     await ref
         .read(playerStatsProvider((matchSyncId: matchSyncId, playerSyncId: playerSyncId)).notifier)
         .load();
+    invalidateMatchEventProviders(ref, matchSyncId);
     if (!context.mounted) return;
     ref.read(currentVarEventProvider.notifier).state = VarEvent(
       type: 'goal',

@@ -17,6 +17,8 @@ class FinishTermResult {
 
   final int? homeScore;
   final int? awayScore;
+  final int? homePenaltyScore;
+  final int? awayPenaltyScore;
 
   final String? leagueSyncId;
   final String? matchTermSyncId;
@@ -36,6 +38,8 @@ class FinishTermResult {
     this.additionalMinutes,
     this.homeScore,
     this.awayScore,
+    this.homePenaltyScore,
+    this.awayPenaltyScore,
     this.leagueSyncId,
   });
 }

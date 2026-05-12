@@ -217,7 +217,7 @@ class MatchesLocalDataSource {
           b.write('G:${g.syncId ?? ''}:${g.groupName}|');
           for (final m in g.matches) {
             b.write(
-                'M:${m.syncId ?? ''}:${m.status}:${m.homeScore}:${m.awayScore}|');
+                'M:${m.syncId ?? ''}:${m.status}:${m.homeScore}:${m.awayScore}:${m.homePenaltyScore ?? ''}:${m.awayPenaltyScore ?? ''}|');
           }
         }
       }
@@ -647,6 +647,12 @@ class MatchesLocalDataSource {
               endTime: m.endTime != null ? Value(m.endTime!) : const Value.absent(),
               homeScore: Value(m.homeScore),
               awayScore: Value(m.awayScore),
+              homePenaltyScore: m.homePenaltyScore != null
+                  ? Value(m.homePenaltyScore)
+                  : const Value.absent(),
+              awayPenaltyScore: m.awayPenaltyScore != null
+                  ? Value(m.awayPenaltyScore)
+                  : const Value.absent(),
               status: Value(m.status),
               createdAt: m.createdAt != null ? Value(m.createdAt!) : const Value.absent(),
               updatedAt: Value(DateTime.now()),
@@ -663,6 +669,12 @@ class MatchesLocalDataSource {
                 endTime: m.endTime != null ? Value(m.endTime!) : const Value.absent(),
                 homeScore: Value(m.homeScore),
                 awayScore: Value(m.awayScore),
+                homePenaltyScore: m.homePenaltyScore != null
+                    ? Value(m.homePenaltyScore)
+                    : const Value.absent(),
+                awayPenaltyScore: m.awayPenaltyScore != null
+                    ? Value(m.awayPenaltyScore)
+                    : const Value.absent(),
                 status: Value(m.status),
                 updatedAt: Value(DateTime.now()),
               ),

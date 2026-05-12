@@ -7,6 +7,7 @@ class PlayersTabViewWidget extends StatelessWidget {
   final String awayTeamSyncId;
   final String matchSyncId;
   final String matchTermSyncId;
+  final bool allowGoalEvents;
 
   const PlayersTabViewWidget({
     super.key,
@@ -14,6 +15,7 @@ class PlayersTabViewWidget extends StatelessWidget {
     required this.awayTeamSyncId,
     required this.matchSyncId,
     required this.matchTermSyncId,
+    required this.allowGoalEvents,
   });
 
   @override
@@ -25,6 +27,7 @@ class PlayersTabViewWidget extends StatelessWidget {
             teamSyncId: homeTeamSyncId,
             matchSyncId: matchSyncId,
             matchTermSyncId: matchTermSyncId,
+            allowGoalEvents: allowGoalEvents,
           ),
         ),
         SingleChildScrollView(
@@ -32,6 +35,7 @@ class PlayersTabViewWidget extends StatelessWidget {
             teamSyncId: awayTeamSyncId,
             matchSyncId: matchSyncId,
             matchTermSyncId: matchTermSyncId,
+            allowGoalEvents: allowGoalEvents,
           ),
         ),
       ],

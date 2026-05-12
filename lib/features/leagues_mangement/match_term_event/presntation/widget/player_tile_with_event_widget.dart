@@ -7,6 +7,7 @@ import '../../../../../core/constants/app_icons.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../page/var_page.dart';
 import '../state_mangement/riverpod.dart';
+import '../../../team_and_player/presntation/widget/player_avatar_widget.dart';
 import 'event_button_widget.dart';
 import 'player_event_handler.dart';
 
@@ -20,6 +21,9 @@ final stopTermStateProvider =
 final selectedIncomingSubstitutePlayerProvider =
     StateProvider<({String playerSyncId, String teamSyncId})?>((ref) => null);
 
+
+
+
 class PlayerTileWithEventWidget extends ConsumerWidget {
   final String name, avatar;
   final String matchSyncId;
@@ -27,6 +31,7 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
   final String playerSyncId;
   final String teamSyncId;
   final bool isSubstitute;
+  final bool allowGoalEvents;
 
   const PlayerTileWithEventWidget({
     super.key,
@@ -37,6 +42,7 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
     required this.matchTermSyncId,
     required this.isSubstitute,
     required this.teamSyncId,
+    required this.allowGoalEvents,
   });
 
   @override
@@ -112,9 +118,7 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundColor: AppColors.secondaryColor.withAlpha(50),
-          ),
+          const PlayerAvatarWidget(),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -130,15 +134,17 @@ class PlayerTileWithEventWidget extends ConsumerWidget {
           ),
           // Spacer()  ,
           if (isParticipating) ...[
-            EventButtonWidget(
-              iconPath: AppIcons.ball,
-              color: Colors.black,
-              count: goals,
-              onPressed: (ctx, r) async {
-                await handler.addGoal(ctx, r);
-              },
-            ),
-            12.w.horizontalSpace,
+            if (allowGoalEvents) ...[
+              EventButtonWidget(
+                iconPath: AppIcons.ball,
+                color: Colors.black,
+                count: goals,
+                onPressed: (ctx, r) async {
+                  await handler.addGoal(ctx, r);
+                },
+              ),
+              12.w.horizontalSpace,
+            ],
             EventButtonWidget(
               iconPath: AppIcons.assist,
 

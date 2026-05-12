@@ -70,6 +70,9 @@ part 'safirah_database.g.dart';
   ],
 )
 class Safirah extends _$Safirah {
+  static const String _knockoutRoundUniqueIndexName =
+      'idx_rounds_knockout_unique_name_per_league';
+
   Safirah._(super.e);
 
   factory Safirah.forTesting([QueryExecutor? executor]) {
@@ -77,7 +80,7 @@ class Safirah extends _$Safirah {
   }
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 22;
 
   static Future<Safirah> create() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -91,6 +94,7 @@ class Safirah extends _$Safirah {
         onCreate: (m) async {
 
           await m.createAll();
+          await _createKnockoutRoundUniqueIndex();
 
           // ✅ بعد إنشاء الجداول لأول مرة
           final termsSource = MatchTermsEventLocalDataSource(this);
@@ -414,6 +418,80 @@ WHERE id NOT IN (
               'ON players(player_league_sync_id);',
             );
           }
+
+          if (from < 21) {
+            await _dedupeKnockoutRoundsForUniqueIndex();
+            await _createKnockoutRoundUniqueIndex();
+          }
+
+          if (from < 22) {
+            await customStatement(
+              'ALTER TABLE matches ADD COLUMN home_penalty_score INTEGER NULL',
+            );
+            await customStatement(
+              'ALTER TABLE matches ADD COLUMN away_penalty_score INTEGER NULL',
+            );
+          }
         },
       );
+
+  Future<void> _createKnockoutRoundUniqueIndex() {
+    return customStatement('''
+CREATE UNIQUE INDEX IF NOT EXISTS $_knockoutRoundUniqueIndexName
+ON rounds(league_sync_id, round_name)
+WHERE group_sync_id IS NULL AND round_type = 'knockout';
+''');
+  }
+
+  Future<void> _dedupeKnockoutRoundsForUniqueIndex() async {
+    final duplicates = await customSelect('''
+SELECT league_sync_id, round_name
+FROM rounds
+WHERE group_sync_id IS NULL AND round_type = 'knockout'
+GROUP BY league_sync_id, round_name
+HAVING COUNT(*) > 1
+''').get();
+
+    for (final row in duplicates) {
+      final leagueSyncId = row.read<String>('league_sync_id');
+      final roundName = row.read<String>('round_name');
+
+      final candidateRows = await customSelect(
+        '''
+SELECT sync_id
+FROM rounds
+WHERE league_sync_id = ?
+  AND round_name = ?
+  AND group_sync_id IS NULL
+  AND round_type = 'knockout'
+ORDER BY created_at ASC, sync_id ASC
+''',
+        variables: [
+          Variable.withString(leagueSyncId),
+          Variable.withString(roundName),
+        ],
+      ).get();
+
+      if (candidateRows.length <= 1) continue;
+
+      final keeperSyncId = candidateRows.first.read<String>('sync_id');
+      final duplicateSyncIds = candidateRows
+          .skip(1)
+          .map((candidate) => candidate.read<String>('sync_id'))
+          .toList();
+
+      for (final duplicateSyncId in duplicateSyncIds) {
+        await customStatement(
+          'UPDATE matches SET round_sync_id = ? WHERE round_sync_id = ?',
+          [keeperSyncId, duplicateSyncId],
+        );
+      }
+
+      final placeholders = List.filled(duplicateSyncIds.length, '?').join(', ');
+      await customStatement(
+        'DELETE FROM rounds WHERE sync_id IN ($placeholders)',
+        duplicateSyncIds,
+      );
+    }
+  }
 }

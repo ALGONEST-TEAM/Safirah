@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:safirah/features/leagues_mangement/leagues/persntaion/page/league_overview_browse_page.dart';
 import 'package:safirah/features/leagues_mangement/leagues/persntaion/page/reporter_matches_page.dart';
 import 'package:safirah/features/leagues_mangement/leagues/persntaion/page/show_rule_league_page.dart';
 import '../../../../../core/helpers/flash_bar_helper.dart';
@@ -15,6 +16,8 @@ import '../../../match/presntaion/page/matches_scheduling_page.dart';
 import '../../../match/presntaion/page/refereer_matches_page.dart';
 import '../../../match_term_event/presntation/page/initialization_term_page.dart';
 import '../../../match_term_event/presntation/state_mangement/riverpod.dart';
+import '../../../team_and_player/presntation/page/invitations_players_page.dart';
+import '../../../team_and_player/presntation/page/league_players_page.dart';
 import '../../../team_and_player/presntation/page/show_team_and_player_page.dart';
 import '../../../team_and_player/presntation/page/teams_with_players_widget.dart';
 import '../riverpod/riverpod.dart';
@@ -59,6 +62,64 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
     ref.watch(leaguePermissionsProvider(widget.leagueSyncId));
     final leaguePermissions = ref.watch(leaguePermissionsProvider(widget.leagueSyncId));
     final canEditLeague = leaguePermissions.asData?.value.contains('league.edit') ?? false;
+    final leagueStatusData = leagueStatus.asData?.value;
+    final showAvailabilityDots = canEditLeague;
+    final canOpenLeagueOverview = showAvailabilityDots ? true : null;
+    final canOpenLeaguePlayers = showAvailabilityDots ? true : null;
+    final canOpenInvitations = showAvailabilityDots ? true : null;
+    final canOpenTeamsPlayers = showAvailabilityDots ? true : null;
+    final canDivideGroups = !showAvailabilityDots
+        ? null
+        : leagueStatusData?.hasPlayersInTeams;
+    final canManageMatches = showAvailabilityDots ? true : null;
+    final canManageReports = showAvailabilityDots ? true : null;
+    final canSetupTerms = !showAvailabilityDots
+        ? null
+        : leagueStatusData?.hasGroups;
+    final canScheduleMatches = !showAvailabilityDots
+        ? null
+        : leagueStatusData?.hasMatches;
+    final canOpenRules = showAvailabilityDots ? true : null;
+    final canOpenOrganizers = showAvailabilityDots ? true : null;
+    final leagueOverviewHint = canOpenLeagueOverview == null
+        ? null
+        : (canOpenLeagueOverview == true ? 'متاح الآن' : 'غير متاح حالياً');
+    final leaguePlayersHint = canOpenLeaguePlayers == null
+        ? null
+        : (canOpenLeaguePlayers == true ? 'متاح الآن' : 'غير متاح حالياً');
+    final invitationsHint = canOpenInvitations == null
+        ? null
+        : (canOpenInvitations == true ? 'متاح الآن' : 'غير متاح حالياً');
+    final teamsPlayersHint = canOpenTeamsPlayers == null
+        ? null
+        : (canOpenTeamsPlayers == true ? 'متاح الآن' : 'غير متاح حالياً');
+    final divideGroupsHint = canDivideGroups == null
+        ? null
+        : (canDivideGroups == true
+            ? 'جاهز لتقسيم المجموعات'
+            : 'ينتظر إتمام تقسيم اللاعبين على الفرق');
+    final manageMatchesHint = canManageMatches == null
+        ? null
+        : (canManageMatches == true ? 'متاح الآن' : 'غير متاح حالياً');
+    final manageReportsHint = canManageReports == null
+        ? null
+        : (canManageReports == true ? 'متاح الآن' : 'غير متاح حالياً');
+    final setupTermsHint = canSetupTerms == null
+        ? null
+        : (canSetupTerms == true
+            ? 'جاهز لتهيئة الأشواط'
+            : 'ينتظر إتمام تقسيم الفرق على المجموعات');
+    final scheduleMatchesHint = canScheduleMatches == null
+        ? null
+        : (canScheduleMatches == true
+            ? 'جاهز لجدولة المباريات'
+            : 'ينتظر إتمام كل عمليات إنشاء الدوري قبل الجدولة');
+    final rulesHint = canOpenRules == null
+        ? null
+        : (canOpenRules == true ? 'متاح الآن' : 'غير متاح حالياً');
+    final organizersHint = canOpenOrganizers == null
+        ? null
+        : (canOpenOrganizers == true ? 'متاح الآن' : 'غير متاح حالياً');
 
     // ref.watch(leagueStatusProvider(widget.leagueSyncId));
     //  ref.watch(usersHasRoleRefreshProvider(widget.leagueSyncId));
@@ -71,7 +132,52 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           ButtonOfOrganizerWidget(
+            title: 'استعراض بيانات الدوري',
+            isAvailable: canOpenLeagueOverview,
+            availabilityHint: leagueOverviewHint,
+            onTap: () {
+              navigateTo(
+                context,
+                LeagueOverviewBrowsePage(
+                  leagueSyncId: widget.leagueSyncId,
+                ),
+              );
+            },
+          ),
+          ButtonOfOrganizerWidget(
+            title: 'جميع لاعبي الدوري',
+            isAvailable: canOpenLeaguePlayers,
+            availabilityHint: leaguePlayersHint,
+            onTap: () {
+              navigateTo(
+                context,
+                LeaguePlayersPage(
+                  leagueSyncId: widget.leagueSyncId,
+                ),
+              );
+            },
+          ),
+          AuthorizationGateHideIfDenied(
+            leagueSyncId: widget.leagueSyncId,
+            permissionKey: 'league.edit',
+            child: ButtonOfOrganizerWidget(
+              title: 'طلبات الانضمام',
+              isAvailable: canOpenInvitations,
+              availabilityHint: invitationsHint,
+              onTap: () {
+                navigateTo(
+                  context,
+                  InvitationsPlayersPage(
+                    leagueSyncId: widget.leagueSyncId,
+                  ),
+                );
+              },
+            ),
+          ),
+          ButtonOfOrganizerWidget(
             title: "الفرق واللعبين",
+            isAvailable: canOpenTeamsPlayers,
+            availabilityHint: teamsPlayersHint,
             onTap: () {
               final details = detailsLeague.asData?.value;
               final status = leagueStatus.asData?.value;
@@ -100,6 +206,8 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
               permissionKey: 'league.edit',
               child: ButtonOfOrganizerWidget(
                 title: 'تقسيم المجموعات',
+                isAvailable: canDivideGroups,
+                availabilityHint: divideGroupsHint,
                 onTap: () {
                   (leagueStatus.asData?.value!.hasPlayersInTeams ?? false) ==
                           false
@@ -121,6 +229,8 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
             permissionKey: 'match.manage',
             child: ButtonOfOrganizerWidget(
               title: 'ادارة المباريات',
+              isAvailable: canManageMatches,
+              availabilityHint: manageMatchesHint,
               onTap: () {
                 navigateTo(
                   context,
@@ -137,6 +247,8 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
             permissionKey: 'match.report',
             child: ButtonOfOrganizerWidget(
               title: 'ادارة التقارير',
+              isAvailable: canManageReports,
+              availabilityHint: manageReportsHint,
               onTap: () {
                 navigateTo(
                   context,
@@ -155,6 +267,8 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
               permissionKey: 'league.edit',
               child: ButtonOfOrganizerWidget(
                 title: "تهيئة الاشواط",
+                isAvailable: canSetupTerms,
+                availabilityHint: setupTermsHint,
                 onTap: () {
                   (leagueStatus.asData?.value!.hasGroups ?? false) == false
                       ? showFlashBarError(
@@ -240,6 +354,8 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
             child: Visibility(
               child: ButtonOfOrganizerWidget(
                 title: 'جدولة المباريات',
+                isAvailable: canScheduleMatches,
+                availabilityHint: scheduleMatchesHint,
                 onTap: () {
                   if ((leagueStatus.asData?.value!.hasMatches ?? false) ==
                       false) {
@@ -275,6 +391,8 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
           ),
           ButtonOfOrganizerWidget(
             title: "قواعد الدوري",
+            isAvailable: canOpenRules,
+            availabilityHint: rulesHint,
             onTap: () {
               navigateTo(
                   context,
@@ -288,6 +406,8 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
             permissionKey: 'league.edit',
             child: ButtonOfOrganizerWidget(
               title: "المنظمين",
+              isAvailable: canOpenOrganizers,
+              availabilityHint: organizersHint,
               onTap: () {
                 navigateTo(
                     context,

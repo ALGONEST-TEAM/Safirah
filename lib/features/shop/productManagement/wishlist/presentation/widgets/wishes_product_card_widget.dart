@@ -197,6 +197,7 @@ class _WishesProductCardWidgetState extends ConsumerState<WishesProductCardWidge
                           showModalBottomSheetWidget(
                             backgroundColor: Colors.transparent,
                             context: context,
+                            dismissOnOuterTap: true,
                             page: AddToCartPage(
                               productId: widget.productId,
                               showWishlistIcon: false,

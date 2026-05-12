@@ -82,6 +82,7 @@ class ProductPriceRowWidget extends StatelessWidget {
             showModalBottomSheetWidget(
               backgroundColor: Colors.transparent,
               context: context,
+              dismissOnOuterTap: true,
               page: AddToCartPage(
                 productId: id,
               ),

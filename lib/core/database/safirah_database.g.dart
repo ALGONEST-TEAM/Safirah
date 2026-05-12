@@ -4563,6 +4563,18 @@ class $MatchesTable extends Matches with TableInfo<$MatchesTable, Matche> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _homePenaltyScoreMeta =
+      const VerificationMeta('homePenaltyScore');
+  @override
+  late final GeneratedColumn<int> homePenaltyScore = GeneratedColumn<int>(
+      'home_penalty_score', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _awayPenaltyScoreMeta =
+      const VerificationMeta('awayPenaltyScore');
+  @override
+  late final GeneratedColumn<int> awayPenaltyScore = GeneratedColumn<int>(
+      'away_penalty_score', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status =
@@ -4610,6 +4622,8 @@ class $MatchesTable extends Matches with TableInfo<$MatchesTable, Matche> {
         endTime,
         homeScore,
         awayScore,
+        homePenaltyScore,
+        awayPenaltyScore,
         status,
         createdAt,
         updatedAt
@@ -4702,6 +4716,18 @@ class $MatchesTable extends Matches with TableInfo<$MatchesTable, Matche> {
       context.handle(_awayScoreMeta,
           awayScore.isAcceptableOrUnknown(data['away_score']!, _awayScoreMeta));
     }
+    if (data.containsKey('home_penalty_score')) {
+      context.handle(
+          _homePenaltyScoreMeta,
+          homePenaltyScore.isAcceptableOrUnknown(
+              data['home_penalty_score']!, _homePenaltyScoreMeta));
+    }
+    if (data.containsKey('away_penalty_score')) {
+      context.handle(
+          _awayPenaltyScoreMeta,
+          awayPenaltyScore.isAcceptableOrUnknown(
+              data['away_penalty_score']!, _awayPenaltyScoreMeta));
+    }
     if (data.containsKey('status')) {
       context.handle(_statusMeta,
           status.isAcceptableOrUnknown(data['status']!, _statusMeta));
@@ -4750,6 +4776,10 @@ class $MatchesTable extends Matches with TableInfo<$MatchesTable, Matche> {
           .read(DriftSqlType.int, data['${effectivePrefix}home_score'])!,
       awayScore: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}away_score'])!,
+      homePenaltyScore: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}home_penalty_score']),
+      awayPenaltyScore: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}away_penalty_score']),
       status: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
       createdAt: attachedDatabase.typeMapping
@@ -4785,6 +4815,8 @@ class Matche extends DataClass implements Insertable<Matche> {
   final DateTime? endTime;
   final int homeScore;
   final int awayScore;
+  final int? homePenaltyScore;
+  final int? awayPenaltyScore;
   final String status;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -4802,6 +4834,8 @@ class Matche extends DataClass implements Insertable<Matche> {
       this.endTime,
       required this.homeScore,
       required this.awayScore,
+      this.homePenaltyScore,
+      this.awayPenaltyScore,
       required this.status,
       required this.createdAt,
       required this.updatedAt});
@@ -4831,6 +4865,12 @@ class Matche extends DataClass implements Insertable<Matche> {
     }
     map['home_score'] = Variable<int>(homeScore);
     map['away_score'] = Variable<int>(awayScore);
+    if (!nullToAbsent || homePenaltyScore != null) {
+      map['home_penalty_score'] = Variable<int>(homePenaltyScore);
+    }
+    if (!nullToAbsent || awayPenaltyScore != null) {
+      map['away_penalty_score'] = Variable<int>(awayPenaltyScore);
+    }
     map['status'] = Variable<String>(status);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -4862,6 +4902,12 @@ class Matche extends DataClass implements Insertable<Matche> {
           : Value(endTime),
       homeScore: Value(homeScore),
       awayScore: Value(awayScore),
+      homePenaltyScore: homePenaltyScore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(homePenaltyScore),
+      awayPenaltyScore: awayPenaltyScore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(awayPenaltyScore),
       status: Value(status),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -4886,6 +4932,8 @@ class Matche extends DataClass implements Insertable<Matche> {
       endTime: serializer.fromJson<DateTime?>(json['endTime']),
       homeScore: serializer.fromJson<int>(json['homeScore']),
       awayScore: serializer.fromJson<int>(json['awayScore']),
+      homePenaltyScore: serializer.fromJson<int?>(json['homePenaltyScore']),
+      awayPenaltyScore: serializer.fromJson<int?>(json['awayPenaltyScore']),
       status: serializer.fromJson<String>(json['status']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -4908,6 +4956,8 @@ class Matche extends DataClass implements Insertable<Matche> {
       'endTime': serializer.toJson<DateTime?>(endTime),
       'homeScore': serializer.toJson<int>(homeScore),
       'awayScore': serializer.toJson<int>(awayScore),
+      'homePenaltyScore': serializer.toJson<int?>(homePenaltyScore),
+      'awayPenaltyScore': serializer.toJson<int?>(awayPenaltyScore),
       'status': serializer.toJson<String>(status),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -4928,6 +4978,8 @@ class Matche extends DataClass implements Insertable<Matche> {
           Value<DateTime?> endTime = const Value.absent(),
           int? homeScore,
           int? awayScore,
+          Value<int?> homePenaltyScore = const Value.absent(),
+          Value<int?> awayPenaltyScore = const Value.absent(),
           String? status,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
@@ -4948,6 +5000,12 @@ class Matche extends DataClass implements Insertable<Matche> {
         endTime: endTime.present ? endTime.value : this.endTime,
         homeScore: homeScore ?? this.homeScore,
         awayScore: awayScore ?? this.awayScore,
+        homePenaltyScore: homePenaltyScore.present
+            ? homePenaltyScore.value
+            : this.homePenaltyScore,
+        awayPenaltyScore: awayPenaltyScore.present
+            ? awayPenaltyScore.value
+            : this.awayPenaltyScore,
         status: status ?? this.status,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -4979,6 +5037,12 @@ class Matche extends DataClass implements Insertable<Matche> {
       endTime: data.endTime.present ? data.endTime.value : this.endTime,
       homeScore: data.homeScore.present ? data.homeScore.value : this.homeScore,
       awayScore: data.awayScore.present ? data.awayScore.value : this.awayScore,
+      homePenaltyScore: data.homePenaltyScore.present
+          ? data.homePenaltyScore.value
+          : this.homePenaltyScore,
+      awayPenaltyScore: data.awayPenaltyScore.present
+          ? data.awayPenaltyScore.value
+          : this.awayPenaltyScore,
       status: data.status.present ? data.status.value : this.status,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -5001,6 +5065,8 @@ class Matche extends DataClass implements Insertable<Matche> {
           ..write('endTime: $endTime, ')
           ..write('homeScore: $homeScore, ')
           ..write('awayScore: $awayScore, ')
+          ..write('homePenaltyScore: $homePenaltyScore, ')
+          ..write('awayPenaltyScore: $awayPenaltyScore, ')
           ..write('status: $status, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -5023,6 +5089,8 @@ class Matche extends DataClass implements Insertable<Matche> {
       endTime,
       homeScore,
       awayScore,
+      homePenaltyScore,
+      awayPenaltyScore,
       status,
       createdAt,
       updatedAt);
@@ -5043,6 +5111,8 @@ class Matche extends DataClass implements Insertable<Matche> {
           other.endTime == this.endTime &&
           other.homeScore == this.homeScore &&
           other.awayScore == this.awayScore &&
+          other.homePenaltyScore == this.homePenaltyScore &&
+          other.awayPenaltyScore == this.awayPenaltyScore &&
           other.status == this.status &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -5062,6 +5132,8 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
   final Value<DateTime?> endTime;
   final Value<int> homeScore;
   final Value<int> awayScore;
+  final Value<int?> homePenaltyScore;
+  final Value<int?> awayPenaltyScore;
   final Value<String> status;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -5080,6 +5152,8 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
     this.endTime = const Value.absent(),
     this.homeScore = const Value.absent(),
     this.awayScore = const Value.absent(),
+    this.homePenaltyScore = const Value.absent(),
+    this.awayPenaltyScore = const Value.absent(),
     this.status = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -5099,6 +5173,8 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
     this.endTime = const Value.absent(),
     this.homeScore = const Value.absent(),
     this.awayScore = const Value.absent(),
+    this.homePenaltyScore = const Value.absent(),
+    this.awayPenaltyScore = const Value.absent(),
     this.status = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -5123,6 +5199,8 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
     Expression<DateTime>? endTime,
     Expression<int>? homeScore,
     Expression<int>? awayScore,
+    Expression<int>? homePenaltyScore,
+    Expression<int>? awayPenaltyScore,
     Expression<String>? status,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -5143,6 +5221,8 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
       if (endTime != null) 'end_time': endTime,
       if (homeScore != null) 'home_score': homeScore,
       if (awayScore != null) 'away_score': awayScore,
+      if (homePenaltyScore != null) 'home_penalty_score': homePenaltyScore,
+      if (awayPenaltyScore != null) 'away_penalty_score': awayPenaltyScore,
       if (status != null) 'status': status,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -5164,6 +5244,8 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
       Value<DateTime?>? endTime,
       Value<int>? homeScore,
       Value<int>? awayScore,
+      Value<int?>? homePenaltyScore,
+      Value<int?>? awayPenaltyScore,
       Value<String>? status,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
@@ -5182,6 +5264,8 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
       endTime: endTime ?? this.endTime,
       homeScore: homeScore ?? this.homeScore,
       awayScore: awayScore ?? this.awayScore,
+      homePenaltyScore: homePenaltyScore ?? this.homePenaltyScore,
+      awayPenaltyScore: awayPenaltyScore ?? this.awayPenaltyScore,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -5232,6 +5316,12 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
     if (awayScore.present) {
       map['away_score'] = Variable<int>(awayScore.value);
     }
+    if (homePenaltyScore.present) {
+      map['home_penalty_score'] = Variable<int>(homePenaltyScore.value);
+    }
+    if (awayPenaltyScore.present) {
+      map['away_penalty_score'] = Variable<int>(awayPenaltyScore.value);
+    }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
@@ -5263,6 +5353,8 @@ class MatchesCompanion extends UpdateCompanion<Matche> {
           ..write('endTime: $endTime, ')
           ..write('homeScore: $homeScore, ')
           ..write('awayScore: $awayScore, ')
+          ..write('homePenaltyScore: $homePenaltyScore, ')
+          ..write('awayPenaltyScore: $awayPenaltyScore, ')
           ..write('status: $status, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -14070,6 +14162,8 @@ typedef $$MatchesTableCreateCompanionBuilder = MatchesCompanion Function({
   Value<DateTime?> endTime,
   Value<int> homeScore,
   Value<int> awayScore,
+  Value<int?> homePenaltyScore,
+  Value<int?> awayPenaltyScore,
   Value<String> status,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -14089,6 +14183,8 @@ typedef $$MatchesTableUpdateCompanionBuilder = MatchesCompanion Function({
   Value<DateTime?> endTime,
   Value<int> homeScore,
   Value<int> awayScore,
+  Value<int?> homePenaltyScore,
+  Value<int?> awayPenaltyScore,
   Value<String> status,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -14144,6 +14240,14 @@ class $$MatchesTableFilterComposer extends Composer<_$Safirah, $MatchesTable> {
 
   ColumnFilters<int> get awayScore => $composableBuilder(
       column: $table.awayScore, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get homePenaltyScore => $composableBuilder(
+      column: $table.homePenaltyScore,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get awayPenaltyScore => $composableBuilder(
+      column: $table.awayPenaltyScore,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get status => $composableBuilder(
       column: $table.status, builder: (column) => ColumnFilters(column));
@@ -14208,6 +14312,14 @@ class $$MatchesTableOrderingComposer
   ColumnOrderings<int> get awayScore => $composableBuilder(
       column: $table.awayScore, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get homePenaltyScore => $composableBuilder(
+      column: $table.homePenaltyScore,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get awayPenaltyScore => $composableBuilder(
+      column: $table.awayPenaltyScore,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get status => $composableBuilder(
       column: $table.status, builder: (column) => ColumnOrderings(column));
 
@@ -14266,6 +14378,12 @@ class $$MatchesTableAnnotationComposer
   GeneratedColumn<int> get awayScore =>
       $composableBuilder(column: $table.awayScore, builder: (column) => column);
 
+  GeneratedColumn<int> get homePenaltyScore => $composableBuilder(
+      column: $table.homePenaltyScore, builder: (column) => column);
+
+  GeneratedColumn<int> get awayPenaltyScore => $composableBuilder(
+      column: $table.awayPenaltyScore, builder: (column) => column);
+
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
@@ -14312,6 +14430,8 @@ class $$MatchesTableTableManager extends RootTableManager<
             Value<DateTime?> endTime = const Value.absent(),
             Value<int> homeScore = const Value.absent(),
             Value<int> awayScore = const Value.absent(),
+            Value<int?> homePenaltyScore = const Value.absent(),
+            Value<int?> awayPenaltyScore = const Value.absent(),
             Value<String> status = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
@@ -14331,6 +14451,8 @@ class $$MatchesTableTableManager extends RootTableManager<
             endTime: endTime,
             homeScore: homeScore,
             awayScore: awayScore,
+            homePenaltyScore: homePenaltyScore,
+            awayPenaltyScore: awayPenaltyScore,
             status: status,
             createdAt: createdAt,
             updatedAt: updatedAt,
@@ -14350,6 +14472,8 @@ class $$MatchesTableTableManager extends RootTableManager<
             Value<DateTime?> endTime = const Value.absent(),
             Value<int> homeScore = const Value.absent(),
             Value<int> awayScore = const Value.absent(),
+            Value<int?> homePenaltyScore = const Value.absent(),
+            Value<int?> awayPenaltyScore = const Value.absent(),
             Value<String> status = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
@@ -14369,6 +14493,8 @@ class $$MatchesTableTableManager extends RootTableManager<
             endTime: endTime,
             homeScore: homeScore,
             awayScore: awayScore,
+            homePenaltyScore: homePenaltyScore,
+            awayPenaltyScore: awayPenaltyScore,
             status: status,
             createdAt: createdAt,
             updatedAt: updatedAt,

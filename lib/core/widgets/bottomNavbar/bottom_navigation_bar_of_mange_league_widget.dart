@@ -24,6 +24,7 @@ import '../../theme/app_colors.dart';
 import '../auto_size_text_widget.dart';
 import 'bottom_navigation_bar_widget.dart';
 import 'design_for_bottom_navigation_bar_widget.dart';
+import 'shell_destination_fab.dart';
 
 final activeIndexProvider = StateProvider<int>((ref) => 0);
 
@@ -65,26 +66,20 @@ class _BottomNavigationBarWidgetState
       ),
       child: Scaffold(
         body: _pages[activeIndex],
-        floatingActionButton: SizedBox(
-          height: 56.h,
-          child: FloatingActionButton.large(
-            onPressed: () {
-              AppStartupShellPreference.markCurrentShell(AppStartupSection.shop);
-              navigateReplacement(context, const BottomNavigationBarWidget());
-            },
-            backgroundColor: AppColors.whiteColor,
-            splashColor: AppColors.primaryColor,
-            elevation: 0,
-            shape: const CircleBorder(),
-            child: Container(
-              padding: EdgeInsets.all(14.sp),
-              decoration: const BoxDecoration(
-                color: AppColors.primaryColor,
-                shape: BoxShape.circle,
-              ),
-              child: SvgPicture.asset(AppIcons.shop),
-            ),
-          ),
+        floatingActionButton: ShellDestinationFab(
+          label: 'المتجر',
+          tooltip: 'الذهاب إلى المتجر',
+          buttonHeight: 56.h,
+          backgroundColor: AppColors.whiteColor,
+          splashColor: AppColors.primaryColor,
+          elevation: 0,
+          iconPadding: EdgeInsets.all(14.sp),
+          innerBackgroundColor: AppColors.primaryColor,
+          icon: SvgPicture.asset(AppIcons.shop),
+          onPressed: () {
+            AppStartupShellPreference.markCurrentShell(AppStartupSection.shop);
+            navigateReplacement(context, const BottomNavigationBarWidget());
+          },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: SafeArea(
@@ -119,8 +114,8 @@ class _BottomNavigationBarWidgetState
                   width: 20.w,
                 ),
                 _buildNavItem(
-                  AppIcons.myOrders,
-                  AppIcons.myOrdersActive,
+                  AppIcons.league,
+                  AppIcons.league,
                   'الدوريات',
                   2,
                   activeIndex,
@@ -296,7 +291,7 @@ class _LeaguesBottomBar extends StatelessWidget {
           1,
         ),
         SizedBox(height: 20.h, width: 20.w),
-        _item(context, AppIcons.myOrders, AppIcons.myOrdersActive, 'الدوريات', 2),
+        _item(context, AppIcons.league, AppIcons.league, 'الدوريات', 2),
         _item(
           context,
           AppIcons.profile,

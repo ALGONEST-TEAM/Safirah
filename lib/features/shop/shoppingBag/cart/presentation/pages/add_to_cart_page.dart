@@ -38,7 +38,6 @@ class _AddToCartPageState extends ConsumerState<AddToCartPage> {
     final state = ref.watch(detailsProvider(widget.productId));
 
     return Container(
-      margin: EdgeInsets.only(top: 80.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(

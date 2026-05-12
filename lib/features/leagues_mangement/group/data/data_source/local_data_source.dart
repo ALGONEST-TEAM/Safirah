@@ -140,6 +140,51 @@ class GroupsLocalDataSource {
 
   Future<List<GroupModel>> getLeagueGroupsWithQualifiedTeams(
       String leagueSyncId) async {
+    Future<Map<String, num>> computeHeadToHeadPointsForGroup({
+      required String groupSyncId,
+      required Set<String> teamSyncIds,
+      int winPoints = 3,
+      int drawPoints = 1,
+    }) async {
+      if (teamSyncIds.length < 2) return const {};
+
+      final points = <String, num>{for (final id in teamSyncIds) id: 0};
+
+      final rows = await (db.select(db.matches).join([
+        innerJoin(
+          db.rounds,
+          db.rounds.syncId.equalsExp(db.matches.roundSyncId),
+        ),
+      ])
+            ..where(db.matches.leagueSyncId.equals(leagueSyncId))
+            ..where(db.rounds.groupSyncId.equals(groupSyncId))
+            ..where(db.matches.status.equals('finished'))
+            ..where(db.matches.homeTeamSyncId.isIn(teamSyncIds.toList()))
+            ..where(db.matches.awayTeamSyncId.isIn(teamSyncIds.toList())))
+          .get();
+
+      for (final row in rows) {
+        final match = row.readTable(db.matches);
+        final home = match.homeTeamSyncId;
+        final away = match.awayTeamSyncId;
+
+        if (!teamSyncIds.contains(home) || !teamSyncIds.contains(away)) {
+          continue;
+        }
+
+        if (match.homeScore > match.awayScore) {
+          points[home] = (points[home] ?? 0) + winPoints;
+        } else if (match.awayScore > match.homeScore) {
+          points[away] = (points[away] ?? 0) + winPoints;
+        } else {
+          points[home] = (points[home] ?? 0) + drawPoints;
+          points[away] = (points[away] ?? 0) + drawPoints;
+        }
+      }
+
+      return points;
+    }
+
     // 1️⃣ جلب جميع المجموعات التابعة للدوري
     final groups = await (db.select(db.group)
           ..where((g) => g.leagueSyncId.equals(leagueSyncId))
@@ -190,16 +235,16 @@ class GroupsLocalDataSource {
       final groupModel = GroupModel.fromEntity(g);
       final teams = map[g.syncId]!;
 
-      // 1) ترتيب مبدئي بالنقاط (موجود بالفعل من الاستعلام)
-      final orderedByPoints = List<QualifiedTeamModel>.from(teams);
+      final orderedByPoints = _groupService.sortQualifiedTeams(teams);
 
-      // 2) تطبيق head-to-head داخل كل مجموعة تعادل بالنقاط
       final finalOrdered = <QualifiedTeamModel>[];
       var start = 0;
       while (start < orderedByPoints.length) {
         var end = start + 1;
         while (end < orderedByPoints.length &&
-            orderedByPoints[end].points == orderedByPoints[start].points) {
+            orderedByPoints[end].points == orderedByPoints[start].points &&
+            _groupService.goalDifference(orderedByPoints[end]) ==
+                _groupService.goalDifference(orderedByPoints[start])) {
           end++;
         }
 
@@ -209,11 +254,15 @@ class GroupsLocalDataSource {
           final tieGroup = orderedByPoints.sublist(start, end);
           final tieTeamIds = tieGroup.map((t) => t.teamSyncId).toSet();
 
-          // حساب نقاط head-to-head بين الفرق المتساوية (key = teamSyncId)
-          final h2hPoints = <String, num>{for (final id in tieTeamIds) id: 0};
+          final h2hPoints = await computeHeadToHeadPointsForGroup(
+            groupSyncId: g.syncId,
+            teamSyncIds: tieTeamIds,
+          );
 
-          final orderedTie =
-              _groupService.sortByHeadToHead(tieGroup, h2hPoints);
+          final orderedTie = _groupService.sortQualifiedTeams(
+            tieGroup,
+            headToHeadPoints: h2hPoints,
+          );
           finalOrdered.addAll(orderedTie);
         }
 

@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/state/check_state_in_post_api_data_widget.dart';
 import 'package:safirah/core/widgets/buttons/default_button.dart';
 import '../../../../../core/state/state.dart';
-import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../core/widgets/text_form_field.dart';
@@ -18,7 +17,6 @@ import '../state_managment/riverpod.dart';
 class _PickedUser {
   final String syncId;
   final String name;
-
   const _PickedUser({required this.syncId, required this.name});
 }
 
@@ -60,7 +58,7 @@ class _ScheduleMatchPageState extends ConsumerState<ScheduleMatchPage> {
     final scheduleState = ref.watch(scheduleMatchProvider);
     ref.watch(usersHasRoleRefreshProvider(widget.leagueSyncId));
     return Scaffold(
-      appBar: SecondaryAppBarWidget(
+      appBar: const SecondaryAppBarWidget(
         title: 'جدولة المباراة',
       ),
       body: Padding(

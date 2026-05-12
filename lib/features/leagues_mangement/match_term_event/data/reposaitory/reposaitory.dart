@@ -135,6 +135,31 @@ class MatchTermsEventRepository {
     }
   }
 
+  Future<Either<DioException, MatchModel>> updatePenaltyShootoutScore({
+    required String matchSyncId,
+    required int homePenaltyScore,
+    required int awayPenaltyScore,
+  }) async {
+    try {
+      final updated = await local.updatePenaltyShootoutScore(
+        matchSyncId: matchSyncId,
+        homePenaltyScore: homePenaltyScore,
+        awayPenaltyScore: awayPenaltyScore,
+      );
+      return Right(updated);
+    } catch (e, s) {
+      return Left(
+        DioException(
+          error: e,
+          stackTrace: s,
+          requestOptions: RequestOptions(
+            path: '/matches/$matchSyncId/update-penalty-score',
+          ),
+        ),
+      );
+    }
+  }
+
   Future<Either<DioException, StartTermResult>> startTermSafe(
     String matchSyncId,
     String idSyncMatchTerm,
@@ -220,6 +245,10 @@ class MatchTermsEventRepository {
               'end_time': result.matchEndTime!.toIso8601String(),
             'home_score': result.homeScore,
             'away_score': result.awayScore,
+            if (result.homePenaltyScore != null)
+              'home_penalty_score': result.homePenaltyScore,
+            if (result.awayPenaltyScore != null)
+              'away_penalty_score': result.awayPenaltyScore,
           },
         );
 
@@ -255,16 +284,18 @@ class MatchTermsEventRepository {
           entityType: 'goal',
           operation: SyncService.operationCreate,
           payload: goal.toJson());
-      await syncService.enqueueOperation(
-        entityType: 'qualifiedTeam',
-        operation: SyncService.operationUpdate,
-        payload: goals.scoring!.toJson(),
-      );
-      await syncService.enqueueOperation(
-        entityType: 'qualifiedTeam',
-        operation: SyncService.operationUpdate,
-        payload: goals.opttend!.toJson(),
-      );
+      if (goals.scoring != null && goals.opttend != null) {
+        await syncService.enqueueOperation(
+          entityType: 'qualifiedTeam',
+          operation: SyncService.operationUpdate,
+          payload: goals.scoring!.toJson(),
+        );
+        await syncService.enqueueOperation(
+          entityType: 'qualifiedTeam',
+          operation: SyncService.operationUpdate,
+          payload: goals.opttend!.toJson(),
+        );
+      }
 
       di.sl<SyncTrigger>().syncIfOnlineInBackground();
 

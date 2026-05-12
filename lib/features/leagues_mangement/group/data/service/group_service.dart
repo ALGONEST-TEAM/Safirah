@@ -7,6 +7,51 @@ import '../model/model.dart';
 class GroupService {
   const GroupService();
 
+  int goalDifference(QualifiedTeamModel team) =>
+      team.goalsFor - team.goalsAgainst;
+
+  int compareQualifiedTeams(
+    QualifiedTeamModel a,
+    QualifiedTeamModel b, {
+    Map<String, num> headToHeadPoints = const {},
+  }) {
+    final pointsCompare = b.points.compareTo(a.points);
+    if (pointsCompare != 0) return pointsCompare;
+
+    final goalDiffCompare = goalDifference(b).compareTo(goalDifference(a));
+    if (goalDiffCompare != 0) return goalDiffCompare;
+
+    final aH2H = headToHeadPoints[a.teamSyncId] ?? 0;
+    final bH2H = headToHeadPoints[b.teamSyncId] ?? 0;
+    final h2hCompare = bH2H.compareTo(aH2H);
+    if (h2hCompare != 0) return h2hCompare;
+
+    final goalsForCompare = b.goalsFor.compareTo(a.goalsFor);
+    if (goalsForCompare != 0) return goalsForCompare;
+
+    final goalsAgainstCompare = a.goalsAgainst.compareTo(b.goalsAgainst);
+    if (goalsAgainstCompare != 0) return goalsAgainstCompare;
+
+    return a.teamSyncId.compareTo(b.teamSyncId);
+  }
+
+  List<QualifiedTeamModel> sortQualifiedTeams(
+    List<QualifiedTeamModel> teams, {
+    Map<String, num> headToHeadPoints = const {},
+  }) {
+    if (teams.length <= 1) return List<QualifiedTeamModel>.from(teams);
+
+    final list = List<QualifiedTeamModel>.from(teams);
+    list.sort(
+      (a, b) => compareQualifiedTeams(
+        a,
+        b,
+        headToHeadPoints: headToHeadPoints,
+      ),
+    );
+    return list;
+  }
+
   bool isPowerOfTwo(int g) => g > 0 && (g & (g - 1)) == 0;
 
   /// يحسب توزيع الفرق على عدد محدد من المجموعات.
@@ -95,39 +140,10 @@ class GroupService {
     List<QualifiedTeamModel> teams,
     Map<String, num> headToHeadPoints,
   ) {
-    if (teams.length <= 1) return teams;
-
-    final list = List<QualifiedTeamModel>.from(teams);
-
-    list.sort((a, b) {
-      // 1) فارق الأهداف العام
-      final aDiff = a.goalsFor - a.goalsAgainst;
-      final bDiff = b.goalsFor - b.goalsAgainst;
-      final diffCompare = bDiff.compareTo(aDiff);
-      if (diffCompare != 0) return diffCompare;
-
-      // 2) عدد الأهداف المسجلة
-      final goalsCompare = b.goalsFor.compareTo(a.goalsFor);
-      if (goalsCompare != 0) return goalsCompare;
-
-      // 3) عدد الانتصارات
-      final winsCompare = b.wins.compareTo(a.wins);
-      if (winsCompare != 0) return winsCompare;
-
-      // 4) عدد الخسائر (الأقل أفضل)
-      final lossesCompare = a.losses.compareTo(b.losses);
-      if (lossesCompare != 0) return lossesCompare;
-
-      // 5) أخيراً: نقاط المواجهات المباشرة كآخر معيار
-      final aH2H = headToHeadPoints[a.teamSyncId] ?? 0;
-      final bH2H = headToHeadPoints[b.teamSyncId] ?? 0;
-      final h2hCompare = bH2H.compareTo(aH2H);
-      if (h2hCompare != 0) return h2hCompare;
-
-      return 0;
-    });
-
-    return list;
+    return sortQualifiedTeams(
+      teams,
+      headToHeadPoints: headToHeadPoints,
+    );
   }
 }
 

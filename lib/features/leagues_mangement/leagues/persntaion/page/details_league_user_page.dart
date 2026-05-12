@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:safirah/core/constants/app_icons.dart';
-import 'package:safirah/core/network/urls.dart';
 import 'package:safirah/core/state/check_state_in_post_api_data_widget.dart';
 import 'package:safirah/core/state/state.dart';
 import 'package:safirah/core/theme/app_colors.dart';
@@ -17,6 +16,7 @@ import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../core/widgets/buttons/default_button.dart';
 import '../../../home/presntation/widgets/banners_widget.dart';
+import '../helpers/league_share_helper.dart';
 import '../riverpod/riverpod.dart';
 import 'details_league_widget.dart';
 
@@ -388,17 +388,10 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                                     textColor: AppColors.secondaryColor,
                                     background: const Color(0xffEDF0FF),
                                     onPressed: () async {
-                                      final uri = Uri(
-                                        scheme: 'https',
-                                        host: Uri.parse(AppURL.base).host,
-                                        pathSegments: ['league', 'index.html'],
-                                        queryParameters: {
-                                          'id': widget.leagueSyncId,
-                                        },
-                                      );
-
                                       await Clipboard.setData(
-                                        ClipboardData(text: uri.toString()),
+                                        ClipboardData(
+                                          text: buildLeagueDeepLink(widget.leagueSyncId),
+                                        ),
                                       );
 
                                       if (context.mounted) {

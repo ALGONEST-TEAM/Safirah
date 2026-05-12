@@ -92,8 +92,10 @@ class KnockoutRepository {
         finishedRoundSyncId: finishedRoundSyncId,
       );
 
-      print(created!.syncId??'npppppppppp');
       if (created == null) return const Right(null);
+
+      // ignore: avoid_print
+      print('[KnockoutRepository] next knockout round syncId=${created.syncId}');
 
       await _enqueueRoundCreate(created);
       await _syncIfOnlineSafely();

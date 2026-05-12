@@ -1,20 +1,35 @@
 import 'dart:math';
 
-import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart';
-import 'package:safirah/core/database/safirah_database.dart';
 
 import '../../../../../injection.dart' as di;
 import '../../../group/data/model/model.dart';
 import '../../../match/data/model/match_model.dart';
 import '../../../match/data/model/round_model.dart';
 import '../../../team_and_player/data/model/team_model.dart';
-import '../../presntation/state_mangement/riverpod.dart';
 import '../data_source/local_data_source/local_knockout_data_source.dart';
 
 class KnockoutGeneratorService {
   const KnockoutGeneratorService();
+
+  String? _resolveWinnerSyncId(MatchModel match) {
+    final homeSync = (match.homeTeamSyncId ?? '').trim();
+    final awaySync = (match.awayTeamSyncId ?? '').trim();
+    if (homeSync.isEmpty || awaySync.isEmpty) return null;
+
+    if (match.homeScore > match.awayScore) return homeSync;
+    if (match.awayScore > match.homeScore) return awaySync;
+
+    final hasPenaltyData =
+        match.homePenaltyScore != null || match.awayPenaltyScore != null;
+    if (!hasPenaltyData) return null;
+
+    final homePenaltyScore = match.homePenaltyScore ?? 0;
+    final awayPenaltyScore = match.awayPenaltyScore ?? 0;
+    if (homePenaltyScore == awayPenaltyScore) return null;
+
+    return homePenaltyScore > awayPenaltyScore ? homeSync : awaySync;
+  }
 
   List<MatchModel> buildKnockoutMatchesFromGroups({
     required String leagueSyncId,
@@ -218,13 +233,12 @@ class KnockoutGeneratorService {
       final awaySync = (m.awayTeamSyncId ?? '').trim();
       if (homeSync.isEmpty || awaySync.isEmpty) continue;
 
-      if (m.homeScore == m.awayScore) {
-        // لو عندك ركلات ترجيح/معيار كسر تعادل، طبقه هنا بدل throw
+      final winnerSync = _resolveWinnerSyncId(m);
+      if (winnerSync == null) {
         throw Exception(
-            '⚠️ لا يمكن إنشاء الجولة التالية: توجد مباراة منتهية بالتعادل.');
+          '⚠️ لا يمكن إنشاء الجولة التالية: توجد مباراة منتهية بدون فائز واضح.',
+        );
       }
-
-      final winnerSync = m.homeScore > m.awayScore ? homeSync : awaySync;
 
       // ensure exists locally
       if (!teamsBySyncId.containsKey(winnerSync)) {
@@ -337,10 +351,10 @@ class EnsureFirstKnockoutService {
     int? seed,
     String roundNamePrefix = '',
   }) async {
-    return _mutex.runIfFree(() async {
+    return _mutex.runIfFree<RoundModel?>(() async {
       // ✅ Guard DB + Logic
       final should = await local.shouldGenerateFirstKnockout(leagueSyncId);
-     // if (!should) return null;
+      if (!should) return null;
 
       // ✅ Generate
       final round = await local.generateKnockoutFromGroups(

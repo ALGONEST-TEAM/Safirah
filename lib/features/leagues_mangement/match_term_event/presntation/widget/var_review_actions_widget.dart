@@ -85,6 +85,8 @@ class VarReviewActionsWidget extends ConsumerWidget {
                       )
                       .load();
                 }
+
+                invalidateMatchEventProviders(ref, matchSyncId);
               } else if (isYellow) {
                 final warning = varEvent.event as WarningModel;
 

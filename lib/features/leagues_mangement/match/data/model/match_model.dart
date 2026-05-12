@@ -29,6 +29,8 @@ class MatchModel {
 
   final int homeScore;
   final int awayScore;
+  final int? homePenaltyScore;
+  final int? awayPenaltyScore;
   final String status;
 
   final TeamModel? homeTeam;
@@ -60,6 +62,8 @@ class MatchModel {
     this.endTime,
     this.homeScore = 0,
     this.awayScore = 0,
+    this.homePenaltyScore,
+    this.awayPenaltyScore,
     this.status = 'scheduled',
     this.homeTeam,
     this.awayTeam,
@@ -89,6 +93,8 @@ class MatchModel {
     DateTime? endTime,
     int? homeScore,
     int? awayScore,
+    int? homePenaltyScore,
+    int? awayPenaltyScore,
     String? status,
     TeamModel? homeTeam,
     TeamModel? awayTeam,
@@ -117,6 +123,8 @@ class MatchModel {
         endTime: endTime ?? this.endTime,
         homeScore: homeScore ?? this.homeScore,
         awayScore: awayScore ?? this.awayScore,
+        homePenaltyScore: homePenaltyScore ?? this.homePenaltyScore,
+        awayPenaltyScore: awayPenaltyScore ?? this.awayPenaltyScore,
         status: status ?? this.status,
         homeTeam: homeTeam ?? this.homeTeam,
         awayTeam: awayTeam ?? this.awayTeam,
@@ -155,6 +163,8 @@ class MatchModel {
     endTime: _parseDate(j['end_time'] ?? j['endTime']),
     homeScore: (j['home_score'] ?? j['homeScore']) ?? 0,
     awayScore: (j['away_score'] ?? j['awayScore']) ?? 0,
+    homePenaltyScore: j['home_penalty_score'] ?? j['homePenaltyScore'],
+    awayPenaltyScore: j['away_penalty_score'] ?? j['awayPenaltyScore'],
     status: (j['status'] ?? 'scheduled'),
     homeTeam: j['home_team'] != null
         ? TeamModel.fromJson(j['home_team'] as Map<String, dynamic>)
@@ -186,6 +196,8 @@ class MatchModel {
     'away_team_sync_id': awayTeamSyncId,
     'match_date': matchDate?.toIso8601String(),
     'scheduled_start_time': scheduledStartTime?.toIso8601String(),
+    if (homePenaltyScore != null) 'home_penalty_score': homePenaltyScore,
+    if (awayPenaltyScore != null) 'away_penalty_score': awayPenaltyScore,
     if (refereeSyncId != null) 'referee_sync_id': refereeSyncId,
     if (mediaSyncId != null) 'media_sync_id': mediaSyncId,
 
@@ -216,6 +228,8 @@ class MatchModel {
         endTime: m.endTime,
         homeScore: m.homeScore,
         awayScore: m.awayScore,
+        homePenaltyScore: m.homePenaltyScore,
+        awayPenaltyScore: m.awayPenaltyScore,
         status: m.status,
         homeTeam: home != null ? TeamModel.fromEntity(home) : null,
         awayTeam: away != null ? TeamModel.fromEntity(away) : null,
@@ -257,6 +271,12 @@ class MatchModel {
       endTime: endTime != null ? Value(endTime!) : const Value.absent(),
       homeScore: Value(homeScore),
       awayScore: Value(awayScore),
+      homePenaltyScore: homePenaltyScore != null
+          ? Value(homePenaltyScore)
+          : const Value.absent(),
+      awayPenaltyScore: awayPenaltyScore != null
+          ? Value(awayPenaltyScore)
+          : const Value.absent(),
       status: Value(status),
       updatedAt: Value(updatedAt ?? now),
     );

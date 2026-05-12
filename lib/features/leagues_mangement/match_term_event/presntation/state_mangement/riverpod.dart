@@ -3,15 +3,17 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import '../../../../../core/database/safirah_database.dart';
+import '../../../../../core/helpers/flash_bar_helper.dart';
+import '../../../../../core/network/errors/app_exception_message.dart';
+import '../../../../../core/network/errors/local_app_exception.dart';
 import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';
+import '../../../../../main.dart';
 import '../../../../../injection.dart' as di show sl;
 import '../../../group/presntaion/state_managment/riverpod.dart';
 import '../../../match/data/model/match_model.dart';
 import '../../../match/data/model/round_model.dart';
 import '../../../match/presntaion/state_managment/riverpod.dart';
-import '../../data/data_source/local_data_source/local_knockout_data_source.dart';
 import '../../data/model/assist_model.dart';
 import '../../data/model/counter_data.dart';
 import '../../data/model/goal_model.dart';
@@ -23,6 +25,19 @@ import '../../data/reposaitory/knockout_reposaitory.dart';
 import '../../data/reposaitory/reposaitory.dart';
 import '../page/var_page.dart';
 import '../widget/player_tile_with_event_widget.dart';
+
+void invalidateMatchEventProviders(Object ref, String matchSyncId) {
+  if (ref is WidgetRef) {
+    ref.invalidate(getFullMatchDataProvider(matchSyncId));
+    ref.invalidate(getCurrentMatchTermProvider(matchSyncId));
+    return;
+  }
+
+  if (ref is Ref) {
+    ref.invalidate(getFullMatchDataProvider(matchSyncId));
+    ref.invalidate(getCurrentMatchTermProvider(matchSyncId));
+  }
+}
 
 final termsProvider =
     StateNotifierProvider<TermsNotifier, DataState<List<TermModel>>>((ref) {
@@ -263,6 +278,84 @@ class FinishTermNotifier extends StateNotifier<DataState<bool>> {
   }
 }
 
+final penaltyShootoutFinishProvider =
+    StateNotifierProvider.autoDispose<PenaltyShootoutFinishNotifier, DataState<Unit>>(
+  (ref) => PenaltyShootoutFinishNotifier(ref),
+);
+
+class PenaltyShootoutFinishNotifier extends StateNotifier<DataState<Unit>> {
+  PenaltyShootoutFinishNotifier(this.ref) : super(DataState.initial(unit));
+
+  final Ref ref;
+  final _repo = MatchTermsEventRepository(
+      local: di.sl(), syncService: di.sl(), connectivity: di.sl());
+
+  Future<void> run({
+    required String matchSyncId,
+    required String matchTermSyncId,
+    required int homePenaltyScore,
+    required int awayPenaltyScore,
+  }) async {
+    state = state.copyWith(state: States.loading, exception: null);
+
+    if (matchTermSyncId.trim().isEmpty) {
+      state = state.copyWith(
+        state: States.error,
+        exception: LocalAppException.userMessage('لم يتم العثور على شوط ركلات الترجيح.'),
+      );
+      return;
+    }
+
+    if (homePenaltyScore < 0 || awayPenaltyScore < 0) {
+      state = state.copyWith(
+        state: States.error,
+        exception: LocalAppException.userMessage('لا يمكن أن تكون نتيجة البلنتيات سالبة.'),
+      );
+      return;
+    }
+
+    if (homePenaltyScore == awayPenaltyScore) {
+      state = state.copyWith(
+        state: States.error,
+        exception: LocalAppException.userMessage(
+          'يجب أن تحسم نتيجة البلنتيات بفائز واضح قبل إنهاء المباراة.',
+        ),
+      );
+      return;
+    }
+
+    final updateRes = await _repo.updatePenaltyShootoutScore(
+      matchSyncId: matchSyncId,
+      homePenaltyScore: homePenaltyScore,
+      awayPenaltyScore: awayPenaltyScore,
+    );
+
+    final updated = updateRes.fold<bool>((e) {
+      state = state.copyWith(state: States.error, exception: e);
+      return false;
+    }, (_) => true);
+
+    if (!updated) return;
+
+    final finishRes = await _repo.finishCurrentTerm(
+      matchSyncId: matchSyncId,
+      matchTermSyncId: matchTermSyncId,
+    );
+
+    finishRes.fold(
+      (e) => state = state.copyWith(state: States.error, exception: e),
+      (_) {
+        ref.read(matchTermCounterProvider(matchSyncId).notifier).reset();
+        ref.read(matchTermStateProvider(matchTermSyncId).notifier).state = false;
+        ref.read(activeVarPlayerProvider.notifier).state = null;
+        ref.read(currentVarEventProvider.notifier).state = null;
+        invalidateMatchEventProviders(ref, matchSyncId);
+        state = state.copyWith(state: States.loaded, data: unit);
+      },
+    );
+  }
+}
+
 final matchTimerProvider = StateProvider<int>((ref) => 0);
 
 class MatchTermCounterNotifier extends StateNotifier<DataState<CounterData>> {
@@ -443,7 +536,6 @@ class MatchTermCounterNotifier extends StateNotifier<DataState<CounterData>> {
     if (_isFinishing) return;
     _isFinishing = true;
 
-    final termId = currentTerm.syncId;
     final matchSyncId = currentTerm.matchSyncId;
     final matchTermSyncId = currentTerm.syncId;
 
@@ -461,9 +553,19 @@ class MatchTermCounterNotifier extends StateNotifier<DataState<CounterData>> {
           (matchSyncId,matchTermSyncId)));
 
       if (finishState.stateData == States.error) {
+        final ctx = appNavigatorKey.currentContext;
+        if (ctx != null) {
+          final parts = MessageOfError.get(finishState.exception as Object);
+          showFlashBarError(
+            context: ctx,
+            title: parts.first,
+            text: parts.last,
+          );
+        }
         return;
       }
 
+      invalidateMatchEventProviders(ref, matchSyncId);
       ref.read(matchTermStateProvider(matchTermSyncId).notifier).state = false;
       await ref.read(getCurrentMatchTermProvider(matchSyncId).notifier).run();
       await ref.read(getCurrentMatchTermProvider(matchSyncId).notifier).run();
@@ -1426,7 +1528,9 @@ final lastFinishedKnockoutRoundKeyProvider =
     final matches = r.matches;
     if (matches == null || matches.isEmpty) continue;
 
-    final allFinished = matches.every((m) => m.status == 'finished');
+    final allFinished = matches.every(
+      (m) => m.status.toLowerCase().trim() == 'finished',
+    );
     if (!allFinished) continue;
 
     final rid = r.id;

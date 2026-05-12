@@ -66,15 +66,35 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
     }
 
     // الخطوة 3: الآن بعد التأكد من وجود الدوري، نقوم بجلب اللاعبين.
-    final query = db.select(db.leaguePlayers)
-      ..where((p) => p.leagueSyncId.equals(leagueSyncId))
-      ..orderBy([
-        (p) => OrderingTerm.asc(p.id),
-      ]);
+    final playerAlias = db.alias(db.players, 'league_player_assignment');
+    final teamAlias = db.alias(db.teams, 'league_player_team');
 
-    final players = await query.get();
+    final rows = await (db.select(db.leaguePlayers).join([
+      leftOuterJoin(
+        playerAlias,
+        playerAlias.playerLeagueSyncId.equalsExp(db.leaguePlayers.syncId),
+      ),
+      leftOuterJoin(
+        teamAlias,
+        teamAlias.syncId.equalsExp(playerAlias.teamSyncId),
+      ),
+    ])
+          ..where(db.leaguePlayers.leagueSyncId.equals(leagueSyncId))
+          ..orderBy([
+            OrderingTerm.asc(db.leaguePlayers.id),
+          ]))
+        .get();
 
-    return players.map(LeaguePlayerModel.fromEntity).toList();
+    return rows.map((row) {
+      final leaguePlayer = row.readTable(db.leaguePlayers);
+      final assignedPlayer = row.readTableOrNull(playerAlias);
+      final assignedTeam = row.readTableOrNull(teamAlias);
+
+      return LeaguePlayerModel.fromEntity(leaguePlayer).copyWith(
+        teamSyncId: assignedPlayer?.teamSyncId,
+        teamName: assignedTeam?.teamName,
+      );
+    }).toList();
   }
 
   Future<List<TeamPlayerCategoryModel>> getCategoriesByLeague(
@@ -848,8 +868,10 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
       ..where((r) => r.leagueSyncId.equals(leagueSyncId)))
         .watch()
         .map((_) => null);
+    final playersTrigger = db.select(db.players).watch().map((_) => null);
+    final teamsTrigger = db.select(db.teams).watch().map((_) => null);
     // ✅ debounced rebuild لتجنب كثرة إعادة البناء أثناء التحديثات
-    return MergeStream([leaguePlayerTrigger]).startWith(null)
+    return MergeStream([leaguePlayerTrigger, playersTrigger, teamsTrigger]).startWith(null)
         .debounceTime(const Duration(milliseconds: 120))
         .asyncMap((_) => getLeagueUsersByLeague(
    leagueSyncId

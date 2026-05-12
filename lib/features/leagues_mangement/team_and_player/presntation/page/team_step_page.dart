@@ -6,10 +6,8 @@ import 'package:safirah/features/leagues_mangement/team_and_player/presntation/p
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/state/check_state_in_post_api_data_widget.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/buttons/default_button.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
-import '../../../../../core/widgets/text_form_field.dart';
 import '../../data/model/team_model.dart';
 import '../state_mangment/riverpod.dart';
 import '../widget/player_selection_team_widget.dart';
@@ -59,7 +57,7 @@ class _TeamStepPageState extends ConsumerState<TeamStepPage> {
         _pickedIds.length <= remaining;
     final state = ref.watch(assignToTeamProvider(_selectedTeam?.syncId ?? ''));
     return Scaffold(
-      appBar:SecondaryAppBarWidget(title: 'تقسيم الفرق',),
+      appBar:const SecondaryAppBarWidget(title: 'تقسيم الفرق',),
 
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -158,6 +156,11 @@ class _TeamStepPageState extends ConsumerState<TeamStepPage> {
                           state: state,
                           messageSuccess: 'تمت اضافة اللعبين لفرقة بنجاح',
                           functionSuccess: () {
+                            if (mounted) {
+                              setState(() {
+                                _pickedIds.clear();
+                              });
+                            }
                             ref
                                 .read(leaguePlayersWithoutTeamProvider(
                                         widget.leagueSyncId)

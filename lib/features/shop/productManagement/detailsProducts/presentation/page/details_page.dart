@@ -205,6 +205,7 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
                 showModalBottomSheetWidget(
                   backgroundColor: Colors.transparent,
                   context: ctx,
+                  dismissOnOuterTap: true,
                   page: AddToCartPage(productId: widget.idProduct),
                 );
                 return true;

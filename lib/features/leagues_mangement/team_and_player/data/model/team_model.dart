@@ -146,7 +146,7 @@ class PlayerModel {
   }) {
     return PlayerModel(
       id: id ?? this.id,
-      playerLeagueSyncId: playersLeagueId ?? this.playerLeagueSyncId,
+      playerLeagueSyncId: playersLeagueId ?? playerLeagueSyncId,
       teamSyncId: teamSyncId ?? this.teamSyncId,
       syncId: syncId ?? this.syncId,
       fullName: fullName ?? this.fullName,
@@ -397,6 +397,8 @@ class LeaguePlayerModel {
 
   final String? name;
   final String? code;
+  final String? teamSyncId;
+  final String? teamName;
 
   int? teamPlayerCategoryId;
 
@@ -407,7 +409,9 @@ class LeaguePlayerModel {
       this.teamPlayerCategoryId,
       this.name,
       this.leagueSyncId,
-      this.code})
+       this.code,
+       this.teamSyncId,
+       this.teamName})
       : syncId = syncId ?? const Uuid().v4();
 
   LeaguePlayerModel copyWith({
@@ -420,6 +424,8 @@ class LeaguePlayerModel {
     int? teamPlayerCategoryId,
     String? name,
     String? code,
+    String? teamSyncId,
+    String? teamName,
   }) =>
       LeaguePlayerModel(
         id: id ?? this.id,
@@ -429,6 +435,8 @@ class LeaguePlayerModel {
         teamPlayerCategoryId: teamPlayerCategoryId ?? this.teamPlayerCategoryId,
         name: name ?? this.name,
         code: code ?? this.code,
+        teamSyncId: teamSyncId ?? this.teamSyncId,
+        teamName: teamName ?? this.teamName,
       );
 
   factory LeaguePlayerModel.fromJson(Map<String, dynamic> j) {
@@ -456,6 +464,8 @@ class LeaguePlayerModel {
       teamPlayerCategoryId:
           j['team_player_category_id'] ?? j['teamPlayerCategoryId'],
       code: j['code']?.toString(),
+      teamSyncId: (j['team_sync_id'] ?? j['teamSyncId'])?.toString(),
+      teamName: (j['team_name'] ?? j['teamName'])?.toString(),
     );
   }
 

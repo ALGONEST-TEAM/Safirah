@@ -16,10 +16,12 @@ class ListOfPlayerInEventMatchWidget extends ConsumerStatefulWidget {
     required this.teamSyncId,
     required this.matchSyncId,
     required this.matchTermSyncId,
+    required this.allowGoalEvents,
   });
   final String teamSyncId;
   final String matchSyncId;
   final String matchTermSyncId;
+  final bool allowGoalEvents;
 
   @override
   ConsumerState<ListOfPlayerInEventMatchWidget> createState() =>
@@ -96,6 +98,7 @@ class _ListOfPlayerInEventMatchWidgetState
                       playerSyncId: p.syncId ?? '',
                       matchSyncId: widget.matchSyncId,
                       matchTermSyncId: matchTermSyncId,
+                      allowGoalEvents: widget.allowGoalEvents,
                       isSubstitute: isSub,
                     );
                   },
@@ -117,6 +120,7 @@ class _ListOfPlayerInEventMatchWidgetState
                       playerSyncId: p.syncId ?? '',
                       matchSyncId: widget.matchSyncId,
                       matchTermSyncId: matchTermSyncId,
+                      allowGoalEvents: widget.allowGoalEvents,
                       isSubstitute: isSub,
                     );
                   },

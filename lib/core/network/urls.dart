@@ -101,6 +101,10 @@ class AppURL {
 
   static const String standings = '/predictions/rankings';
 
+  static const String awards = '/predictions/awards';
+
+  static const String awardsLegacy = '/predictions/prizes';
+
   static const String leagueHome = '/league-application/home/main';
 
   static const String news = '/league-application/news';

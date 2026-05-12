@@ -25,6 +25,9 @@ class Rounds extends Table {
 
   @override
   List<String> get customConstraints => [
+        // Group rounds are unique per (league, group, name). Knockout rounds use
+        // a dedicated partial unique index from safirah_database.dart because
+        // SQLite treats NULL group_sync_id values as distinct inside UNIQUE(...).
         'UNIQUE(league_sync_id, group_sync_id, round_name)',
       ];
 }

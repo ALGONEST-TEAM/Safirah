@@ -40,6 +40,10 @@ class Matches extends Table {
 
   IntColumn get homeScore => integer().withDefault(const Constant(0))();
   IntColumn get awayScore => integer().withDefault(const Constant(0))();
+  IntColumn get homePenaltyScore =>
+      integer().named('home_penalty_score').nullable()();
+  IntColumn get awayPenaltyScore =>
+      integer().named('away_penalty_score').nullable()();
 
   TextColumn get status => text()
       .withDefault(const Constant('unscheduled'))

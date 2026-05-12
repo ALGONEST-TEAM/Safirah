@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import 'local_app_exception.dart';
 import 'local_exception.dart';
 import 'remote_exception.dart';
 
@@ -10,6 +11,12 @@ import 'remote_exception.dart';
 class MessageOfError {
   static List<String> get(Object exception) {
     if (exception is DioException) {
+      final nested = exception.error;
+      if (nested is LocalAppException ||
+          nested is FormatException ||
+          nested is Error) {
+        return MessageOfLocalError.getExceptionMessage(nested as Object);
+      }
       return MessageOfErorrApi.getExeptionMessage(exception);
     }
 

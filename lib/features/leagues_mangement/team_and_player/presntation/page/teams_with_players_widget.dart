@@ -23,8 +23,10 @@ class TeamsWithPlayersPage extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final leagueStatusUpdate = ref.watch(leagueStatusUpdateProvider);
     final leagueStatus = ref.watch(leagueStatusStreamProvider(leagueSyncId));
-    final leaguePermissions = ref.watch(leaguePermissionsProvider(leagueSyncId));
-    final canEditLeague = leaguePermissions.asData?.value.contains('league.edit') ?? false;
+    final leaguePermissions =
+        ref.watch(leaguePermissionsProvider(leagueSyncId));
+    final canEditLeague =
+        leaguePermissions.asData?.value.contains('league.edit') ?? false;
     final unassignedPlayersCount =
         ref.watch(leaguePlayersWithoutTeamCountProvider(leagueSyncId));
     final canApproveTeams = (unassignedPlayersCount ?? 1) == 0;
@@ -35,7 +37,6 @@ class TeamsWithPlayersPage extends ConsumerWidget {
       appBar: SecondaryAppBarWidget(
         title: canEditLeague ? 'اعتماد الفرق' : 'فرق الدوري',
       ),
-
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 8.0.w, vertical: 8.h),
         child: Column(
@@ -78,9 +79,8 @@ class TeamsWithPlayersPage extends ConsumerWidget {
                           ),
                         CheckStateInPostApiDataWidget(
                           state: leagueStatusUpdate,
-
-messageSuccess: ' تم اعتماد تقسيم اللعبين على الفرق بنجاح',
-
+                          messageSuccess:
+                              ' تم اعتماد تقسيم اللعبين على الفرق بنجاح',
                           functionSuccess: () {
                             ref.read(activeIndexProvider.notifier).state = 2;
 
@@ -106,10 +106,33 @@ messageSuccess: ' تم اعتماد تقسيم اللعبين على الفرق 
                             onPressed: canApproveTeams
                                 ? () {
                                     ref
-                                        .read(leagueStatusUpdateProvider.notifier)
+                                        .read(activeIndexProvider.notifier)
+                                        .state = 2;
+                                    ref
+                                        .read(
+                                            leagueStatusUpdateProvider.notifier)
                                         .update(
                                             leagueSyncId: leagueSyncId,
                                             hasPlayersAssigned: true);
+
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const BottomNavigationBarOfMangeLeagueWidget(),
+                                      ),
+                                      (route) => false,
+                                    );
+
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => DetailsLeagueWidget(
+                                            leagueSyncId: leagueSyncId,
+                                          ),
+                                        ),
+                                      );
+                                    });
                                   }
                                 : null,
                             text: 'اعتماد الفرق',

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app_links/app_links.dart';
 import 'package:flutter/widgets.dart';
+import 'package:safirah/core/helpers/navigateTo.dart';
 import 'package:safirah/core/widgets/bottomNavbar/bottom_navigation_bar_of_mange_league_widget.dart';
 import 'package:safirah/core/widgets/bottomNavbar/bottom_navigation_bar_widget.dart';
 import 'package:safirah/features/leagues_mangement/leagues/persntaion/page/details_league_widget.dart';
@@ -221,10 +222,9 @@ class DeepLinkService {
 
       // Ensure we are in the main shell then push league.
       nav.currentState?.pushAndRemoveUntil(
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const BottomNavigationBarOfMangeLeagueWidget(),
-          transitionDuration: Duration.zero,
-          reverseTransitionDuration: Duration.zero,
+        buildAdaptivePageRoute(
+          child: const BottomNavigationBarOfMangeLeagueWidget(),
+          instant: true,
         ),
         (route) => false,
       );
@@ -232,10 +232,8 @@ class DeepLinkService {
       // Push details on top.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         nav.currentState?.push(
-          PageRouteBuilder(
-            pageBuilder: (_, __, ___) => DetailsLeagueUserPage(leagueSyncId: leagueSyncId),
-            transitionDuration: Duration.zero,
-            reverseTransitionDuration: Duration.zero,
+          buildAdaptivePageRoute(
+            child: DetailsLeagueUserPage(leagueSyncId: leagueSyncId),
           ),
         );
         _completeNavigationDispatch();
@@ -256,25 +254,22 @@ class DeepLinkService {
       }
 
       nav.currentState?.pushAndRemoveUntil(
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const BottomNavigationBarWidget(),
-          transitionDuration: Duration.zero,
-          reverseTransitionDuration: Duration.zero,
+        buildAdaptivePageRoute(
+          child: const BottomNavigationBarWidget(),
+          instant: true,
         ),
         (route) => false,
       );
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         nav.currentState?.push(
-          PageRouteBuilder(
-            pageBuilder: (_, __, ___) => DetailsPage(
+          buildAdaptivePageRoute(
+            child: DetailsPage(
               idProduct: productId,
               image: const [],
               name: '',
               price: '',
             ),
-            transitionDuration: Duration.zero,
-            reverseTransitionDuration: Duration.zero,
           ),
         );
         _completeNavigationDispatch();

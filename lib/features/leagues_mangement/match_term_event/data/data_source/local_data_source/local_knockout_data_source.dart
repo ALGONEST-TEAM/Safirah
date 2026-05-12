@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../../../core/database/safirah_database.dart';
 import '../../../../group/data/model/model.dart';
+import '../../../../group/data/service/group_service.dart';
 import '../../../../match/data/model/match_model.dart';
 import '../../../../match/data/model/round_model.dart';
 import '../../../../team_and_player/data/model/team_model.dart';
@@ -16,9 +17,14 @@ import 'local_term_data_source.dart';
 class KnockoutGeneratorLocalDataSource {
   final Safirah db;
   final KnockoutGeneratorService _service;
+  final GroupService _groupService;
 
   KnockoutGeneratorLocalDataSource(this.db)
-      : _service = const KnockoutGeneratorService();
+      : _service = const KnockoutGeneratorService(),
+        _groupService = const GroupService();
+
+  bool _isFinishedStatus(String status) =>
+      status.toLowerCase().trim() == 'finished';
 
   // ---------------------------------------------------------------------------
   // GROUP => Generate first KO
@@ -82,89 +88,6 @@ class KnockoutGeneratorLocalDataSource {
       return points;
     }
 
-    List<QualifiedTeamModel> _applyH2HTieBreaker({
-      required List<QualifiedTeamModel> input,
-      required Map<String, num> h2hPoints,
-    }) {
-      final list = List<QualifiedTeamModel>.from(input);
-
-      list.sort((a, b) {
-        // 1) points desc
-        final p = b.points.compareTo(a.points);
-        if (p != 0) return p;
-
-        // 2) goal diff desc
-        final gd = _goalDiff(b).compareTo(_goalDiff(a));
-        if (gd != 0) return gd;
-
-        // 3) head-to-head desc (after goal diff)
-        final aH = h2hPoints[a.teamSyncId] ?? 0;
-        final bH = h2hPoints[b.teamSyncId] ?? 0;
-        final h = bH.compareTo(aH);
-        if (h != 0) return h;
-
-        // 4) goals for desc
-        final gf = b.goalsFor.compareTo(a.goalsFor);
-        if (gf != 0) return gf;
-
-        // 5) stable last tie (avoid random ordering)
-        return a.teamSyncId.compareTo(b.teamSyncId);
-      });
-
-      return list;
-    }
-
-    List<QualifiedTeamModel> _resolveTiesWithH2HForCut({
-      required List<QualifiedTeamModel> sortedBase,
-      required int cut,
-      required Map<String, num> h2hPoints,
-    }) {
-      if (sortedBase.isEmpty || cut <= 0) return const [];
-      if (sortedBase.length <= cut) return sortedBase;
-
-      // Identify "tie block" intersecting the cut boundary
-      final boundary = sortedBase[cut - 1];
-      final boundaryPoints = boundary.points;
-      final boundaryDiff = _goalDiff(boundary);
-
-      int start = cut - 1;
-      while (start - 1 >= 0) {
-        final t = sortedBase[start - 1];
-        if (t.points == boundaryPoints && _goalDiff(t) == boundaryDiff) {
-          start--;
-        } else {
-          break;
-        }
-      }
-
-      int end = cut - 1;
-      while (end + 1 < sortedBase.length) {
-        final t = sortedBase[end + 1];
-        if (t.points == boundaryPoints && _goalDiff(t) == boundaryDiff) {
-          end++;
-        } else {
-          break;
-        }
-      }
-
-      // If no tie block spanning boundary, simple take
-      if (start == end) return sortedBase.take(cut).toList();
-
-      final before = sortedBase.sublist(0, start);
-      final block = sortedBase.sublist(start, end + 1);
-      final after = sortedBase.sublist(end + 1);
-
-      final reSortedBlock = _applyH2HTieBreaker(input: block, h2hPoints: h2hPoints);
-
-      final merged = <QualifiedTeamModel>[
-        ...before,
-        ...reSortedBlock,
-        ...after,
-      ];
-
-      return merged.take(cut).toList();
-    }
-
     return db.transaction<RoundModel>(() async {
       // ✅ Idempotency guard: إذا وُجدت جولة Knockout بالفعل لهذا الدوري، أرجعها بدل إنشاء جديد
       final existingRound = await (db.select(db.rounds)
@@ -207,12 +130,15 @@ class KnockoutGeneratorLocalDataSource {
         );
       }
 
-      // 1) Ensure no scheduled/live matches
-      final unfinished = await (db.select(db.matches)
-            ..where((m) => m.leagueSyncId.equals(leagueSyncId) & (m.status.equals('scheduled') | m.status.equals('live'))))
-          .get();
-      if (unfinished.isNotEmpty) {
-        throw Exception('⚠️ لا يمكن إنشاء التصفيات، بعض المباريات لم تنته بعد.');
+      // 1) Reuse the shared eligibility rule so direct creation behaves the
+      // same as ensureKnockoutProgress()/shouldGenerateFirstKnockout().
+      final canGenerateFirstKnockout = await shouldGenerateFirstKnockout(
+        leagueSyncId,
+      );
+      if (!canGenerateFirstKnockout) {
+        throw Exception(
+          '⚠️ لا يمكن إنشاء التصفيات قبل انتهاء جميع مباريات المجموعات أو إذا كانت موجودة بالفعل.',
+        );
       }
 
       // 2) جلب المجموعات
@@ -269,45 +195,39 @@ class KnockoutGeneratorLocalDataSource {
           continue;
         }
 
-        // Base sort (points, goal diff, goalsFor, wins, losses)
-        final baseSorted = List<QualifiedTeamModel>.from(enriched)
-          ..sort((a, b) {
-            final p = b.points.compareTo(a.points);
-            if (p != 0) return p;
+        final baseSorted = _groupService.sortQualifiedTeams(enriched);
 
-            final gd = _goalDiff(b).compareTo(_goalDiff(a));
-            if (gd != 0) return gd;
+        final fullyOrdered = <QualifiedTeamModel>[];
+        var start = 0;
+        while (start < baseSorted.length) {
+          var end = start + 1;
+          while (end < baseSorted.length &&
+              baseSorted[end].points == baseSorted[start].points &&
+              _goalDiff(baseSorted[end]) == _goalDiff(baseSorted[start])) {
+            end++;
+          }
 
-            final gf = b.goalsFor.compareTo(a.goalsFor);
-            if (gf != 0) return gf;
+          if (end - start == 1) {
+            fullyOrdered.add(baseSorted[start]);
+          } else {
+            final tieBlock = baseSorted.sublist(start, end);
+            final h2hPoints = await _computeHeadToHeadPointsForGroup(
+              groupSyncId: g.syncId,
+              teamSyncIds: tieBlock.map((e) => e.teamSyncId).toSet(),
+            );
 
-            final w = b.wins.compareTo(a.wins);
-            if (w != 0) return w;
+            fullyOrdered.addAll(
+              _groupService.sortQualifiedTeams(
+                tieBlock,
+                headToHeadPoints: h2hPoints,
+              ),
+            );
+          }
 
-            final l = a.losses.compareTo(b.losses);
-            if (l != 0) return l;
+          start = end;
+        }
 
-            return a.teamSyncId.compareTo(b.teamSyncId);
-          });
-
-        // Compute H2H only for teams that might affect the cut boundary:
-        final cut = limit.clamp(0, baseSorted.length);
-        final boundaryCandidates = baseSorted.take((cut + 6).clamp(1, baseSorted.length)).toList();
-        final teamSet = boundaryCandidates.map((e) => e.teamSyncId).toSet();
-
-        final h2hPoints = await _computeHeadToHeadPointsForGroup(
-          groupSyncId: g.syncId,
-          teamSyncIds: teamSet,
-        );
-
-        // Apply H2H ONLY for tie blocks at the cut boundary (after goal diff)
-        final finalSelected = _resolveTiesWithH2HForCut(
-          sortedBase: baseSorted,
-          cut: cut,
-          h2hPoints: h2hPoints,
-        );
-
-        groupQualified[g.id] = finalSelected;
+        groupQualified[g.id] = fullyOrdered.take(limit).toList();
       }
 
       // 4) بناء مباريات التصفيات منطقياً عبر الخدمة
@@ -396,8 +316,6 @@ class KnockoutGeneratorLocalDataSource {
   }) async {
     final matchTermLocal = MatchTermsEventLocalDataSource(db);
 
-    bool isFinished(String s) => s.toLowerCase().trim() == 'finished';
-    print("11");
     return db.transaction<RoundModel?>(() async {
       final finishedRoundEntity = await (db.select(db.rounds)
         ..where((r) => r.syncId.equals(finishedRoundSyncId)))
@@ -412,7 +330,7 @@ class KnockoutGeneratorLocalDataSource {
 
       if (matchEntities.isEmpty) return null;
 
-      if (matchEntities.any((m) => !isFinished(m.status))) {
+      if (matchEntities.any((m) => !_isFinishedStatus(m.status))) {
         throw Exception('⚠️ لا يمكن إنشاء الجولة التالية، بعض المباريات لم تنته بعد.');
       }
 
@@ -567,19 +485,61 @@ class KnockoutGeneratorLocalDataSource {
     required String leagueSyncId,
     required String matchFilter,
   }) {
-    final roundsTrigger = (db.select(db.rounds)
-      ..where((r) => r.leagueSyncId.equals(leagueSyncId)))
-        .watch()
-        .map((_) => null);
+    final Stream<void> triggers = MergeStream<void>([
+      (db.select(db.rounds)
+            ..where((r) => r.leagueSyncId.equals(leagueSyncId)))
+          .watch()
+          .map((_) => null),
+      (db.select(db.matches)
+            ..where((m) => m.leagueSyncId.equals(leagueSyncId)))
+          .watch()
+          .map((_) => null),
+      db.select(db.matchTerms).watch().map((_) => null),
+      db.select(db.teams).watch().map((_) => null),
+    ]).debounceTime(const Duration(milliseconds: 120));
 
-    final matchesTrigger = (db.select(db.matches)
-      ..where((m) => m.leagueSyncId.equals(leagueSyncId)))
-        .watch()
-        .map((_) => null);
+    String signatureOf(List<RoundModel> rounds) {
+      final b = StringBuffer();
+      for (final r in rounds) {
+        b.write('|R:${r.syncId ?? ''}:${r.roundName}:${r.roundType}|');
+        for (final m in r.matches ?? const <MatchModel>[]) {
+          b.write(
+            'M:${m.syncId ?? ''}:${m.status}:${m.homeScore}:${m.awayScore}:${m.homePenaltyScore ?? ''}:${m.awayPenaltyScore ?? ''}:${m.homeTeamSyncId ?? ''}:${m.awayTeamSyncId ?? ''}|',
+          );
+          for (final t in m.matchTerms) {
+            b.write(
+              'T:${t.syncId}:${t.isFinished}:${t.additionalMinutes}:${t.startTime?.toIso8601String() ?? ''}:${t.endTime?.toIso8601String() ?? ''}|',
+            );
+          }
+        }
+      }
+      return b.toString();
+    }
 
-    return MergeStream([roundsTrigger, matchesTrigger])
-        .debounceTime(const Duration(milliseconds: 120))
-        .asyncMap((_) => getAllKnockoutRoundsWithMatches(leagueSyncId, matchFilter));
+    return Rx.defer(() {
+      DateTime lastNonEmptyAt = DateTime.fromMillisecondsSinceEpoch(0);
+
+      return Stream<void>.value(null)
+          .concatWith([triggers])
+          .asyncMap(
+            (_) => getAllKnockoutRoundsWithMatches(leagueSyncId, matchFilter),
+          )
+          .distinct((a, b) => signatureOf(a) == signatureOf(b))
+          .scan<List<RoundModel>>((acc, curr, _) {
+            if (curr.isNotEmpty) {
+              lastNonEmptyAt = DateTime.now();
+              return curr;
+            }
+
+            if (acc.isEmpty) return curr;
+
+            const grace = Duration(milliseconds: 800);
+            final tooSoon = DateTime.now().difference(lastNonEmptyAt) < grace;
+            if (tooSoon) return acc;
+
+            return curr;
+          }, const <RoundModel>[]);
+    });
   }
 
   Future<List<RoundModel>> getAllKnockoutRoundsWithMatches(
@@ -592,7 +552,8 @@ class KnockoutGeneratorLocalDataSource {
     final roundEntities = await (db.select(db.rounds)
       ..where((r) =>
       r.leagueSyncId.equals(leagueSyncId) &
-      r.roundType.equals('knockout')))
+      r.roundType.equals('knockout'))
+      ..orderBy([(r) => OrderingTerm.asc(r.createdAt)]))
         .get();
 
     final List<RoundModel> rounds = [];
@@ -662,6 +623,8 @@ class KnockoutGeneratorLocalDataSource {
         );
       }));
 
+      if (matches.isEmpty) continue;
+
       rounds.add(RoundModel(
         syncId: r.syncId,
         groupSyncId: r.groupSyncId,
@@ -691,7 +654,7 @@ class KnockoutGeneratorLocalDataSource {
         .get();
 
     if (matches.isEmpty) return null;
-    if (matches.any((m) => m.status != 'finished')) return null;
+    if (matches.any((m) => !_isFinishedStatus(m.status))) return null;
 
     final finishedCount = matches.length;
 
@@ -807,6 +770,12 @@ class KnockoutGeneratorLocalDataSource {
             status: Value((m.status).trim()),
             homeScore: Value(m.homeScore),
             awayScore: Value(m.awayScore),
+            homePenaltyScore: m.homePenaltyScore != null
+                ? Value(m.homePenaltyScore)
+                : const Value.absent(),
+            awayPenaltyScore: m.awayPenaltyScore != null
+                ? Value(m.awayPenaltyScore)
+                : const Value.absent(),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -855,50 +824,16 @@ class KnockoutGeneratorLocalDataSource {
         });
       }
 
-      // 2) Sync-delete matches for rounds that included matches payload
-      for (final entry in incomingMatchIdsByRound.entries) {
-        final roundSyncId = entry.key;
-        final incomingMatchIds = entry.value;
-
-        if (incomingMatchIds.isEmpty) {
-          await (db.delete(db.matches)
-                ..where((t) => t.roundSyncId.equals(roundSyncId)))
-              .go();
-          continue;
-        }
-
-        await (db.delete(db.matches)
-              ..where((t) => t.roundSyncId.equals(roundSyncId))
-              ..where((t) => t.syncId.isNotIn(incomingMatchIds.toList())))
-            .go();
-      }
-
-      // 3) Upsert matches
+      // 2) Upsert matches first so the visible local snapshot stays populated
+      // while refresh data is being applied.
       if (matchesToUpsert.isNotEmpty) {
         await db.batch((batch) {
           batch.insertAllOnConflictUpdate(db.matches, matchesToUpsert);
         });
       }
 
-      // 4) Sync-delete matchTerms only for matches that included terms payload
-      for (final entry in incomingTermIdsByMatch.entries) {
-        final matchSyncId = entry.key;
-        final incomingTermIds = entry.value;
-
-        if (incomingTermIds.isEmpty) {
-          await (db.delete(db.matchTerms)
-                ..where((t) => t.matchSyncId.equals(matchSyncId)))
-              .go();
-          continue;
-        }
-
-        await (db.delete(db.matchTerms)
-              ..where((t) => t.matchSyncId.equals(matchSyncId))
-              ..where((t) => t.syncId.isNotIn(incomingTermIds.toList())))
-            .go();
-      }
-
-      // 5) Upsert matchTerms
+      // 3) Upsert matchTerms before deleting stale rows so match cards keep
+      // their detailed state during refresh.
       if (matchTermsToUpsert.isNotEmpty) {
         // Drift's insertAllOnConflictUpdate updates on PRIMARY KEY (id),
         // بينما جدول match_terms يعتبر sync_id هو الـ unique key.
@@ -918,6 +853,42 @@ class KnockoutGeneratorLocalDataSource {
             mode: InsertMode.insertOrReplace,
           );
         });
+      }
+
+      // 4) Sync-delete matches for rounds that included matches payload
+      for (final entry in incomingMatchIdsByRound.entries) {
+        final roundSyncId = entry.key;
+        final incomingMatchIds = entry.value;
+
+        if (incomingMatchIds.isEmpty) {
+          await (db.delete(db.matches)
+                ..where((t) => t.roundSyncId.equals(roundSyncId)))
+              .go();
+          continue;
+        }
+
+        await (db.delete(db.matches)
+              ..where((t) => t.roundSyncId.equals(roundSyncId))
+              ..where((t) => t.syncId.isNotIn(incomingMatchIds.toList())))
+            .go();
+      }
+
+      // 5) Sync-delete matchTerms only for matches that included terms payload
+      for (final entry in incomingTermIdsByMatch.entries) {
+        final matchSyncId = entry.key;
+        final incomingTermIds = entry.value;
+
+        if (incomingTermIds.isEmpty) {
+          await (db.delete(db.matchTerms)
+                ..where((t) => t.matchSyncId.equals(matchSyncId)))
+              .go();
+          continue;
+        }
+
+        await (db.delete(db.matchTerms)
+              ..where((t) => t.matchSyncId.equals(matchSyncId))
+              ..where((t) => t.syncId.isNotIn(incomingTermIds.toList())))
+            .go();
       }
     });
   }
@@ -1078,7 +1049,7 @@ class KnockoutGeneratorLocalDataSource {
           .get();
 
       if (matches.isEmpty) continue;
-      final allFinished = matches.every((m) => m.status == 'finished');
+      final allFinished = matches.every((m) => _isFinishedStatus(m.status));
       if (!allFinished) continue;
 
       final finishedCount = matches.length;

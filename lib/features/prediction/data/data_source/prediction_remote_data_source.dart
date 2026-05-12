@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/network/remote_request.dart';
 import '../../../../core/network/urls.dart';
 import '../../../../core/state/pagination_data/paginated_model.dart';
+import '../model/awards_model.dart';
 import '../model/league_for_prediction_model.dart';
 import '../model/standings_model.dart';
 
@@ -62,5 +63,54 @@ class PredictionRemoteDataSource {
     final response = await RemoteRequest.getData(
         url: AppURL.standings, query: {'scope': scope});
     return StandingsData.fromJson(response.data['data']);
+  }
+
+  Future<AwardsData> awards(String scope) async {
+    try {
+      final response = await RemoteRequest.getData(
+        url: AppURL.awards,
+      );
+      final parsed = AwardsData.fromJson(
+        response.data['data'] ?? response.data,
+        preferredScope: scope,
+      );
+      if (_shouldUseParsedAwards(parsed) && parsed.hasScope(scope)) return parsed;
+    } catch (_) {
+      // Fall through to scoped/new compatibility endpoint, then legacy/demo data.
+    }
+
+    try {
+      final response = await RemoteRequest.getData(
+        url: AppURL.awards,
+        query: {'scope': scope},
+      );
+      final parsed = AwardsData.fromJson(
+        response.data['data'] ?? response.data,
+        preferredScope: scope,
+      );
+      if (_shouldUseParsedAwards(parsed)) return parsed;
+    } catch (_) {
+      // Fall through to legacy endpoint, then demo data.
+    }
+
+    try {
+      final response = await RemoteRequest.getData(
+        url: AppURL.awardsLegacy,
+        query: {'scope': scope},
+      );
+      final parsed = AwardsData.fromJson(
+        response.data['data'] ?? response.data,
+        preferredScope: scope,
+      );
+      if (_shouldUseParsedAwards(parsed)) return parsed;
+    } catch (_) {
+      // Fall through to demo data.
+    }
+
+    return AwardsData.placeholder(scope);
+  }
+
+  bool _shouldUseParsedAwards(AwardsData data) {
+    return data.hasRemoteStructure || data.items.any((item) => item.hasPrize);
   }
 }

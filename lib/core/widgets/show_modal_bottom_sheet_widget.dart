@@ -6,29 +6,66 @@ import '../theme/app_colors.dart';
 import 'auto_size_text_widget.dart';
 import 'buttons/icon_button_widget.dart';
 
+class DismissibleBottomSheetFrame extends StatelessWidget {
+  const DismissibleBottomSheetFrame({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height,
+      child: Column(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              key: const ValueKey('bottom-sheet-dismiss-area'),
+              behavior: HitTestBehavior.opaque,
+              onTap: () => Navigator.of(context).maybePop(),
+              child: const SizedBox.expand(),
+            ),
+          ),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
 void showModalBottomSheetWidget({
   required BuildContext context,
   required Widget page,
   Color? backgroundColor,
+  bool dismissOnOuterTap = false,
 }) {
+  final bottomSheetChild = SafeArea(
+    top: false,
+    child: Padding(
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: page,
+    ),
+  );
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: backgroundColor ?? Colors.white,
-    builder: (context) => SafeArea(
-      top: false,
-      child: Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: page,
-      ),
-    ),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(12.r),
-        topRight: Radius.circular(12.r),
-      ),
-    ),
+    backgroundColor:
+        dismissOnOuterTap ? Colors.transparent : backgroundColor ?? Colors.white,
+    builder: (context) => dismissOnOuterTap
+        ? DismissibleBottomSheetFrame(child: bottomSheetChild)
+        : bottomSheetChild,
+    shape: dismissOnOuterTap
+        ? null
+        : RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(12.r),
+              topRight: Radius.circular(12.r),
+            ),
+          ),
   );
 }
 

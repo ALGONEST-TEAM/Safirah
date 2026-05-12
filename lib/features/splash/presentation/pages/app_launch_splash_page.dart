@@ -60,7 +60,7 @@ class _AppLaunchSplashPageState extends State<AppLaunchSplashPage>
     }
 
     return Lottie.asset(
-      'assets/safirah.json',
+      'assets/safirah1.json',
       controller: _animationController,
       repeat: false,
       fit: BoxFit.contain,
@@ -116,15 +116,15 @@ class _SplashScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
+      value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: AppColors.secondaryColor,
-        systemNavigationBarDividerColor: AppColors.secondaryColor,
-        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: AppColors.scaffoldColor,
+        systemNavigationBarDividerColor: AppColors.scaffoldColor,
+        systemNavigationBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: AppColors.secondaryColor,
+        backgroundColor: AppColors.scaffoldColor,
         body: LayoutBuilder(
           builder: (context, constraints) {
             final animationSize = constraints.biggest.shortestSide;
@@ -146,7 +146,7 @@ class _SplashScaffold extends StatelessWidget {
   Widget get widgetAnimation {
     return animationWidget ??
         Lottie.asset(
-          'assets/safirah.json',
+          'assets/data (1).json',
           repeat: false,
           fit: BoxFit.contain,
         );

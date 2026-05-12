@@ -20,6 +20,7 @@ import '../../theme/app_colors.dart';
 import '../auto_size_text_widget.dart';
 import 'bottom_navigation_bar_of_mange_league_widget.dart';
 import 'design_for_bottom_navigation_bar_widget.dart';
+import 'shell_destination_fab.dart';
 
 final activeIndexShopProvider = StateProvider<int>((ref) => 0);
 
@@ -87,23 +88,17 @@ class _BottomNavigationBarWidgetState
       ),
       child: Scaffold(
         body: _pages[activeIndex],
-        floatingActionButton: SizedBox(
-          height: 57.h,
-          child: FloatingActionButton.large(
-            onPressed: _openLeaguesSection,
-            backgroundColor: AppColors.whiteColor,
-            splashColor: AppColors.primaryColor,
-            elevation: 0,
-            shape: const CircleBorder(),
-            child: Container(
-              padding: EdgeInsets.all(11.sp),
-              decoration: const BoxDecoration(
-                color: AppColors.primaryColor,
-                shape: BoxShape.circle,
-              ),
-              child: SvgPicture.asset(AppIcons.league),
-            ),
-          ),
+        floatingActionButton: ShellDestinationFab(
+          label: 'المسابقات',
+          tooltip: 'الذهاب إلى المسابقات',
+          buttonHeight: 57.h,
+          backgroundColor: AppColors.whiteColor,
+          splashColor: AppColors.primaryColor,
+          elevation: 0,
+          iconPadding: EdgeInsets.all(11.sp),
+          innerBackgroundColor: AppColors.primaryColor,
+          icon: SvgPicture.asset(AppIcons.league),
+          onPressed: _openLeaguesSection,
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: SafeArea(

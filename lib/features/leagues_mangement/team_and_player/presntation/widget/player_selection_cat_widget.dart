@@ -5,6 +5,7 @@ import 'package:safirah/core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../state_mangment/riverpod.dart';
+import 'player_avatar_widget.dart';
 
 class PlayersSelectionCatWidget extends ConsumerWidget {
   const PlayersSelectionCatWidget({
@@ -72,7 +73,7 @@ class PlayersSelectionCatWidget extends ConsumerWidget {
                               ),
                               child: Row(
                                 children: [
-                                  const CircleAvatar(),
+                                  const PlayerAvatarWidget(),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Column(

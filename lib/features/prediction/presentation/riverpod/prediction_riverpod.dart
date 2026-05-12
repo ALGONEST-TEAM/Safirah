@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../../../../core/state/data_state.dart';
 import '../../../../core/state/pagination_data/paginated_model.dart';
 import '../../../../core/state/state.dart';
-import '../../../../generated/l10n.dart';
+import '../../data/model/awards_model.dart';
 import '../../data/model/league_for_prediction_model.dart';
 import '../../data/model/standings_model.dart';
 import '../../data/repos/prediction_repo.dart';
@@ -172,6 +172,56 @@ class StandingsNotifier extends StateNotifier<DataState<StandingsData>> {
 }
 
 final standingsScopeProvider = StateProvider<String?>((ref) => null);
+
+final awardsScopeProvider = StateProvider<String>((ref) => 'month');
+
+final awardsScopeRefreshProvider =
+    StateProvider<RefreshState>((ref) => RefreshState.idle());
+
+final awardsProvider =
+    StateNotifierProvider<AwardsNotifier, DataState<AwardsData>>(
+  (ref) {
+    return AwardsNotifier();
+  },
+);
+
+class AwardsNotifier extends StateNotifier<DataState<AwardsData>> {
+  static const String initialScope = 'month';
+
+  AwardsNotifier()
+      : super(DataState<AwardsData>.initial(AwardsData.empty())) {
+    getData();
+  }
+
+  final _controller = PredictionReposaitory();
+
+  Future<void> getData() async {
+    state = state.copyWith(state: States.loading);
+
+    final data = await _controller.awards(initialScope);
+    data.fold((failure) {
+      state = state.copyWith(state: States.error, exception: failure);
+    }, (newData) {
+      state = state.copyWith(state: States.loaded, data: newData);
+    });
+  }
+
+  Future<Object?> ensureScopeLoaded(String scope) async {
+    if (scope.trim().isEmpty || state.data.hasScope(scope)) return null;
+
+    final data = await _controller.awards(scope);
+    Object? failure;
+
+    data.fold((error) {
+      failure = error;
+    }, (newData) {
+      final merged = state.data.scopes.isEmpty ? newData : state.data.mergeWith(newData);
+      state = state.copyWith(state: States.loaded, data: merged);
+    });
+
+    return failure;
+  }
+}
 
 //Choose the sorting method
 // ===================== Match Status Helpers (Riverpod) =====================

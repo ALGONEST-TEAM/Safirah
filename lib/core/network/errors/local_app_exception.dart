@@ -27,8 +27,16 @@ class LocalAppException implements Exception {
 
   /// رسالة جاهزة للعرض للمستخدم مع عنوان افتراضي من الترجمة.
   factory LocalAppException.userMessage(String message, {Object? cause, StackTrace? stackTrace}) {
+    String fallbackTitle() {
+      try {
+        return S.current.somethingWentWrong;
+      } catch (_) {
+        return 'حدث خطأ';
+      }
+    }
+
     return LocalAppException(
-      title: S.current.somethingWentWrong,
+      title: fallbackTitle(),
       message: message,
       cause: cause,
       stackTrace: stackTrace,

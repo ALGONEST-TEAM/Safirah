@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:safirah/core/theme/app_colors.dart';
 import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../core/widgets/buttons/default_button.dart';
 import '../../data/model/team_model.dart';
 import '../page/category_step_page.dart';
-import '../page/invitations_players_page.dart';
 import '../page/team_step_page.dart';
 import '../state_mangment/riverpod.dart';
+import 'player_avatar_widget.dart';
 
 class AllPlayersOfLeagueWidget extends ConsumerStatefulWidget {
   final String leagueSyncId;
@@ -48,20 +47,6 @@ class _AllPlayersOfLeagueWidgetState
 
     return Column(
       children: [
-      DefaultButtonWidget(
-      background: AppColors.secondaryColor,
-      textColor: Colors.white,
-      onPressed: () {
-        //  print(players.length<=widget.maxPlayer*widget.maxTeam);
-        navigateTo(
-          context,
-          InvitationsPlayersPage(
-            leagueSyncId: widget.leagueSyncId,
-          ),
-        );
-      },
-      text: "طلبات الانضمام",
-    ),
         Expanded(
           child: CheckStateInStreamWidget<List<LeaguePlayerModel>>(
             async: playersAsync,
@@ -93,21 +78,7 @@ class _AllPlayersOfLeagueWidgetState
                         Visibility(
                           visible:
                               players.length >= widget.maxPlayer * widget.maxTeam,
-                          replacement: DefaultButtonWidget(
-                            background: AppColors.secondaryColor,
-                            textColor: Colors.white,
-                            onPressed: () {
-                              print(players.length <=
-                                  widget.maxPlayer * widget.maxTeam);
-                              navigateTo(
-                                context,
-                                InvitationsPlayersPage(
-                                  leagueSyncId: widget.leagueSyncId,
-                                ),
-                              );
-                            },
-                            text: "طلبات الانضمام",
-                          ),
+                          replacement: const SizedBox.shrink(),
                           child: Row(
                             children: [
                               Expanded(
@@ -115,7 +86,6 @@ class _AllPlayersOfLeagueWidgetState
                                   background: Colors.white,
                                   textColor: Colors.black,
                                   onPressed: () {
-                                    print(widget.leagueSyncId);
                                     navigateTo(
                                       context,
                                       TeamStepPage(
@@ -176,8 +146,14 @@ class _AllPlayersOfLeagueWidgetState
 
 class PlayerTile extends StatelessWidget {
   final String name, avatar;
+  final String? subtitle;
 
-  const PlayerTile({super.key, required this.name, required this.avatar});
+  const PlayerTile({
+    super.key,
+    required this.name,
+    required this.avatar,
+    this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -186,12 +162,20 @@ class PlayerTile extends StatelessWidget {
       decoration: BoxDecoration(
           color: Colors.white, borderRadius: BorderRadius.circular(12)),
       child: Row(children: [
-        CircleAvatar(backgroundImage: NetworkImage(avatar)),
+        PlayerAvatarWidget(avatarUrl: avatar),
         SizedBox(width: 10.w),
         Expanded(
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           AutoSizeTextWidget(text: name, fontWeight: FontWeight.w600),
+          if ((subtitle ?? '').trim().isNotEmpty) ...[
+            2.h.verticalSpace,
+            AutoSizeTextWidget(
+              text: subtitle!,
+              fontSize: 10.sp,
+              colorText: Colors.black54,
+            ),
+          ],
         ])),
       ]),
     );

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-
 import '../../../../../core/helpers/navigateTo.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/online_images_widget.dart';
 import '../../../match_term_event/presntation/page/add_event_match_page.dart';
 import '../../../leagues/persntaion/page/report_of_match_in_league_page.dart';
 import '../../data/model/match_model.dart';
+import '../helpers/match_score_presentation_helper.dart';
 import '../page/edit_schedule_match_page.dart';
 import '../page/match_details_page.dart';
 import '../page/schedule_match_page.dart';
@@ -27,6 +28,8 @@ class MatchTileWidget extends StatelessWidget {
       required this.role,
       required this.matchFilter});
 
+  String _forceLtrScoreText(String text) => '\u200E$text\u200E';
+
   String dataInMatch() {
     if (match.status == 'unscheduled') {
       return '-:-';
@@ -35,7 +38,7 @@ class MatchTileWidget extends StatelessWidget {
       if (dt == null) return '-:-';
       return DateFormat('hh:mm a', 'ar').format(dt);
     } else {
-      return '${match.awayScore}:${match.homeScore}';
+      return formatMatchRegularScore(match, reverseOrder: true);
     }
   }
 
@@ -112,6 +115,15 @@ class MatchTileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dt = match.matchDate;
+    final scorePresentation = buildMatchScorePresentation(
+      match,
+      reverseOrder: true,
+      nonScorePrimaryText: dataInMatch(),
+    );
+    final penaltyDisplayText = formatMatchPenaltyDisplayText(
+      match,
+      reverseOrder: true,
+    );
     final dateText = dt == null
         ? ''
         : '${DateFormat('EEEE', 'ar').format(dt)}  ${DateFormat.yMMMMd('ar').format(dt)}';
@@ -143,7 +155,6 @@ class MatchTileWidget extends StatelessWidget {
                         imageUrl: match.homeTeam!.logoUrl??'',
                         fit: BoxFit.contain,
                         circularImage: true,
-
                         size: Size(25.w, 25.h),
                         borderRadius: 20.r,
                       ),
@@ -151,8 +162,35 @@ class MatchTileWidget extends StatelessWidget {
                   ),
                 ),
                  SizedBox(width: 10.w),
-                AutoSizeTextWidget(
-                  text: dataInMatch(),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AutoSizeTextWidget(
+                      text: _forceLtrScoreText(scorePresentation.primaryText),
+                      fontSize: 12.sp,
+                    ),
+                    if (penaltyDisplayText != null) ...[
+                      2.h.verticalSpace,
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 2.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.secondaryColor.withValues(alpha: .08),
+                          borderRadius: BorderRadius.circular(20.r),
+                          border: Border.all(
+                            color: AppColors.secondaryColor.withValues(alpha: .28),
+                          ),
+                        ),
+                        child: AutoSizeTextWidget(
+                          text: penaltyDisplayText,
+                          fontSize: 9.5.sp,
+                          colorText: AppColors.secondaryColor,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                  SizedBox(width: 10.w),
                 Expanded(
