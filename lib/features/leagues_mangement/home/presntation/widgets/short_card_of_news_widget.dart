@@ -4,18 +4,23 @@ import 'package:flutter_svg/svg.dart';
 
 import '../../../../../core/extension/string.dart';
 import '../../../../../core/helpers/navigateTo.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/online_images_widget.dart';
 import '../pages/news_details_page.dart';
 
 class ShortCardOfNewsWidget extends StatelessWidget {
-  final String name;
+  final String title;
+  final String mainTitle;
+
   final String date;
   final String? imageUrl;
   final int? id;
+
   const ShortCardOfNewsWidget({
     super.key,
-    required this.name,
+    required this.mainTitle,
+    required this.title,
     required this.date,
     required this.imageUrl,
     required this.id,
@@ -56,8 +61,15 @@ class ShortCardOfNewsWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  2.h.verticalSpace,
                   AutoSizeTextWidget(
-                    text: name,
+                    text: mainTitle,
+                    fontSize: 10.sp,
+                    colorText: AppColors.primaryColor,
+                  ),
+                  SizedBox(height: 4.h),
+                  AutoSizeTextWidget(
+                    text: title,
                     fontSize: 11.sp,
                     maxLines: 3,
                     fontWeight: FontWeight.w500,

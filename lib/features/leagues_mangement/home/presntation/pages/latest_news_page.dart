@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/widgets/buttons/icon_button_widget.dart';
 import 'package:safirah/core/widgets/logo_shimmer_widget.dart';
+import 'package:safirah/core/widgets/secondary_app_bar_widget.dart';
 
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../core/state/state.dart';
@@ -52,18 +53,7 @@ class _LatestNewsPageState extends ConsumerState<LatestNewsPage> {
     var state = ref.watch(getAllLatestNewsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.secondaryColor,
-        leadingWidth: 60.w,
-        automaticallyImplyLeading: false,
-        leading: const IconButtonWidget(iconColor: Colors.white),
-        title: AutoSizeTextWidget(
-          text: 'الأخبار',
-          fontSize: 14.sp,
-          colorText: Colors.white,
-        ),
-        centerTitle: true,
-      ),
+      appBar:SecondaryAppBarWidget(title:'الاخبار' ,),
       body: SafeArea(
         top: false,
         child: CheckStateInGetApiDataWidget(

@@ -45,6 +45,12 @@ class LatestNewsCardWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AutoSizeTextWidget(
+                      text: news.mainTitle,
+                      fontSize: 10.sp,
+                      colorText: AppColors.primaryColor,
+                    ),
+                    SizedBox(height: 6.h),
+                    AutoSizeTextWidget(
                       text: news.title,
                       fontSize: 11.sp,
                     ),

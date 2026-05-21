@@ -10,7 +10,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 class ConnectivityService {
   ConnectivityService({
     Connectivity? connectivity,
-    this.lookupHost = 'saferah.dev-station.com',
+    this.lookupHost = 'safirah.store',
     this.debounce = const Duration(milliseconds: 400),
   }) : _connectivity = connectivity ?? Connectivity();
 

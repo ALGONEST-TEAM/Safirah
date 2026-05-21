@@ -219,12 +219,13 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
           ? FloatingActionButton(
               heroTag: 'product-whatsapp-share-${widget.idProduct}',
               onPressed: () => _openSupportWhatsApp(state.data),
-              backgroundColor: const Color(0xFF25D366),
+              backgroundColor: AppColors.secondaryColor,
               foregroundColor: Colors.white,
               child: SvgPicture.asset(
                 AppIcons.whatsapp,
-                width: 24,
-                height: 24,
+                width: 28,
+                color: AppColors.whiteColor,
+                height: 28,
               ),
             )
           : null,

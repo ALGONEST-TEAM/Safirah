@@ -177,10 +177,10 @@ class HomePages extends ConsumerWidget {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 12.h)
                           .copyWith(bottom: 10.h, top: 12.h),
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const AutoSizeTextWidget(
+                          AutoSizeTextWidget(
                             text: 'آخر الأخبار',
                           ),
 
@@ -204,7 +204,8 @@ class HomePages extends ConsumerWidget {
                           }
 
                           return ShortCardOfNewsWidget(
-                            name: item.title,
+                            title: item.title,
+                            mainTitle: item.mainTitle,
                             date: item.publishedAt??'',
                             imageUrl: item.primaryMedia.url,
                             id: item.id,

@@ -3,6 +3,7 @@ import 'league_highlights_model.dart';
 class NewsItemModel {
   final int id;
   final String syncId;
+  final String mainTitle;
   final String title;
   final String content;
   final bool status;
@@ -14,6 +15,7 @@ class NewsItemModel {
   NewsItemModel({
     required this.id,
     required this.syncId,
+    this.mainTitle = 'كرة القدم',
     required this.title,
     required this.content,
     required this.status,
@@ -27,6 +29,7 @@ class NewsItemModel {
     return NewsItemModel(
       id: (json['id'] ?? 0) as int,
       syncId: (json['sync_id'] ?? '').toString(),
+      mainTitle: (json['main_title'] ?? json['mainTitle'] ?? 'كرة القدم').toString(),
       title: (json['title'] ?? '').toString(),
       content: (json['content'] ?? '').toString(),
       status: json['status'] == true,
@@ -54,6 +57,7 @@ class NewsItemModel {
     return NewsItemModel(
       id: 0,
       syncId: '',
+      mainTitle: '',
       content: '',
       status: true,
       publishedAt: '',

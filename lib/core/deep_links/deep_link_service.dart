@@ -13,7 +13,8 @@ import '../../features/leagues_mangement/leagues/persntaion/page/details_league_
 
 /// Deep link contract:
 /// - Supports: safirah://league/<leagueSyncId>
-/// - Supports: https://saferah.dev-station.com/league/<leagueSyncId>
+/// - Supports: https://safirah.store/league/<leagueSyncId>
+/// - (Legacy) https://saferah.dev-station.com/league/<leagueSyncId>
 /// - (Legacy) https://safirah.app/league/<leagueSyncId>
 /// - If a link is opened, the app navigates to [DetailsLeagueWidget] for that league.
 ///
@@ -140,6 +141,7 @@ class DeepLinkService {
     if (uri.scheme != 'https') return true;
 
     const allowedHosts = <String>{
+      'safirah.store',
       'saferah.dev-station.com',
       'safirah.app', // legacy
     };
@@ -151,7 +153,10 @@ class DeepLinkService {
     // Expected patterns:
     // safirah://league/<id>
     // safirah://league?leagueSyncId=<id>
+    // https://safirah.store/league/<id>
+    // https://safirah.store/league/index.html?id=<id>
     // https://saferah.dev-station.com/league/<id>
+    // https://saferah.dev-station.com/league/index.html?id=<id>
     // (legacy) https://safirah.app/league/<id>
 
     // 1) Enforce allowed hosts for HTTPS so random domains can't trigger in-app navigation.

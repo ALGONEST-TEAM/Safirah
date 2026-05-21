@@ -1,7 +1,7 @@
 class AppURL {
-  static String get base => 'https://saferah.dev-station.com';
+  static String get base => 'https://safirah.store';
 
-  //https://saferah.dev-station.com
+  // Primary public host: https://safirah.store
   ///https://dash.jeeey.net
   //https://jeeey-dashboard.najaz.in
   //https://dash-jeeey.dev-station.com
