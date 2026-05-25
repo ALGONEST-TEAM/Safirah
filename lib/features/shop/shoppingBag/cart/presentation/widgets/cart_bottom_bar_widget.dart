@@ -10,6 +10,7 @@ import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/price_and_currency_widget.dart';
 import '../../../../../../core/widgets/buttons/default_button.dart';
 import '../../../../../../generated/l10n.dart';
+import '../../../../../payment/presentation/riverpod/payment_riverpod.dart';
 import '../../../confirmOrder/presentation/pages/confirm_order_page.dart';
 import '../../../confirmOrder/presentation/riverpod/confirm_order_riverpod.dart';
 
@@ -116,7 +117,8 @@ class CartBottomBarWidget extends ConsumerWidget {
                   functionSuccess: () {
                     if (ctrl.lastMode != FetchMode.confirm) return;
 
-                    ConfirmOrderController.form.reset();
+                    resetPaymentSelectionState(ref);
+                    refreshPaymentExecutionState(ref);
                     navigateTo(
                       context,
                       ConfirmOrderPage(

@@ -17,12 +17,14 @@ class AddressToConfirmTheOrderWidget extends StatelessWidget {
   final List<CartModel> products;
   final List<AddressModel> address;
   final FormGroup form;
+  final VoidCallback? onSelectionChanged;
 
   const AddressToConfirmTheOrderWidget({
     super.key,
     required this.products,
     required this.address,
     required this.form,
+    this.onSelectionChanged,
   });
 
   @override
@@ -31,50 +33,84 @@ class AddressToConfirmTheOrderWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         InkWell(
-          child: GeneralDesignForOrderDetailsWidget(
-            title: S.of(context).deliveryAddress,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SvgPicture.asset(
-                  AppIcons.deliveryAddress,
-                  height: 44.h,
-                ),
-                8.w.horizontalSpace,
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      AutoSizeTextWidget(
-                        text: form.control('address').invalid
-                            ? S.of(context).address
-                            : form.control('address').value,
-                        fontSize: 12.4.sp,
-                        colorText: AppColors.mainColorFont,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      4.h.verticalSpace,
-                      AutoSizeTextWidget(
-                        text:
-                            "${form.control('city_name').value ?? ''} - ${form.control('district').value ?? ''}",
-                        fontSize: 10.4.sp,
-                        colorText: AppColors.fontColor2,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ],
-                  ),
-                ),
-                SvgPicture.asset(
-                  AppIcons.arrowLeft,
-                  height: 16.h,
-                ),
-                4.w.horizontalSpace,
-              ],
-            ),
+          child: StreamBuilder<Object?>(
+            stream: form.control('address').valueChanges,
+            initialData: form.control('address').value,
+            builder: (context, snapshot) {
+              return StreamBuilder<Object?>(
+                stream: form.control('city_name').valueChanges,
+                initialData: form.control('city_name').value,
+                builder: (context, snapshot) {
+                  return StreamBuilder<Object?>(
+                    stream: form.control('district').valueChanges,
+                    initialData: form.control('district').value,
+                    builder: (context, snapshot) {
+                      final addressValue =
+                          (form.control('address').value as String?)?.trim() ??
+                              '';
+                      final cityName = (form.control('city_name').value
+                                  as String?)
+                              ?.trim() ??
+                          '';
+                      final district = (form.control('district').value
+                                  as String?)
+                              ?.trim() ??
+                          '';
+                      final locationSummary = [cityName, district]
+                          .where((item) => item.isNotEmpty)
+                          .join(' - ');
+
+                      return GeneralDesignForOrderDetailsWidget(
+                        title: S.of(context).deliveryAddress,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SvgPicture.asset(
+                              AppIcons.deliveryAddress,
+                              height: 44.h,
+                            ),
+                            8.w.horizontalSpace,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  AutoSizeTextWidget(
+                                    text: addressValue.isEmpty
+                                        ? S.of(context).address
+                                        : addressValue,
+                                    fontSize: 12.4.sp,
+                                    colorText: AppColors.mainColorFont,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  if (locationSummary.isNotEmpty) ...[
+                                    4.h.verticalSpace,
+                                    AutoSizeTextWidget(
+                                      text: locationSummary,
+                                      fontSize: 10.4.sp,
+                                      colorText: AppColors.fontColor2,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            SvgPicture.asset(
+                              AppIcons.arrowLeft,
+                              height: 16.h,
+                            ),
+                            4.w.horizontalSpace,
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
           ),
-          onTap: () {
-            scrollShowModalBottomSheetWidget(
+          onTap: () async {
+            await scrollShowModalBottomSheetWidget(
               context: context,
               title: S.of(context).yourAddress,
               page: BottomSheetDesignForOrderConfirmationAddressesWidget(
@@ -83,6 +119,9 @@ class AddressToConfirmTheOrderWidget extends StatelessWidget {
                 form: form,
               ),
             );
+
+            if (!context.mounted) return;
+            onSelectionChanged?.call();
           },
         ),
         RequiredInputsWidget(

@@ -285,5 +285,20 @@
   "requestCancelled": "Request was cancelled",
   "requestCancelled2": "Retry if the cancellation was unintentional",
   "invalidApiUrl": "Invalid service URL",
-  "invalidApiUrl2": "Check the server address (Base URL) and try again"
+  "invalidApiUrl2": "Check the server address (Base URL) and try again",
+  "--------payment-----------": "---------payment----------",
+    "amountLabel": "Amount",
+    "amountValidation": "Please enter the amount",
+    "payKuraimiInstruction": "The identification number is generated from Al Kuraimi app settings on first setup",
+    "payKuraimiCodeLabel": "Identification code",
+    "payKuraimiCodeHint": "Identification code",
+    "payKuraimiCodeEmptyError": "Please enter the identification code",
+    "payJawaliInstruction": "Enter the purchase code generated in the Jawali app",
+    "payJawaliCodeLabel": "Purchase code",
+    "payJawaliCodeHint": "Purchase code",
+    "payJawaliCodeEmptyError": "Please enter the purchase code",
+    "paymentMethod": "Payment method",
+    "confirmPayment": "Confirm Payment",
+    "bookingConfirmed": "Your orders has been confirmed successfully, thank you.",
+    "backToMyBookings": "Back to my orders"
 }

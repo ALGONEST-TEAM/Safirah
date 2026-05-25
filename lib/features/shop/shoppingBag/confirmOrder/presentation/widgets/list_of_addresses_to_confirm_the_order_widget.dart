@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import '../../../../address/data/model/address_model.dart';
-import '../riverpod/confirm_order_riverpod.dart';
+import '../../../../../payment/presentation/riverpod/payment_riverpod.dart';
 import 'address_card_to_confirm_the_order_widget.dart';
 
 class ListOfAddressesToConfirmTheOrderWidget extends ConsumerStatefulWidget {
@@ -42,15 +42,28 @@ class _ListOfAddressesToConfirmTheOrderWidgetState
               widget.address[index].district!.name.toString(),
               value: widget.address[index].id.toString(),
               onPressed: () {
-                setState(() {
-                  widget.form.control('address_id').value =
-                      widget.address[index].id;
-                  widget.form.control('address').value =
-                      widget.address[index].address;
-                  widget.form.control('district').value =widget.address[index].district!.name;
-                  widget.form.control('city_name').value=widget.address[index].city!.name;
-                  ref.refresh(confirmOrderProvider.notifier);
-                });
+                final selectedAddress = widget.address[index];
+                final currentAddressId =
+                    widget.form.control('address_id').value as int?;
+                final hasAddressChanged = currentAddressId != selectedAddress.id;
+
+                widget.form.control('address_id').updateValue(selectedAddress.id);
+                widget.form
+                    .control('address')
+                    .updateValue(selectedAddress.address);
+                widget.form
+                    .control('district')
+                    .updateValue(selectedAddress.district!.name);
+                widget.form
+                    .control('city_name')
+                    .updateValue(selectedAddress.city!.name);
+
+                if (hasAddressChanged) {
+                  widget.form.control('shipping_method_id').reset();
+                  widget.form.control('shipping_price').reset();
+                }
+
+                refreshPaymentExecutionState(ref);
                 Navigator.of(context).pop();
               },
             );

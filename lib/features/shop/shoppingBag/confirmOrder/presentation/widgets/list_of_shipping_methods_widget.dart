@@ -4,8 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import '../../../../../../core/helpers/flash_bar_helper.dart';
 import '../../../../../../core/theme/app_colors.dart';
+import '../../../../../payment/presentation/riverpod/payment_riverpod.dart';
 import '../../data/model/delivery_types_model.dart';
-import '../riverpod/confirm_order_riverpod.dart';
 import 'design_of_shipping_method_data_widget.dart';
 
 class ListOfShippingMethodsWidget extends ConsumerStatefulWidget {
@@ -37,49 +37,60 @@ class _ListOfShippingMethodsWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final city = widget.form.control('city_name');
-    final hasAddress = city.valid &&
-        city.value != null &&
-        city.value.toString().trim().isNotEmpty;
-    final isSanaa = hasAddress ? _isSanaa(city.value.toString()) : false;
-    final methods = hasAddress
-        ? widget.deliveryTypes.where((m) {
-            final methodScope = (m.scope) == true;
-            return isSanaa ? methodScope : !methodScope;
-          }).toList()
-        : widget.deliveryTypes;
-    return ListView.separated(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: methods.length,
-      itemBuilder: (context, index) {
-        final item = methods[index];
+    return StreamBuilder<Object?>(
+      stream: widget.form.control('city_name').valueChanges,
+      initialData: widget.form.control('city_name').value,
+      builder: (context, snapshot) {
+        return StreamBuilder<Object?>(
+          stream: widget.form.control('shipping_method_id').valueChanges,
+          initialData: widget.form.control('shipping_method_id').value,
+          builder: (context, snapshot) {
+            final city = widget.form.control('city_name');
+            final hasAddress = city.valid &&
+                city.value != null &&
+                city.value.toString().trim().isNotEmpty;
+            final isSanaa = hasAddress ? _isSanaa(city.value.toString()) : false;
+            final methods = hasAddress
+                ? widget.deliveryTypes.where((m) {
+                    final methodScope = (m.scope) == true;
+                    return isSanaa ? methodScope : !methodScope;
+                  }).toList()
+                : widget.deliveryTypes;
 
-        return DesignOfShippingMethodDataWidget(
-          deliveryData: item,
-          shippingMethodGroupValue:
-              widget.form.control('shipping_method_id').value.toString(),
-          onPressed: () {
-            if (!hasAddress) {
-              showFlashBarWarring(
-                  context: context,
-                  message: 'يرجى تحديد العنوان لتحديد وسيلة الشحن');
-              return;
-            }
-            setState(() {
-              widget.form.control('shipping_method_id').value = item.id;
-              widget.form.control('shipping_price').value = item.cost;
+            return ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: methods.length,
+              itemBuilder: (context, index) {
+                final item = methods[index];
 
-              ref.refresh(confirmOrderProvider.notifier);
-            });
+                return DesignOfShippingMethodDataWidget(
+                  deliveryData: item,
+                  shippingMethodGroupValue:
+                      widget.form.control('shipping_method_id').value.toString(),
+                  onPressed: () {
+                    if (!hasAddress) {
+                      showFlashBarWarring(
+                          context: context,
+                          message: 'يرجى تحديد العنوان لتحديد وسيلة الشحن');
+                      return;
+                    }
+
+                    widget.form.control('shipping_method_id').updateValue(item.id);
+                    widget.form.control('shipping_price').updateValue(item.cost);
+                    refreshPaymentExecutionState(ref);
+                  },
+                );
+              },
+              separatorBuilder: (context, index) => Divider(
+                color: AppColors.fontColor2.withValues(alpha: 0.2),
+                thickness: 0.5.h,
+                height: 14.h,
+              ),
+            );
           },
         );
       },
-      separatorBuilder: (context, index) => Divider(
-        color: AppColors.fontColor2.withValues(alpha: 0.2),
-        thickness: 0.5.h,
-        height: 14.h,
-      ),
     );
   }
 }

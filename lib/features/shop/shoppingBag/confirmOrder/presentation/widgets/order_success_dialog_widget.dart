@@ -78,8 +78,8 @@ class OrderSuccessDialogWidget extends ConsumerWidget {
 }
 
 class CompleteOrder {
-  static successDialog(BuildContext context, ref) {
-    showDialog(
+  static Future<void> successDialog(BuildContext context) {
+    return showDialog(
       useSafeArea: true,
       context: context,
       builder: (context) {
@@ -89,9 +89,6 @@ class CompleteOrder {
           child: OrderSuccessDialogWidget(),
         );
       },
-    ).then((v) {
-      ref.read(activeIndexShopProvider.notifier).state = 0;
-      navigateAndFinish(context, const BottomNavigationBarWidget());
-    });
+    );
   }
 }

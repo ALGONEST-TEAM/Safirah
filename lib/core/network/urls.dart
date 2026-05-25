@@ -109,4 +109,11 @@ class AppURL {
 
   static const String news = '/league-application/news';
 
+  static String get confirmPayment => '/booking/payment';
+
+  static String get startFloosakPayment => '/booking/payment/Flousk/send-money';
+
+  static String get confirmFloosakPayment => '/booking/payment/Flousk/confirm';
+  static String get getAllPaymentMethods => '/orders/get_payment-methods';
+
 }

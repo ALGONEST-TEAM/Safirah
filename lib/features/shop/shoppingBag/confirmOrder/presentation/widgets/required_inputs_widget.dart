@@ -20,15 +20,23 @@ class RequiredInputsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final control = form.control(value);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (form.control(value).invalid)
-          StreamBuilder(
-            stream: form.control(value).touchChanges,
-            builder: (context, snapshot) {
-              if (snapshot.data == true) {
+        StreamBuilder<bool>(
+          stream: control.touchChanges,
+          initialData: control.touched,
+          builder: (context, touchSnapshot) {
+            return StreamBuilder<ControlStatus>(
+              stream: control.statusChanged,
+              initialData: control.status,
+              builder: (context, statusSnapshot) {
+                if (!control.touched || !control.invalid) {
+                  return const SizedBox.shrink();
+                }
 
                 return Padding(
                   padding: EdgeInsets.only(top: 8.h, left: 12.w, right: 12.w),
@@ -38,10 +46,10 @@ class RequiredInputsWidget extends StatelessWidget {
                     colorText: AppColors.dangerSwatch.shade400,
                   ),
                 );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
+              },
+            );
+          },
+        ),
       ],
     );
   }

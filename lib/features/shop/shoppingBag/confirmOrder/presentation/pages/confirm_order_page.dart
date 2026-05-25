@@ -11,32 +11,141 @@ import '../../../../../../core/widgets/buttons/default_button.dart';
 import '../../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../../core/widgets/text_form_field.dart';
 import '../../../../../../generated/l10n.dart';
+import '../../../../../../services/auth/auth.dart';
+import '../../../../../payment/data/model/payment_request_context_model.dart';
+import '../../../../../payment/presentation/riverpod/payment_riverpod.dart';
+import '../../../../../payment/presentation/widget/payment_action_button_widget.dart';
+import '../../../../../payment/presentation/widget/payment_methods_section_widget.dart';
 import '../../../cart/data/model/cart_model.dart';
+import '../../data/model/confirm_order_model.dart';
 import '../riverpod/confirm_order_riverpod.dart';
 import '../widgets/address_to_confirm_the_order_widget.dart';
 import '../widgets/bill_widget.dart';
 import '../../../../../../core/widgets/general_design_for_order_details_widget.dart';
-import '../widgets/list_of_payment_method_widget.dart';
 import '../widgets/list_of_shipping_methods_widget.dart';
 import '../widgets/order_confirmation_product_card_widget.dart';
 import '../widgets/order_success_dialog_widget.dart';
 import '../widgets/required_inputs_widget.dart';
 
-class ConfirmOrderPage extends ConsumerWidget {
+class ConfirmOrderPage extends ConsumerStatefulWidget {
   final List<CartModel> products;
 
-  ConfirmOrderPage({super.key, required this.products});
-
-  final TextEditingController couponCodeController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  const ConfirmOrderPage({super.key, required this.products});
 
   @override
-  Widget build(BuildContext context, ref) {
-    var confirmOrderState = ref.watch(confirmOrderProvider);
+  ConsumerState<ConfirmOrderPage> createState() => _ConfirmOrderPageState();
+}
+
+class _ConfirmOrderPageState extends ConsumerState<ConfirmOrderPage> {
+  final TextEditingController couponCodeController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _confirmOrderController = ConfirmOrderController();
+
+  String _normalizeLocalPhone(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('967') && digits.length > 9) {
+      return digits.substring(digits.length - 9);
+    }
+    return digits;
+  }
+
+  String? _validatePhone(BuildContext context, String? value) {
+    final phone = _normalizeLocalPhone(value ?? '');
+    if (phone.isEmpty) {
+      return 'قم بإدخال رقم الهاتف';
+    }
+    if (phone.length < 9) {
+      return S.of(context).phoneMustBe9Digits;
+    }
+    if (!phone.startsWith('7')) {
+      return S.of(context).phoneMustStartWith7;
+    }
+    return null;
+  }
+
+  ConfirmOrderModel _buildConfirmOrderModel({
+    required List<CartModel> cart,
+    required String couponCode,
+  }) {
+    final printNotes = <int, String>{
+      for (final item in cart)
+        item.id: ((item.isPrintable ?? 0) != 0)
+            ? ref.read(printCtrlProvider(item.id)).text.trim()
+            : '',
+    };
+    final formData = _confirmOrderController.form.group.value;
+
+    return ConfirmOrderModel(
+      cartProducts: cart,
+      addressId: formData['address_id'] as int,
+      paymentId: formData['payment_method'] as int,
+      deliveryTypeId: formData['shipping_method_id'] as int,
+      copon: couponCode,
+      printNotesById: printNotes,
+    );
+  }
+
+  PaymentRequestContextModel _buildPaymentRequest({
+    required ConfirmOrderModel confirmOrderModel,
+    required num totalPayable,
+  }) {
+    final initialPhone = _normalizeLocalPhone(Auth().phoneNumber);
+    return PaymentRequestContextModel(
+      confirmOrderModel: confirmOrderModel,
+      depositAmount: totalPayable.toDouble(),
+      initialPhoneNumber: initialPhone,
+      phoneMaxLength: 9,
+      phoneValidator: _validatePhone,
+      phoneNumberMapper: _normalizeLocalPhone,
+      floosakTargetPhoneMapper: (value) => '967${_normalizeLocalPhone(value)}',
+    );
+  }
+
+  bool _validateBeforePaymentOpen(
+    BuildContext context,
+  ) {
+    if (!_confirmOrderController.validateAndNotify(context)) return false;
+
+    final isValid = _formKey.currentState!.validate();
+    if (!isValid) {
+      showFlashBarWarring(
+        context: context,
+        message: S.of(context).pleaseEnterProductPrintDescription,
+      );
+      return false;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    return true;
+  }
+
+  void _handlePaymentSuccess({
+    required BuildContext context,
+    required WidgetRef ref,
+  }) {
+    resetPaymentSelectionState(ref);
+    CompleteOrder.successDialog(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _confirmOrderController.form.reset();
+    _confirmOrderController.form.group.control('payment_method').reset();
+  }
+
+  @override
+  void dispose() {
+    couponCodeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final ctrl = ref.read(fetchOrderConfirmationDataProvider.notifier);
     final state = ref.watch(fetchOrderConfirmationDataProvider);
 
-    var shippingPrice;
+    num? shippingPrice;
     return Scaffold(
       appBar: SecondaryAppBarWidget(title: S.of(context).confirmOrder),
       body: Form(
@@ -44,30 +153,47 @@ class ConfirmOrderPage extends ConsumerWidget {
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: ReactiveFormBuilder(
-            form: () => ConfirmOrderController.form.group,
+            form: () => _confirmOrderController.form.group,
             builder: (context, form, child) {
-              shippingPrice = form.value['shipping_price'];
+              shippingPrice = form.value['shipping_price'] as num?;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AddressToConfirmTheOrderWidget(
-                    products: products,
+                    products: widget.products,
                     address: state.data.userAddresses,
                     form: form,
+                    onSelectionChanged: () => setState(() {}),
                   ),
-                  GeneralDesignForOrderDetailsWidget(
+                  // GeneralDesignForOrderDetailsWidget(
+                  //   title: S.of(context).paymentMethod,
+                  //   child: ListOfPaymentMethodWidget(
+                  //     payMethods: state.data.paymentMethods,
+                  //     form: form,
+                  //   ),
+                  // ),
+                  // GeneralDesignForOrderDetailsWidget(
+                  //   title: S.of(context).paymentMethod,
+                  //   child: ListOfPaymentMethodWidget(
+                  //     paymentData: payState.data,
+                  //   ),
+                  // ),
+                  12.h.verticalSpace,
+                  PaymentMethodsSectionWidget(
                     title: S.of(context).paymentMethod,
-                    child: ListOfPaymentMethodWidget(
-                      payMethods: state.data.paymentMethods,
-                      form: form,
-                    ),
+                    onMethodSelected: (method) {
+                      _confirmOrderController.form.group
+                          .control('payment_method')
+                          .value = method.id;
+                    },
                   ),
-                  RequiredInputsWidget(
-                    form: form,
-                    value: 'payment_method',
-                    requiredText: S.of(context).pleaseChoseAPaymentMethod,
-                  ),
+
+                  // RequiredInputsWidget(
+                  //   form: form,
+                  //   value: 'payment_method',
+                  //   requiredText: S.of(context).pleaseChoseAPaymentMethod,
+                  // ),
                   GeneralDesignForOrderDetailsWidget(
                     title: S.of(context).shippingMethod,
                     child: ListOfShippingMethodsWidget(
@@ -103,11 +229,11 @@ class ConfirmOrderPage extends ConsumerWidget {
                           isLoading: state.stateData == States.loading &&
                               ctrl.lastMode == FetchMode.coupon,
                           onPressed: () {
-                            if (products.isEmpty) {
+                            if (widget.products.isEmpty) {
                               return;
                             }
                             ctrl.getData(
-                              products: products,
+                              products: widget.products,
                               couponCode: couponCodeController.text,
                               mode: FetchMode.coupon,
                             );
@@ -139,36 +265,21 @@ class ConfirmOrderPage extends ConsumerWidget {
         ),
       ),
       bottomNavigationBar: ButtonBottomNavigationBarDesignWidget(
-        child: CheckStateInPostApiDataWidget(
-          state: confirmOrderState,
-          hasMessageSuccess: false,
-          functionSuccess: () {
-            CompleteOrder.successDialog(context, ref);
-          },
-          bottonWidget: DefaultButtonWidget(
-            text: S.of(context).confirmOrder,
-            height: 41.h,
-            isLoading: confirmOrderState.stateData == States.loading,
-            onPressed: () {
-              final notifier = ref.read(confirmOrderProvider.notifier);
-
-              if (!notifier.validateAndNotify(context)) return;
-
-              final isValid = _formKey.currentState!.validate();
-              if (!isValid) {
-                showFlashBarWarring(
-                    context: context,
-                    message: S.of(context).pleaseEnterProductPrintDescription);
-              } else {
-                FocusManager.instance.primaryFocus?.unfocus();
-                notifier.confirmOrder(
-                  context: context,
-                  cart: state.data.products,
-                  copon: couponCodeController.text,
-                );
-              }
-            },
+        child: PaymentActionButtonWidget(
+          paymentRequestBuilder: (context, ref) => _buildPaymentRequest(
+            confirmOrderModel: _buildConfirmOrderModel(
+              cart: state.data.products,
+              couponCode: couponCodeController.text,
+            ),
+            totalPayable: state.data.billData?.totalPayable ?? 0,
           ),
+          buttonText: S.of(context).confirmOrder,
+          height: 41.h,
+          onBeforeOpen: (context, ref) => _validateBeforePaymentOpen(context),
+          onPaymentSuccess: (context, ref, purchaseId) => _handlePaymentSuccess(
+              context: context,
+              ref: ref,
+            ),
         ),
       ),
     );

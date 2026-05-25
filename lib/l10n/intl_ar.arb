@@ -285,5 +285,20 @@
   "requestCancelled": "تم إلغاء الطلب",
   "requestCancelled2": "أعد المحاولة إذا كان الإلغاء غير مقصود",
   "invalidApiUrl": "رابط الخدمة غير صالح",
-  "invalidApiUrl2": "تحقق من عنوان الخادم (Base URL) ثم أعد المحاولة"
+  "invalidApiUrl2": "تحقق من عنوان الخادم (Base URL) ثم أعد المحاولة",
+  "--------payment-----------": "---------payment----------",
+    "amountLabel": "المبلغ",
+    "amountValidation": "يرجى إدخال المبلغ",
+    "payKuraimiInstruction": "رقم التعريف يُولَّد من إعدادات تطبيق الكريمي لأول مرة",
+    "payKuraimiCodeLabel": "رمز التعريف",
+    "payKuraimiCodeHint": "رمز التعريف",
+    "payKuraimiCodeEmptyError": "يرجى إدخال رمز التعريف",
+    "payJawaliInstruction": "أدخل كود الشراء المنشأ في تطبيق جوالي",
+    "payJawaliCodeLabel": "كود الشراء",
+    "payJawaliCodeHint": "كود الشراء",
+    "payJawaliCodeEmptyError": "يرجى إدخال كود الشراء",
+    "paymentMethod": "طريقة الدفع",
+    "confirmPayment": "تأكيد الدفع",
+    "bookingConfirmed": "تم تأكيد طلبك بنجاح، شكرًا لك.",
+    "backToMyBookings": "العودة إلى طلباتي"
 }
