@@ -75,11 +75,7 @@ class _LeagueFormPageState extends ConsumerState<CreateLeaguePage> {
                         notifier: notifier,
                       ),
                       SizedBox(height: 12.h),
-                      // CreateLeagueLogoPickerWidget(
-                      //   logoPath: _logoUrl,
-                      //   picker: _picker,
-                      //   onLogoChanged: _onLogoChanged,
-                      // ),
+
                       CreateLeagueLogoPickerWidget(
                         logoLocalPath: _logoLocalPath,
                         picker: _picker,

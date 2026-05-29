@@ -175,7 +175,7 @@ class _LeagueSettingsPageState extends ConsumerState<LeagueSettingsPage> {
             ),
           ),
           ButtonOfOrganizerWidget(
-            title: "الفرق واللعبين",
+            title: "الفرق واللاعبين",
             isAvailable: canOpenTeamsPlayers,
             availabilityHint: teamsPlayersHint,
             onTap: () {

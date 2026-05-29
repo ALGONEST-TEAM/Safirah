@@ -35,9 +35,9 @@ class ShowDetailsComeFromCardProductWithShimmerWidget extends StatelessWidget {
                 productData: image,
                 indexColorImage: indexColorImage,
               ),
-              NumberOfImageWidget(
-                numImageAndIndex: "${image.length} / ${indexImage ?? 1}",
-              ),
+              // NumberOfImageWidget(
+              //   numImageAndIndex: "${image.length} / ${indexImage ?? 1}",
+              // ),
               Container(
                 width: double.infinity,
                 margin: EdgeInsets.all(12.sp),

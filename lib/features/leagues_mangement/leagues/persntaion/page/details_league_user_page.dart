@@ -252,7 +252,7 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            AutoSizeTextWidget(text: 'تفاصيل اللعبين'),
+                            AutoSizeTextWidget(text: 'تفاصيل اللاعبين'),
                             6.h.verticalSpace,
                             Container(
                               width: double.infinity,

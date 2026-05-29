@@ -139,13 +139,13 @@ class _ConfirmOrderPageState extends ConsumerState<ConfirmOrderPage> {
     couponCodeController.dispose();
     super.dispose();
   }
+  num? shippingPrice;
 
   @override
   Widget build(BuildContext context) {
     final ctrl = ref.read(fetchOrderConfirmationDataProvider.notifier);
     final state = ref.watch(fetchOrderConfirmationDataProvider);
 
-    num? shippingPrice;
     return Scaffold(
       appBar: SecondaryAppBarWidget(title: S.of(context).confirmOrder),
       body: Form(
@@ -189,14 +189,10 @@ class _ConfirmOrderPageState extends ConsumerState<ConfirmOrderPage> {
                     },
                   ),
 
-                  // RequiredInputsWidget(
-                  //   form: form,
-                  //   value: 'payment_method',
-                  //   requiredText: S.of(context).pleaseChoseAPaymentMethod,
-                  // ),
                   GeneralDesignForOrderDetailsWidget(
                     title: S.of(context).shippingMethod,
                     child: ListOfShippingMethodsWidget(
+
                       deliveryTypes: state.data.deliveryTypes,
                       form: form,
                     ),
@@ -254,9 +250,16 @@ class _ConfirmOrderPageState extends ConsumerState<ConfirmOrderPage> {
                       );
                     }).toList(),
                   ),
-                  BillWidget(
-                    deliveryCost: shippingPrice ?? 0,
-                    billData: state.data.billData!,
+                  ReactiveValueListenableBuilder(
+                    formControl: form.control('shipping_price'),
+                    builder: (context, control, child) {
+                      final deliveryCost = control.value is num ? control.value as num : 0;
+
+                      return BillWidget(
+                        deliveryCost: deliveryCost,
+                        billData: state.data.billData!,
+                      );
+                    },
                   ),
                 ],
               );

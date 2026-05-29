@@ -52,7 +52,7 @@ void refreshPaymentExecutionState(WidgetRef ref) {
 }
 
 final confirmPaymentProvider =
-    StateNotifierProvider.autoDispose<ConfirmPaymentNotifier, DataState<bool>>(
+    StateNotifierProvider<ConfirmPaymentNotifier, DataState<bool>>(
         (ref) => ConfirmPaymentNotifier());
 
 class ConfirmPaymentNotifier extends StateNotifier<DataState<bool>> {

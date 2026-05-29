@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:safirah/core/state/check_state_in_post_api_data_widget.dart';
+import 'package:safirah/core/state/state.dart';
 
 import '../../../../core/widgets/buttons/default_button.dart';
 import '../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
@@ -33,44 +35,66 @@ class PaymentActionButtonWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return DefaultButtonWidget(
-      text: buttonText,
-      height: height,
-      isLoading: isLoading,
-      onPressed: () {
-        if (onBeforeOpen?.call(context, ref) == false) {
-          return;
-        }
+    final state= ref.watch(confirmPaymentProvider);
+    return CheckStateInPostApiDataWidget(
+      state: state,
+      functionSuccess: (){
+        onPaymentSuccess
+            ?.call(context, ref, '00000');
+      },
+      bottonWidget: DefaultButtonWidget(
+        text: buttonText,
+        height: height,
+        isLoading: state.stateData==States.loading,
+        onPressed: () {
+          if (onBeforeOpen?.call(context, ref) == false) {
+            return;
+          }
 
-        final selectedPayMethod = ref.read(selectedPayMethodProvider);
-        final paySpec = paySpecForPaymentMethod(selectedPayMethod);
+          final selectedPayMethod = ref.read(selectedPayMethodProvider);
+          final paySpec = paySpecForPaymentMethod(selectedPayMethod);
 
-        if (selectedPayMethod == null) {
-          ref.read(selectedPayMethodErrorProvider.notifier).state =
-              S.of(context).pleaseChoseAPaymentMethod;
-          return;
-        }
+          if (selectedPayMethod == null) {
+            ref.read(selectedPayMethodErrorProvider.notifier).state =
+                S.of(context).pleaseChoseAPaymentMethod;
+            return;
+          }
 
-        ref.read(selectedPayMethodErrorProvider.notifier).state = null;
+          ref.read(selectedPayMethodErrorProvider.notifier).state = null;
 
-        final request = paymentRequest ?? paymentRequestBuilder?.call(context, ref);
-        if (request == null) {
-          return;
-        }
+          final request = paymentRequest ?? paymentRequestBuilder?.call(context, ref);
+          if (request == null) {
+            return;
+          }
 
-        showTitledBottomSheet(
-          context: context,
-          title: paySpec?.requiresCodeField == false
-              ? selectedPayMethod.title
-              : (paySpec?.codeLabel.isNotEmpty == true
+          if(selectedPayMethod.name=='cash_on_delivery'){
+            ref.read(confirmPaymentProvider.notifier).confirmPayment(
+              paymentRequest: request,
+              payMethodName:selectedPayMethod.name,
+              voucher: '',
+              amount: 0,
+              phoneNumber: '',
+              purchaseId: '00000',
+            );
+
+          }
+          else{
+            showTitledBottomSheet(
+              context: context,
+              title: paySpec?.requiresCodeField == false
+                  ? selectedPayMethod.title
+                  : (paySpec?.codeLabel.isNotEmpty == true
                   ? paySpec!.codeLabel
                   : selectedPayMethod.title),
-          page: PayMethodWidget(
-            paymentRequest: request,
-            onPaymentSuccess: onPaymentSuccess,
-          ),
-        );
-      },
+              page: PayMethodWidget(
+                paymentRequest: request,
+                onPaymentSuccess: onPaymentSuccess,
+              ),
+            );
+          }
+
+        },
+      ),
     );
   }
 }

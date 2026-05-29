@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../../core/widgets/online_images_widget.dart';
 import '../state_mangment/riverpod_details.dart';
+import 'number_of_image_widget.dart';
 
 class ImageShowInDetailsComeFromCardWidget extends StatefulWidget {
   final List<String> productData;
@@ -40,8 +41,10 @@ class _ImageShowInDetailsComeFromCardWidgetState
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, ref, child) =>
-          NotificationListener<ScrollNotification>(
+      builder: (context, ref, child) {
+        var indexImage = ref.watch(showNumberOfScrollImageProvider);
+
+        return NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification scrollInfo) {
           final double itemWidth = MediaQuery.of(context).size.width;
           int newIndex = (_scrollController.offset / itemWidth).round() + 1;
@@ -53,26 +56,39 @@ class _ImageShowInDetailsComeFromCardWidgetState
           }
           return true;
         },
-        child: SizedBox(
-          height: 420.h,
-          child: ListView.builder(
-            controller: _scrollController,
-            scrollDirection: Axis.horizontal,
-            physics: const PageScrollPhysics(),
-            itemCount: widget.productData.length,
-            itemBuilder: (context, index) {
-              return SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: OnlineImagesWidget(
-                  imageUrl: widget.productData[index],
-                  size: Size(double.infinity, 420.h),
-                  borderRadius: 0,
-                ),
-              );
-            },
-          ),
+        child: Stack(
+          alignment: AlignmentGeometry.bottomCenter,
+          children: [
+            SizedBox(
+              height: 420.h,
+              child: ListView.builder(
+                controller: _scrollController,
+                scrollDirection: Axis.horizontal,
+                physics: const PageScrollPhysics(),
+                itemCount: widget.productData.length,
+                itemBuilder: (context, index) {
+                  return SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: OnlineImagesWidget(
+                      imageUrl: widget.productData[index],
+                      size: Size(double.infinity, 420.h),
+                      borderRadius: 0,
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding:  EdgeInsets.only(bottom: 10.0.h),
+              child: NumberOfImageWidget(
+                numImageAndIndex: "${widget.productData.length} / ${indexImage ?? 1}",
+              ),
+            ),
+
+          ],
         ),
-      ),
+      );
+      },
     );
   }
 }

@@ -170,6 +170,7 @@ class _ManualPaymentWidgetState extends ConsumerState<ManualPaymentWidget> {
                 textSize: 12.sp,
                 isLoading: confirmState.stateData == States.loading,
                 onPressed: () {
+                  print( widget.paymentMethod.name);
                   print(_purchaseIdController.text.trim());
                   final isValid = _formKey.currentState?.validate() ?? false;
                   if (!isValid) return;
@@ -180,7 +181,7 @@ class _ManualPaymentWidgetState extends ConsumerState<ManualPaymentWidget> {
                         voucher: '',
                         amount: 0,
                         phoneNumber: '',
-                        purchaseId: _purchaseIdController.text.trim(),
+                        purchaseId:widget.paymentMethod.name=="cash_on_delivery"? '00000':_purchaseIdController.text.trim(),
                       );
                 },
               ),

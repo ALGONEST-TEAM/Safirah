@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +7,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:safirah/services/update_service.dart';
+import 'package:upgrader/upgrader.dart';
 import 'core/network/remote_request.dart';
 import 'core/notifications/firebase_messaging_service.dart';
 import 'core/notifications/notification_bootstrap.dart';
@@ -81,6 +84,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   SyncAutoRunner? _syncAutoRunner;
   SyncFailedNotifier? _syncFailedNotifier;
   AuthorizationSyncRunner? _authorizationSyncRunner;
+  late final Upgrader _upgrader;
 
   @override
   void initState() {
@@ -125,8 +129,19 @@ class _MyAppState extends ConsumerState<MyApp> {
       FirebaseMessagingService.I.onRefreshUnread = null;
       FirebaseMessagingService.I.onSetUnread = null;
     }
-
     super.initState();
+    _upgrader = Upgrader(
+      debugDisplayAlways: true,
+      debugLogging: true,
+      durationUntilAlertAgain: const Duration(
+        days: 1,
+      ),
+      countryCode: 'US',
+      languageCode: 'en',
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      GooglePlayUpdateService.checkForUpdate();
+    });
   }
 
   @override
@@ -147,14 +162,12 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
     final locale = ref.watch(languageProvider);
-
     return ScreenUtilInit(
       designSize: const Size(360, 690),
       minTextAdapt: false,
       splitScreenMode: false,
       child: MaterialApp(
         navigatorKey: appNavigatorKey,
-
         debugShowCheckedModeBanner: false,
         locale: locale,
         localizationsDelegates: const [
@@ -165,15 +178,70 @@ class _MyAppState extends ConsumerState<MyApp> {
         ],
         supportedLocales: const [
           Locale('ar'),
-          //Locale('en'),
         ],
         theme: lightTheme,
+
+        builder: (context, child) {
+          if (!Platform.isIOS) return child!;
+
+          return UpgradeAlert(
+            navigatorKey: appNavigatorKey,
+            upgrader: _upgrader,
+            dialogStyle: UpgradeDialogStyle.cupertino,
+            showIgnore: false,
+            showLater: true,
+            showReleaseNotes: true,
+            child: child!,
+          );
+        },
+
         home: AppLaunchSplashPage(
           onSplashFinished: DeepLinkService.I.markSplashCompleted,
-          child: _StartupAppShellGate(),
+          child: const _StartupAppShellGate(),
         ),
       ),
     );
+
+
+
+    // return ScreenUtilInit(
+    //   designSize: const Size(360, 690),
+    //   minTextAdapt: false,
+    //   splitScreenMode: false,
+    //   child: MaterialApp(
+    //     navigatorKey: appNavigatorKey,
+    //
+    //     debugShowCheckedModeBanner: false,
+    //     locale: locale,
+    //     localizationsDelegates: const [
+    //       S.delegate,
+    //       GlobalMaterialLocalizations.delegate,
+    //       GlobalWidgetsLocalizations.delegate,
+    //       GlobalCupertinoLocalizations.delegate,
+    //     ],
+    //     supportedLocales: const [
+    //       Locale('ar'),
+    //       //Locale('en'),
+    //     ],
+    //     theme: lightTheme,
+    //     home:Platform.isIOS? UpgradeAlert(
+    //       dialogStyle: UpgradeDialogStyle.cupertino,
+    //       upgrader: Upgrader(
+    //           debugDisplayAlways: true,
+    //           debugLogging: true
+    //
+    //       ),
+    //
+    //       child: AppLaunchSplashPage(
+    //         onSplashFinished: DeepLinkService.I.markSplashCompleted,
+    //         child: _StartupAppShellGate(),
+    //       ),
+    //     ):AppLaunchSplashPage(
+    //       onSplashFinished: DeepLinkService.I.markSplashCompleted,
+    //       child: _StartupAppShellGate(),
+    //     ),
+    //   ),
+    // );
   }
 }
 

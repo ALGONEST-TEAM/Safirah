@@ -37,19 +37,19 @@ class WaresPartInDetailsWidget extends ConsumerWidget {
           productData: productData,
           indexColorImage: indexColorImage,
         ),
-        if (productData.colorsProduct!.isNotEmpty ||
-            productData.allImage!.isNotEmpty)
-          productData.colorHasImage == false
-              ? NumberOfImageWidget(
-                  numImageAndIndex:
-                      "${productData.allImage!.length} / ${indexImage ?? 1}",
-                )
-              : productData.colorsProduct!.isNotEmpty
-                  ? NumberOfImageWidget(
-                      numImageAndIndex:
-                          "${productData.colorsProduct![indexColorImage ?? 0].image!.length} / ${indexImage ?? 1}",
-                    )
-                  : const SizedBox(),
+        // if (productData.colorsProduct!.isNotEmpty ||
+        //     productData.allImage!.isNotEmpty)
+        //   productData.colorHasImage == false
+        //       ? NumberOfImageWidget(
+        //           numImageAndIndex:
+        //               "${productData.allImage!.length} / ${indexImage ?? 1}",
+        //         )
+        //       : productData.colorsProduct!.isNotEmpty
+        //           ? NumberOfImageWidget(
+        //               numImageAndIndex:
+        //                   "${productData.colorsProduct![indexColorImage ?? 0].image!.length} / ${indexImage ?? 1}",
+        //             )
+        //           : const SizedBox(),
         Container(
           width: double.infinity,
           margin: EdgeInsets.all(12.sp),
