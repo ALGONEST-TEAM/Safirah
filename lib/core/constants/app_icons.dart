@@ -108,7 +108,12 @@ class AppIcons {
   static const String profile = '${_iconsPath}bottombar/profile.svg';
   static const String profileActive =
       '${_iconsPath}bottombar/profile_active.svg';
+  static const String cupActive =
+      '${_iconsPath}cup (1).svg';
 
+  static const String cup =
+      '${_iconsPath}cup.svg';
+  ////////////////////////////////
   static const String ball =
       '${_iconsPath}ball.svg';
 
@@ -122,4 +127,6 @@ class AppIcons {
 
   static const String editPlayer =
       '${_iconsPath}edit_event.svg';
+
+
 }

@@ -131,7 +131,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     }
     super.initState();
     _upgrader = Upgrader(
-      debugDisplayAlways: true,
+      //debugDisplayAlways: true,
       debugLogging: true,
       durationUntilAlertAgain: const Duration(
         days: 1,

@@ -114,8 +114,8 @@ class _BottomNavigationBarWidgetState
                   width: 20.w,
                 ),
                 _buildNavItem(
-                  AppIcons.league,
-                  AppIcons.league,
+                  AppIcons.cup,
+                  AppIcons.cupActive,
                   'الدوريات',
                   2,
                   activeIndex,
