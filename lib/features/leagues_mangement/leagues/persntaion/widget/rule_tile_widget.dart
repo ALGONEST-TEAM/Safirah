@@ -31,11 +31,11 @@ class RuleTileWidget extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
           ),
-          side: MaterialStateBorderSide.resolveWith(
+          side: WidgetStateBorderSide.resolveWith(
                 (states) => const BorderSide(color: Color(0xFFCA9A2C), width: 1,strokeAlign: 1),
           ),
-          fillColor: MaterialStateProperty.resolveWith((states) {
-            return states.contains(MaterialState.selected)
+          fillColor: WidgetStateProperty.resolveWith((states) {
+            return states.contains(WidgetState.selected)
                 ? const Color(0xFFCA9A2C)
                 : const Color(0xFFFBF8EB);
           }),

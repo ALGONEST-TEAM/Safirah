@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:safirah/features/leagues_mangement/team_and_player/data/model/team_model.dart';
 
 class MatchEventModel {

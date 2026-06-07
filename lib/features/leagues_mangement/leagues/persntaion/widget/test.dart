@@ -4,7 +4,7 @@ import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import 'package:safirah/core/theme/app_colors.dart';
 
 class testpage extends StatefulWidget {
-  const testpage({Key? key}) : super(key: key);
+  const testpage({super.key});
 
   @override
   State<testpage> createState() => _testpageState();
@@ -123,7 +123,7 @@ class _testpageState extends State<testpage> {
                             color: AppColors.fontColor,
                             fontFamily: 'IBMPlexSansArabic',
                           ),
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             border: InputBorder.none,
                           ),
                         ),
@@ -152,7 +152,7 @@ class _testpageState extends State<testpage> {
                                 horizontal: 12.w, vertical: 10.h),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.r),
-                              side: BorderSide(color: AppColors.primaryColor),
+                              side: const BorderSide(color: AppColors.primaryColor),
                             ),
                           ),
                           icon: Icon(Icons.add,
@@ -287,7 +287,7 @@ class _testpageState extends State<testpage> {
               ),
               child: item.checked
                   ? Icon(Icons.check, color: AppColors.whiteColor, size: 18.w)
-                  : SizedBox.shrink(),
+                  : const SizedBox.shrink(),
             ),
             SizedBox(width: 12.w),
             Expanded(

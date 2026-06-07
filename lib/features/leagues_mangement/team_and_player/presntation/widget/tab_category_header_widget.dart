@@ -36,7 +36,7 @@ class _TabsCategoryHeaderWidgetState extends State<TabsCategoryHeaderWidget> {
             tabAlignment: TabAlignment.start,
             dividerColor: Colors.transparent,
             indicator: const BoxDecoration(),
-            overlayColor: MaterialStateProperty.all(Colors.transparent),
+            overlayColor: WidgetStateProperty.all(Colors.transparent),
             indicatorSize: TabBarIndicatorSize.tab,
             tabs: List.generate(widget.categories.length, (i) {
               // t بين 0 و1 تمثل قرب المؤشر من هذا التبويب

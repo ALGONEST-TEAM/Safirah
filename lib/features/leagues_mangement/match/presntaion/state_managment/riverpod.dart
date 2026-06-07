@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../../../../../core/state/data_state.dart';
 import '../../../../../core/state/state.dart';
 import '../../../../../injection.dart' as di;
-import '../../../../prediction/data/model/matches_predictions_model.dart';
 import '../../../team_and_player/data/model/team_model.dart' show TeamModel;
 import '../../data/model/match_event_model.dart';
 import '../../data/model/round_model.dart';

@@ -196,8 +196,8 @@ class _AwardRankCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cardHeight = item.prizeDetails.trim().isNotEmpty ? 120.h : 115.h;
     final accent = AppColors.secondaryColor;
-    final primaryTextColor = AppColors.fontColor;
-    final secondaryTextColor = AppColors.fontColor2;
+    const primaryTextColor = AppColors.fontColor;
+    const secondaryTextColor = AppColors.fontColor2;
     final badgeColor = accent.withValues(alpha: .12);
     final badgeTextColor = accent;
     final badgeBorderColor = accent.withValues(alpha: .18);

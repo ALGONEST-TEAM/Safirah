@@ -47,7 +47,7 @@ class LabeledDropdownField<T> extends StatelessWidget {
           padding: EdgeInsets.all(10.w),
           child: DropdownButtonFormField<int>(
             dropdownColor: Colors.white,
-            value: validSelected ? selectedId : null,
+            initialValue: validSelected ? selectedId : null,
             items: items
                 .map((e) => DropdownMenuItem<int>(
               value: idOf(e),

@@ -38,7 +38,7 @@ class _SelectUserForAuthorizationPageState
     final searchState = ref.watch(searchUserProvider(query));
 
     return Scaffold(
-      appBar: SecondaryAppBarWidget(
+      appBar: const SecondaryAppBarWidget(
         title: 'إضافة منظم',
       ),
       body: Padding(

@@ -15,7 +15,7 @@ class ReporterMatchesPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return Scaffold(
-      appBar: SecondaryAppBarWidget(title: 'ادارة التقارير',),
+      appBar: const SecondaryAppBarWidget(title: 'ادارة التقارير',),
 
       body: SafeArea(
         child: MatchesScheduleWidget(

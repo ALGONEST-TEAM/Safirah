@@ -29,7 +29,7 @@ class TapBarWidget extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 4.5.w),
       dividerColor: Colors.transparent,
       indicatorSize: TabBarIndicatorSize.tab,
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
+      overlayColor: WidgetStateProperty.all(Colors.transparent),
       labelPadding: EdgeInsets.zero,
       indicatorPadding: EdgeInsets.symmetric(horizontal: 4.5.w, vertical: 2),
       indicator: ShapeDecoration(

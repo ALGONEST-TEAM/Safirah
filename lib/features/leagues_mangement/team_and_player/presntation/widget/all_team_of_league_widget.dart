@@ -62,7 +62,7 @@ class _AllTeamOfLeagueWidgetState extends ConsumerState<AllTeamOfLeagueWidget> {
                     : navigateTo(
                         context,
                         PlayersOfTeamWidget(
-                          teamSyncId: t.syncId!,
+                          teamSyncId: t.syncId,
                           teamName: t.teamName,
                           leagueSyncId: widget.leagueSyncId,
                           teamModel: t,

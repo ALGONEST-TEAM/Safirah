@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/theme/app_colors.dart';
 import 'package:safirah/core/widgets/auto_size_text_widget.dart';
-import '../../../match_term_event/presntation/state_mangement/riverpod.dart';
 import '../widget/knockout_rounds_list_widget.dart';
 import '../widget/rounds_list_widget.dart';
 

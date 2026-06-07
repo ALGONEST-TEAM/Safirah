@@ -22,7 +22,7 @@ class ShowTeamAndPlayerPage extends ConsumerWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        appBar: SecondaryAppBarWidget(title: 'تحديد الفرق',),
+        appBar: const SecondaryAppBarWidget(title: 'تحديد الفرق',),
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
@@ -49,7 +49,7 @@ class ShowTeamAndPlayerPage extends ConsumerWidget {
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
                       overlayColor:
-                          MaterialStateProperty.all(Colors.transparent),
+                          WidgetStateProperty.all(Colors.transparent),
                       labelPadding: EdgeInsets.zero,
                       labelColor: Colors.white,
                       unselectedLabelColor: AppColors.secondaryColor,

@@ -5,6 +5,7 @@ class StandingsData {
   final List<StandingItemData> items;
   final StandingItemData userItem;
   final List<RankingPeriods> rankingPeriods;
+  final String periods;
 
   StandingsData({
     required this.scope,
@@ -13,6 +14,8 @@ class StandingsData {
     required this.items,
     required this.userItem,
     required this.rankingPeriods,
+    required this.periods,
+
   });
 
   factory StandingsData.fromJson(Map<String, dynamic> json) {
@@ -30,6 +33,7 @@ class StandingsData {
             ),
       rankingPeriods:
           RankingPeriods.fromJsonList(json['ranking_periods'] ?? []),
+      periods: (json['period']['label'] ?? '').toString(),
     );
   }
 
@@ -41,6 +45,7 @@ class StandingsData {
       items: [],
       userItem: StandingItemData.empty(),
       rankingPeriods: const [],
+      periods: ''
     );
   }
 }
@@ -66,7 +71,7 @@ class RankingPeriods {
 
   static List<RankingPeriods> fromJsonList(List json) {
     return json
-        .where((e) => e is Map<String, dynamic>)
+        .whereType<Map<String, dynamic>>()
         .map((e) => RankingPeriods.fromJson(e as Map<String, dynamic>))
         .toList();
   }

@@ -26,9 +26,9 @@ class CheckBoxForWishlistWidget extends StatelessWidget {
         activeColor: AppColors.primaryColor,
         checkColor: Colors.white,
         shape: const CircleBorder(),
-        side: MaterialStateBorderSide.resolveWith(
+        side: WidgetStateBorderSide.resolveWith(
           (states) {
-            if (states.contains(MaterialState.selected)) {
+            if (states.contains(WidgetState.selected)) {
               return const BorderSide(
                 color: AppColors.primaryColor,
                 width: 1,
@@ -43,9 +43,9 @@ class CheckBoxForWishlistWidget extends StatelessWidget {
         visualDensity: const VisualDensity(
           horizontal: -4,
         ),
-        fillColor: MaterialStateProperty.resolveWith<Color>(
-          (Set<MaterialState> states) {
-            if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith<Color>(
+          (Set<WidgetState> states) {
+            if (states.contains(WidgetState.selected)) {
               return AppColors.primaryColor;
             }
             return fillColor ?? Colors.black12;

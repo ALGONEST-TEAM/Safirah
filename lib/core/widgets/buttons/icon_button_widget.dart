@@ -27,7 +27,7 @@ class IconButtonWidget extends StatelessWidget {
       highlightColor: AppColors.primaryColor.withValues(alpha: 0.4),
       splashRadius: 2,
       style: ButtonStyle(
-        shape: MaterialStateProperty.all(const CircleBorder()),
+        shape: WidgetStateProperty.all(const CircleBorder()),
       ),
       onPressed: onPressed ??
           () {

@@ -130,7 +130,7 @@ class _ReportOfMatchInLeaguePageState extends ConsumerState<ReportOfMatchInLeagu
   Widget build(BuildContext context) {
     final state = ref.watch(addReportProvider);
     return Scaffold(
-      appBar: SecondaryAppBarWidget(title: 'اضافة تقرير'),
+      appBar: const SecondaryAppBarWidget(title: 'اضافة تقرير'),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(12.0.w),
@@ -140,7 +140,7 @@ class _ReportOfMatchInLeaguePageState extends ConsumerState<ReportOfMatchInLeagu
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AutoSizeTextWidget(text: 'اكتب عنوان التقرير'),
+                  const AutoSizeTextWidget(text: 'اكتب عنوان التقرير'),
                   6.h.verticalSpace,
                   TextFormFieldWidget(
                     controller: titleController,
@@ -156,7 +156,7 @@ class _ReportOfMatchInLeaguePageState extends ConsumerState<ReportOfMatchInLeagu
                   ),
                   12.h.verticalSpace,
 
-                  AutoSizeTextWidget(text: 'اكتب تفاصيل التقرير'),
+                  const AutoSizeTextWidget(text: 'اكتب تفاصيل التقرير'),
                   6.h.verticalSpace,
                   TextFormFieldWidget(
                     controller: detailsController,

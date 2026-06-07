@@ -21,8 +21,8 @@ class AuthorizationGatePage extends StatelessWidget {
       body: AuthorizationGate(
         leagueSyncId: leagueSyncId,
         permissionKey: permissionKey,
-        child: child,
         denied: const AuthorizationDeniedWidget(),
+        child: child,
       ),
     );
   }

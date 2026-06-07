@@ -95,7 +95,7 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            AutoSizeTextWidget(text: 'تفاصيل الدوري'),
+                            const AutoSizeTextWidget(text: 'تفاصيل الدوري'),
                             6.h.verticalSpace,
                             Container(
                               width: double.infinity,
@@ -133,9 +133,9 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            SizedBox(
+                                            const SizedBox(
                                                 width: double.infinity,
-                                                child: const AutoSizeTextWidget(
+                                                child: AutoSizeTextWidget(
                                                     text: 'قواعد الدوري')),
                                             6.h.verticalSpace,
                                             CheckStateInStreamWidget<
@@ -252,7 +252,7 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            AutoSizeTextWidget(text: 'تفاصيل اللاعبين'),
+                            const AutoSizeTextWidget(text: 'تفاصيل اللاعبين'),
                             6.h.verticalSpace,
                             Container(
                               width: double.infinity,
@@ -264,7 +264,7 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  AutoSizeTextWidget(text: 'منظم الدوري'),
+                                  const AutoSizeTextWidget(text: 'منظم الدوري'),
                                   Padding(
                                     padding:
                                         EdgeInsets.symmetric(vertical: 8.h),
@@ -310,7 +310,7 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                                         ),
                                       ),
                                       4.w.horizontalSpace,
-                                      AutoSizeTextWidget(text: 'نوع الدوري :'),
+                                      const AutoSizeTextWidget(text: 'نوع الدوري :'),
                                       4.w.horizontalSpace,
                                       AutoSizeTextWidget(
                                         text: 'مجموعات',
@@ -329,7 +329,7 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                                         ),
                                       ),
                                       4.w.horizontalSpace,
-                                      AutoSizeTextWidget(
+                                      const AutoSizeTextWidget(
                                           text: 'عدد اللعابين :'),
                                       4.w.horizontalSpace,
                                       AutoSizeTextWidget(
@@ -349,7 +349,7 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                                         ),
                                       ),
                                       4.w.horizontalSpace,
-                                      AutoSizeTextWidget(text: 'عدد الفرق :'),
+                                      const AutoSizeTextWidget(text: 'عدد الفرق :'),
                                       4.w.horizontalSpace,
                                       AutoSizeTextWidget(
                                         text: ' $maxTeams فريق',
@@ -368,7 +368,7 @@ class _DetailsLeagueUserPageState extends ConsumerState<DetailsLeagueUserPage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            AutoSizeTextWidget(text: 'الانضمام الى الدوري'),
+                            const AutoSizeTextWidget(text: 'الانضمام الى الدوري'),
                             6.h.verticalSpace,
                             Container(
                               width: double.infinity,

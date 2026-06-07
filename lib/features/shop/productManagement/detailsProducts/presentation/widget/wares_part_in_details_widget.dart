@@ -14,7 +14,6 @@ import 'list_of_colors_product_widget.dart';
 import 'list_of_number_product_widget.dart';
 import 'list_of_size_product_widget.dart';
 import 'more_details_widget.dart';
-import 'number_of_image_widget.dart';
 import 'price_with_discount_price_widget.dart';
 import 'printing_on_the_product_widget.dart';
 

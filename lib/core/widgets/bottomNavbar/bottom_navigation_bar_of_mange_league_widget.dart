@@ -164,17 +164,17 @@ class MainShellPage extends ConsumerWidget {
     final shopIndex = ref.watch(shopTabIndexProvider);
 
     final leaguePages =  [
-      ExitFromAppWidget(child: league_home.HomePages()),
-      ExitFromAppWidget(child: PredictionPage()),
-      ExitFromAppWidget(child: ShowLeaguesPage()),
-      ExitFromAppWidget(child: ProfilePage()),
+      const ExitFromAppWidget(child: league_home.HomePages()),
+      const ExitFromAppWidget(child: PredictionPage()),
+      const ExitFromAppWidget(child: ShowLeaguesPage()),
+      const ExitFromAppWidget(child: ProfilePage()),
     ];
 
     final shopPages =  [
-      ExitFromAppWidget(child: shop_home.HomePage()),
-      ExitFromAppWidget(child: MyOrdersPage()),
-      ExitFromAppWidget(child: CartPage()),
-      ExitFromAppWidget(child: ProfilePage()),
+      const ExitFromAppWidget(child: shop_home.HomePage()),
+      const ExitFromAppWidget(child: MyOrdersPage()),
+      const ExitFromAppWidget(child: CartPage()),
+      const ExitFromAppWidget(child: ProfilePage()),
     ];
 
     final isLeagues = mode == AppShellMode.leagues;

@@ -96,7 +96,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
 
     ref.listen<DataState<ProfileDataModel>>(getProfileDataProvider,
         (prev, next) {
-      if (!_seeded && next.stateData == States.loaded && next.data != null) {
+      if (!_seeded && next.stateData == States.loaded) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _seedInitial(next.data);
           _seeded = true;

@@ -20,7 +20,7 @@ class AddAnotherRuleForLeagueWidget extends ConsumerWidget {
     final addRuleLeague = ref.watch(addRuleProvider);
 
     return Scaffold(
-      appBar: SecondaryAppBarWidget(title: "اضافة قاعدة جديدة"),
+      appBar: const SecondaryAppBarWidget(title: "اضافة قاعدة جديدة"),
       body: Padding(
         padding: EdgeInsets.all(12.w),
         child: Column(

@@ -59,7 +59,7 @@ class _LeagueRulesPageState extends ConsumerState<LeagueRulesPage> {
     final addRuleLeague = ref.watch(addRuleProvider);
 
     return Scaffold(
-      appBar: SecondaryAppBarWidget(title: "اضافة قواعد الدوري"),
+      appBar: const SecondaryAppBarWidget(title: "اضافة قواعد الدوري"),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(12.w),

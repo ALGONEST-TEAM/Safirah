@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../widget/chip_selector_widget.dart';
 import '../page/divide_group_page.dart';
-import '../state_managment/riverpod.dart';
 import 'group_count_suggestion.dart';
 
 class QualifiedSelectorSectionWidget extends ConsumerWidget {

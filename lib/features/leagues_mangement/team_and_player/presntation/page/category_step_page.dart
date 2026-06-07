@@ -50,7 +50,7 @@ class _CategoryStepPageState extends ConsumerState<CategoryStepPage> {
 
     final state = ref.watch(setPlayerCategoryProvider);
     return Scaffold(
-        appBar:SecondaryAppBarWidget(title: 'تقسيم الفئات',),
+        appBar:const SecondaryAppBarWidget(title: 'تقسيم الفئات',),
         body: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child:

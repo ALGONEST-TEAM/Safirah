@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../../core/widgets/radio_widget.dart';
-import '../../../../../../generated/l10n.dart';
 import '../../data/model/standings_model.dart';
 import '../riverpod/prediction_riverpod.dart';
 

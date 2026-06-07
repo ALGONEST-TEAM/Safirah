@@ -160,7 +160,7 @@ class CheckStateInStreamWidget<T> extends StatelessWidget {
       // Show a minimal empty state instead (and allow refresh if provided).
       if (emptyBuilder != null) return emptyBuilder!.call();
 
-      final content = const Center(child: Text('لا توجد بيانات'));
+      const content = Center(child: Text('لا توجد بيانات'));
 
       if (onRefresh != null) {
         return RefreshIndicator(

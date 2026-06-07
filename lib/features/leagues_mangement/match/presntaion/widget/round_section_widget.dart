@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../data/model/round_model.dart';
 import 'group_card_widget.dart';
-import 'matches_schedule_widget.dart';
 
 class RoundSectionWidget extends StatelessWidget {
   final RoundModel round;

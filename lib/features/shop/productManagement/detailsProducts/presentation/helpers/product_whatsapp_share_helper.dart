@@ -101,7 +101,5 @@ String buildProductWhatsAppMessage({
     if (normalizedPrice.isNotEmpty) 'السعر: $normalizedPrice',
     'افتح المنتج مباشرة:',
     webLink,
-    'إذا لم يفتح الرابط داخل التطبيق تلقائيًا، استخدم هذا الرابط داخل التطبيق:',
-    appLink,
   ].join('\n');
 }

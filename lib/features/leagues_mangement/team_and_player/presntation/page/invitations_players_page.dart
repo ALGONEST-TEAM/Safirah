@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:safirah/core/state/check_state_in_get_api_data_widget.dart';
 import 'package:safirah/core/widgets/secondary_app_bar_widget.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../state_mangment/riverpod.dart';
 import '../widget/card_invitations_player_widget.dart';
 

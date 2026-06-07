@@ -517,7 +517,7 @@ class MatchTermsEventLocalDataSource {
     required String matchSyncId,
     required String matchTermSyncId,
   }) async {
-    int _typePriority(String raw, {required Term tr}) {
+    int typePriority(String raw, {required Term tr}) {
       if (_isPenaltyTermDefinition(tr)) return 2;
       final v = raw.trim().toLowerCase();
       if (v == 'regular' || v == 'اساسي' || v == 'أساسي') return 0;
@@ -525,7 +525,7 @@ class MatchTermsEventLocalDataSource {
       return 9;
     }
 
-    FinishTermResult _result({
+    FinishTermResult result({
       required bool termFinished,
       required bool matchFinished,
       required bool isKnockout,
@@ -553,7 +553,7 @@ class MatchTermsEventLocalDataSource {
       );
     }
 
-    Future<MatchModel> _loadMatchOrThrow() async {
+    Future<MatchModel> loadMatchOrThrow() async {
       final e = await (db.select(db.matches)
             ..where((m) => m.syncId.equals(matchSyncId)))
           .getSingleOrNull();
@@ -563,7 +563,7 @@ class MatchTermsEventLocalDataSource {
       return MatchModel.fromEntityWithRelations(e);
     }
 
-    Future<bool> _isKnockoutOrThrow(MatchModel match) async {
+    Future<bool> isKnockoutOrThrow(MatchModel match) async {
       final roundSyncId = match.roundSyncId;
       if (roundSyncId == null) {
         throw Exception('❌ roundSyncId غير موجود للمباراة $matchSyncId');
@@ -580,7 +580,7 @@ class MatchTermsEventLocalDataSource {
     }
 
     Future<List<({MatchTerm mt, LeagueTerm lt, Term tr})>>
-        _loadOrderedTermsOrThrow() async {
+        loadOrderedTermsOrThrow() async {
       final mt = db.matchTerms;
       final lt = db.leagueTerms;
       final tr = db.terms;
@@ -611,8 +611,8 @@ class MatchTermsEventLocalDataSource {
         final byOrder = a.tr.order.compareTo(b.tr.order);
         if (byOrder != 0) return byOrder;
 
-        final ap = _typePriority(a.tr.type, tr: a.tr);
-        final bp = _typePriority(b.tr.type, tr: b.tr);
+        final ap = typePriority(a.tr.type, tr: a.tr);
+        final bp = typePriority(b.tr.type, tr: b.tr);
         final byType = ap.compareTo(bp);
         if (byType != 0) return byType;
 
@@ -622,15 +622,15 @@ class MatchTermsEventLocalDataSource {
       return all;
     }
 
-    bool _allFinished(Iterable<({MatchTerm mt, LeagueTerm lt, Term tr})> xs) =>
+    bool allFinished0(Iterable<({MatchTerm mt, LeagueTerm lt, Term tr})> xs) =>
         xs.every((x) => x.mt.isFinished);
 
     return db.transaction(() async {
       // 1) Read/validate for safety (tables existence + coherent state)
-      final match0 = await _loadMatchOrThrow();
-      final isKnockout = await _isKnockoutOrThrow(match0);
+      final match0 = await loadMatchOrThrow();
+      final isKnockout = await isKnockoutOrThrow(match0);
 
-      final all = await _loadOrderedTermsOrThrow();
+      final all = await loadOrderedTermsOrThrow();
 
       // Always use DB state to decide what is the current term
       final current = all.where((x) => !x.mt.isFinished).firstOrNull;
@@ -639,9 +639,9 @@ class MatchTermsEventLocalDataSource {
       if (current == null) {
         final now = DateTime.now();
         await finishMatch(match0);
-        final matchNow = await _loadMatchOrThrow();
+        final matchNow = await loadMatchOrThrow();
         final last = all.last.mt;
-        return _result(
+        return result(
           termFinished: true,
           matchFinished: true,
           isKnockout: isKnockout,
@@ -654,8 +654,8 @@ class MatchTermsEventLocalDataSource {
 
       // Guard: only finish CURRENT term (idempotent & prevents re-showing term)
       if (current.mt.syncId != matchTermSyncId) {
-        final matchNow = await _loadMatchOrThrow();
-        return _result(
+        final matchNow = await loadMatchOrThrow();
+        return result(
           termFinished: false,
           matchFinished: false,
           isKnockout: isKnockout,
@@ -678,23 +678,23 @@ class MatchTermsEventLocalDataSource {
       );
 
       // 3) Re-read tables after mutation (safety)
-      final match = await _loadMatchOrThrow();
-      final all2 = await _loadOrderedTermsOrThrow();
+      final match = await loadMatchOrThrow();
+      final all2 = await loadOrderedTermsOrThrow();
 
       final finishedTerm =
           all2.firstWhere((x) => x.mt.syncId == matchTermSyncId).mt;
       final next = all2.where((x) => !x.mt.isFinished).firstOrNull;
 
       final regular =
-          all2.where((x) => _typePriority(x.tr.type, tr: x.tr) == 0).toList();
+          all2.where((x) => typePriority(x.tr.type, tr: x.tr) == 0).toList();
       final extra =
-          all2.where((x) => _typePriority(x.tr.type, tr: x.tr) == 1).toList();
+          all2.where((x) => typePriority(x.tr.type, tr: x.tr) == 1).toList();
       final penalty =
-          all2.where((x) => _typePriority(x.tr.type, tr: x.tr) == 2).toList();
+          all2.where((x) => typePriority(x.tr.type, tr: x.tr) == 2).toList();
 
-      final regularFinished = regular.isEmpty ? true : _allFinished(regular);
-      final extraFinished = extra.isEmpty ? true : _allFinished(extra);
-      final penaltyFinished = penalty.isEmpty ? true : _allFinished(penalty);
+      final regularFinished = regular.isEmpty ? true : allFinished0(regular);
+      final extraFinished = extra.isEmpty ? true : allFinished0(extra);
+      final penaltyFinished = penalty.isEmpty ? true : allFinished0(penalty);
 
       final tie = match.homeScore == match.awayScore;
       final penaltyWinnerTeamSyncId = _resolvePenaltyWinnerTeamSyncId(match);
@@ -717,8 +717,8 @@ class MatchTermsEventLocalDataSource {
           }
 
           await finishMatch(match);
-          final matchEnd = await _loadMatchOrThrow();
-          return _result(
+          final matchEnd = await loadMatchOrThrow();
+          return result(
             termFinished: true,
             matchFinished: true,
             isKnockout: true,
@@ -731,7 +731,7 @@ class MatchTermsEventLocalDataSource {
         // B) Regular ended, tie => go next if exists, else finish
         if (regularFinished && tie) {
           if (next != null) {
-            return _result(
+            return result(
               termFinished: true,
               matchFinished: false,
               isKnockout: true,
@@ -747,8 +747,8 @@ class MatchTermsEventLocalDataSource {
           }
 
           await finishMatch(match);
-          final matchEnd = await _loadMatchOrThrow();
-          return _result(
+          final matchEnd = await loadMatchOrThrow();
+          return result(
             termFinished: true,
             matchFinished: true,
             isKnockout: true,
@@ -774,8 +774,8 @@ class MatchTermsEventLocalDataSource {
           }
 
           await finishMatch(match);
-          final matchEnd = await _loadMatchOrThrow();
-          return _result(
+          final matchEnd = await loadMatchOrThrow();
+          return result(
             termFinished: true,
             matchFinished: true,
             isKnockout: true,
@@ -794,8 +794,8 @@ class MatchTermsEventLocalDataSource {
           }
 
           await finishMatch(match);
-          final matchEnd = await _loadMatchOrThrow();
-          return _result(
+          final matchEnd = await loadMatchOrThrow();
+          return result(
             termFinished: true,
             matchFinished: true,
             isKnockout: true,
@@ -807,7 +807,7 @@ class MatchTermsEventLocalDataSource {
 
         // Ongoing => go next
         if (next != null) {
-          return _result(
+          return result(
             termFinished: true,
             matchFinished: false,
             isKnockout: true,
@@ -824,8 +824,8 @@ class MatchTermsEventLocalDataSource {
         }
 
         await finishMatch(match);
-        final matchEnd = await _loadMatchOrThrow();
-        return _result(
+        final matchEnd = await loadMatchOrThrow();
+        return result(
           termFinished: true,
           matchFinished: true,
           isKnockout: true,
@@ -838,7 +838,7 @@ class MatchTermsEventLocalDataSource {
       // 5) Non-knockout: finish when all terms are finished
       final allFinished = all2.every((x) => x.mt.isFinished);
       if (allFinished) {
-        return _result(
+        return result(
           termFinished: true,
           matchFinished: true,
           isKnockout: false,
@@ -850,7 +850,7 @@ class MatchTermsEventLocalDataSource {
       }
 
       if (next != null) {
-        return _result(
+        return result(
           termFinished: true,
           matchFinished: false,
           isKnockout: false,
@@ -860,7 +860,7 @@ class MatchTermsEventLocalDataSource {
         );
       }
 
-      return _result(
+      return result(
         termFinished: true,
         matchFinished: false,
         isKnockout: false,
@@ -1706,7 +1706,7 @@ class MatchTermsEventLocalDataSource {
     //    بدل إرجاع null (والذي يجعل UI يعتبر اللاعب احتياط)، نعمل fallback
     //    للشوط السابق الحقيقي حسب (terms.order).
 
-    Future<String?> _statusFromPrevOrderedTerm() async {
+    Future<String?> statusFromPrevOrderedTerm() async {
       final mt = db.matchTerms;
       final lt = db.leagueTerms;
       final tr = db.terms;
@@ -1756,7 +1756,7 @@ class MatchTermsEventLocalDataSource {
       return prevRow?.participationType;
     }
 
-    final prevStatus = await _statusFromPrevOrderedTerm();
+    final prevStatus = await statusFromPrevOrderedTerm();
     if (prevStatus != null) {
       return prevStatus;
     }

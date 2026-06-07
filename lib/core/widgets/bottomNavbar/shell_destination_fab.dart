@@ -63,7 +63,7 @@ class ShellDestinationFab extends StatelessWidget {
             child: IgnorePointer(
               child: Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primaryColor,

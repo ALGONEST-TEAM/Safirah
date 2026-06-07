@@ -13,29 +13,17 @@ import 'standings_sort_widget.dart';
 
 class StandingsScopeCardWidget extends ConsumerWidget {
   final List<RankingPeriods> scopes;
+  final String periods;
 
   const StandingsScopeCardWidget({
     super.key,
     required this.scopes,
+    required this.periods,
   });
 
-  String _scopeLabel(BuildContext context, String scope) {
-    switch (scope) {
-      case 'week':
-        return S.of(context).weekly;
-      case 'month':
-        return S.of(context).monthly;
-      case 'season':
-        return S.of(context).season;
-      default:
-        return S.of(context).weekly;
-    }
-  }
 
   @override
   Widget build(BuildContext context,ref) {
-    final scope = ref.watch(standingsScopeProvider);
-
     return InkWell(
       onTap: (){
         scrollShowModalBottomSheetWidget(
@@ -56,7 +44,7 @@ class StandingsScopeCardWidget extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               AutoSizeTextWidget(
-                text: _scopeLabel(context, scope??scopes[0].name),
+                text:periods,
                 fontSize: 13.sp,
                 colorText: AppColors.fontColor,
               ),

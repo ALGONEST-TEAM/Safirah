@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:drift/drift.dart';
 
 import '../../../../core/network/remote_request.dart';
 import '../model/authorization_models.dart';

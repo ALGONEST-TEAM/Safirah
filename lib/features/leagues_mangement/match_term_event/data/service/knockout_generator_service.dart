@@ -311,11 +311,11 @@ class KnockoutGeneratorService {
 
   String roundNameForCount(int count, String prefix) {
     final namePrefix = prefix.isNotEmpty ? '$prefix - ' : '';
-    if (count >= 16) return '${namePrefix}دور 32';
-    if (count >= 8) return '${namePrefix}دور 16';
-    if (count >= 4) return '${namePrefix}ربع النهائي';
-    if (count >= 2) return '${namePrefix}نصف النهائي';
-    if (count >= 1) return '${namePrefix}النهائي';
+    if (count >= 16) return '$namePrefixدور 32';
+    if (count >= 8) return '$namePrefixدور 16';
+    if (count >= 4) return '$namePrefixربع النهائي';
+    if (count >= 2) return '$namePrefixنصف النهائي';
+    if (count >= 1) return '$namePrefixالنهائي';
     return '${namePrefix}Unknown Round';
   }
 }

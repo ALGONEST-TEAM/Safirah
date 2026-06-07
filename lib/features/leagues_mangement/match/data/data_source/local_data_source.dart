@@ -197,16 +197,16 @@ class MatchesLocalDataSource {
     final Stream<void> triggers = MergeStream<void>([
       (db.select(db.rounds)..where((r) => r.leagueSyncId.equals(leagueSyncId)))
           .watch()
-          .map((_) => null),
+          .map((_) {}),
       (db.select(db.group)..where((g) => g.leagueSyncId.equals(leagueSyncId)))
           .watch()
-          .map((_) => null),
+          .map((_) {}),
       (db.select(db.matches)
             ..where((m) => m.leagueSyncId.equals(leagueSyncId)))
           .watch()
-          .map((_) => null),
-      db.select(db.matchTerms).watch().map((_) => null),
-      db.select(db.teams).watch().map((_) => null),
+          .map((_) {}),
+      db.select(db.matchTerms).watch().map((_) {}),
+      db.select(db.teams).watch().map((_) {}),
     ]);
 
     String signatureOf(List<RoundModel> rounds) {

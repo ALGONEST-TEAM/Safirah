@@ -66,20 +66,19 @@ class StandingsWidget extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        StandingsScopeCardWidget(scopes: state.data.rankingPeriods),
+                        StandingsScopeCardWidget(scopes: state.data.rankingPeriods,periods: state.data.periods,),
                         StandingsListCardWidget(items: state.data.items),
                       ],
                     ),
                   ),
-                  if (state.data.userItem != null)
-                    Positioned(
-                      left: 12.w,
-                      right: 12.w,
-                      bottom: 38.h,
-                      child: StandingsUserRowWidget(
-                        item: state.data.userItem,
-                      ),
+                  Positioned(
+                    left: 12.w,
+                    right: 12.w,
+                    bottom: 38.h,
+                    child: StandingsUserRowWidget(
+                      item: state.data.userItem,
                     ),
+                  ),
                 ],
               ),
             ),

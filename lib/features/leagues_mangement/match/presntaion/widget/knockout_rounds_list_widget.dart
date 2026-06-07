@@ -9,7 +9,6 @@ import '../../../match_term_event/presntation/state_mangement/riverpod.dart';
 import '../../data/model/match_model.dart';
 import '../../data/model/round_model.dart';
 import 'match_tile_widget.dart';
-import 'matches_schedule_widget.dart';
 class KnockoutRoundsListWidget extends ConsumerStatefulWidget {
   final String leagueSyncId;
   final String matchFilter;

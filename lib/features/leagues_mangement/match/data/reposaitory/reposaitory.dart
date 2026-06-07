@@ -39,7 +39,7 @@ class MatchesRepository {
       } on DioException catch (e) {
         throw SyncDioException.from(e);
       }
-      return Right(unit);
+      return const Right(unit);
     } on DioException catch (e) {
       return Left(e);
     }

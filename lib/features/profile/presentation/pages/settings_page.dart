@@ -10,7 +10,6 @@ import '../../../sync_status/presentation/pages/sync_status_page.dart';
 import '../widgets/change_phone_number_widget.dart';
 import '../widgets/list_tile_profile_widget.dart';
 import '../widgets/change_currency_bottom_sheet.dart';
-import '../widgets/language_bottom_sheet.dart';
 import 'logout_or_delete_account_bottom_sheet.dart';
 
 class SettingsPage extends StatefulWidget {

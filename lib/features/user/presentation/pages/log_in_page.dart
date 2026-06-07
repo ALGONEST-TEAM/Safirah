@@ -12,7 +12,6 @@ import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../core/widgets/buttons/default_button.dart';
 import '../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../core/widgets/text_form_field.dart';
-import '../../../../firebase_options.dart';
 import '../../../../generated/l10n.dart';
 import '../riverpod/user_riverpod.dart';
 import '../widgets/user_page_titles_widget.dart';

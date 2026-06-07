@@ -5,9 +5,8 @@ import 'package:flutter/material.dart';
 class FadePageRoute<T> extends PageRouteBuilder<T> {
   FadePageRoute({
     required Widget child,
-    RouteSettings? settings,
+    super.settings,
   }) : super(
-          settings: settings,
           transitionDuration: const Duration(milliseconds: 500),
           reverseTransitionDuration: const Duration(milliseconds: 500),
           pageBuilder: (_, __, ___) => child,

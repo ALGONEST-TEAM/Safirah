@@ -987,7 +987,7 @@ class GenerateFirstKnockoutNotifier
 
   GenerateFirstKnockoutNotifier(this.leagueSyncId, this.qualifiedPerGroup)
       : super(DataState.initial(
-          RoundModel(id: -1, leagueSyncId: '', roundName: '', roundType: ''),
+          const RoundModel(id: -1, leagueSyncId: '', roundName: '', roundType: ''),
         ));
 
   Future<void> run() async {
@@ -1147,7 +1147,7 @@ class PlayerStatsNotifier extends StateNotifier<DataState<PlayerStats>> {
   PlayerStatsNotifier(this.matchSyncId, this.playerSyncId)
       : super(
           DataState.initial(
-            PlayerStats(goals: 0, assists: 0, yellowCards: 0, redCards: 0),
+            const PlayerStats(goals: 0, assists: 0, yellowCards: 0, redCards: 0),
           ),
         ) {
     load();

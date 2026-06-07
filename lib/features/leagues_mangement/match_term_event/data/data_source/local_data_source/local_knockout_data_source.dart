@@ -39,9 +39,9 @@ class KnockoutGeneratorLocalDataSource {
   }) async {
     final matchTermLocal = MatchTermsEventLocalDataSource(db);
 
-    int _goalDiff(QualifiedTeamModel t) => t.goalsFor - t.goalsAgainst;
+    int goalDiff(QualifiedTeamModel t) => t.goalsFor - t.goalsAgainst;
 
-    Future<Map<String, num>> _computeHeadToHeadPointsForGroup({
+    Future<Map<String, num>> computeHeadToHeadPointsForGroup({
       required String groupSyncId,
       required Set<String> teamSyncIds,
       int winPoints = 3,
@@ -203,7 +203,7 @@ class KnockoutGeneratorLocalDataSource {
           var end = start + 1;
           while (end < baseSorted.length &&
               baseSorted[end].points == baseSorted[start].points &&
-              _goalDiff(baseSorted[end]) == _goalDiff(baseSorted[start])) {
+              goalDiff(baseSorted[end]) == goalDiff(baseSorted[start])) {
             end++;
           }
 
@@ -211,7 +211,7 @@ class KnockoutGeneratorLocalDataSource {
             fullyOrdered.add(baseSorted[start]);
           } else {
             final tieBlock = baseSorted.sublist(start, end);
-            final h2hPoints = await _computeHeadToHeadPointsForGroup(
+            final h2hPoints = await computeHeadToHeadPointsForGroup(
               groupSyncId: g.syncId,
               teamSyncIds: tieBlock.map((e) => e.teamSyncId).toSet(),
             );
@@ -489,13 +489,13 @@ class KnockoutGeneratorLocalDataSource {
       (db.select(db.rounds)
             ..where((r) => r.leagueSyncId.equals(leagueSyncId)))
           .watch()
-          .map((_) => null),
+          .map((_) {}),
       (db.select(db.matches)
             ..where((m) => m.leagueSyncId.equals(leagueSyncId)))
           .watch()
-          .map((_) => null),
-      db.select(db.matchTerms).watch().map((_) => null),
-      db.select(db.teams).watch().map((_) => null),
+          .map((_) {}),
+      db.select(db.matchTerms).watch().map((_) {}),
+      db.select(db.teams).watch().map((_) {}),
     ]).debounceTime(const Duration(milliseconds: 120));
 
     String signatureOf(List<RoundModel> rounds) {
@@ -783,7 +783,6 @@ class KnockoutGeneratorLocalDataSource {
         // --- Match Terms (أشواط المباراة) ---
         // Only sync terms if API actually sent them.
         final terms = m.matchTerms;
-        if (terms == null) continue;
 
         final effectiveMatchSyncId = matchSyncId.isNotEmpty ? matchSyncId : '';
         // If match has no syncId, we can't reliably sync terms.

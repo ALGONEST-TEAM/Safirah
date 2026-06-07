@@ -241,14 +241,14 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
         // Defensive validation to avoid `!` null crashes.
         final teamSyncId = p.teamSyncId;
         if (teamSyncId == null || teamSyncId.isEmpty) {
-          throw LocalAppException(
+          throw const LocalAppException(
             message: 'runDraft: generated player without teamSyncId',
             title: '',
           );
         }
         final leaguePlayerSyncId = p.playerLeagueSyncId;
         if (leaguePlayerSyncId!.isEmpty) {
-          throw LocalAppException(
+          throw const LocalAppException(
             message: 'runDraft: generated player without playerLeagueSyncId',
             title: '',
           );

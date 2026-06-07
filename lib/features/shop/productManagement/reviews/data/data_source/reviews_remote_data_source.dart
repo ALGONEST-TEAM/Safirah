@@ -37,8 +37,9 @@ class ReviewsRemoteDataSource {
     formData.fields.add(MapEntry('product_id', productId.toString()));
     formData.fields.add(MapEntry('color_id', colorId.toString()));
     formData.fields.add(MapEntry('parent_measuring_id', sizeId.toString()));
-    if (numberId != 0 && numberId != null)
+    if (numberId != 0) {
       formData.fields.add(MapEntry('number_id', numberId.toString()));
+    }
     formData.fields.add(MapEntry('comment', comment));
     formData.fields.add(MapEntry('value', evaluation.toString()));
     formData.fields.add(MapEntry('proportion', proportion.toString()));

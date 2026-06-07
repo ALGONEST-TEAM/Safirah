@@ -103,7 +103,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
-import 'package:uuid/uuid.dart';
 
 import '../page/create_league_page.dart';
 

@@ -71,7 +71,7 @@ class TermsAndConditionsHeroCardWidget extends StatelessWidget {
             spacing: 8.w,
             runSpacing: 8.h,
             children: [
-              PrivacyPolicyBadgeWidget(
+              const PrivacyPolicyBadgeWidget(
                 icon: Icons.event_note_outlined,
                 label: 'آخر تحديث: ${LegalContactInfo.lastUpdated}',
               ),

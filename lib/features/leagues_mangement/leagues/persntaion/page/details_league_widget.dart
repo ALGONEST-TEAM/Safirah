@@ -70,7 +70,7 @@ class _DetailsLeagueWidgetState extends ConsumerState<DetailsLeagueWidget>
           actions: [
             IconButton(onPressed: (){
               navigateTo(context, LeagueSettingsPage(leagueSyncId: widget.leagueSyncId,));
-            }, icon:  Icon(Icons.settings))
+            }, icon:  const Icon(Icons.settings))
           ],
         ),
         body: Column(

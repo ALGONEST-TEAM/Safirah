@@ -10,7 +10,6 @@ import '../../../../../core/network/urls.dart';
 import '../../../../../core/state/pagination_data/paginated_model.dart';
 import '../../../home/data/models/banners_model.dart';
 import '../../../home/data/models/news_item_model.dart';
-import '../../../team_and_player/data/model/team_model.dart';
 import '../model/league_model.dart';
 import '../model/league_status_model.dart';
 

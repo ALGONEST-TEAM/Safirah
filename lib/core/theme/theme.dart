@@ -25,8 +25,8 @@ ThemeData lightTheme = ThemeData(
     labelColor: Colors.black,
     unselectedLabelColor: AppColors.fontColor,
     indicatorColor: Colors.black,
-    overlayColor: MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) {
+    overlayColor: WidgetStateProperty.resolveWith<Color?>(
+      (Set<WidgetState> states) {
         return AppColors.primaryColor.withValues(alpha: 0.1);
       },
     ),

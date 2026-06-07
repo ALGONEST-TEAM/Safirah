@@ -53,7 +53,7 @@ class _LatestNewsPageState extends ConsumerState<LatestNewsPage> {
     var state = ref.watch(getAllLatestNewsProvider);
 
     return Scaffold(
-      appBar:SecondaryAppBarWidget(title:'الاخبار' ,),
+      appBar:const SecondaryAppBarWidget(title:'الاخبار' ,),
       body: SafeArea(
         top: false,
         child: CheckStateInGetApiDataWidget(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/price_and_currency_widget.dart';
 import '../../data/model/discount_model.dart';

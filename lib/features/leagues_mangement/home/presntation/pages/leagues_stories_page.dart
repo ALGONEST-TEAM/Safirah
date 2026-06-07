@@ -265,8 +265,8 @@ class _LeaguesStoriesViewerState extends State<LeaguesStoriesViewer> {
             onLoad: (group, item) {
               _syncHeaderIfChanged(group: group, item: item);
             },
-            config: VStoryConfig(
-              defaultDuration: const Duration(seconds: 5),
+            config: const VStoryConfig(
+              defaultDuration: Duration(seconds: 5),
               progressColor: Colors.white,
               progressBackgroundColor: Colors.white24,
               enableCaching: true,
@@ -275,7 +275,7 @@ class _LeaguesStoriesViewerState extends State<LeaguesStoriesViewer> {
               // نلغي هيدر الباكيج لأنه يختفي عند لمس الشاشة
               showHeader: false,
               maxCacheSize: 300 * 1024 * 1024,
-              maxCacheAge: const Duration(days: 7),
+              maxCacheAge: Duration(days: 7),
               maxCacheObjects: 80,
             ),
           ),

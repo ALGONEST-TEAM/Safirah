@@ -50,7 +50,7 @@ class _TeamEditorPageState extends ConsumerState<TeamEditorPage> {
     final saver = ref.watch(updateTeamProvider);
 
     return Scaffold(
-      appBar:SecondaryAppBarWidget(title: 'تعديل بيانات الفريق',),
+      appBar:const SecondaryAppBarWidget(title: 'تعديل بيانات الفريق',),
 
     body: SafeArea(
         child: Padding(

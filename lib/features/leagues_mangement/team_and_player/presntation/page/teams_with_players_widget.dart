@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safirah/core/state/check_state_in_post_api_data_widget.dart';
 import 'package:safirah/core/widgets/buttons/default_button.dart';
 import '../../../../authorization/persntaion/riverpod/riverpod.dart';
-import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/bottomNavbar/bottom_navigation_bar_of_mange_league_widget.dart';

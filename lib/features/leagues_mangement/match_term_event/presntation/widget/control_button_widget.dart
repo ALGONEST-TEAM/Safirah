@@ -193,7 +193,7 @@ class _ControlButtonWidgetState extends ConsumerState<ControlButtonWidget> {
 
 
 class SponsorForm extends StatefulWidget {
-  const SponsorForm({Key? key}) : super(key: key);
+  const SponsorForm({super.key});
 
   @override
   State<SponsorForm> createState() => _SponsorFormState();
@@ -202,7 +202,7 @@ class _SponsorFormState extends State<SponsorForm> {
   final TextEditingController _sponsorNameController = TextEditingController();
   final TextEditingController _sponsorLinkController = TextEditingController();
   final TextEditingController _sponsorDescriptionController = TextEditingController();
-  String _selectedPackage = 'فضي';
+  final String _selectedPackage = 'فضي';
 
   @override
   void initState() {
@@ -257,10 +257,10 @@ class _SponsorFormState extends State<SponsorForm> {
                             Container(
                               width: 390,
                               constraints: const BoxConstraints(maxWidth: double.infinity),
-                              child: Column(
+                              child: const Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'دوري طوفان الاقصى',
                                     style: TextStyle(
                                       color: Colors.white,
@@ -269,8 +269,8 @@ class _SponsorFormState extends State<SponsorForm> {
                                       height: 0.8,
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
-                                  const Text(
+                                  SizedBox(height: 12),
+                                  Text(
                                     'رعاية احترافي لدوري كرة القدم الخاص بك! 🏆⚽',
                                     style: TextStyle(
                                       color: Colors.white,

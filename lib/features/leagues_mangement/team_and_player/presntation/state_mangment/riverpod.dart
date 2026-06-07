@@ -447,7 +447,7 @@ final getLeaguePlayersStatisticsProvider = StateNotifierProvider.family<
 class GetLeaguePlayersStatisticsNotifier
     extends StateNotifier<DataState<LeaguePlayerStatsModel>> {
   GetLeaguePlayersStatisticsNotifier(this.syncLeagueId)
-      : super(DataState.initial(LeaguePlayerStatsModel())) {
+      : super(DataState.initial(const LeaguePlayerStatsModel())) {
     load();
   }
 

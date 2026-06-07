@@ -57,7 +57,7 @@ class TeamDropdownFieldWidget extends ConsumerWidget {
               padding: EdgeInsets.all(10.w),
               child: DropdownButtonFormField<int>(
                 dropdownColor: Colors.white,
-                value: selectedId != null &&
+                initialValue: selectedId != null &&
                     team.any((e) => e.id == selectedId)
                     ? selectedId
                     : null,

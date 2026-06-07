@@ -50,7 +50,7 @@ class _LeagueFormPageState extends ConsumerState<CreateLeaguePage> {
     final notifier = ref.read(leagueFormProvider.notifier);
 
     return Scaffold(
-      appBar:  SecondaryAppBarWidget(
+      appBar:  const SecondaryAppBarWidget(
       title: 'انشاء الدوري',
     ),
       body: SafeArea(

@@ -1,10 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../match_term_event/presntation/state_mangement/riverpod.dart';
-import '../../data/model/round_model.dart';
-import '../state_managment/riverpod.dart';
 import 'knockout_rounds_list_widget.dart';
 import 'rounds_list_widget.dart';
 class MatchesScheduleWidget extends ConsumerStatefulWidget {

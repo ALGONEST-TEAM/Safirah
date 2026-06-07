@@ -436,7 +436,7 @@ class _MatchHeader extends StatelessWidget {
                 height: 34.h,
                 child: Row(
                   children: [
-                    IconButtonWidget(
+                    const IconButtonWidget(
                       iconColor: Colors.white,
                     ),
                     Expanded(

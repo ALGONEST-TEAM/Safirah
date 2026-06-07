@@ -6,6 +6,7 @@ import 'package:safirah/core/constants/app_icons.dart';
 import 'package:safirah/core/helpers/navigateTo.dart';
 import 'package:safirah/core/widgets/logo_shimmer_widget.dart';
 import 'package:safirah/features/leagues_mangement/leagues/persntaion/page/create_league_page.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
@@ -36,7 +37,9 @@ class HomePages extends ConsumerWidget {
           heroTag: 'create-league-fab',
           tooltip: 'انشاء دوري',
           elevation: 0,
-          onPressed: () {
+          onPressed: ()async {
+            final hash = await  SmsAutoFill().getAppSignature;
+            print('App Signature: $hash');
             navigateTo(context, const CreateLeaguePage());
           },
           backgroundColor: AppColors.primaryColor,
@@ -189,7 +192,7 @@ class HomePages extends ConsumerWidget {
                     ),
                     SizedBox(
                       child: ListView.separated(
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         itemCount: state.data.news.length,
                         separatorBuilder: (_, __) => SizedBox(height: 8.w),

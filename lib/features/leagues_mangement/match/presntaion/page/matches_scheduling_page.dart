@@ -15,7 +15,7 @@ class MatchesSchedulingPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return Scaffold(
-      appBar: SecondaryAppBarWidget(
+      appBar: const SecondaryAppBarWidget(
         title: 'جدولة المباريات',
       ),
       body: SafeArea(
@@ -49,7 +49,7 @@ class MatchesSchedulingPage extends ConsumerWidget {
                             padding: EdgeInsets.symmetric(horizontal: 2.5.w),
                             indicatorSize: TabBarIndicatorSize.tab,
                             overlayColor:
-                            MaterialStateProperty.all(Colors.transparent),
+                            WidgetStateProperty.all(Colors.transparent),
                             labelPadding: EdgeInsets.zero,
                             indicatorPadding:
                             EdgeInsets.symmetric(

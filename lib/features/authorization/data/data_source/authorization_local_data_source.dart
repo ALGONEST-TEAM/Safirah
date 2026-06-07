@@ -10,7 +10,7 @@ class AuthorizationLocalDataSource {
   final Safirah db;
   const AuthorizationLocalDataSource(this.db);
 
-  static final Uuid _uuid = const Uuid();
+  static const Uuid _uuid = Uuid();
 
   Future<void> seedCreatorAsOrganizer({
     required String leagueSyncId,

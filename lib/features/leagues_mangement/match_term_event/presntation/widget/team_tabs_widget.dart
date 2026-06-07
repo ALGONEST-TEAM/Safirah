@@ -34,7 +34,7 @@ class TeamTabsWidget extends StatelessWidget {
           ),
           padding: EdgeInsets.symmetric(horizontal: 4.5.w),
           indicatorSize: TabBarIndicatorSize.tab,
-          overlayColor: MaterialStateProperty.all(Colors.transparent),
+          overlayColor: WidgetStateProperty.all(Colors.transparent),
           labelPadding: EdgeInsets.zero,
           // indicatorPadding:
           // EdgeInsets.symmetric(horizontal: 4.5.w, vertical: 2),

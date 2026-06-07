@@ -179,7 +179,7 @@ class _StatsChipsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = const [
+    const items = [
       ('هدافين', Icons.sports_soccer),
       ('أسيست', Icons.handshake_outlined),
       ('مساهمة', Icons.star_border),

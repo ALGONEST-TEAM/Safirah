@@ -7,7 +7,6 @@ import '../../../../../core/state/state.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/loading_widget.dart';
 import '../../../home/presntation/riverpod/home_riverpod.dart';
-import '../../../home/presntation/widgets/latest_news_card_widget.dart';
 import '../riverpod/riverpod.dart';
 import '../widget/report_card_widget.dart';
 
