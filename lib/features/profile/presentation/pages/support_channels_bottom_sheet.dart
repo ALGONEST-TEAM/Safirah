@@ -36,14 +36,14 @@ class SupportChannelsBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       {
-        "title": "773551738",
+        "title": "783210007",
         "icon": AppIcons.whatsapp,
-        "onTap": () => _launchWhatsApp("773551738"),
+        "onTap": () => _launchWhatsApp("783210007"),
       },
       {
-        "title": "777111686",
+        "title": "775076388",
         "icon": AppIcons.whatsapp,
-        "onTap": () => _launchWhatsApp("777111686"),
+        "onTap": () => _launchWhatsApp("775076388"),
       },
       {
         "title": "0139034",
@@ -51,9 +51,9 @@ class SupportChannelsBottomSheet extends StatelessWidget {
         "onTap": () => _launchPhone("0139034"),
       },
       {
-        "title": "mraed225588@gmail.com",
+        "title": "safira.store.ye@gmail.com",
         "icon": AppIcons.email,
-        "onTap": () => _launchEmail("mraed225588@gmail.com"),
+        "onTap": () => _launchEmail("safira.store.ye@gmail.com"),
       },
     ];
 

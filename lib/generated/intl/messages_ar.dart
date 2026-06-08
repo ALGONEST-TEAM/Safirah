@@ -54,7 +54,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "amountValidation":
             MessageLookupByLibrary.simpleMessage("يرجى إدخال المبلغ"),
         "appDescription": MessageLookupByLibrary.simpleMessage(
-            "تطبيق صافرة هو تطبيق متخصص في بيع الملابس الرياضية من أرقى وأجود الخامات، وإنشاء الدوريات العالية من هدفنا أن نوفر خدمة متميزة وجودة عالية."),
+            "تطبيق صافرة يجمع بين بيع الملابس الرياضية عالية الجودة، وإنشاء وإدارة الدوريات، والمشاركة في مسابقات توقع نتائج المباريات، لتقديم تجربة رياضية متكاملة وممتعة للمستخدمين."),
         "appName": MessageLookupByLibrary.simpleMessage("صــــافرة"),
         "applicationLanguage":
             MessageLookupByLibrary.simpleMessage("لغة التطبيق"),

@@ -12,14 +12,15 @@ String buildProductAppFallbackDeepLink(int productId) =>
     'safirah://product/$productId';
 
 Uri buildSupportWhatsAppUri({
-  String phone = '775076388',
+  required String phone,
   String? message,
 }) {
+  final normalizedPhone = phone.replaceAll(RegExp(r'\D'), '');
   final normalizedMessage = message?.trim() ?? '';
 
   return Uri.https(
     'wa.me',
-    '/$phone',
+    '/$normalizedPhone',
     normalizedMessage.isEmpty ? null : {'text': normalizedMessage},
   );
 }

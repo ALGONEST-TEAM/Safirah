@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/constants/app_icons.dart';
 import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
@@ -38,7 +39,7 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SingleChildScrollView(
         padding: EdgeInsets.all(12.sp),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           spacing: 12.h,
           children: [
             ProfileHeaderCardWidget(onLogoutSuccess: _refresh),
@@ -117,8 +118,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
               },
             ),
-            2.h.verticalSpace,
+            1.h.verticalSpace,
             const AppIntroCardWidget(),
+
             20.h.verticalSpace,
           ],
         ),

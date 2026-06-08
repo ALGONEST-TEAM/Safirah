@@ -55,7 +55,10 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
   }
 
   bool _shouldShowWhatsAppButton(DataState<ProductData> state) {
-    return state.data.showWhatsapp == true && _canShareProduct(state);
+    final whatsappNumber = state.data.whatsappNumber?.trim() ?? '';
+    return state.data.showWhatsapp == true &&
+        whatsappNumber.isNotEmpty &&
+        _canShareProduct(state);
   }
 
   String _resolveShareName(ProductData product) {
@@ -132,8 +135,12 @@ class _DetailsPageState extends ConsumerState<DetailsPage>
   }
 
   Future<void> _openSupportWhatsApp(ProductData product) async {
+    final whatsappNumber = product.whatsappNumber?.trim() ?? '';
+    if (whatsappNumber.isEmpty) return;
+
     final launched = await launchUrl(
       buildSupportWhatsAppUri(
+        phone: whatsappNumber,
         message: _buildProductShareMessage(product),
       ),
       mode: LaunchMode.externalApplication,

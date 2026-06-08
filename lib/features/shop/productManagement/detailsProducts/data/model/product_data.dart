@@ -26,6 +26,7 @@ class ProductData {
   final String? description;
   final bool? isPrintable;
   final bool? showWhatsapp;
+  final String? whatsappNumber;
 
   // الصور
   @HiveField(9)
@@ -79,6 +80,7 @@ class ProductData {
     this.description,
     this.isPrintable,
     this.showWhatsapp,
+    this.whatsappNumber,
     this.mainImage,
     this.allImage,
     this.colorHasImage,
@@ -113,6 +115,7 @@ class ProductData {
       description: json['description'] ?? "",
       isPrintable: json['is_printable'] ?? false,
       showWhatsapp: json['show_whatsapp'] ?? false,
+      whatsappNumber: json['whatsapp_number']?.toString(),
 
       // الصور
       mainImage: List<String>.from(

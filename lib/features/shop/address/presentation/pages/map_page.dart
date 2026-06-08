@@ -15,6 +15,7 @@ import '../../../../../core/widgets/bottomNavbar/button_bottom_navigation_bar_de
 import '../../../../../core/widgets/buttons/default_button.dart';
 import '../../../../../core/widgets/secondary_app_bar_widget.dart';
 import '../../../../../generated/l10n.dart';
+import '../../helpers/yemen_delivery_bounds.dart';
 import '../riverpod/address_riverpod.dart';
 
 class MapPage extends ConsumerStatefulWidget {
@@ -36,7 +37,7 @@ class _MapPageState extends ConsumerState<MapPage> {
   final Completer<GoogleMapController> _controller =
   Completer<GoogleMapController>();
 
-  getCurrentLocation({
+  void getCurrentLocation({
     required LatLng latLng,
     required WidgetRef ref,
   }) {
@@ -50,7 +51,7 @@ class _MapPageState extends ConsumerState<MapPage> {
         ),
       );
     });
-    _getCityName(latLng);
+    _handleLocationSelection(latLng);
   }
 
   @override
@@ -209,65 +210,67 @@ class _MapPageState extends ConsumerState<MapPage> {
     return normalized;
   }
 
-  void _compareCity(String cityName, LatLng latLng) {
-    String normalizedCityName = normalizeText(cityName);
-    int? tempId;
-    var citiesState = ref.watch(citiesProvider);
+  void _handleLocationSelection(LatLng latLng) {
+    final mapNotifier = ref.read(mapProvider.notifier);
+    final isWithinDeliveryBounds = YemenDeliveryBounds.containsLatLng(latLng);
 
-    List<String> normalizedYemenCities =
-    citiesState.data.map((city) => normalizeText(city.name)).toList();
-    if (normalizedYemenCities.contains(normalizedCityName)) {
-      tempId = citiesState.data
-          .firstWhere((city) => normalizeText(city.name) == normalizedCityName)
-          .id;
-      setState(() {
-        widget.form.patchValue({
-          'city_id': tempId,
-          'city_name': cityName,
-        });
-        widget.form.patchValue({'district_id': null});
-        widget.form.patchValue({'district_name': null});
-        showError = false;
-        ref.read(mapProvider.notifier).changeLocation(latLng);
-        ref
-            .read(mapProvider.notifier)
-            .checkForLocationChanges = true;
-      });
-    } else {
-      setState(() {
-        showError = true;
-        ref
-            .read(mapProvider.notifier)
-            .checkForLocationChanges = false;
-      });
+    setState(() {
+      showError = !isWithinDeliveryBounds;
+    });
+
+    if (!isWithinDeliveryBounds) {
+      mapNotifier.checkForLocationChanges = false;
+      return;
     }
+
+    mapNotifier.changeLocation(latLng);
+    mapNotifier.checkForLocationChanges = true;
+    unawaited(_resolveAddressFromCoordinates(latLng));
   }
 
-  Future<void> _getCityName(LatLng latLng) async {
+  Future<void> _resolveAddressFromCoordinates(LatLng latLng) async {
     try {
-      final lang = Localizations
-          .localeOf(context)
-          .languageCode;
+      final lang = Localizations.localeOf(context).languageCode;
       setLocaleIdentifier(lang);
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(
+      final placemarks = await placemarkFromCoordinates(
         latLng.latitude,
         latLng.longitude,
       );
-      if (placemarks.isNotEmpty) {
-        String? city = placemarks.first.locality;
-        String? district = placemarks.first.subLocality;
+      if (placemarks.isEmpty || !mounted) return;
 
-        if (city != null) {
-          _compareCity(city, latLng);
-          setState(() {
-            _city = normalizeText(city);
-            _district = normalizeText(district ?? '');
-          });
-        }
+      final placemark = placemarks.first;
+      final city = placemark.locality;
+      final district = placemark.subLocality;
+
+      setState(() {
+        _city = city != null ? normalizeText(city) : '';
+        _district = normalizeText(district ?? '');
+      });
+
+      if (city != null) {
+        _tryAutoFillCityFromName(city);
       }
     } catch (e) {
-      throw "$e";
+      debugPrint('Geocoding failed: $e');
     }
+  }
+
+  void _tryAutoFillCityFromName(String cityName) {
+    final normalizedCityName = normalizeText(cityName);
+    final cities = ref.read(citiesProvider).data;
+
+    final matchedCityIndex = cities.indexWhere(
+      (city) => normalizeText(city.name) == normalizedCityName,
+    );
+    if (matchedCityIndex == -1) return;
+
+    final matchedCity = cities[matchedCityIndex];
+    widget.form.patchValue({
+      'city_id': matchedCity.id,
+      'city_name': cityName,
+      'district_id': null,
+      'district_name': null,
+    });
   }
 }

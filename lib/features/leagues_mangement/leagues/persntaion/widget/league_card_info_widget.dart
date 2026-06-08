@@ -33,19 +33,14 @@ class LeagueCardInfoWidget extends StatelessWidget {
           SizedBox(height: 8.h),
           Row(
             children: [
+
               AutoSizeTextWidget(
                 text: leagueModel.subscriptionPrice ?? '1000 ريال',
                 fontSize: 11.sp,
                 colorText: AppColors.primaryColor,
                 maxLines: 1,
               ),
-              SizedBox(width: 6.w),
-              const AutoSizeTextWidget(
-                text: '/ نادي الكامب نو',
-                fontSize: 10,
-                colorText: Color(0xff8E95A2),
-                maxLines: 1,
-              ),
+
             ],
           ),
           2.h.verticalSpace,
