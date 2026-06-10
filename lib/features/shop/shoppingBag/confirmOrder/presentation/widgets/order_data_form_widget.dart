@@ -4,6 +4,7 @@ class OrderDataFormController {
   final group = FormGroup(
     {
       'address_id': FormControl<int>(),
+      'city_id': FormControl<int>(),
       'address': FormControl<String>(
         validators: [Validators.required],
       ),

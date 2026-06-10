@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
 import 'package:safirah/core/theme/app_colors.dart';
+import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 
 class AppLaunchSplashPage extends StatefulWidget {
   const AppLaunchSplashPage({
@@ -129,11 +131,32 @@ class _SplashScaffold extends StatelessWidget {
           builder: (context, constraints) {
             final animationSize = constraints.biggest.shortestSide;
 
-            return Center(
-              child: SizedBox.square(
-                dimension: animationSize,
-                child: RepaintBoundary(
-                  child: widgetAnimation,
+            return SafeArea(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: SizedBox.square(
+                        dimension: animationSize,
+                        child: RepaintBoundary(
+                          child: widgetAnimation,
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+
+                        AutoSizeTextWidget(text:  '  تم التطوير بواسطة ',colorText: AppColors.secondaryColor,fontSize:  13.sp,),
+                        AutoSizeTextWidget(text:  'Algonest ',colorText: AppColors.primaryColor,fontSize:   13.sp,),
+
+                      ],
+                    ),
+
+                  ],
                 ),
               ),
             );

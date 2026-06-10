@@ -115,5 +115,6 @@ class AppURL {
 
   static String get confirmFloosakPayment => '/booking/payment/Flousk/confirm';
   static String get getAllPaymentMethods => '/orders/get_payment-methods';
+  static String get getDeliveryType => '/orders/get_delivery_types';
 
 }

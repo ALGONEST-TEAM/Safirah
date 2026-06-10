@@ -71,6 +71,10 @@ class ProductData {
   final List<ReviewData>? productReviews;
   @HiveField(16)
   final num? averageRate;
+  final String? productReturnPolice;
+  final String? productShippingDetails;
+  final String? productMeasurementDetails;
+
 
   ProductData({
     this.id,
@@ -103,6 +107,9 @@ class ProductData {
     this.reviews,
     this.productReviews,
     this.averageRate,
+    this.productReturnPolice,
+    this.productShippingDetails,
+    this.productMeasurementDetails
   });
 
   factory ProductData.fromJson(Map<String, dynamic> json) {
@@ -163,6 +170,9 @@ class ProductData {
             ),
       averageRate: json['avrage_rate'] ?? 0.0,
       productReviews: ReviewData.fromJsonList(json['product_reviews'] ?? []),
+      productReturnPolice:  json['product_return_policy']??'',
+      productShippingDetails:  json['product_shipping_details']??'',
+productMeasurementDetails: json['product_measurement_details']??'',
     );
   }
 

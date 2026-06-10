@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:reactive_forms/reactive_forms.dart';
@@ -9,11 +10,12 @@ import '../../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../../../generated/l10n.dart';
 import '../../../../address/data/model/address_model.dart';
 import '../../../cart/data/model/cart_model.dart';
+import '../riverpod/confirm_order_riverpod.dart';
 import 'bottom_sheet_design_for_order_confirmation_addresses_widget.dart';
 import '../../../../../../core/widgets/general_design_for_order_details_widget.dart';
 import 'required_inputs_widget.dart';
 
-class AddressToConfirmTheOrderWidget extends StatelessWidget {
+class AddressToConfirmTheOrderWidget extends ConsumerWidget {
   final List<CartModel> products;
   final List<AddressModel> address;
   final FormGroup form;
@@ -21,14 +23,16 @@ class AddressToConfirmTheOrderWidget extends StatelessWidget {
 
   const AddressToConfirmTheOrderWidget({
     super.key,
+
     required this.products,
+
     required this.address,
+
     required this.form,
     this.onSelectionChanged,
   });
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -119,7 +123,16 @@ class AddressToConfirmTheOrderWidget extends StatelessWidget {
                 form: form,
               ),
             );
+            if (!context.mounted) return;
 
+            final addressId = form.control('address_id').value;
+
+            print(addressId);
+            if (addressId != null) {
+              ref.read(fetchDeliveryProvider(addressId).notifier).getDelivery(
+
+              );
+            }
             if (!context.mounted) return;
             onSelectionChanged?.call();
           },

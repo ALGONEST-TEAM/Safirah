@@ -248,29 +248,29 @@ class _MapPageState extends ConsumerState<MapPage> {
         _district = normalizeText(district ?? '');
       });
 
-      if (city != null) {
-        _tryAutoFillCityFromName(city);
-      }
+      // if (city != null) {
+      //   _tryAutoFillCityFromName(city);
+      // }
     } catch (e) {
       debugPrint('Geocoding failed: $e');
     }
   }
 
-  void _tryAutoFillCityFromName(String cityName) {
-    final normalizedCityName = normalizeText(cityName);
-    final cities = ref.read(citiesProvider).data;
-
-    final matchedCityIndex = cities.indexWhere(
-      (city) => normalizeText(city.name) == normalizedCityName,
-    );
-    if (matchedCityIndex == -1) return;
-
-    final matchedCity = cities[matchedCityIndex];
-    widget.form.patchValue({
-      'city_id': matchedCity.id,
-      'city_name': cityName,
-      'district_id': null,
-      'district_name': null,
-    });
-  }
+  // void _tryAutoFillCityFromName(String cityName) {
+  //   final normalizedCityName = normalizeText(cityName);
+  //   final cities = ref.read(citiesProvider).data;
+  //
+  //   final matchedCityIndex = cities.indexWhere(
+  //     (city) => normalizeText(city.name) == normalizedCityName,
+  //   );
+  //   if (matchedCityIndex == -1) return;
+  //
+  //   final matchedCity = cities[matchedCityIndex];
+  //   widget.form.patchValue({
+  //     'city_id': matchedCity.id,
+  //     'city_name': cityName,
+  //     'district_id': null,
+  //     'district_name': null,
+  //   });
+  // }
 }

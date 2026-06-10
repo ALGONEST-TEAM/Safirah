@@ -9,8 +9,8 @@ class DescriptionInModelSheetWidget extends StatelessWidget {
   const DescriptionInModelSheetWidget(
       {super.key, required this.detailsProduct});
 
-  final List<DetailsProductData> detailsProduct;
-
+ // final List<DetailsProductData> detailsProduct;
+final String detailsProduct ;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -24,36 +24,37 @@ class DescriptionInModelSheetWidget extends StatelessWidget {
           ),
           const Divider(color: Color(0xffF6F6F6)),
           SingleChildScrollView(
-            child: Column(
-              children: detailsProduct.map((item) {
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.detailName!,
-                          textAlign: TextAlign.right,
-                          style: TextStyle(fontSize: 13.sp),
-                        ),
-                      ),
-                      20.verticalSpace,
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            item.detailValue!,
-                            style: TextStyle(fontSize: 13.sp),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
+            child: AutoSizeTextWidget(text: detailsProduct,maxLines: 50,),
+            // child: Column(
+            //   children: detailsProduct.map((item) {
+            //     return Padding(
+            //       padding:
+            //           const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            //       child: Row(
+            //         mainAxisAlignment: MainAxisAlignment.start,
+            //         children: [
+            //           Expanded(
+            //             child: Text(
+            //               item.detailName!,
+            //               textAlign: TextAlign.right,
+            //               style: TextStyle(fontSize: 13.sp),
+            //             ),
+            //           ),
+            //           20.verticalSpace,
+            //           Expanded(
+            //             child: Align(
+            //               alignment: Alignment.center,
+            //               child: Text(
+            //                 item.detailValue!,
+            //                 style: TextStyle(fontSize: 13.sp),
+            //               ),
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     );
+            //   }).toList(),
+            // ),
           ),
 
           // ListView.builder(

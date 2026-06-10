@@ -7,6 +7,7 @@ import '../../../../../../core/state/state.dart';
 import '../../../../../../generated/l10n.dart';
 import '../../../cart/data/model/cart_model.dart';
 import '../../data/model/confirm_order_data_model.dart';
+import '../../data/model/delivery_types_model.dart';
 import '../../data/repos/confirm_order_repo.dart';
 import '../widgets/order_data_form_widget.dart';
 
@@ -91,3 +92,26 @@ final printCtrlProvider =
   ref.onDispose(c.dispose);
   return c;
 });
+
+final fetchDeliveryProvider = StateNotifierProvider.family<
+    FetchDeliveryNotifier,
+    DataState<List<DeliveryTypesModel>>,int>((ref,idDelivery) => FetchDeliveryNotifier(idDelivery));
+
+class  FetchDeliveryNotifier extends StateNotifier<DataState<List<DeliveryTypesModel>>> {
+  FetchDeliveryNotifier(this.idAddress)
+      : super(DataState<List<DeliveryTypesModel>>.initial([]) ){
+    getDelivery();
+  }
+ final int idAddress;
+  final _controller = ConfirmOrderReposaitory();
+
+  Future<void> getDelivery( ) async {
+    state = state.copyWith(state: States.loading);
+    final user = await _controller.fetchDeliveryType( addressId:idAddress );
+    user.fold((f) {
+      state = state.copyWith(state: States.error, exception: f);
+    }, (delivery) {
+      state = state.copyWith(state: States.loaded, data: delivery);
+    });
+  }
+}

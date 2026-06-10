@@ -39,6 +39,7 @@ class MoreDetailsWidget extends StatelessWidget {
               text: describe,
               colorText: Colors.black87,
               fontSize: 11.6.sp,
+              maxLines: 20,
               fontWeight: FontWeight.w400,
             ),
             const Spacer(),

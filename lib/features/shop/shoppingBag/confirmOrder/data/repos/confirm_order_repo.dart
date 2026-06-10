@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../cart/data/model/cart_model.dart';
 import '../data_source/confirm_order_remote_data_source.dart';
 import '../model/confirm_order_data_model.dart';
+import '../model/delivery_types_model.dart';
 
 class ConfirmOrderReposaitory {
   Future<Either<DioException, ConfirmOrderDataModel>> fetchOrderConfirmationData({
@@ -16,6 +17,21 @@ class ConfirmOrderReposaitory {
       );
       return Right(remote);
     } on DioException catch (e) {
+      return Left(e);
+    }
+  }
+
+  Future<Either<DioException, List<DeliveryTypesModel>>> fetchDeliveryType({
+    required int addressId
+
+  }) async {
+    try {
+      final remote = await ConfirmOrderRemoteDataSource().fetchDeliveryType(
+      addressId: addressId
+      );
+      return Right(remote);
+    } on DioException catch (e) {
+      print(e.error);
       return Left(e);
     }
   }

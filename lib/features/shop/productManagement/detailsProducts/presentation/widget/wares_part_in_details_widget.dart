@@ -149,21 +149,21 @@ class WaresPartInDetailsWidget extends ConsumerWidget {
             ),
             MoreDetailsWidget(
               page: DescriptionInModelSheetWidget(
-                detailsProduct: productData.detailsProduct ?? [],
+                detailsProduct: productData.productMeasurementDetails ?? '',
               ),
               describe: S.of(context).size_details,
               icon: AppIcons.sizeDetails,
             ),
             MoreDetailsWidget(
               page: DescriptionInModelSheetWidget(
-                detailsProduct: productData.detailsProduct ?? [],
+                detailsProduct: productData.productShippingDetails ?? '',
               ),
               describe: S.of(context).shipping_details,
               icon: AppIcons.shippingDetails,
             ),
             MoreDetailsWidget(
               page: DescriptionInModelSheetWidget(
-                detailsProduct: productData.detailsProduct ?? [],
+                detailsProduct: productData.productReturnPolice ?? '',
               ),
               describe: S.of(context).return_policy,
               icon: AppIcons.returnPolicy,

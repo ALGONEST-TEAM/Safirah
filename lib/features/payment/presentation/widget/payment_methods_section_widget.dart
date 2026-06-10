@@ -9,20 +9,71 @@ import '../../data/model/payment_methods_model.dart';
 import '../riverpod/payment_riverpod.dart';
 import 'list_of_pay_method_widget.dart';
 
-class PaymentMethodsSectionWidget extends ConsumerWidget {
+class PaymentMethodsSectionWidget extends ConsumerStatefulWidget {
   final String title;
   final ValueChanged<PaymentMethodsModel>? onMethodSelected;
+  final bool excludeCashOnDelivery;
+  final VoidCallback? onPaymentMethodCleared;
 
   const PaymentMethodsSectionWidget({
     super.key,
     required this.title,
     this.onMethodSelected,
+    this.excludeCashOnDelivery = false,
+    this.onPaymentMethodCleared,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PaymentMethodsSectionWidget> createState() =>
+      _PaymentMethodsSectionWidgetState();
+}
+
+class _PaymentMethodsSectionWidgetState
+    extends ConsumerState<PaymentMethodsSectionWidget> {
+  static const _cashOnDeliveryMethodName = 'cash_on_delivery';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _clearCashOnDeliverySelectionIfNeeded();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant PaymentMethodsSectionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.excludeCashOnDelivery != oldWidget.excludeCashOnDelivery) {
+      _clearCashOnDeliverySelectionIfNeeded();
+    }
+  }
+
+  void _clearCashOnDeliverySelectionIfNeeded() {
+    if (!widget.excludeCashOnDelivery) return;
+
+    final selectedMethod = ref.read(selectedPayMethodProvider);
+    if (selectedMethod?.name != _cashOnDeliveryMethodName) return;
+
+    ref.read(selectedPayMethodProvider.notifier).state = null;
+    ref.read(selectedPayMethodErrorProvider.notifier).state = null;
+    widget.onPaymentMethodCleared?.call();
+  }
+
+  List<PaymentMethodsModel> _visiblePaymentMethods(
+    List<PaymentMethodsModel> paymentMethods,
+  ) {
+    if (!widget.excludeCashOnDelivery) return paymentMethods;
+
+    return paymentMethods
+        .where((method) => method.name != _cashOnDeliveryMethodName)
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final payState = ref.watch(getAllPaymentMethodsProvider);
     final errorMessage = ref.watch(selectedPayMethodErrorProvider);
+    final visiblePaymentMethods = _visiblePaymentMethods(payState.data);
 
     return CheckStateInGetApiDataWidget(
       state: payState,
@@ -40,7 +91,7 @@ class PaymentMethodsSectionWidget extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AutoSizeTextWidget(
-              text: title,
+              text: widget.title,
               fontSize: 11.sp,
             ),
             8.h.verticalSpace,
@@ -54,8 +105,8 @@ class PaymentMethodsSectionWidget extends ConsumerWidget {
                 ),
               ),
             ListOfPaymentMethodWidget(
-              paymentData: payState.data,
-              onMethodSelected: onMethodSelected,
+              paymentData: visiblePaymentMethods,
+              onMethodSelected: widget.onMethodSelected,
             ),
           ],
         ),
@@ -71,7 +122,7 @@ class PaymentMethodsSectionWidget extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AutoSizeTextWidget(
-              text: title,
+              text: widget.title,
               fontSize: 11.sp,
             ),
             14.h.verticalSpace,

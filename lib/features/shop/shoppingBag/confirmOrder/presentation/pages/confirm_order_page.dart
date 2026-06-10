@@ -156,6 +156,9 @@ class _ConfirmOrderPageState extends ConsumerState<ConfirmOrderPage> {
             form: () => _confirmOrderController.form.group,
             builder: (context, form, child) {
               shippingPrice = form.value['shipping_price'] as num?;
+              final hasPrintableProduct = state.data.products.any(
+                (product) => (product.isPrintable ?? 0) != 0,
+              );
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +167,9 @@ class _ConfirmOrderPageState extends ConsumerState<ConfirmOrderPage> {
                     products: widget.products,
                     address: state.data.userAddresses,
                     form: form,
-                    onSelectionChanged: () => setState(() {}),
+                    onSelectionChanged: () => setState(() {
+                      print(state.data.userAddresses[0].cityId);
+                    }),
                   ),
                   // GeneralDesignForOrderDetailsWidget(
                   //   title: S.of(context).paymentMethod,
@@ -180,19 +185,32 @@ class _ConfirmOrderPageState extends ConsumerState<ConfirmOrderPage> {
                   //   ),
                   // ),
                   12.h.verticalSpace,
-                  PaymentMethodsSectionWidget(
-                    title: S.of(context).paymentMethod,
-                    onMethodSelected: (method) {
-                      _confirmOrderController.form.group
-                          .control('payment_method')
-                          .value = method.id;
+                  ReactiveValueListenableBuilder<int>(
+                    formControl: form.control('city_id') as FormControl<int>,
+                    builder: (context, control, child) {
+                      final cityId = control.value ?? 0;
+                      final excludeCashOnDelivery =
+                          hasPrintableProduct ||( cityId != 3&&cityId!=0);
+                      print(cityId);
+                      return PaymentMethodsSectionWidget(
+                        title: S.of(context).paymentMethod,
+                        excludeCashOnDelivery: excludeCashOnDelivery,
+                        onPaymentMethodCleared: () {
+                          form.control('payment_method').reset();
+                        },
+                        onMethodSelected: (method) {
+                          _confirmOrderController.form.group
+                              .control('payment_method')
+                              .value = method.id;
+                        },
+                      );
                     },
                   ),
 
                   GeneralDesignForOrderDetailsWidget(
                     title: S.of(context).shippingMethod,
-                    child: ListOfShippingMethodsWidget(
 
+                    child: ListOfShippingMethodsWidget(
                       deliveryTypes: state.data.deliveryTypes,
                       form: form,
                     ),

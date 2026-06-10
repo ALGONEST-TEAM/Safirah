@@ -7,6 +7,7 @@ import '../../../../../core/helpers/navigateTo.dart';
 import '../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../../generated/l10n.dart';
 import '../../../../../services/auth/auth.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/main_app_bar_widget.dart';
 import '../../../shop/address/presentation/pages/view_all_address_page.dart';
 import '../../../shop/productManagement/wishlist/presentation/pages/wishlist_page.dart';
@@ -120,8 +121,16 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             1.h.verticalSpace,
             const AppIntroCardWidget(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
 
-            20.h.verticalSpace,
+                AutoSizeTextWidget(text:  '  تم التطوير بواسطة ',colorText: AppColors.secondaryColor,),
+                AutoSizeTextWidget(text:  'Algonest ',colorText: AppColors.primaryColor),
+
+              ],
+            ),        20.h.verticalSpace,
           ],
         ),
       ),

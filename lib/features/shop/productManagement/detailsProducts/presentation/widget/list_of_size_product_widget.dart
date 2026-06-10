@@ -117,28 +117,82 @@ class _ListOfSizeProductWidgetState
             final item = entry.value;
             final isSelected = selectedSize == item.sizeTypeName;
 
+            // return GestureDetector(
+            //   onTap: () {
+            //     print(item.stockStatus);
+            //     if (item.numberData!.isEmpty) {
+            //       if (item.stockStatus == false) {
+            //         showFlashBarWarring(
+            //           context: context,
+            //           message: item.stock ?? '',
+            //         );
+            //         return;
+            //       }
+            //     }
+            //     final priceNotifier =
+            //         ref.read(changePriceProvider(widget.sizeProduct).notifier);
+            //
+            //     if ((widget.sizeProduct.numbersOfProduct?.isNotEmpty ??
+            //         false)) {
+            //       priceNotifier
+            //         ..setNumber('')
+            //         ..setIdNumber(0);
+            //       ref
+            //           .read(changeIndexOfSizeProvider(widget.sizeProduct.id!)
+            //               .notifier)
+            //           .state = index;
+            //     }
+            //
+            //     priceNotifier
+            //       ..setNameSize(item.sizeTypeName)
+            //       ..setIdSize(item.id!);
+            //
+            //     setState(() {});
+            //   },
+            //   child: Container(
+            //     padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 7.h),
+            //     decoration: BoxDecoration(
+            //       color: isSelected ? AppColors.secondaryColor : Colors.white,
+            //       borderRadius: BorderRadius.circular(8.r),
+            //       border: Border.all(color: AppColors.greySwatch.shade200),
+            //     ),
+            //     child: Text(
+            //       item.sizeTypeName.toString(),
+            //       style: TextStyle(
+            //         color:
+            //             isSelected ? AppColors.whiteColor : AppColors.fontColor,
+            //         fontSize: 12.sp,
+            //         fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+            //       ),
+            //     ),
+            //   ),
+            // );
+            final isOutOfStock =
+                item.stockStatus == false &&
+                    (item.numberData?.isEmpty ?? true);
+
             return GestureDetector(
               onTap: () {
-                if (item.numberData!.isEmpty) {
-                  if (item.stockStatus == false) {
-                    showFlashBarWarring(
-                      context: context,
-                      message: item.stock ?? '',
-                    );
-                    return;
-                  }
+                if (isOutOfStock) {
+                  showFlashBarWarring(
+                    context: context,
+                    message: item.stock ?? 'نفد المخزون',
+                  );
+                  return;
                 }
-                final priceNotifier =
-                    ref.read(changePriceProvider(widget.sizeProduct).notifier);
 
-                if ((widget.sizeProduct.numbersOfProduct?.isNotEmpty ??
-                    false)) {
+                final priceNotifier =
+                ref.read(changePriceProvider(widget.sizeProduct).notifier);
+
+                if ((widget.sizeProduct.numbersOfProduct?.isNotEmpty ?? false)) {
                   priceNotifier
                     ..setNumber('')
                     ..setIdNumber(0);
+
                   ref
-                      .read(changeIndexOfSizeProvider(widget.sizeProduct.id!)
-                          .notifier)
+                      .read(
+                    changeIndexOfSizeProvider(widget.sizeProduct.id!).notifier,
+                  )
                       .state = index;
                 }
 
@@ -148,22 +202,53 @@ class _ListOfSizeProductWidgetState
 
                 setState(() {});
               },
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 7.h),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.secondaryColor : Colors.white,
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(color: AppColors.greySwatch.shade200),
-                ),
-                child: Text(
-                  item.sizeTypeName.toString(),
-                  style: TextStyle(
-                    color:
-                        isSelected ? AppColors.whiteColor : AppColors.fontColor,
-                    fontSize: 12.sp,
-                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Opacity(
+                    opacity: isOutOfStock ? .45 : 1,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 13.w,
+                        vertical: 7.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.secondaryColor
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                          color: isOutOfStock
+                              ? Colors.grey.shade400
+                              : AppColors.greySwatch.shade200,
+                        ),
+                      ),
+                      child: Text(
+                        item.sizeTypeName.toString(),
+                        style: TextStyle(
+                          color: isSelected
+                              ? AppColors.whiteColor
+                              : AppColors.fontColor,
+                          fontSize: 12.sp,
+                          fontWeight: isSelected
+                              ? FontWeight.w500
+                              : FontWeight.w400,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+
+                  if (isOutOfStock)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: CustomPaint(
+                          painter: _OutOfStockPainter(),
+                        ),
+                      ),
+                    ),
+
+
+                ],
               ),
             );
           }).toList(),
@@ -174,3 +259,21 @@ class _ListOfSizeProductWidgetState
 }
 
 
+class _OutOfStockPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.grey.withValues(alpha: .75)
+      ..strokeWidth = 1
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawLine(
+      Offset(0, size.height),
+      Offset(size.width, 0),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}

@@ -52,7 +52,7 @@ class AppIntroCardWidget extends StatelessWidget {
             child: Padding(
               padding:  EdgeInsets.all(10.sp),
               child: AutoSizeTextWidget(
-                text: S.of(context).appDescription+'\n           تم التطوير بواسطة Algonest ',
+                text: S.of(context).appDescription,
                 colorText: AppColors.fontColor,
                 fontSize: 11.6.sp,
                 fontWeight: FontWeight.w400,

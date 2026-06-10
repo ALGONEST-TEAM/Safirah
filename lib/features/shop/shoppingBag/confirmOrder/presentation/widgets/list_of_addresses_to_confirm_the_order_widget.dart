@@ -48,6 +48,9 @@ class _ListOfAddressesToConfirmTheOrderWidgetState
                 final hasAddressChanged = currentAddressId != selectedAddress.id;
 
                 widget.form.control('address_id').updateValue(selectedAddress.id);
+                widget.form.control('city_id').updateValue(
+                      selectedAddress.cityId ?? selectedAddress.city?.id,
+                    );
                 widget.form
                     .control('address')
                     .updateValue(selectedAddress.address);
