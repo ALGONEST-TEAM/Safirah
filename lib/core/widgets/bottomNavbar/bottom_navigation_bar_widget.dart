@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:safirah/core/helpers/navigateTo.dart';
+import '../../../features/prediction/data/model/matches_predictions_model.dart';
+import '../../../features/prediction/presentation/pages/match_details_page.dart';
 import '../../../features/profile/presentation/pages/profile_page.dart';
 import '../../../features/shop/home/presentation/pages/home_page.dart';
 import '../../../features/shop/myOrders/presentation/pages/my_orders_page.dart';
@@ -57,6 +59,7 @@ class _BottomNavigationBarWidgetState
   }
 
   void _openLeaguesSection() {
+
     switch (resolveLeaguesEntryAction(loggedIn: Auth().loggedIn)) {
       case LeaguesEntryAction.openLogin:
         navigateTo(context, const LogInPage());

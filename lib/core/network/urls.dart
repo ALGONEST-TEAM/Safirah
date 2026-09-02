@@ -19,6 +19,8 @@ class AppURL {
 
   static String get getProfileData => '/profile';
 
+  static String teamMatches(int teamId) => '/predictions/teams/$teamId/matches';
+
   static String get editProfile => '/profile/update';
 
   static String get deleteAccount => '/profile/delete_account';
@@ -97,7 +99,31 @@ class AppURL {
 
   static const String getAllMatches = '/predictions/fixtures/current';
 
+  static String matchDetails(int matchId) => '/predictions/fixtures/$matchId/details';
+
+  static String matchStatistics(int matchId, {String? period}) {
+    if (period != null && period.trim().isNotEmpty) {
+      return '/predictions/fixtures/$matchId/statistics?period=$period';
+    }
+    return '/predictions/fixtures/$matchId/statistics';
+  }
+
+  static String matchStandings(int matchId, {String? scope}) {
+    if (scope != null && scope.trim().isNotEmpty) {
+      return '/predictions/fixtures/$matchId/standings?scope=$scope';
+    }
+    return '/predictions/fixtures/$matchId/standings';
+  }
+
+  static String matchLineups(int matchId) => '/predictions/fixtures/$matchId/lineup';
+
+  static String matchEvents(int matchId) => '/predictions/fixtures/$matchId/events';
+
+  static String matchH2H(int matchId) => '/predictions/fixtures/$matchId/h2h';
+
   static const String prediction = '/predictions';
+  
+  static String competitorPredictions(int id) => '/predictions/competitor/$id';
 
   static const String standings = '/predictions/rankings';
 

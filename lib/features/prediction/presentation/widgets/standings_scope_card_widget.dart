@@ -8,7 +8,6 @@ import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../generated/l10n.dart';
 import '../../data/model/standings_model.dart';
-import '../riverpod/prediction_riverpod.dart';
 import 'standings_sort_widget.dart';
 
 class StandingsScopeCardWidget extends ConsumerWidget {

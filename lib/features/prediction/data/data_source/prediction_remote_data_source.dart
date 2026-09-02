@@ -28,6 +28,20 @@ class PredictionRemoteDataSource {
     );
   }
 
+  Future<PaginationModel<LeaguesContainerModel>> getCompetitorPredictions(
+      int competitorId, int page) async {
+    final response = await RemoteRequest.getData(
+      url: AppURL.competitorPredictions(competitorId),
+      query: {'page': page},
+    );
+    return PaginationModel<LeaguesContainerModel>.fromJson(
+      response.data['data'] ?? response.data,
+      (book) {
+        return LeaguesContainerModel.fromJson(book);
+      },
+    );
+  }
+
   Future<Unit> sendPrediction(
     int matchId,
     int homeScore,

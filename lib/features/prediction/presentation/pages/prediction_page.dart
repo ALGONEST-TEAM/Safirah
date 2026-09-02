@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:safirah/core/widgets/auto_size_text_widget.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/main_app_bar_widget.dart';
@@ -8,17 +9,18 @@ import '../widgets/awards_widget.dart';
 import '../widgets/standings_widget.dart';
 import '../widgets/matches_widget.dart';
 import '../widgets/prediction_list_widget.dart';
+import '../riverpod/prediction_riverpod.dart';
 
-class PredictionPage extends StatefulWidget {
+class PredictionPage extends ConsumerStatefulWidget {
   const PredictionPage({super.key, this.tabChildren});
 
   final List<Widget>? tabChildren;
 
   @override
-  State<PredictionPage> createState() => _PredictionPageState();
+  ConsumerState<PredictionPage> createState() => _PredictionPageState();
 }
 
-class _PredictionPageState extends State<PredictionPage>
+class _PredictionPageState extends ConsumerState<PredictionPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final List<String> _tabs = [

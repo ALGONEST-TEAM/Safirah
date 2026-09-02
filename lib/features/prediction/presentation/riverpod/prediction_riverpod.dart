@@ -29,15 +29,84 @@ class GetAllMatchesNotifier
 
   final _controller = PredictionReposaitory();
 
-  Future<void> getData() async {
-    state = state.copyWith(state: States.loading);
+  Future<void> getData({bool silent = false}) async {
+    if (!silent || state.data.isEmpty) {
+      state = state.copyWith(state: States.loading);
+    }
 
     final data = await _controller.getAllMatches(scope);
     data.fold((failure) {
-      state = state.copyWith(state: States.error, exception: failure);
+      if (!silent || state.data.isEmpty) {
+        state = state.copyWith(state: States.error, exception: failure);
+      }
     }, (newData) {
       state = state.copyWith(state: States.loaded, data: newData);
     });
+  }
+
+  void updateMatchFromWebSocket({
+    required int matchId,
+    int? homeScore,
+    int? awayScore,
+    int? stateId,
+    String? resultInfo,
+    int? minute,
+    int? second,
+    bool? ticking,
+    int? timeAdded,
+  }) {
+    if (state.data.isEmpty) return;
+
+    bool updatedAny = false;
+    final newContainers = state.data.map((container) {
+      final newLeagues = container.leagues.map((league) {
+        final newMatches = league.matches.map((match) {
+          if (match.matchId == matchId) {
+            updatedAny = true;
+            
+            String? newGoalSide = match.lastGoalSide;
+            DateTime? newGoalTime = match.lastGoalTime;
+
+            if (homeScore != null && homeScore > (match.homeTeam.score ?? 0)) {
+              newGoalSide = 'home';
+              newGoalTime = DateTime.now();
+            } else if (awayScore != null && awayScore > (match.awayTeam.score ?? 0)) {
+              newGoalSide = 'away';
+              newGoalTime = DateTime.now();
+            }
+
+            return match.copyWith(
+              status: stateId ?? match.status,
+              resultInfo: resultInfo ?? match.resultInfo,
+              minute: minute ?? match.minute,
+              second: second ?? match.second,
+              ticking: ticking ?? match.ticking,
+              timeAdded: timeAdded ?? match.timeAdded,
+              homeTeam: homeScore != null
+                  ? match.homeTeam.copyWith(score: homeScore)
+                  : match.homeTeam,
+              awayTeam: awayScore != null
+                  ? match.awayTeam.copyWith(score: awayScore)
+                  : match.awayTeam,
+              lastGoalSide: newGoalSide,
+              lastGoalTime: newGoalTime,
+            );
+          }
+          return match;
+        }).toList();
+
+        return league.copyWith(matches: newMatches);
+      }).toList();
+
+      return container.copyWith(leagues: newLeagues);
+    }).toList();
+
+    if (updatedAny) {
+      state = state.copyWith(
+        state: state.stateData,
+        data: newContainers,
+      );
+    }
   }
 }
 
@@ -72,6 +141,51 @@ class GetAllPredictionsNotifier
     final nextPage = moreData ? state.data.currentPage + 1 : 1;
 
     final result = await _controller.getAllPredictions(nextPage);
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(state: States.error, exception: failure);
+      },
+      (newData) {
+        state = state.success(newData, moreData);
+      },
+    );
+  }
+}
+
+final getCompetitorPredictionsProvider = StateNotifierProvider.family<
+    GetCompetitorPredictionsNotifier,
+    DataState<PaginationModel<LeaguesContainerModel>>, int>(
+  (ref, int competitorId) {
+    return GetCompetitorPredictionsNotifier(competitorId);
+  },
+);
+
+class GetCompetitorPredictionsNotifier
+    extends StateNotifier<DataState<PaginationModel<LeaguesContainerModel>>> {
+  final int competitorId;
+
+  GetCompetitorPredictionsNotifier(this.competitorId)
+      : super(DataState<PaginationModel<LeaguesContainerModel>>.initial(
+            PaginationModel.empty())) {
+    getData();
+  }
+
+  final _controller = PredictionReposaitory();
+
+  Future<void> getData({bool moreData = false}) async {
+    if (moreData && state.data.currentPage >= state.data.lastPage) {
+      return;
+    }
+    if (moreData) {
+      state = state.copyWith(state: States.loadingMore);
+    } else {
+      state = state.copyWith(state: States.loading);
+    }
+
+    final nextPage = moreData ? state.data.currentPage + 1 : 1;
+
+    final result = await _controller.getCompetitorPredictions(competitorId, nextPage);
 
     result.fold(
       (failure) {
@@ -173,7 +287,7 @@ class StandingsNotifier extends StateNotifier<DataState<StandingsData>> {
 
 final standingsScopeProvider = StateProvider<String?>((ref) => null);
 
-final awardsScopeProvider = StateProvider<String>((ref) => 'month');
+final awardsScopeProvider = StateProvider<String>((ref) => 'season');
 
 final awardsScopeRefreshProvider =
     StateProvider<RefreshState>((ref) => RefreshState.idle());
@@ -186,7 +300,7 @@ final awardsProvider =
 );
 
 class AwardsNotifier extends StateNotifier<DataState<AwardsData>> {
-  static const String initialScope = 'month';
+  static const String initialScope = 'season';
 
   AwardsNotifier()
       : super(DataState<AwardsData>.initial(AwardsData.empty())) {

@@ -14,8 +14,8 @@ class CartProductModel {
   final int? numberId;
   final String? numberName;
   final int? isPrintable;
-  final dynamic productPrintingPrice;
-  final int printingPrice;
+  final num? productPrintingPrice;
+  final num printingPrice;
 
   CartProductModel({
     required this.id,
@@ -48,14 +48,14 @@ class CartProductModel {
       colorHex: (json['color_hex'] ?? '').toString(),
       colorName: (json['color_name'] ?? '').toString(),
       image: (json['image'] ?? '').toString(),
-      price: json['price'] ,
-      productPriceAfterDiscount: json['product_price_after_discount'] ,
-      discount: json['discount'] ,
+      price: json['price'],
+      productPriceAfterDiscount: json['product_price_after_discount'],
+      discount: json['discount'],
       numberId: (json['number_id'] as num?)?.toInt(),
       numberName: (json['number_name'] ?? '').toString(),
-      isPrintable: json['is_printable'],
-      productPrintingPrice: json['product_printing_price'],
-      printingPrice: json['printing_price'],
+      isPrintable: (json['is_printable'] as num?)?.toInt(),
+      productPrintingPrice: json['product_printing_price'] as num?,
+      printingPrice: json['printing_price'] as num? ?? 0,
     );
   }
 

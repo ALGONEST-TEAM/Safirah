@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/helpers/navigateTo.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../data/model/standings_model.dart';
+import '../pages/competitor_predictions_page.dart';
 import 'standings_header_widget.dart';
 import 'standings_rank_widget.dart';
 
@@ -31,73 +33,80 @@ class StandingsListCardWidget extends StatelessWidget {
               final item = items[i];
               return Column(
                 children: [
-                  Padding(
-                    padding: EdgeInsets.all(10.sp),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 4.w,
-                      children: [
-                        StandingsRankWidget(
-                          rank: item.rank,
-                          movement: item.trend,
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                            spacing: 4.h,
-                            children: [
-                              AutoSizeTextWidget(
-                                text: item.user,
-                                fontSize: 12.sp,
-                                minFontSize: 12,
-                                maxLines: 2,
-                              ),
-                              // AutoSizeTextWidget(
-                              //   text: item.username,
-                              //   fontSize: 10.sp,
-                              //   colorText: AppColors.fontColor
-                              //       .withValues(alpha: .6),
-                              //   maxLines: 2,
-                              // ),
-                            ],
+                  GestureDetector(
+                    onTap: () {
+                      if (item.userId != 0) {
+                        navigateTo(
+                          context,
+
+                           CompetitorPredictionsPage(
+                            competitorId: item.userId.toInt(),
+                            competitorName: item.user,
                           ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                            spacing: 6.h,
-                            children: [
-                              AutoSizeTextWidget(
-                                text:
-                                '${item.correctPredictions} توقع صحيح',
-                                fontSize: 10.sp,
-                                colorText: AppColors.fontColor
-                                    .withValues(alpha: .6),
-                                maxLines: 2,
-                              ),
-                              AutoSizeTextWidget(
-                                text:
-                                '${item.incorrectPredictions} توقع غير صحيح',
-                                fontSize: 10.sp,
-                                colorText: AppColors.fontColor
-                                    .withValues(alpha: .6),
-                                maxLines: 2,
-                              ),
-                            ],
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.all(10.sp),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 4.w,
+                        children: [
+                          StandingsRankWidget(
+                            rank: item.rank,
+                            movement: item.trend,
                           ),
-                        ),
-                        SizedBox(
-                          width: 54.w,
-                          child: AutoSizeTextWidget(
-                            text: item.points.toString(),
-                            fontSize: 11.sp,
-                            textAlign: TextAlign.end,
-                            maxLines: 2,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              spacing: 4.h,
+                              children: [
+                                AutoSizeTextWidget(
+                                  text: item.user,
+                                  fontSize: 12.sp,
+                                  minFontSize: 12,
+                                  maxLines: 2,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              spacing: 6.h,
+                              children: [
+                                AutoSizeTextWidget(
+                                  text:
+                                  '${item.correctPredictions} توقع صحيح',
+                                  fontSize: 10.sp,
+                                  colorText: AppColors.fontColor
+                                      .withValues(alpha: .6),
+                                  maxLines: 2,
+                                ),
+                                AutoSizeTextWidget(
+                                  text:
+                                  '${item.incorrectPredictions} توقع غير صحيح',
+                                  fontSize: 10.sp,
+                                  colorText: AppColors.fontColor
+                                      .withValues(alpha: .6),
+                                  maxLines: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 54.w,
+                            child: AutoSizeTextWidget(
+                              text: item.points.toString(),
+                              fontSize: 11.sp,
+                              textAlign: TextAlign.end,
+                              maxLines: 2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   if (i != items.length - 1)

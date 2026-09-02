@@ -11,6 +11,7 @@ class TeamWidget extends StatelessWidget {
   final Size? sizeImage;
   final double? fontSize;
   final double? width;
+  final EdgeInsetsGeometry? padding;
 
   const TeamWidget({
     super.key,
@@ -20,6 +21,7 @@ class TeamWidget extends StatelessWidget {
     this.sizeImage,
     this.fontSize,
     this.width,
+    this.padding,
   });
 
   @override
@@ -27,7 +29,7 @@ class TeamWidget extends StatelessWidget {
     return Container(
       width: width ?? 110.w,
       color: Colors.transparent,
-      padding: EdgeInsets.symmetric(vertical: 8.h),
+      padding: padding ?? EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
         mainAxisAlignment:
             alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,

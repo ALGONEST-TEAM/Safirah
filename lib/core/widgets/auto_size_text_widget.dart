@@ -27,6 +27,9 @@ class AutoSizeTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double resolvedMin = (minFontSize ?? 10.0).roundToDouble();
+    final double resolvedMax = (maxFontSize ?? 24.0).roundToDouble();
+
     return AutoSizeText(
       text,
       style: TextStyle(
@@ -37,11 +40,11 @@ class AutoSizeTextWidget extends StatelessWidget {
         decoration: decoration,
       ),
       maxLines: maxLines ?? 1,
-      maxFontSize: maxFontSize ?? 24,
-      minFontSize: minFontSize ?? 10,
+      maxFontSize: resolvedMax,
+      minFontSize: resolvedMin,
+      stepGranularity: 1,
       overflow: TextOverflow.ellipsis,
       textAlign: textAlign ?? TextAlign.start,
-
     );
   }
 }

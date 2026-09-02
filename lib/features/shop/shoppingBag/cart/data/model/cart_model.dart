@@ -17,8 +17,8 @@ class CartModel {
   final num? couponDiscount;
     final int? numberId;
     final String? numberName;
-  final int? productPrintingPrice;
-  final int? printingPrice;
+  final num? productPrintingPrice;
+  final num? printingPrice;
   final int? isPrintable;
 
   CartModel({
@@ -45,25 +45,25 @@ class CartModel {
 
   factory CartModel.fromJson(Map<String, dynamic> json) {
     return CartModel(
-      id: json['id'] ??0,
-      productId: json['product_id'] as int?,
+      id: (json['id'] as num? ?? 0).toInt(),
+      productId: (json['product_id'] as num?)?.toInt(),
       productName: json['product_name'] ?? '',
-      quantity: json['quantity'] as int?,
+      quantity: (json['quantity'] as num?)?.toInt(),
       colorId: json['color_id'],
       colorName: json['color_name'] ?? '',
       colorHex: json['color_hex'] ?? '',
-      sizeId: json['parent_measuring_id'] as int?,
+      sizeId: (json['parent_measuring_id'] as num?)?.toInt(),
       sizeName: json['measuring_value'] ?? '',
       images: json['image'] ?? "",
       price: json['product_price'],
       productPriceAfterDiscount: json['product_price_after_discount'],
       discount: json['discount'],
       couponDiscount: json['coupon_discount'] ?? 0,
-      numberId: json['number_id'] as int?,
+      numberId: (json['number_id'] as num?)?.toInt(),
       numberName: json['number_name'] ?? "",
-      productPrintingPrice: json['product_printing_price'],
-      printingPrice: json['printing_price'],
-      isPrintable: json['is_printable'],
+      productPrintingPrice: json['product_printing_price'] as num?,
+      printingPrice: json['printing_price'] as num?,
+      isPrintable: (json['is_printable'] as num?)?.toInt(),
     );
   }
 
@@ -124,8 +124,8 @@ class CartModel {
     int? numberId,
     String? numberName,
     int? isPrintable,
-    int? productPrintingPrice,
-    int? printingPrice,
+    num? productPrintingPrice,
+    num? printingPrice,
   }) {
     return CartModel(
       id: id ?? this.id,

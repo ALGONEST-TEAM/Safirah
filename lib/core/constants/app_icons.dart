@@ -125,6 +125,9 @@ class AppIcons {
   static const String substitutionPlayer =
       '${_iconsPath}substitution.svg';
 
+  static const String substitutionInMatch =
+      '${_iconsPath}substitution_in_match.svg';
+
   static const String editPlayer =
       '${_iconsPath}edit_event.svg';
 

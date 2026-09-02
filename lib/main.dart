@@ -94,7 +94,8 @@ class _MyAppState extends ConsumerState<MyApp> {
 
     FirebaseMessagingService.I.getDeviceToken().then((t) {
       if (t != null) {
-        debugPrint('Device Token: $t');
+        debugPrint('Device Token: $t -----');
+        debugPrint('Device Token: ${Auth().token}');
         Auth().setFcmToken(t);
       }
     });

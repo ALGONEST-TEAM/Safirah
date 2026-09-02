@@ -14,6 +14,8 @@ import '../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
 import '../../../../core/widgets/text_form_field.dart';
 import '../../../../generated/l10n.dart';
 import '../riverpod/user_riverpod.dart';
+import '../widgets/phone_country_selector_button_widget.dart';
+import '../widgets/user_country_picker_helper.dart';
 import '../widgets/user_page_titles_widget.dart';
 import 'verify_code_page.dart';
 
@@ -27,7 +29,25 @@ class LogInPage extends ConsumerStatefulWidget {
 class _LogInPageState extends ConsumerState<LogInPage> {
   TextEditingController phoneNumberController = TextEditingController();
   final formKey = GlobalKey<FormState>();
+  String _selectedCountryDialCode = '967';
+  String _selectedCountryFlag = '🇾🇪';
 
+  bool get _isNonYemeniNumber => _selectedCountryDialCode != '967';
+  String get _normalizedPhoneNumber =>
+      phoneNumberController.text.replaceAll(RegExp(r'\D'), '');
+  String get _completePhoneNumber =>
+      '$_selectedCountryDialCode$_normalizedPhoneNumber';
+  void _showCountryPicker() {
+    UserCountryPickerHelper.show(
+      context: context,
+      onSelected: (selection) {
+        setState(() {
+          _selectedCountryDialCode = selection.dialCode;
+          _selectedCountryFlag = selection.flagEmoji;
+        });
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     var state = ref.watch(userProvider);
@@ -73,22 +93,18 @@ class _LogInPageState extends ConsumerState<LogInPage> {
                           TextFormFieldWidget(
                             controller: phoneNumberController,
                             type: TextInputType.phone,
+
                             hintText: S.of(context).enterPhoneNumber,
-                            maxLength: 9,
                             fieldValidator: (value) {
-                              if (value == null || value.toString().isEmpty) {
+                              final phone = (value ?? '').replaceAll(RegExp(r'\D'), '');
+                              if (phone.isEmpty) {
                                 return S.of(context).pleaseEnterPhoneNumber;
                               }
-                              final phone = value.trim();
-                              if (!phone.startsWith('7')) {
-                                return S.of(context).phoneMustStartWith7;
-                              }
-                              if (phone.length < 9) {
-                                return S.of(context).phoneMustBe9Digits;
+                              if (phone.length < 6 || phone.length > 15) {
+                                return 'يرجى إدخال رقم هاتف صحيح';
                               }
                               return null;
-                            },
-                            prefix: Padding(
+                            },                            prefix: Padding(
                               padding: EdgeInsets.all(11.sp),
                               child: SvgPicture.asset(
                                 AppIcons.phone,
@@ -96,20 +112,36 @@ class _LogInPageState extends ConsumerState<LogInPage> {
                                 color: AppColors.primaryColor,
                               ),
                             ),
-                            suffixIcon: Padding(
-                              padding: EdgeInsets.only(
-                                left: 12.w,
-                                right: 12.w,
-                                top: 12.h,
-                                bottom: 8.h,
-                              ),
-                              child: AutoSizeTextWidget(
-                                text: "967+",
-                                colorText: AppColors.primaryColor,
-                                fontSize: 12.sp,
-                              ),
+                            // suffixIcon: Padding(
+                            //   padding: EdgeInsets.only(
+                            //     left: 12.w,
+                            //     right: 12.w,
+                            //     top: 12.h,
+                            //     bottom: 8.h,
+                            //   ),
+                            //   child: AutoSizeTextWidget(
+                            //     text: "967+",
+                            //     colorText: AppColors.primaryColor,
+                            //     fontSize: 12.sp,
+                            //   ),
+                            // ),
+                            suffixIcon: PhoneCountrySelectorButtonWidget(
+                              flagEmoji: _selectedCountryFlag,
+                              dialCode: _selectedCountryDialCode,
+                              onTap: _showCountryPicker,
                             ),
                           ),
+                          if (_isNonYemeniNumber) ...[
+                            8.h.verticalSpace,
+                            AutoSizeTextWidget(
+                              text:
+                              ' يرجى إدخال رقم مرتبط بالواتساب الخاص بك لأن رمز التحقق OTP سيصل إليه.',
+                              fontSize: 9.8.sp,
+                              colorText: AppColors.fontColor2,
+                              fontWeight: FontWeight.w400,
+                              maxLines: 3,
+                            ),
+                          ],
                           12.h.verticalSpace,
                           CheckStateInPostApiDataWidget(
                             state: state,
@@ -120,7 +152,7 @@ class _LogInPageState extends ConsumerState<LogInPage> {
                                 fontSize: 15.6.sp,
                                 context: context,
                                 page: VerifyCodePage(
-                                  phoneNumber: phoneNumberController.text,
+                                  phoneNumber:_completePhoneNumber,
                                 ),
                               );
                             },
@@ -139,7 +171,7 @@ class _LogInPageState extends ConsumerState<LogInPage> {
                                 if (isValid) {
                                   FocusManager.instance.primaryFocus?.unfocus();
                                   ref.read(userProvider.notifier).logIn(
-                                        phoneNumber: phoneNumberController.text,
+                                        phoneNumber: _completePhoneNumber,
                                       );
                                 }
                               },

@@ -93,6 +93,7 @@ class StandingItemData {
   final num correctPredictions;
   final num incorrectPredictions;
   final num totalPredictions;
+  final num userId;
   final String user;
   final String trend;
 
@@ -104,6 +105,7 @@ class StandingItemData {
     required this.correctPredictions,
     required this.incorrectPredictions,
     required this.totalPredictions,
+    required this.userId,
     required this.user,
     required this.trend,
   });
@@ -119,6 +121,7 @@ class StandingItemData {
       correctPredictions: (json['correct_predictions'] ?? 0) as num,
       incorrectPredictions: (json['incorrect_predictions'] ?? 0) as num,
       totalPredictions: (json['total_predictions'] ?? 0) as num,
+      userId: (user?['id'] ?? 0) as num,
       user: user?['name'] ?? '',
       trend: json['trend'] ?? '',
     );
@@ -137,6 +140,7 @@ class StandingItemData {
       correctPredictions: 0,
       incorrectPredictions: 0,
       totalPredictions: 0,
+      userId: 0,
       user: '',
       trend: '',
     );

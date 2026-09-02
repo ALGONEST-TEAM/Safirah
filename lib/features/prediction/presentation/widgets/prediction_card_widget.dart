@@ -16,9 +16,14 @@ import 'team_widget.dart';
 class PredictionCardWidget extends ConsumerStatefulWidget {
   final LeagueForPredictionModel data;
   final String date;
+  final bool isCompetitor;
 
-  const PredictionCardWidget(
-      {super.key, required this.data, required this.date});
+  const PredictionCardWidget({
+    super.key,
+    required this.data,
+    required this.date,
+    this.isCompetitor = false,
+  });
 
   @override
   ConsumerState<PredictionCardWidget> createState() =>
@@ -110,21 +115,26 @@ class _PredictionCardWidgetState extends ConsumerState<PredictionCardWidget> {
                         alignRight: false,
                       ),
                     ),
-                    MatchStatusActionWidget(
-                      status: item.status,
-                      rtl: rtl,
-                      onEditTap: () {
-                        showModalBottomSheetWidget(
-                          context: context,
-                          page: SendOrEditPredictionWidget(
-                            league: widget.data.name,
-                            date: widget.date,
-                            matches: item,
-                            isEdit: true,
-                          ),
-                        );
-                      },
-                    ),
+                    if (widget.isCompetitor && statusHelper.isNotStarted(item.status))
+                      SizedBox(width: 24.w) // Keep the spacing but hide the icon
+                    else
+                      MatchStatusActionWidget(
+                        status: item.status,
+                        rtl: rtl,
+                        onEditTap: () {
+                          if (!widget.isCompetitor) {
+                            showModalBottomSheetWidget(
+                              context: context,
+                              page: SendOrEditPredictionWidget(
+                                league: widget.data.name,
+                                date: widget.date,
+                                matches: item,
+                                isEdit: true,
+                              ),
+                            );
+                          }
+                        },
+                      ),
                   ],
                 ),
               ),

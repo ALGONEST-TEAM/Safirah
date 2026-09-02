@@ -24,6 +24,18 @@ class PredictionReposaitory {
       getAllPredictions(int page) async {
     try {
       final remote = await _predictionRemoteDataSource.getAllPredictions(page);
+      print(remote.data[4].leagues[0].matches[0].statusColor);
+      return Right(remote);
+    } on DioException catch (e) {
+      return Left(e);
+    }
+  }
+
+  Future<Either<DioException, PaginationModel<LeaguesContainerModel>>>
+      getCompetitorPredictions(int competitorId, int page) async {
+    try {
+      final remote = await _predictionRemoteDataSource.getCompetitorPredictions(
+          competitorId, page);
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
