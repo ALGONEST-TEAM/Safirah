@@ -35,6 +35,7 @@ class StandingsListCardWidget extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
+                      print(item.userId.toString()+'00000000000000');
                       if (item.userId != 0) {
                         navigateTo(
                           context,

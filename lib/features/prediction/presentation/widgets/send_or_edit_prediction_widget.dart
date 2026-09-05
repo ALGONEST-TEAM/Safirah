@@ -18,6 +18,7 @@ class SendOrEditPredictionWidget extends ConsumerStatefulWidget {
   final String date;
   final bool isEdit;
   final MatchesPredictionsModel matches;
+  final void Function(int homeScore, int awayScore)? onSuccess;
 
   const SendOrEditPredictionWidget({
     super.key,
@@ -25,6 +26,7 @@ class SendOrEditPredictionWidget extends ConsumerStatefulWidget {
     required this.date,
     required this.matches,
     this.isEdit = false,
+    this.onSuccess,
   });
 
   @override
@@ -49,8 +51,12 @@ class _SendOrEditPredictionWidgetState
     _awayController = TextEditingController();
 
     if (widget.isEdit) {
-      _initialHome = widget.matches.homeScore.toString();
-      _initialAway = widget.matches.awayScore.toString();
+      _initialHome = widget.matches.homeScore != null
+          ? widget.matches.homeScore.toString()
+          : '';
+      _initialAway = widget.matches.awayScore != null
+          ? widget.matches.awayScore.toString()
+          : '';
 
       _homeController.text = _initialHome;
       _awayController.text = _initialAway;
@@ -161,6 +167,9 @@ class _SendOrEditPredictionWidgetState
                         ref.invalidate(getAllMatchesProvider);
                       }
                       ref.invalidate(getAllPredictionsProvider);
+                      final home = int.tryParse(_homeController.text) ?? 0;
+                      final away = int.tryParse(_awayController.text) ?? 0;
+                      widget.onSuccess?.call(home, away);
                     },
                     bottonWidget: DefaultButtonWidget(
                       text: widget.isEdit
@@ -184,12 +193,13 @@ class _SendOrEditPredictionWidgetState
                                       homeScore: _homeController.text.toInt(),
                                       awayScore: _awayController.text.toInt(),
                                     );
+                              } else {
+                                ref.read(sendPredictionProvider.notifier).send(
+                                      matchId: widget.matches.matchId,
+                                      homeScore: _homeController.text.toInt(),
+                                      awayScore: _awayController.text.toInt(),
+                                    );
                               }
-                              ref.read(sendPredictionProvider.notifier).send(
-                                    matchId: widget.matches.matchId,
-                                    homeScore: _homeController.text.toInt(),
-                                    awayScore: _awayController.text.toInt(),
-                                  );
                             },
                     ),
                   ),

@@ -15,35 +15,34 @@ import 'live_goal_flash_widget.dart';
 
 class LiveMatchItemWidget extends ConsumerWidget {
   final MatchesPredictionsModel item;
+  bool? isInMatchesTeam;
 
-  const LiveMatchItemWidget({
-    super.key,
-    required this.item,
-  });
+  LiveMatchItemWidget(
+      {super.key, required this.item, this.isInMatchesTeam = false});
 
   @override
-  Widget build(BuildContext context,ref) {
+  Widget build(BuildContext context, ref) {
+    return GestureDetector(
+      onTap: isInMatchesTeam == true
+          ? null
+          : () {
+              TeamColorExtractor.preloadColors(
+                item.homeTeam.logo,
+                item.awayTeam.logo,
+              );
 
-    return InkWell(
-      onTap: () {
-        TeamColorExtractor.preloadColors(
-          item.homeTeam.logo,
-          item.awayTeam.logo,
-        );
-
-        ref.read(matchEventsProvider( item.matchId).notifier).getMatchEvents();
-        navigateTo(
-          context,
-          MatchDetailsPage(
-            matchId: item.matchId,
-          ),
-        );
-
-      },
-
-      borderRadius: BorderRadius.circular(8.r),
+              ref
+                  .read(matchEventsProvider(item.matchId).notifier)
+                  .getMatchEvents();
+              navigateTo(
+                context,
+                MatchDetailsPage(
+                  matchId: item.matchId,
+                ),
+              );
+            },
+      behavior: HitTestBehavior.opaque,
       child: Padding(
-
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -86,7 +85,8 @@ class LiveMatchItemWidget extends ConsumerWidget {
                   timeAdded: item.timeAdded,
                 ),
                 scoreWidget: AutoSizeTextWidget(
-                  text: "${item.homeTeam.score ?? 0} - ${item.awayTeam.score ?? 0}",
+                  text:
+                      "${item.homeTeam.score ?? 0} - ${item.awayTeam.score ?? 0}",
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w800,
                   colorText: AppColors.fontColor,

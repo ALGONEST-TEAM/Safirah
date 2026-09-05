@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
+import '../../riverpod/match_details_riverpod.dart';
 import 'match_details_who_will_win_team_logo_widget.dart';
 import '../../../data/model/match_details_model.dart';
 import '../../../data/model/matches_predictions_model.dart';
 import '../send_or_edit_prediction_widget.dart';
 
-class MatchDetailsWhoWillWinWidget extends StatelessWidget {
+class MatchDetailsWhoWillWinWidget extends ConsumerWidget {
   final String leagueName;
   final MatchesPredictionsModel? match;
   final MatchDetailsModel? matchDetails;
@@ -22,19 +23,32 @@ class MatchDetailsWhoWillWinWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final homeLogo = matchDetails?.teams?.home?.logo ?? match?.homeTeam.logo ?? '';
-    final awayLogo = matchDetails?.teams?.away?.logo ?? match?.awayTeam.logo ?? '';
-    final homeName = matchDetails?.teams?.home?.name ?? match?.homeTeam.name ?? '';
-    final awayName = matchDetails?.teams?.away?.name ?? match?.awayTeam.name ?? '';
+  Widget build(BuildContext context, WidgetRef ref) {
+    final homeLogo =
+        matchDetails?.teams?.home?.logo ?? match?.homeTeam.logo ?? '';
+    final awayLogo =
+        matchDetails?.teams?.away?.logo ?? match?.awayTeam.logo ?? '';
+    final homeName =
+        matchDetails?.teams?.home?.name ?? match?.homeTeam.name ?? '';
+    final awayName =
+        matchDetails?.teams?.away?.name ?? match?.awayTeam.name ?? '';
 
-    final bool hasPrediction = matchDetails?.hasPrediction == true || match?.hasPrediction == true;
-    final int userHomeScore = matchDetails?.userHomeScore ?? match?.homeScore?.toInt() ?? 0;
-    final int userAwayScore = matchDetails?.userAwayScore ?? match?.awayScore?.toInt() ?? 0;
-    final int predictionId = matchDetails?.predictionId ?? match?.productionId ?? 0;
+    final bool hasPrediction =
+        matchDetails?.hasPrediction == true || match?.hasPrediction == true;
+    final int userHomeScore =
+        matchDetails?.userHomeScore ?? match?.homeScore?.toInt() ?? 0;
+    final int userAwayScore =
+        matchDetails?.userAwayScore ?? match?.awayScore?.toInt() ?? 0;
+    final int predictionId =
+        matchDetails?.predictionId ?? match?.productionId ?? 0;
 
-    // Create a fallback MatchesPredictionsModel if match is null
-    final MatchesPredictionsModel predictionModel = match ??
+    // Create prediction model with the latest prediction details
+    final MatchesPredictionsModel predictionModel = match?.copyWith(
+          hasPrediction: hasPrediction,
+          homeScore: userHomeScore,
+          awayScore: userAwayScore,
+          productionId: predictionId,
+        ) ??
         MatchesPredictionsModel(
           matchId: matchDetails?.id ?? 0,
           matchDate: matchDetails?.date ?? '',
@@ -110,7 +124,8 @@ class MatchDetailsWhoWillWinWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.greySwatch.shade50,
-                  border: Border.all(color: AppColors.greySwatch.shade200, width: 1),
+                  border: Border.all(
+                      color: AppColors.greySwatch.shade200, width: 1),
                 ),
                 alignment: Alignment.center,
                 child: AutoSizeTextWidget(
@@ -145,15 +160,19 @@ class MatchDetailsWhoWillWinWidget extends StatelessWidget {
           // Always Active Predict Button
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: hasPrediction ? Colors.white : AppColors.primaryColor,
-              foregroundColor: hasPrediction ? AppColors.primaryColor : Colors.white,
+              backgroundColor:
+                  hasPrediction ? Colors.white : AppColors.primaryColor,
+              foregroundColor:
+                  hasPrediction ? AppColors.primaryColor : Colors.white,
               minimumSize: Size(double.infinity, 38.h),
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24.r),
                 side: BorderSide(
-                  color: hasPrediction ? AppColors.primaryColor : AppColors.greySwatch.shade100, 
-                  width: 0.8
+                  color: hasPrediction
+                      ? AppColors.primaryColor
+                      : AppColors.greySwatch.shade100,
+                  width: 0.8,
                 ),
               ),
             ),
@@ -165,6 +184,17 @@ class MatchDetailsWhoWillWinWidget extends StatelessWidget {
                   date: predictionModel.matchDate,
                   matches: predictionModel,
                   isEdit: hasPrediction,
+                  onSuccess: (homeScore, awayScore) {
+                    ref
+                        .read(matchDetailsProvider(predictionModel.matchId).notifier)
+                        .updatePrediction(
+                          homeScore: homeScore,
+                          awayScore: awayScore,
+                        );
+                    ref
+                        .read(matchDetailsProvider(predictionModel.matchId).notifier)
+                        .getMatchDetails(isRefresh: true);
+                  },
                 ),
               );
             },
@@ -172,16 +202,17 @@ class MatchDetailsWhoWillWinWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  hasPrediction ? Icons.edit : Icons.edit_outlined, 
-                  color: hasPrediction ? AppColors.primaryColor : Colors.white, 
-                  size: 16.r
+                  hasPrediction ? Icons.edit : Icons.edit_outlined,
+                  color: hasPrediction ? AppColors.primaryColor : Colors.white,
+                  size: 16.r,
                 ),
                 8.w.horizontalSpace,
                 AutoSizeTextWidget(
                   text: hasPrediction ? 'تعديل التوقع' : 'توقع الآن',
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
-                  colorText: hasPrediction ? AppColors.primaryColor : Colors.white,
+                  colorText:
+                      hasPrediction ? AppColors.primaryColor : Colors.white,
                 ),
               ],
             ),

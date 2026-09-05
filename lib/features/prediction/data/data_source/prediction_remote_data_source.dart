@@ -35,7 +35,7 @@ class PredictionRemoteDataSource {
       query: {'page': page},
     );
     return PaginationModel<LeaguesContainerModel>.fromJson(
-      response.data['data'] ?? response.data,
+      response.data['data']['predictions'] ?? response.data,
       (book) {
         return LeaguesContainerModel.fromJson(book);
       },

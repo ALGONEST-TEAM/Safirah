@@ -14,10 +14,13 @@ import 'team_widget.dart';
 
 class NormalMatchItemWidget extends ConsumerWidget {
   final MatchesPredictionsModel item;
+  bool? isInMatchesTeam;
 
-  const NormalMatchItemWidget({
+   NormalMatchItemWidget({
     super.key,
     required this.item,
+  this.  isInMatchesTeam=false
+
   });
 
   @override
@@ -46,8 +49,8 @@ class NormalMatchItemWidget extends ConsumerWidget {
       return time;
     }
 
-    return InkWell(
-      onTap: () {
+    return GestureDetector(
+      onTap:isInMatchesTeam==true? null:() {
         TeamColorExtractor.preloadColors(
           item.homeTeam.logo,
           item.awayTeam.logo,
@@ -61,6 +64,7 @@ class NormalMatchItemWidget extends ConsumerWidget {
           ),
         );
       },
+        behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 2.h),
         child: Column(

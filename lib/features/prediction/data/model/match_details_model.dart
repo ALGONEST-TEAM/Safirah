@@ -69,7 +69,48 @@ class MatchDetailsModel {
   }
 
   factory MatchDetailsModel.fromJson(Map<String, dynamic> json) {
-    final prediction = json['prediction'] as Map<String, dynamic>?;
+    Map<String, dynamic>? prediction;
+    if (json['prediction'] is Map) {
+      prediction = Map<String, dynamic>.from(json['prediction']);
+    } else if (json['prediction'] is List &&
+        (json['prediction'] as List).isNotEmpty &&
+        (json['prediction'] as List).first is Map) {
+      prediction =
+          Map<String, dynamic>.from((json['prediction'] as List).first);
+    } else if (json['user_prediction'] is Map) {
+      prediction = Map<String, dynamic>.from(json['user_prediction']);
+    } else if (json['user_prediction'] is List &&
+        (json['user_prediction'] as List).isNotEmpty &&
+        (json['user_prediction'] as List).first is Map) {
+      prediction =
+          Map<String, dynamic>.from((json['user_prediction'] as List).first);
+    } else if (json['my_prediction'] is Map) {
+      prediction = Map<String, dynamic>.from(json['my_prediction']);
+    }
+
+    int? parseInt(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      return int.tryParse(value.toString());
+    }
+
+    final rawHomeScore = prediction?['home_score'] ??
+        prediction?['user_home_score'] ??
+        prediction?['home'] ??
+        json['user_home_score'] ??
+        json['prediction_home_score'];
+
+    final rawAwayScore = prediction?['away_score'] ??
+        prediction?['user_away_score'] ??
+        prediction?['away'] ??
+        json['user_away_score'] ??
+        json['prediction_away_score'];
+
+    final rawPredictionId = prediction?['id'] ??
+        prediction?['prediction_id'] ??
+        json['prediction_id'];
+
     return MatchDetailsModel(
       id: json['id'] ?? 0,
       apiId: json['api_id'] ?? '',
@@ -103,11 +144,16 @@ class MatchDetailsModel {
       timeAdded: (json['match_clock']?['added_time'] ?? json['match_clock']?['time_added'] ?? json['time_added']) != null
           ? int.tryParse((json['match_clock']?['added_time'] ?? json['match_clock']?['time_added'] ?? json['time_added']).toString())
           : null,
-      isInPredictionSystem: json['is_in_prediction_system'] == true || json['is_in_prediction_system'] == 1 || json['is_in_prediction_system']?.toString() == 'true',
-      hasPrediction: json['has_prediction'] == true || json['has_prediction'] == 1 || json['has_prediction']?.toString() == 'true',
-      userHomeScore: prediction?['home_score'],
-      userAwayScore: prediction?['away_score'],
-      predictionId: prediction?['id'],
+      isInPredictionSystem: json['is_in_prediction_system'] == true ||
+          json['is_in_prediction_system'] == 1 ||
+          json['is_in_prediction_system']?.toString() == 'true',
+      hasPrediction: json['has_prediction'] == true ||
+          json['has_prediction'] == 1 ||
+          json['has_prediction']?.toString() == 'true' ||
+          prediction != null,
+      userHomeScore: parseInt(rawHomeScore),
+      userAwayScore: parseInt(rawAwayScore),
+      predictionId: parseInt(rawPredictionId),
     );
   }
 

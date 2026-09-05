@@ -35,7 +35,7 @@ class _LiveGoalFlashWidgetState extends State<LiveGoalFlashWidget>
     super.initState();
     _flashController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200), // دورة كاملة تستغرق 2.4 ثانية (حوالي 4-5 ومضات)
+      duration: const Duration(milliseconds: 2000), // دورة كاملة تستغرق 2.4 ثانية (حوالي 4-5 ومضات)
     );
     _checkGoalStatus();
   }
@@ -149,12 +149,12 @@ class _LiveGoalFlashWidgetState extends State<LiveGoalFlashWidget>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (widget.lastGoalSide == 'away') ...[
+                if (widget.lastGoalSide == 'home') ...[
                   // Away side (Left in RTL layout means Home is Right, Away is Left)
                   Icon(Icons.arrow_back, color: AppColors.mainColorFont, size: 10.r),
                   3.w.horizontalSpace,
                   Icon(Icons.sports_soccer, color: AppColors.mainColorFont, size: 13.r),
-                ] else if (widget.lastGoalSide == 'home') ...[
+                ] else if (widget.lastGoalSide == 'away') ...[
                   // Home side (Right in RTL layout)
                   Icon(Icons.sports_soccer, color: AppColors.mainColorFont, size: 13.r),
                   3.w.horizontalSpace,

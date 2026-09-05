@@ -24,7 +24,7 @@ class PredictionReposaitory {
       getAllPredictions(int page) async {
     try {
       final remote = await _predictionRemoteDataSource.getAllPredictions(page);
-      print(remote.data[4].leagues[0].matches[0].statusColor);
+   //   print(remote.data[4].leagues[0].matches[0].statusColor);
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
@@ -36,6 +36,7 @@ class PredictionReposaitory {
     try {
       final remote = await _predictionRemoteDataSource.getCompetitorPredictions(
           competitorId, page);
+      print(remote.data[0]);
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
@@ -79,6 +80,8 @@ class PredictionReposaitory {
   Future<Either<DioException, StandingsData>> standings(String scope) async {
     try {
       final remote = await _predictionRemoteDataSource.standings(scope);
+      print(remote.userItem.userId);
+
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);

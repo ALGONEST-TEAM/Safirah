@@ -79,7 +79,6 @@ class _MatchDetailsHeaderContentWidgetState
       onTap: () {
        // final teamId = md.teams?.home?.teamId ?? md.teams?.home?.id ?? 0;
          final teamId = md.teams?.home?.sportmonksId;
-        print(teamId);
         if (teamId != 0) {
           navigateTo(
               context,

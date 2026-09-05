@@ -48,6 +48,22 @@ class MatchDetailsNotifier extends StateNotifier<DataState<MatchDetailsModel>> {
     );
   }
 
+  void updatePrediction({
+    required int homeScore,
+    required int awayScore,
+    int? predictionId,
+  }) {
+    state = state.copyWith(
+      state: state.stateData,
+      data: state.data.copyWith(
+        hasPrediction: true,
+        userHomeScore: homeScore,
+        userAwayScore: awayScore,
+        predictionId: predictionId ?? state.data.predictionId,
+      ),
+    );
+  }
+
   void updateFromWebSocket({
     int? homeScore,
     int? awayScore,

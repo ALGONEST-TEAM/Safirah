@@ -70,9 +70,9 @@ class MatchCardWidget extends ConsumerWidget {
               return Column(
                 children: [
                   if (isLiveMatch)
-                    LiveMatchItemWidget(item: item)
+                    LiveMatchItemWidget(item: item,isInMatchesTeam: hideHeader,)
                   else
-                    NormalMatchItemWidget(item: item),
+                    NormalMatchItemWidget(item: item,isInMatchesTeam: hideHeader,),
                   if (i != data.matches.length - 1)
                     Divider(
                       height: 4.h,
