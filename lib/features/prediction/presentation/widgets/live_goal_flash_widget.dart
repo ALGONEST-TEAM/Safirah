@@ -35,7 +35,7 @@ class _LiveGoalFlashWidgetState extends State<LiveGoalFlashWidget>
     super.initState();
     _flashController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000), // دورة كاملة تستغرق 2.4 ثانية (حوالي 4-5 ومضات)
+      duration: const Duration(milliseconds: 2000), 
     );
     _checkGoalStatus();
   }
@@ -48,6 +48,8 @@ class _LiveGoalFlashWidgetState extends State<LiveGoalFlashWidget>
     }
   }
 
+  static const int _goalFlashDurationSeconds = 20;
+
   void _checkGoalStatus() {
     if (widget.lastGoalTime == null || widget.lastGoalSide == null) {
       _endGoalAnimation();
@@ -57,7 +59,7 @@ class _LiveGoalFlashWidgetState extends State<LiveGoalFlashWidget>
     final now = DateTime.now();
     final difference = now.difference(widget.lastGoalTime!);
 
-    if (difference.inSeconds < 10) {
+    if (difference.inSeconds < _goalFlashDurationSeconds) {
       // Start or continue goal animation
       if (!_isGoalActive) {
         setState(() {
@@ -68,11 +70,14 @@ class _LiveGoalFlashWidgetState extends State<LiveGoalFlashWidget>
 
       // Schedule stop
       _goalTimer?.cancel();
-      _goalTimer = Timer(Duration(seconds: 10 - difference.inSeconds), () {
-        if (mounted) {
-          _endGoalAnimation();
-        }
-      });
+      _goalTimer = Timer(
+        Duration(seconds: _goalFlashDurationSeconds - difference.inSeconds),
+        () {
+          if (mounted) {
+            _endGoalAnimation();
+          }
+        },
+      );
     } else {
       _endGoalAnimation();
     }
