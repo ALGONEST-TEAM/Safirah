@@ -34,6 +34,9 @@ class StandingsListCardWidget extends StatelessWidget {
               return Column(
                 children: [
                   GestureDetector(
+
+                    behavior: HitTestBehavior.opaque,
+
                     onTap: () {
                       print(item.userId.toString()+'00000000000000');
                       if (item.userId != 0) {
