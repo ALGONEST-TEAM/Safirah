@@ -47,6 +47,14 @@ class _EditScheduleMatchPageState extends ConsumerState<EditScheduleMatchPage> {
   bool _prefilledBaseFields = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(usersHasRoleRefreshProvider(widget.leagueSyncId).notifier).refresh();
+    });
+  }
+
+  @override
   void dispose() {
     dateMatch.dispose();
     timeMatch.dispose();
@@ -105,7 +113,6 @@ class _EditScheduleMatchPageState extends ConsumerState<EditScheduleMatchPage> {
   Widget build(BuildContext context) {
     final scheduleState = ref.watch(scheduleMatchProvider);
     final matchState = ref.watch(getFullMatchDataProvider(widget.matchSyncId));
-    ref.watch(usersHasRoleRefreshProvider(widget.leagueSyncId));
 
     final refereeUsersAsync = ref.watch(
       usersHasRolesStreamProvider(

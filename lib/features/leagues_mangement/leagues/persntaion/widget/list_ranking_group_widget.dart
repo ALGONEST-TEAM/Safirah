@@ -10,16 +10,30 @@ import '../../../group/presntaion/widget/ranking_team_widget.dart';
 import '../../../home/presntation/widgets/banners_widget.dart';
 import '../riverpod/riverpod.dart';
 
-class ListRankingGroupWidget extends ConsumerWidget {
+class ListRankingGroupWidget extends ConsumerStatefulWidget {
   const ListRankingGroupWidget({super.key, required this.leagueSyncId});
 
   final String leagueSyncId;
 
   @override
-  Widget build(BuildContext context, ref) {
-    final rankingState = ref.watch(groupsStreamProvider(leagueSyncId));
-    ref.watch(groupRefreshProvider(leagueSyncId));
-    final bannersState = ref.watch(getLeagueBannersProvider(leagueSyncId));
+  ConsumerState<ListRankingGroupWidget> createState() =>
+      _ListRankingGroupWidgetState();
+}
+
+class _ListRankingGroupWidgetState
+    extends ConsumerState<ListRankingGroupWidget> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(groupRefreshProvider(widget.leagueSyncId).notifier).refresh();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final rankingState = ref.watch(groupsStreamProvider(widget.leagueSyncId));
+    final bannersState = ref.watch(getLeagueBannersProvider(widget.leagueSyncId));
 
     return Column(
       children: [
@@ -27,7 +41,7 @@ class ListRankingGroupWidget extends ConsumerWidget {
           padding: EdgeInsets.symmetric(vertical: 12.h),
           child: BannersWidget(
             banners: bannersState.data,
-            currentLeagueSyncId: leagueSyncId,
+            currentLeagueSyncId: widget.leagueSyncId,
           ),
         ),
         Expanded(
@@ -43,7 +57,7 @@ class ListRankingGroupWidget extends ConsumerWidget {
                     ),
                   ),
               onRefresh: () => ref
-                  .read(groupRefreshProvider(leagueSyncId).notifier)
+                  .read(groupRefreshProvider(widget.leagueSyncId).notifier)
                   .refresh(),
               keepPreviousDataWhileLoading: true,
               dataBuilder: (ranking) {

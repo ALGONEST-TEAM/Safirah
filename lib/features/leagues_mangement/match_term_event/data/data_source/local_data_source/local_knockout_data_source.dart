@@ -102,23 +102,24 @@ class KnockoutGeneratorLocalDataSource {
               ..orderBy([(m) => OrderingTerm.asc(m.createdAt)]))
             .get();
 
-        final matches = <MatchModel>[];
-        for (final m in matchEntities) {
+        final matchIds = matchEntities.map((m) => m.syncId).toList();
+        final termsByMatch = <String, List<MatchTermModel>>{};
+        if (matchIds.isNotEmpty) {
           final matchTermsEnt = await (db.select(db.matchTerms)
-                ..where((mt) => mt.matchSyncId.equals(m.syncId)))
+                ..where((mt) => mt.matchSyncId.isIn(matchIds)))
               .get();
 
-          final terms = matchTermsEnt.map((mt) => MatchTermModel.fromEntity(mt)).toList();
-
-          matches.add(
-            MatchModel.fromEntityWithRelations(
-              m,
-              home: null,
-              away: null,
-              matchTerms: terms,
-            ),
-          );
+          for (final mt in matchTermsEnt) {
+            termsByMatch.putIfAbsent(mt.matchSyncId, () => []).add(MatchTermModel.fromEntity(mt));
+          }
         }
+
+        final matches = matchEntities.map((m) => MatchModel.fromEntityWithRelations(
+          m,
+          home: null,
+          away: null,
+          matchTerms: termsByMatch[m.syncId] ?? const [],
+        )).toList();
 
         return RoundModel(
           syncId: existingRound.syncId,
@@ -171,10 +172,19 @@ class KnockoutGeneratorLocalDataSource {
           ]))
             .get();
 
-        // Enrich with team names
+        // Enrich with team names (✅ Batch query بدلاً من N+1)
+        final teamSyncIds = qualifiedRows.map((r) => r.teamSyncId).toSet().toList();
+        final teamsMap = <String, Team>{};
+        if (teamSyncIds.isNotEmpty) {
+          final teams = await (db.select(db.teams)..where((t) => t.syncId.isIn(teamSyncIds))).get();
+          for (final t in teams) {
+            teamsMap[t.syncId] = t;
+          }
+        }
+
         final enriched = <QualifiedTeamModel>[];
         for (final r in qualifiedRows) {
-          final teamEnt = await (db.select(db.teams)..where((t) => t.syncId.equals(r.teamSyncId))).getSingleOrNull();
+          final teamEnt = teamsMap[r.teamSyncId];
           if (teamEnt == null) continue;
 
           enriched.add(QualifiedTeamModel(
@@ -566,63 +576,79 @@ class KnockoutGeneratorLocalDataSource {
 
     final bool showAll = filtersList.contains('all') || filtersList.isEmpty;
 
-    for (final r in roundEntities) {
-      final query = db.select(db.matches).join([
-        innerJoin(homeAlias, homeAlias.syncId.equalsExp(db.matches.homeTeamSyncId)),
-        innerJoin(awayAlias, awayAlias.syncId.equalsExp(db.matches.awayTeamSyncId)),
-      ]);
+    if (roundEntities.isEmpty) return rounds;
 
-      final filters = <Expression<bool>>[
-        db.matches.roundSyncId.equals(r.syncId),
-        db.matches.leagueSyncId.equals(leagueSyncId),
-      ];
+    // ✅ تحسين احترافي فائق: جلب جميع مباريات وأشواط الأدوار الإقصائية في استعلامين مجمعين فقط
+    final allRoundSyncIds = roundEntities.map((r) => r.syncId).toList();
 
-      if (!showAll) {
-        final statusExpressions = <Expression<bool>>[];
-        for (final status in filtersList) {
-          switch (status) {
-            case 'scheduled':
-              statusExpressions.add(db.matches.status.equals('scheduled'));
-              break;
-            case 'unscheduled':
-              statusExpressions.add(db.matches.status.equals('unscheduled'));
-              break;
-            case 'live':
-              statusExpressions.add(db.matches.status.equals('live'));
-              break;
-            case 'finished':
-              statusExpressions.add(db.matches.status.equals('finished'));
-              break;
-          }
-        }
-        if (statusExpressions.isNotEmpty) {
-          filters.add(statusExpressions.reduce((a, b) => a | b));
+    final query = db.select(db.matches).join([
+      innerJoin(homeAlias, homeAlias.syncId.equalsExp(db.matches.homeTeamSyncId)),
+      innerJoin(awayAlias, awayAlias.syncId.equalsExp(db.matches.awayTeamSyncId)),
+    ]);
+
+    final filters = <Expression<bool>>[
+      db.matches.roundSyncId.isIn(allRoundSyncIds),
+      db.matches.leagueSyncId.equals(leagueSyncId),
+    ];
+
+    if (!showAll) {
+      final statusExpressions = <Expression<bool>>[];
+      for (final status in filtersList) {
+        switch (status) {
+          case 'scheduled':
+            statusExpressions.add(db.matches.status.equals('scheduled'));
+            break;
+          case 'unscheduled':
+            statusExpressions.add(db.matches.status.equals('unscheduled'));
+            break;
+          case 'live':
+            statusExpressions.add(db.matches.status.equals('live'));
+            break;
+          case 'finished':
+            statusExpressions.add(db.matches.status.equals('finished'));
+            break;
         }
       }
+      if (statusExpressions.isNotEmpty) {
+        filters.add(statusExpressions.reduce((a, b) => a | b));
+      }
+    }
 
-      query.where(filters.reduce((a, b) => a & b));
-      final joined = await query.get();
+    query.where(filters.reduce((a, b) => a & b));
+    final joined = await query.get();
 
-      final matches = await Future.wait(joined.map((row) async {
-        final match = row.readTable(db.matches);
-        final home = row.readTable(homeAlias);
-        final away = row.readTable(awayAlias);
+    // جلب جميع الأشواط دفعة واحدة لكافة المباريات
+    final allMatchSyncIds = joined.map((row) => row.readTable(db.matches).syncId).toSet().toList();
+    final termsByMatch = <String, List<MatchTermModel>>{};
+    if (allMatchSyncIds.isNotEmpty) {
+      final matchTerms = await (db.select(db.matchTerms)
+        ..where((mt) => mt.matchSyncId.isIn(allMatchSyncIds)))
+          .get();
 
-        final matchTerms = await (db.select(db.matchTerms)
-          ..where((mt) => mt.matchSyncId.equals(match.syncId)))
-            .get();
+      for (final mt in matchTerms) {
+        termsByMatch.putIfAbsent(mt.matchSyncId, () => []).add(MatchTermModel.fromEntity(mt));
+      }
+    }
 
-        final matchTermModels =
-        matchTerms.map((mt) => MatchTermModel.fromEntity(mt)).toList();
+    // تجميع المباريات حسب الجولة في الذاكرة O(1)
+    final matchesByRound = <String, List<MatchModel>>{};
+    for (final row in joined) {
+      final match = row.readTable(db.matches);
+      final home = row.readTable(homeAlias);
+      final away = row.readTable(awayAlias);
 
-        return MatchModel.fromEntityWithRelations(
+      matchesByRound.putIfAbsent(match.roundSyncId, () => []).add(
+        MatchModel.fromEntityWithRelations(
           match,
           home: home,
           away: away,
-          matchTerms: matchTermModels,
-        );
-      }));
+          matchTerms: termsByMatch[match.syncId] ?? const [],
+        ),
+      );
+    }
 
+    for (final r in roundEntities) {
+      final matches = matchesByRound[r.syncId] ?? const [];
       if (matches.isEmpty) continue;
 
       rounds.add(RoundModel(
@@ -1042,10 +1068,18 @@ class KnockoutGeneratorLocalDataSource {
 
     if (rounds.isEmpty) return null;
 
+    // ✅ تحسين احترافي: جلب جميع مباريات الجولات الإقصائية باستعلام واحد وفهرستها في الذاكرة (0 N+1)
+    final roundSyncIds = rounds.map((r) => r.syncId).toList();
+    final allMatches = await (db.select(db.matches)
+          ..where((m) => m.roundSyncId.isIn(roundSyncIds))).get();
+
+    final matchesByRound = <String, List<Matche>>{};
+    for (final m in allMatches) {
+      matchesByRound.putIfAbsent(m.roundSyncId, () => []).add(m);
+    }
+
     for (final r in rounds) {
-      final matches = await (db.select(db.matches)
-            ..where((m) => m.roundSyncId.equals(r.syncId)))
-          .get();
+      final matches = matchesByRound[r.syncId] ?? const [];
 
       if (matches.isEmpty) continue;
       final allFinished = matches.every((m) => _isFinishedStatus(m.status));
@@ -1058,9 +1092,7 @@ class KnockoutGeneratorLocalDataSource {
       for (final other in rounds) {
         if (other.syncId == r.syncId) continue;
 
-        final otherMatches = await (db.select(db.matches)
-              ..where((m) => m.roundSyncId.equals(other.syncId)))
-            .get();
+        final otherMatches = matchesByRound[other.syncId] ?? const [];
 
         if (otherMatches.isEmpty) continue;
 

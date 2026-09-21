@@ -25,6 +25,10 @@ class FinishTermResult {
   final String leagueTermSyncId;
   final String matchSyncId;
 
+  /// الشوط التالي (إن وجد)
+  final String? nextMatchTermSyncId;
+  final String? nextLeagueTermSyncId;
+
   const FinishTermResult({
     required this.termFinished,
     required this.matchSyncId,
@@ -41,6 +45,8 @@ class FinishTermResult {
     this.homePenaltyScore,
     this.awayPenaltyScore,
     this.leagueSyncId,
+    this.nextMatchTermSyncId,
+    this.nextLeagueTermSyncId,
   });
 }
 

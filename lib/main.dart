@@ -72,7 +72,6 @@ void main() async {
     },
   );
 }
-
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 

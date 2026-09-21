@@ -47,6 +47,14 @@ class _ScheduleMatchPageState extends ConsumerState<ScheduleMatchPage> {
   _PickedUser? _media;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(usersHasRoleRefreshProvider(widget.leagueSyncId).notifier).refresh();
+    });
+  }
+
+  @override
   void dispose() {
     dateMatch.dispose();
     timeMatch.dispose();
@@ -56,7 +64,6 @@ class _ScheduleMatchPageState extends ConsumerState<ScheduleMatchPage> {
   @override
   Widget build(BuildContext context) {
     final scheduleState = ref.watch(scheduleMatchProvider);
-    ref.watch(usersHasRoleRefreshProvider(widget.leagueSyncId));
     return Scaffold(
       appBar: const SecondaryAppBarWidget(
         title: 'جدولة المباراة',

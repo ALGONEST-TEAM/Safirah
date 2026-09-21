@@ -288,10 +288,30 @@ class GroupsLocalDataSource {
         .map((_) => null);
 
     return MergeStream([groupTrigger, qualifiedTrigger])
+        .startWith(null)
         .debounceTime(const Duration(milliseconds: 120))
         .asyncMap((_) => getLeagueGroupsWithQualifiedTeams(
               leagueSyncId,
-            ));
+            ))
+        .distinct((prev, next) {
+          if (prev.length != next.length) return false;
+          for (var i = 0; i < prev.length; i++) {
+            if (prev[i].syncId != next[i].syncId) return false;
+            final prevQ = prev[i].qualifiedTeams;
+            final nextQ = next[i].qualifiedTeams;
+            if (prevQ.length != nextQ.length) return false;
+            for (var j = 0; j < prevQ.length; j++) {
+              if (prevQ[j].teamSyncId != nextQ[j].teamSyncId ||
+                  prevQ[j].points != nextQ[j].points ||
+                  prevQ[j].played != nextQ[j].played ||
+                  prevQ[j].goalsFor != nextQ[j].goalsFor ||
+                  prevQ[j].goalsAgainst != nextQ[j].goalsAgainst) {
+                return false;
+              }
+            }
+          }
+          return true;
+        });
   }
 
   Future<void> upsertLeagueGroupsAndQualifiedTeamsFromRemote({
@@ -304,18 +324,23 @@ class GroupsLocalDataSource {
           .where((g) => g.leagueSyncId == leagueSyncId)
           .toList();
 
-      if (clearExisting) {
+      if (filtered.isEmpty && clearExisting) {
         await (db.delete(db.qualifiedTeam)
               ..where((q) => q.leagueSyncId.equals(leagueSyncId)))
             .go();
         await (db.delete(db.group)
               ..where((g) => g.leagueSyncId.equals(leagueSyncId)))
             .go();
+        return;
       }
+
+      final keepGroupSyncIds = <String>{};
+      final keepQualifiedSyncIds = <String>{};
 
       for (final g in filtered) {
         // --- Groups (tLeagueGroups) ---
         final groupSyncId = g.syncId ?? const Uuid().v7();
+        keepGroupSyncIds.add(groupSyncId);
 
         await db.into(db.group).insert(
               GroupCompanion.insert(
@@ -333,6 +358,7 @@ class GroupsLocalDataSource {
         // --- QualifiedTeams ---
         for (final qt in g.qualifiedTeams) {
           final qtSyncId = qt.syncId ?? const Uuid().v7();
+          keepQualifiedSyncIds.add(qtSyncId);
 
           await db.into(db.qualifiedTeam).insert(
                 QualifiedTeamCompanion.insert(
@@ -358,6 +384,24 @@ class GroupsLocalDataSource {
                 ),
                 mode: InsertMode.insertOrReplace,
               );
+        }
+      }
+
+      // ✅ تنظيف احترافي: حذف المحذوف فقط بعد تحديث البيانات دون إفراغ الجداول لحظياً
+      if (clearExisting) {
+        if (keepQualifiedSyncIds.isNotEmpty) {
+          await (db.delete(db.qualifiedTeam)
+                ..where((q) =>
+                    q.leagueSyncId.equals(leagueSyncId) &
+                    q.syncId.isNotIn(keepQualifiedSyncIds.toList())))
+              .go();
+        }
+        if (keepGroupSyncIds.isNotEmpty) {
+          await (db.delete(db.group)
+                ..where((g) =>
+                    g.leagueSyncId.equals(leagueSyncId) &
+                    g.syncId.isNotIn(keepGroupSyncIds.toList())))
+              .go();
         }
       }
     });
