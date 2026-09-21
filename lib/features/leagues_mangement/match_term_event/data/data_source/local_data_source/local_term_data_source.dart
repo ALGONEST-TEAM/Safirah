@@ -531,6 +531,7 @@ class MatchTermsEventLocalDataSource {
       required bool isKnockout,
       required MatchModel match,
       required MatchTerm termRow,
+      MatchTerm? nextTermRow,
       DateTime? matchEndTime,
       bool pointsUpdatedLocally = false,
     }) {
@@ -550,6 +551,8 @@ class MatchTermsEventLocalDataSource {
         homePenaltyScore: match.homePenaltyScore,
         awayPenaltyScore: match.awayPenaltyScore,
         leagueSyncId: match.leagueSyncId,
+        nextMatchTermSyncId: nextTermRow?.syncId,
+        nextLeagueTermSyncId: nextTermRow?.leagueTermSyncId,
       );
     }
 
@@ -637,6 +640,19 @@ class MatchTermsEventLocalDataSource {
 
       // If no current term => match is effectively finished
       if (current == null) {
+        if (match0.status == 'finished') {
+          final last = all.last.mt;
+          return result(
+            termFinished: true,
+            matchFinished: true,
+            isKnockout: isKnockout,
+            match: match0,
+            termRow: last,
+            matchEndTime: match0.endTime,
+            pointsUpdatedLocally: false,
+          );
+        }
+
         final now = DateTime.now();
         await finishMatch(match0);
         final matchNow = await loadMatchOrThrow();
@@ -736,7 +752,8 @@ class MatchTermsEventLocalDataSource {
               matchFinished: false,
               isKnockout: true,
               match: match,
-              termRow: next.mt,
+              termRow: finishedTerm,
+              nextTermRow: next.mt,
             );
           }
 
@@ -812,7 +829,8 @@ class MatchTermsEventLocalDataSource {
             matchFinished: false,
             isKnockout: true,
             match: match,
-            termRow: next.mt,
+            termRow: finishedTerm,
+            nextTermRow: next.mt,
           );
         }
 
@@ -855,7 +873,8 @@ class MatchTermsEventLocalDataSource {
           matchFinished: false,
           isKnockout: false,
           match: match,
-          termRow: next.mt,
+          termRow: finishedTerm,
+          nextTermRow: next.mt,
           pointsUpdatedLocally: false,
         );
       }
@@ -880,6 +899,14 @@ class MatchTermsEventLocalDataSource {
     final matchSyncId = (match.syncId ?? '').trim();
     if (matchSyncId.isEmpty) {
       throw Exception('finishMatch requires match.syncId');
+    }
+
+    // تحقق إضافي: اقرأ الحالة الحقيقية من DB (وليس من الموديل القديم)
+    final dbMatch = await (db.select(db.matches)
+          ..where((m) => m.syncId.equals(matchSyncId)))
+        .getSingleOrNull();
+    if (dbMatch != null && dbMatch.status == 'finished') {
+      return;
     }
 
     final now = DateTime.now();
@@ -932,18 +959,48 @@ class MatchTermsEventLocalDataSource {
         .get();
 
     if (joinedTerms.isEmpty) {
-      print("2");
+      // تحقق: هل المباراة فعلاً منتهية؟
+      if (matchEntity.status == 'finished') {
+        return MatchTermModel(
+          syncId: '',
+          id: 0,
+          matchSyncId: matchSyncId,
+          leagueTermSyncId: '',
+          isFinished: true,
+          termName: 'انتهت المباراة',
+          termType: 'finished',
+          leagueTermName: '',
+        );
+      }
 
-      return MatchTermModel(
-        syncId: '',
-        id: 0,
+      // المباراة ليست منتهية لكن الأشواط مفقودة → حاول إعادة إنشائها من league_terms
+      final leagueSyncId = matchEntity.leagueSyncId;
+      final roundRow = await (db.select(db.rounds)
+            ..where((r) => r.syncId.equals(matchEntity.roundSyncId)))
+          .getSingleOrNull();
+      final roundType = roundRow?.roundType ?? 'group';
+
+      final recreated = await createMatchTermsFromLeague(
         matchSyncId: matchSyncId,
-        leagueTermSyncId: '',
-        isFinished: true,
-        termName: 'انتهت المباراة',
-        termType: 'finished',
-        leagueTermName: '',
+        leagueSyncId: leagueSyncId,
+        roundType: roundType,
       );
+
+      if (recreated.isEmpty) {
+        return MatchTermModel(
+          syncId: '',
+          id: 0,
+          matchSyncId: matchSyncId,
+          leagueTermSyncId: '',
+          isFinished: true,
+          termName: 'لا توجد أشواط',
+          termType: 'error',
+          leagueTermName: '',
+        );
+      }
+
+      // أعد الاستعلام بعد إعادة الإنشاء
+      return getCurrentMatchTerm(matchSyncId);
     }
 
     final matchTerms = joinedTerms.map((row) {
@@ -999,32 +1056,8 @@ class MatchTermsEventLocalDataSource {
       final match = MatchModel.fromEntityWithRelations(matchEntity);
 
       if (match.status.toLowerCase().trim() == 'finished') {
-        // ترجع القيم الحالية بدون تعديل (إن وجدت)
-        final q = db.qualifiedTeam;
-
-        final leagueId = (match.leagueSyncId ?? '').trim();
-        if (leagueId.isEmpty) return (home: null, away: null);
-
-        final homeId = (match.homeTeamSyncId ?? '').trim();
-        final awayId = (match.awayTeamSyncId ?? '').trim();
-        if (homeId.isEmpty || awayId.isEmpty) return (home: null, away: null);
-
-        final homeRow = await (db.select(q)
-              ..where((t) =>
-                  t.leagueSyncId.equals(leagueId) &
-                  t.teamSyncId.equals(homeId)))
-            .getSingleOrNull();
-
-        final awayRow = await (db.select(q)
-              ..where((t) =>
-                  t.leagueSyncId.equals(leagueId) &
-                  t.teamSyncId.equals(awayId)))
-            .getSingleOrNull();
-
-        return (
-          home: homeRow != null ? QualifiedTeamModel.fromEntity(homeRow) : null,
-          away: awayRow != null ? QualifiedTeamModel.fromEntity(awayRow) : null,
-        );
+        // ✅ المباراة منتهية مسبقاً → لا تعدل النقاط مرة أخرى
+        return (home: null, away: null);
       }
 
       final leagueId = (match.leagueSyncId ?? '').trim();

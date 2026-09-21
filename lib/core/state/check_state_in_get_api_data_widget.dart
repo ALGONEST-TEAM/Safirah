@@ -65,7 +65,7 @@ class CheckStateInGetApiDataWidget extends StatelessWidget {
   }
 }
 
-class CheckStateInStreamWidget<T> extends StatelessWidget {
+class CheckStateInStreamWidget<T> extends StatefulWidget {
   /// async value from StreamProvider / FutureProvider
   final AsyncValue<T> async;
 
@@ -99,14 +99,42 @@ class CheckStateInStreamWidget<T> extends StatelessWidget {
   });
 
   @override
+  State<CheckStateInStreamWidget<T>> createState() =>
+      _CheckStateInStreamWidgetState<T>();
+}
+
+class _CheckStateInStreamWidgetState<T>
+    extends State<CheckStateInStreamWidget<T>> {
+  T? _lastValidData;
+
+  @override
+  void initState() {
+    super.initState();
+    _captureValidData(widget.async);
+  }
+
+  @override
+  void didUpdateWidget(covariant CheckStateInStreamWidget<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _captureValidData(widget.async);
+  }
+
+  void _captureValidData(AsyncValue<T> async) {
+    final current = async.asData?.value;
+    if (current != null && !widget.isEmpty(current)) {
+      _lastValidData = current;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // previous data if exists (Riverpod keeps last AsyncData in some transitions)
-    final previousData = async.asData?.value;
+    // ✅ الاحتفاظ بالبيانات السابقة لتجنب أي وميض (Flicker) أثناء إعادة الجلب أو التحميل
+    final previousData = widget.async.asData?.value ?? _lastValidData;
 
     // 1) LOADING
-    if (async.isLoading) {
-      if (keepPreviousDataWhileLoading && previousData != null) {
-        // show old data + small loader
+    if (widget.async.isLoading) {
+      if (widget.keepPreviousDataWhileLoading && previousData != null) {
+        // عرض البيانات القديمة مع مؤشر تحميل خفيف بأعلى الصفحة دون وميض
         return Stack(
           children: [
             _buildDataOrEmpty(previousData),
@@ -115,18 +143,18 @@ class CheckStateInStreamWidget<T> extends StatelessWidget {
         );
       }
 
-      return loadingWidget ??
+      return widget.loadingWidget ??
           const Center(
             child: LogoShimmerWidget(),
           );
     }
 
     // 2) ERROR
-    if (async.hasError) {
-      final error = async.error;
+    if (widget.async.hasError) {
+      final error = widget.async.error;
       final safeError = error ?? Exception('Unknown error');
 
-      // ✅ قاعدة إلزامية: إذا عندك بيانات قديمة -> FlashBar فقط + اعرض البيانات القديمة
+      // ✅ قاعدة إلزامية: إذا توفرت بيانات سابقة -> FlashBar فقط مع استمرار عرض البيانات
       if (previousData != null) {
         SchedulerBinding.instance.addPostFrameCallback((_) {
           showFlashBarError(
@@ -144,37 +172,50 @@ class CheckStateInStreamWidget<T> extends StatelessWidget {
         child: ErrorsWidget(
           title: MessageOfError.get(safeError).first,
           subTitle: MessageOfError.get(safeError).last,
-          onPressed: onRefresh == null ? null : () => onRefresh!(),
+          onPressed: widget.onRefresh == null ? null : () => widget.onRefresh!(),
         ),
       );
     }
 
     // 3) DATA
-    final data = async.asData!.value;
-    return _buildDataOrEmpty(data);
+    final data = widget.async.asData?.value ?? previousData;
+    if (data != null) {
+      return _buildDataOrEmpty(data);
+    }
+
+    return widget.loadingWidget ??
+        const Center(
+          child: LogoShimmerWidget(),
+        );
   }
 
   Widget _buildDataOrEmpty(T data) {
-    if (isEmpty(data)) {
-      // If caller didn't provide an emptyBuilder, don't collapse the UI.
-      // Show a minimal empty state instead (and allow refresh if provided).
-      if (emptyBuilder != null) return emptyBuilder!.call();
+    if (widget.isEmpty(data)) {
+      if (widget.emptyBuilder != null) return widget.emptyBuilder!.call();
 
       const content = Center(child: Text('لا توجد بيانات'));
 
-      if (onRefresh != null) {
+      if (widget.onRefresh != null) {
         return RefreshIndicator(
-          onRefresh: onRefresh!,
+          onRefresh: widget.onRefresh!,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: [const SizedBox(height: 280), content],
+            children: const [SizedBox(height: 280), content],
           ),
         );
       }
 
       return content;
     }
-    return dataBuilder(data);
+
+    if (widget.onRefresh != null) {
+      return RefreshIndicator(
+        onRefresh: widget.onRefresh!,
+        child: widget.dataBuilder(data),
+      );
+    }
+
+    return widget.dataBuilder(data);
   }
 }
 

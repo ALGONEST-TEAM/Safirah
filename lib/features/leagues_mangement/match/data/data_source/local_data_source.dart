@@ -205,8 +205,17 @@ class MatchesLocalDataSource {
             ..where((m) => m.leagueSyncId.equals(leagueSyncId)))
           .watch()
           .map((_) {}),
-      db.select(db.matchTerms).watch().map((_) {}),
-      db.select(db.teams).watch().map((_) {}),
+      (db.select(db.matchTerms).join([
+        innerJoin(
+          db.matches,
+          db.matches.syncId.equalsExp(db.matchTerms.matchSyncId),
+        ),
+      ])..where(db.matches.leagueSyncId.equals(leagueSyncId)))
+          .watch()
+          .map((_) {}),
+      (db.select(db.teams)..where((t) => t.leagueSyncId.equals(leagueSyncId)))
+          .watch()
+          .map((_) {}),
     ]);
 
     String signatureOf(List<RoundModel> rounds) {
@@ -436,6 +445,53 @@ class MatchesLocalDataSource {
         g.syncId: g,
     };
 
+    // ✅ تحسين احترافي فائق: جلب جميع مباريات الجولات والأشواط في استعلامين مجمعين فقط (Batch Query)
+    // بدلاً من استعلام لكل جولة ومجموعة داخل الحلقات التكرارية (N+1)
+    final allRoundSyncIds = rounds.map((r) => r.syncId).toSet().toList();
+
+    final matchesQuery = db.select(db.matches).join([
+      innerJoin(homeAlias, homeAlias.syncId.equalsExp(db.matches.homeTeamSyncId)),
+      innerJoin(awayAlias, awayAlias.syncId.equalsExp(db.matches.awayTeamSyncId)),
+    ]);
+
+    final matchFilters = <Expression<bool>>[
+      db.matches.roundSyncId.isIn(allRoundSyncIds),
+      db.matches.leagueSyncId.equals(leagueSyncId),
+      if (!showAll) statusFilterExpr(),
+    ];
+
+    matchesQuery.where(matchFilters.reduce((a, b) => a & b));
+    final allJoined = await matchesQuery.get();
+
+    // جلب جميع الأشواط لكافة المباريات دفعة واحدة
+    final allMatchIds = allJoined.map((row) => row.readTable(db.matches).syncId).toSet().toList();
+    final termsByMatch = <String, List<MatchTermModel>>{};
+    if (allMatchIds.isNotEmpty) {
+      final terms = await (db.select(db.matchTerms)
+        ..where((mt) => mt.matchSyncId.isIn(allMatchIds)))
+          .get();
+
+      for (final t in terms) {
+        termsByMatch.putIfAbsent(t.matchSyncId, () => []).add(MatchTermModel.fromEntity(t));
+      }
+    }
+
+    // فهرسة وتجميع المباريات حسب الجولة في الذاكرة لسرعة O(1)
+    final matchesByRound = <String, List<MatchModel>>{};
+    for (final row in allJoined) {
+      final match = row.readTable(db.matches);
+      final home = row.readTable(homeAlias);
+      final away = row.readTable(awayAlias);
+
+      final model = MatchModel.fromEntityWithRelations(
+        match,
+        home: home,
+        away: away,
+        matchTerms: termsByMatch[match.syncId] ?? const [],
+      );
+      matchesByRound.putIfAbsent(match.roundSyncId, () => []).add(model);
+    }
+
     final List<RoundModel> result = [];
 
     for (final roundNo in roundNumbers) {
@@ -451,47 +507,7 @@ class MatchesLocalDataSource {
         final group = groups[groupSyncId];
         if (group == null) continue;
 
-        final query = db.select(db.matches).join([
-          innerJoin(homeAlias, homeAlias.syncId.equalsExp(db.matches.homeTeamSyncId)),
-          innerJoin(awayAlias, awayAlias.syncId.equalsExp(db.matches.awayTeamSyncId)),
-        ]);
-
-        final filters = <Expression<bool>>[
-          db.matches.roundSyncId.equals(round.syncId),
-          db.matches.leagueSyncId.equals(leagueSyncId),
-          if (!showAll) statusFilterExpr(),
-        ];
-
-        query.where(filters.reduce((a, b) => a & b));
-        final joined = await query.get();
-
-        // ✅ تحسين كبير: جلب matchTerms دفعة واحدة بدل لكل مباراة
-        final matchIds = joined.map((row) => row.readTable(db.matches).syncId).toSet().toList();
-
-        final termsByMatch = <String, List<MatchTermModel>>{};
-        if (matchIds.isNotEmpty) {
-          final terms = await (db.select(db.matchTerms)
-            ..where((mt) => mt.matchSyncId.isIn(matchIds)))
-              .get();
-
-          for (final t in terms) {
-            termsByMatch.putIfAbsent(t.matchSyncId, () => []).add(MatchTermModel.fromEntity(t));
-          }
-        }
-
-        final matches = joined.map((row) {
-          final match = row.readTable(db.matches);
-          final home = row.readTable(homeAlias);
-          final away = row.readTable(awayAlias);
-
-          return MatchModel.fromEntityWithRelations(
-            match,
-            home: home,
-            away: away,
-            matchTerms: termsByMatch[match.syncId] ?? const [],
-          );
-        }).toList();
-
+        final matches = matchesByRound[round.syncId] ?? const [];
         if (matches.isEmpty) continue;
 
         groupsForThisRound.add(
@@ -742,11 +758,14 @@ class MatchesLocalDataSource {
       }
 
       if (deleteMissingMatchTerms) {
-        // تنظيف كل terms التي لا تخص matches الموجودة بعد التحديث.
-        // 1) احذف حسب keepTermIds (إن كانت القائمة ضخمة، اجعلها batch لاحقًا)
-        await (db.delete(db.matchTerms)
-          ..where((t) => t.syncId.isNotIn(keepTermIds)))
-            .go();
+        // تنظيف terms التي تخص matches الموجودة في هذا الدوري فقط.
+        if (keepMatchIds.isNotEmpty) {
+          await (db.delete(db.matchTerms)
+            ..where((t) =>
+                t.matchSyncId.isIn(keepMatchIds) &
+                t.syncId.isNotIn(keepTermIds)))
+              .go();
+        }
       }
     });
   }

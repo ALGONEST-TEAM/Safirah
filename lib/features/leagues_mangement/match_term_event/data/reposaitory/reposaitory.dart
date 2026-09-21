@@ -256,16 +256,20 @@ class MatchTermsEventRepository {
         if (!result.isKnockout && result.pointsUpdatedLocally) {
           final res = await local.finishMatchAndUpdatePoints(
               matchSyncId, DateTime.now());
-          await syncService.enqueueOperation(
-            entityType: 'qualifiedTeam',
-            operation: SyncService.operationUpdate,
-            payload: res.home!.toJson(),
-          );
-          await syncService.enqueueOperation(
-            entityType: 'qualifiedTeam',
-            operation: SyncService.operationUpdate,
-            payload: res.away!.toJson(),
-          );
+          if (res.home != null) {
+            await syncService.enqueueOperation(
+              entityType: 'qualifiedTeam',
+              operation: SyncService.operationUpdate,
+              payload: res.home!.toJson(),
+            );
+          }
+          if (res.away != null) {
+            await syncService.enqueueOperation(
+              entityType: 'qualifiedTeam',
+              operation: SyncService.operationUpdate,
+              payload: res.away!.toJson(),
+            );
+          }
         }
       }
 

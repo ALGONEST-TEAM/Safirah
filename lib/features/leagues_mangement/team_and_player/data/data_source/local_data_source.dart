@@ -166,7 +166,18 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
     return MergeStream([playersTrigger])
         .startWith(null)
         .debounceTime(const Duration(milliseconds: 120))
-        .asyncMap((_) => getPlayerTeam(teamSyncId: teamSyncId));
+        .asyncMap((_) => getPlayerTeam(teamSyncId: teamSyncId))
+        .distinct((prev, next) {
+          if (prev.length != next.length) return false;
+          for (var i = 0; i < prev.length; i++) {
+            if (prev[i].syncId != next[i].syncId ||
+                prev[i].status != next[i].status ||
+                prev[i].fullName != next[i].fullName) {
+              return false;
+            }
+          }
+          return true;
+        });
   }
 
   Future<List<PlayerModel>> runDraft({
@@ -869,13 +880,28 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
         .watch()
         .map((_) => null);
     final playersTrigger = db.select(db.players).watch().map((_) => null);
-    final teamsTrigger = db.select(db.teams).watch().map((_) => null);
+    final teamsTrigger = (db.select(db.teams)
+      ..where((t) => t.leagueSyncId.equals(leagueSyncId)))
+        .watch()
+        .map((_) => null);
     // ✅ debounced rebuild لتجنب كثرة إعادة البناء أثناء التحديثات
     return MergeStream([leaguePlayerTrigger, playersTrigger, teamsTrigger]).startWith(null)
         .debounceTime(const Duration(milliseconds: 120))
         .asyncMap((_) => getLeagueUsersByLeague(
    leagueSyncId
-    ));
+    ))
+    .distinct((prev, next) {
+      if (prev.length != next.length) return false;
+      for (var i = 0; i < prev.length; i++) {
+        if (prev[i].syncId != next[i].syncId ||
+            prev[i].teamSyncId != next[i].teamSyncId ||
+            prev[i].name != next[i].name ||
+            prev[i].teamPlayerCategoryId != next[i].teamPlayerCategoryId) {
+          return false;
+        }
+      }
+      return true;
+    });
   }
   Stream<List<TeamModel>> watchTeams({
     required  String leagueSyncId
@@ -889,6 +915,18 @@ Future<TeamModel?> updateTeam(TeamModel team) async {
         .debounceTime(const Duration(milliseconds: 120))
         .asyncMap((_) => getTeamsByLeague(
         leagueSyncId
-    ));
+    ))
+    .distinct((prev, next) {
+      if (prev.length != next.length) return false;
+      for (var i = 0; i < prev.length; i++) {
+        if (prev[i].syncId != next[i].syncId ||
+            prev[i].teamName != next[i].teamName ||
+            prev[i].logoUrl != next[i].logoUrl ||
+            prev[i].status != next[i].status) {
+          return false;
+        }
+      }
+      return true;
+    });
   }
 }

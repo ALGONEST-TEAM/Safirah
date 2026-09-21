@@ -63,7 +63,7 @@ import 'round_section_widget.dart';
 //     );
 //   }
 // }
-class RoundsListWidget extends ConsumerWidget {
+class RoundsListWidget extends ConsumerStatefulWidget {
   final String role;
   final String leagueSyncId;
   final String matchFilter;
@@ -80,14 +80,26 @@ class RoundsListWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(roundsRefreshProvider(refreshParam));
-    final asyncRounds = ref.watch(roundsWithGroupsStreamProvider(streamParam));
+  ConsumerState<RoundsListWidget> createState() => _RoundsListWidgetState();
+}
+
+class _RoundsListWidgetState extends ConsumerState<RoundsListWidget> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(roundsRefreshProvider(widget.refreshParam).notifier).refresh();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final asyncRounds = ref.watch(roundsWithGroupsStreamProvider(widget.streamParam));
 
     return CheckStateInStreamWidget<List<RoundModel>>(
       async: asyncRounds,
       isEmpty: (rounds) => rounds.isEmpty,
-      onRefresh: () => ref.read(roundsRefreshProvider(refreshParam).notifier).refresh(),
+      onRefresh: () => ref.read(roundsRefreshProvider(widget.refreshParam).notifier).refresh(),
       keepPreviousDataWhileLoading: true,
       emptyBuilder: () => Center(
         child: AutoSizeTextWidget(
@@ -97,7 +109,7 @@ class RoundsListWidget extends ConsumerWidget {
       ),
       dataBuilder: (rounds) {
         return RefreshIndicator(
-          onRefresh: () => ref.read(roundsRefreshProvider(refreshParam).notifier).refresh(),
+          onRefresh: () => ref.read(roundsRefreshProvider(widget.refreshParam).notifier).refresh(),
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(12),
@@ -106,9 +118,9 @@ class RoundsListWidget extends ConsumerWidget {
               final round = rounds[i];
               return RoundSectionWidget(
                 round: round,
-                role: role,
-                leagueSyncId: leagueSyncId,
-                matchFilter: matchFilter,
+                role: widget.role,
+                leagueSyncId: widget.leagueSyncId,
+                matchFilter: widget.matchFilter,
               );
             },
           ),
