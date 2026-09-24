@@ -129,7 +129,13 @@ class _CheckStateInStreamWidgetState<T>
   @override
   Widget build(BuildContext context) {
     // ✅ الاحتفاظ بالبيانات السابقة لتجنب أي وميض (Flicker) أثناء إعادة الجلب أو التحميل
-    final previousData = widget.async.asData?.value ?? _lastValidData;
+    final current = widget.async.asData?.value;
+    final hasValidCurrent = current != null && !widget.isEmpty(current);
+    final previousData = hasValidCurrent
+        ? current
+        : (widget.keepPreviousDataWhileLoading && _lastValidData != null
+            ? _lastValidData
+            : current);
 
     // 1) LOADING
     if (widget.async.isLoading) {
@@ -178,7 +184,7 @@ class _CheckStateInStreamWidgetState<T>
     }
 
     // 3) DATA
-    final data = widget.async.asData?.value ?? previousData;
+    final data = hasValidCurrent ? current : (previousData ?? current);
     if (data != null) {
       return _buildDataOrEmpty(data);
     }

@@ -48,8 +48,10 @@ class SearchUserNotifier
      remote: di.sl<AuthorizationRemoteDataSource>(),connectivity: di.sl(),syncService: di.sl() );
 
   Future<void> load() async {
+    if (!mounted) return;
     state = state.copyWith(state: States.loading);
     final r = await _repo.searchUserToMakeAuthorization( search: search);
+    if (!mounted) return;
     r.fold(
           (e) => state = state.copyWith(state: States.error, exception: e),
           (list) => state = state.copyWith(state: States.loaded, data: list),
@@ -73,8 +75,10 @@ class AssignRoleForUserNotifier
       remote: di.sl<AuthorizationRemoteDataSource>(),connectivity: di.sl(),syncService: di.sl() );
 
   Future<void> load(UserModelForAuthorization user) async {
+    if (!mounted) return;
     state = state.copyWith(state: States.loading);
     final r = await _repo.assignRoleForUser( user: user);
+    if (!mounted) return;
     r.fold(
           (e) => state = state.copyWith(state: States.error, exception: e),
           (list) => state = state.copyWith(state: States.loaded),
@@ -103,33 +107,42 @@ StreamProvider.family<List<UserHasRoleModel>, UsersRoleParam>((ref, param) {
   );
 });
 
-final usersHasRoleRefreshProvider = StateNotifierProvider.family.autoDispose<
+final usersHasRoleRefreshProvider = StateNotifierProvider.family<
     UsersHasRoleRefreshNotifier,
     RefreshState,
     String>((ref, leagueSyncId) {
   final repo = ref.read(usersHasRoleRepoProvider);
   return UsersHasRoleRefreshNotifier(repo, leagueSyncId);
 });
+
 class UsersHasRoleRefreshNotifier extends StateNotifier<RefreshState> {
   final AuthorizationRepository _repo;
   final String leagueSyncId;
 
   UsersHasRoleRefreshNotifier(this._repo, this.leagueSyncId)
-      : super(RefreshState.idle()) {
-    refresh();
-  }
+      : super(RefreshState.idle());
 
   Future<void> refresh({bool deleteMissing = true}) async {
+    if (!mounted) return;
     state = state.copyWith(status: RefreshStatus.loading, exception: null);
 
     final res = await _repo.refreshUsersHasRoles(
-      leagueSyncId:leagueSyncId,
+      leagueSyncId: leagueSyncId,
       deleteMissing: deleteMissing,
     );
 
+    if (!mounted) return;
     res.fold(
-          (e) => state = state.copyWith(status: RefreshStatus.error, exception: e),
-          (_) => state = state.copyWith(status: RefreshStatus.idle, exception: null),
+      (e) {
+        if (mounted) {
+          state = state.copyWith(status: RefreshStatus.error, exception: e);
+        }
+      },
+      (_) {
+        if (mounted) {
+          state = state.copyWith(status: RefreshStatus.idle, exception: null);
+        }
+      },
     );
   }
 }

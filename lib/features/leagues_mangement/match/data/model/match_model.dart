@@ -146,7 +146,7 @@ class MatchModel {
   /// ✅ من JSON
   factory MatchModel.fromJson(Map<String, dynamic> j) => MatchModel(
     id: j['id'],
-    syncId: j['sync_id'],
+    syncId: (j['sync_id'] ?? j['syncId'] ?? j['match_sync_id'])?.toString(),
     leagueSyncId: (j['league_id'] ?? j['leagueId'] ?? j['league_sync_id']),
     roundSyncId: (j['round_sync_id'] ?? j['roundSyncId'] ?? j['round_id']),
     homeTeamSyncId: (j['home_team_sync_id'] ??

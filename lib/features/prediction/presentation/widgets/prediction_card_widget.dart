@@ -101,7 +101,9 @@ class _PredictionCardWidgetState extends ConsumerState<PredictionCardWidget> {
                     Flexible(
                       child: AutoSizeTextWidget(
                         text: statusHelper.isNotStarted(item.status)
-                            ? item.matchTime.substring(0, 5)
+                            ? (item.matchTime.length >= 5
+                                ? item.matchTime.substring(0, 5)
+                                : item.matchTime)
                             : "${item.homeTeam.score} - ${item.awayTeam.score}",
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,

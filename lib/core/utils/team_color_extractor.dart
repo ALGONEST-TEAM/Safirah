@@ -1,15 +1,36 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
+import '../network/urls.dart';
 
 class TeamColorExtractor {
   static final Map<String, List<Color>> _colorCache = {};
+  static final Map<String, Future<Color>> _pendingExtractions = {};
+
+  /// Normalizes relative or malformed URLs (e.g. uploaded from dashboard)
+  static String? normalizeUrl(String? raw) {
+    if (raw == null) return null;
+    final url = raw.trim();
+    if (url.isEmpty) return null;
+
+    // Already absolute
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+
+    // Protocol-relative
+    if (url.startsWith('//')) return 'https:$url';
+
+    // Relative path -> attach to API base domain
+    final base = AppURL.base.replaceAll(RegExp(r"/+$"), '');
+    final path = url.replaceAll(RegExp(r"^/+"), '');
+    return '$base/$path';
+  }
 
   /// Preload team logo colors in background before opening match details
   static void preloadColors(String? homeLogo, String? awayLogo) {
-    if (homeLogo != null && homeLogo.trim().isNotEmpty && !_colorCache.containsKey(homeLogo)) {
+    if (homeLogo != null && homeLogo.trim().isNotEmpty && !_colorCache.containsKey(homeLogo.trim())) {
       extractColor(hexColor: null, logoUrl: homeLogo);
     }
-    if (awayLogo != null && awayLogo.trim().isNotEmpty && !_colorCache.containsKey(awayLogo)) {
+    if (awayLogo != null && awayLogo.trim().isNotEmpty && !_colorCache.containsKey(awayLogo.trim())) {
       extractColor(hexColor: null, logoUrl: awayLogo);
     }
   }
@@ -17,14 +38,14 @@ class TeamColorExtractor {
   /// Synchronous instant lookup from memory cache
   static Color? getCachedColor(String? logoUrl) {
     if (logoUrl == null || logoUrl.trim().isEmpty) return null;
-    return _colorCache[logoUrl]?.first;
+    return _colorCache[logoUrl.trim()]?.first;
   }
 
   /// Check if two colors are too similar
   static bool isClashing(Color color1, Color color2) {
-    final int rDiff = color1.red - color2.red;
-    final int gDiff = color1.green - color2.green;
-    final int bDiff = color1.blue - color2.blue;
+    final int rDiff = (color1.r * 255.0).round() - (color2.r * 255.0).round();
+    final int gDiff = (color1.g * 255.0).round() - (color2.g * 255.0).round();
+    final int bDiff = (color1.b * 255.0).round() - (color2.b * 255.0).round();
     final double distance = (rDiff * rDiff + gDiff * gDiff + bDiff * bDiff).toDouble();
     if (distance < 2500) return true;
     
@@ -40,7 +61,7 @@ class TeamColorExtractor {
   /// Look for an alternative color in the cached logo palette that doesn't clash
   static Color? getAlternativeColor(String? logoUrl, Color clashingColor) {
     if (logoUrl == null || logoUrl.trim().isEmpty) return null;
-    final colors = _colorCache[logoUrl];
+    final colors = _colorCache[logoUrl.trim()];
     if (colors == null || colors.length <= 1) return null;
 
     for (int i = 1; i < colors.length; i++) {
@@ -59,27 +80,59 @@ class TeamColorExtractor {
   }) async {
     // 1. If API hexColor is present and valid, parse and return it immediately!
     if (hexColor != null && hexColor.trim().isNotEmpty) {
-      String hex = hexColor.replaceAll('#', '').replaceAll('0x', '').trim();
-      if (hex.length == 6) hex = 'FF$hex';
-      if (hex.length == 8) {
-        final parsed = int.tryParse(hex, radix: 16);
-        if (parsed != null && parsed != 0xFFFFFFFF && parsed != 0x00000000) {
-          return _beautifyColor(Color(parsed));
-        }
+      final parsed = parseHex(hexColor, defaultColor: Colors.transparent);
+      if (parsed != Colors.transparent) {
+        return parsed;
       }
     }
 
+    final trimmedKey = logoUrl.trim();
+    if (trimmedKey.isEmpty) return defaultColor;
+
     // 2. Check memory cache for this logoUrl
-    if (logoUrl.trim().isEmpty) return defaultColor;
-    if (_colorCache.containsKey(logoUrl)) {
-      return _colorCache[logoUrl]!.first;
+    if (_colorCache.containsKey(trimmedKey)) {
+      return _colorCache[trimmedKey]!.first;
     }
 
-    // 3. Dynamically extract dominant color from team logo image
+    // 3. Deduplicate in-flight extractions (prevents duplicate parallel tasks)
+    if (_pendingExtractions.containsKey(trimmedKey)) {
+      return _pendingExtractions[trimmedKey]!;
+    }
+
+    // 4. Normalize URL (handles relative dashboard paths like /storage/teams/...)
+    final normalized = normalizeUrl(trimmedKey);
+    if (normalized == null) return defaultColor;
+
+    // 5. Check for SVG - PaletteGenerator is for raster images only
+    final lower = normalized.toLowerCase();
+    if (lower.endsWith('.svg') || lower.contains('.svg?')) {
+      return defaultColor;
+    }
+
+    final future = _performExtraction(normalized, trimmedKey, defaultColor);
+    _pendingExtractions[trimmedKey] = future;
+    return future;
+  }
+
+  static Future<Color> _performExtraction(
+    String normalizedUrl,
+    String cacheKey,
+    Color defaultColor,
+  ) async {
     try {
+      // Super-fast downscaled extraction:
+      // ResizeImage resizes down to 48x48 on decode, turning a 3000x3000px 36MB bitmap into a 9KB thumbnail!
+      final ImageProvider resizedProvider = ResizeImage(
+        CachedNetworkImageProvider(normalizedUrl),
+        width: 48,
+        height: 48,
+      );
+
       final paletteGenerator = await PaletteGenerator.fromImageProvider(
-        NetworkImage(logoUrl),
-        maximumColorCount: 16,
+        resizedProvider,
+        size: const Size(48, 48),
+        maximumColorCount: 8,
+        timeout: const Duration(seconds: 3),
       );
 
       final Color extracted = paletteGenerator.dominantColor?.color ??
@@ -98,10 +151,12 @@ class TeamColorExtractor {
         }
       }
 
-      _colorCache[logoUrl] = allColors;
+      _colorCache[cacheKey] = allColors;
       return beautified;
     } catch (_) {
       return defaultColor;
+    } finally {
+      _pendingExtractions.remove(cacheKey);
     }
   }
 
@@ -133,7 +188,7 @@ class TeamColorExtractor {
     if (hex.length == 6) hex = 'FF$hex';
     if (hex.length != 8) return defaultColor;
     final parsed = int.tryParse(hex, radix: 16);
-    if (parsed == null) return defaultColor;
+    if (parsed == null || parsed == 0xFFFFFFFF || parsed == 0x00000000) return defaultColor;
     return _beautifyColor(Color(parsed));
   }
 }

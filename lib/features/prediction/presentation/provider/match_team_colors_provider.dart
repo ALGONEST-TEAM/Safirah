@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../../core/utils/team_color_extractor.dart';
@@ -48,7 +47,7 @@ final matchTeamColorsProvider = StateNotifierProvider.family.autoDispose<
   (ref, int matchId) {
     final detailsState = ref.watch(matchDetailsProvider(matchId));
     final notifier = MatchTeamColorsNotifier();
-    if (detailsState.data != null) {
+    if (detailsState.data.teams != null) {
       notifier.updateFromMatchDetails(
         homeHex: detailsState.data.teams?.home?.color,
         awayHex: detailsState.data.teams?.away?.color,
@@ -115,40 +114,37 @@ class MatchTeamColorsNotifier extends StateNotifier<MatchTeamColorsState> {
     final bool needsHomeExtract = homeLogo != null && homeLogo.trim().isNotEmpty;
     final bool needsAwayExtract = awayLogo != null && awayLogo.trim().isNotEmpty;
 
-    Color newHomeColor = state.homeColor;
-    Color newHomeGlowColor = state.homeGlowColor;
-    Color newAwayColor = state.awayColor;
-    Color newAwayGlowColor = state.awayGlowColor;
+    final Color currentHomeColor = state.homeColor;
+    final Color currentAwayColor = state.awayColor;
 
-    if (needsHomeExtract && homeLogo != null && homeLogo.isNotEmpty) {
-      final Color? cachedHome = TeamColorExtractor.getCachedColor(homeLogo);
-      if (cachedHome != null) {
-        newHomeColor = cachedHome;
-        newHomeGlowColor = cachedHome;
-      } else {
-        newHomeColor = await TeamColorExtractor.extractColor(
-          hexColor: null,
-          logoUrl: homeLogo,
-          defaultColor: const Color(0xFFC40010),
-        );
-        newHomeGlowColor = newHomeColor != Colors.white ? newHomeColor : newHomeGlowColor;
-      }
-    }
+    // Parallelize home and away extraction with Future.wait
+    final homeFuture = (needsHomeExtract && homeLogo.isNotEmpty)
+        ? (TeamColorExtractor.getCachedColor(homeLogo) != null
+            ? Future.value(TeamColorExtractor.getCachedColor(homeLogo)!)
+            : TeamColorExtractor.extractColor(
+                hexColor: homeHex,
+                logoUrl: homeLogo,
+                defaultColor: const Color(0xFFC40010),
+              ))
+        : Future.value(currentHomeColor);
 
-    if (needsAwayExtract && awayLogo != null && awayLogo.isNotEmpty) {
-      final Color? cachedAway = TeamColorExtractor.getCachedColor(awayLogo);
-      if (cachedAway != null) {
-        newAwayColor = cachedAway;
-        newAwayGlowColor = cachedAway;
-      } else {
-        newAwayColor = await TeamColorExtractor.extractColor(
-          hexColor: null,
-          logoUrl: awayLogo,
-          defaultColor: const Color(0xFF79ADE2),
-        );
-        newAwayGlowColor = newAwayColor != Colors.white ? newAwayColor : newAwayGlowColor;
-      }
-    }
+    final awayFuture = (needsAwayExtract && awayLogo.isNotEmpty)
+        ? (TeamColorExtractor.getCachedColor(awayLogo) != null
+            ? Future.value(TeamColorExtractor.getCachedColor(awayLogo)!)
+            : TeamColorExtractor.extractColor(
+                hexColor: awayHex,
+                logoUrl: awayLogo,
+                defaultColor: const Color(0xFF79ADE2),
+              ))
+        : Future.value(currentAwayColor);
+
+    final results = await Future.wait([homeFuture, awayFuture]);
+
+    Color newHomeColor = results[0];
+    Color newHomeGlowColor = newHomeColor != Colors.white ? newHomeColor : state.homeGlowColor;
+
+    Color newAwayColor = results[1];
+    Color newAwayGlowColor = newAwayColor != Colors.white ? newAwayColor : state.awayGlowColor;
 
     // Ensure contrast: if both logos extract a very similar color, fallback to an alternative color or grey
     newAwayColor = TeamColorHelper.resolveColorConflict(newHomeColor, newAwayColor, awayLogo: awayLogo);

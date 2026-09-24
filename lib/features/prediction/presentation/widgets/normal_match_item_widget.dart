@@ -5,7 +5,6 @@ import '../../../../core/helpers/navigateTo.dart';
 import '../../../../core/utils/team_color_extractor.dart';
 import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../generated/l10n.dart';
-import 'package:intl/intl.dart';
 import '../../data/model/matches_predictions_model.dart';
 import '../pages/match_details_page.dart';
 import '../riverpod/match_details_riverpod.dart';
@@ -14,13 +13,12 @@ import 'team_widget.dart';
 
 class NormalMatchItemWidget extends ConsumerWidget {
   final MatchesPredictionsModel item;
-  bool? isInMatchesTeam;
+  final bool isInMatchesTeam;
 
-   NormalMatchItemWidget({
+  const NormalMatchItemWidget({
     super.key,
     required this.item,
-  this.  isInMatchesTeam=false
-
+    this.isInMatchesTeam = false,
   });
 
   @override

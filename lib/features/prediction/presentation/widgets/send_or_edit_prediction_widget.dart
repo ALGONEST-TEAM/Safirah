@@ -134,7 +134,9 @@ class _SendOrEditPredictionWidgetState
                 ),
                 Expanded(
                   child: AutoSizeTextWidget(
-                    text: widget.matches.matchTime.substring(0, 5),
+                    text: widget.matches.matchTime.length >= 5
+                        ? widget.matches.matchTime.substring(0, 5)
+                        : widget.matches.matchTime,
                     fontSize: 13.6.sp,
                     fontWeight: FontWeight.w600,
                     textAlign: TextAlign.center,

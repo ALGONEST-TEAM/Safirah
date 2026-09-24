@@ -15,10 +15,13 @@ import 'live_goal_flash_widget.dart';
 
 class LiveMatchItemWidget extends ConsumerWidget {
   final MatchesPredictionsModel item;
-  bool? isInMatchesTeam;
+  final bool isInMatchesTeam;
 
-  LiveMatchItemWidget(
-      {super.key, required this.item, this.isInMatchesTeam = false});
+  const LiveMatchItemWidget({
+    super.key,
+    required this.item,
+    this.isInMatchesTeam = false,
+  });
 
   @override
   Widget build(BuildContext context, ref) {

@@ -1,4 +1,4 @@
-import '../../presentation/widgets/match_details/match_events_list_widget.dart';
+import '../../presentation/provider/match_events_ui_provider.dart';
 
 class MatchEventsModel {
   final int matchId;

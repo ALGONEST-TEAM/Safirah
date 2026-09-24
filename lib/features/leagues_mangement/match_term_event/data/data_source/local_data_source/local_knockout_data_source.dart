@@ -541,11 +541,8 @@ class KnockoutGeneratorLocalDataSource {
               return curr;
             }
 
-            if (acc.isEmpty) return curr;
-
-            const grace = Duration(milliseconds: 800);
-            final tooSoon = DateTime.now().difference(lastNonEmptyAt) < grace;
-            if (tooSoon) return acc;
+            // إذا توفرت بيانات محلية صالحة مسبقاً، لا تصدر قائمة فارغة مؤقتة إطلاقاً لمنع الوميض واختفاء المباريات
+            if (acc.isNotEmpty) return acc;
 
             return curr;
           }, const <RoundModel>[]);
@@ -582,8 +579,8 @@ class KnockoutGeneratorLocalDataSource {
     final allRoundSyncIds = roundEntities.map((r) => r.syncId).toList();
 
     final query = db.select(db.matches).join([
-      innerJoin(homeAlias, homeAlias.syncId.equalsExp(db.matches.homeTeamSyncId)),
-      innerJoin(awayAlias, awayAlias.syncId.equalsExp(db.matches.awayTeamSyncId)),
+      leftOuterJoin(homeAlias, homeAlias.syncId.equalsExp(db.matches.homeTeamSyncId)),
+      leftOuterJoin(awayAlias, awayAlias.syncId.equalsExp(db.matches.awayTeamSyncId)),
     ]);
 
     final filters = <Expression<bool>>[
@@ -634,8 +631,8 @@ class KnockoutGeneratorLocalDataSource {
     final matchesByRound = <String, List<MatchModel>>{};
     for (final row in joined) {
       final match = row.readTable(db.matches);
-      final home = row.readTable(homeAlias);
-      final away = row.readTable(awayAlias);
+      final home = row.readTableOrNull(homeAlias);
+      final away = row.readTableOrNull(awayAlias);
 
       matchesByRound.putIfAbsent(match.roundSyncId, () => []).add(
         MatchModel.fromEntityWithRelations(
@@ -886,9 +883,7 @@ class KnockoutGeneratorLocalDataSource {
         final incomingMatchIds = entry.value;
 
         if (incomingMatchIds.isEmpty) {
-          await (db.delete(db.matches)
-                ..where((t) => t.roundSyncId.equals(roundSyncId)))
-              .go();
+          // إذا لم تكن هناك مباريات في الاستجابة، لا نحذف المباريات المنشأة محلياً منعاً لاختفائها
           continue;
         }
 

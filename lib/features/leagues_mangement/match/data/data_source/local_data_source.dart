@@ -747,13 +747,19 @@ class MatchesLocalDataSource {
       // ----------------------------
       if (deleteMissingRounds) {
         await (db.delete(db.rounds)
-          ..where((t) => t.leagueSyncId.equals(leagueSyncId) & t.syncId.isNotIn(keepRoundIds)))
+          ..where((t) =>
+              t.leagueSyncId.equals(leagueSyncId) &
+              t.roundType.equals('group') &
+              t.syncId.isNotIn(keepRoundIds)))
             .go();
       }
 
-      if (deleteMissingMatches) {
+      if (deleteMissingMatches && keepRoundIds.isNotEmpty) {
         await (db.delete(db.matches)
-          ..where((t) => t.leagueSyncId.equals(leagueSyncId) & t.syncId.isNotIn(keepMatchIds)))
+          ..where((t) =>
+              t.leagueSyncId.equals(leagueSyncId) &
+              t.roundSyncId.isIn(keepRoundIds) &
+              t.syncId.isNotIn(keepMatchIds)))
             .go();
       }
 
