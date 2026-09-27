@@ -9,6 +9,7 @@ import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../core/widgets/design_please_login_widget.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../../services/auth/auth.dart';
+import '../../data/model/league_for_prediction_model.dart';
 import '../riverpod/prediction_riverpod.dart';
 import 'prediction_card_widget.dart';
 import 'shimmer_matches_widget.dart';
@@ -31,9 +32,11 @@ class _PredictionListWidgetState extends ConsumerState<PredictionListWidget> {
   }
 
   void _onScroll() {
-    const threshold = 200.0;
-
+    if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
+    if (!position.hasContentDimensions) return;
+
+    const threshold = 200.0;
     final isNearEnd = position.pixels >= (position.maxScrollExtent - threshold);
 
     if (isNearEnd &&
@@ -67,46 +70,54 @@ class _PredictionListWidgetState extends ConsumerState<PredictionListWidget> {
               onRefresh: () async {
                 ref.invalidate(getAllPredictionsProvider);
               },
-              child: ListView.builder(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: 12.w)
-                    .copyWith(bottom: 46.h),
-                itemCount: state.data.data.length +
-                    (state.stateData == States.loadingMore ? 1 : 0),
-                itemBuilder: (context, index) {
-                  final isLoaderItem = index >= state.data.data.length;
-                  if (isLoaderItem) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      child: const Center(
-                          child: CircularProgressIndicatorWidget()),
-                    );
+              child: Builder(
+                builder: (context) {
+                  // Flatten: each league becomes its own ListView item
+                  final flatItems = <({String? dateHeader, LeagueForPredictionModel? league, String? leagueDate})>[];
+                  for (final day in state.data.data) {
+                    flatItems.add((dateHeader: day.date, league: null, leagueDate: null));
+                    for (final league in day.leagues) {
+                      flatItems.add((dateHeader: null, league: league, leagueDate: day.date));
+                    }
                   }
 
-                  final day = state.data.data[index];
+                  return ListView.builder(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w)
+                        .copyWith(bottom: 46.h),
+                    itemCount: flatItems.length +
+                        (state.stateData == States.loadingMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index >= flatItems.length) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.h),
+                          child: const Center(
+                              child: CircularProgressIndicatorWidget()),
+                        );
+                      }
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 4.w)
-                            .copyWith(top: 16.h),
-                        child: AutoSizeTextWidget(
-                          text: day.date,
-                          fontSize: 10.6.sp,
-                        ),
-                      ),
-                      ...day.leagues.map(
-                        (league) => Padding(
-                          padding: EdgeInsets.only(top: 6.h),
-                          child: PredictionCardWidget(
-                            data: league,
-                            date: day.date,
+                      final item = flatItems[index];
+
+                      if (item.dateHeader != null) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.w)
+                              .copyWith(top: 16.h),
+                          child: AutoSizeTextWidget(
+                            text: item.dateHeader!,
+                            fontSize: 10.6.sp,
                           ),
+                        );
+                      }
+
+                      return Padding(
+                        padding: EdgeInsets.only(top: 6.h),
+                        child: PredictionCardWidget(
+                          data: item.league!,
+                          date: item.leagueDate!,
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   );
                 },
               ),

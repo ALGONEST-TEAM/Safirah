@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -9,7 +9,7 @@ import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../generated/l10n.dart';
 import '../riverpod/prediction_riverpod.dart';
 
-class MatchStatusActionWidget extends ConsumerWidget {
+class MatchStatusActionWidget extends StatelessWidget {
   final num? status;
   final bool rtl;
   final VoidCallback onEditTap;
@@ -22,8 +22,8 @@ class MatchStatusActionWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final statusHelper = ref.watch(matchStatusHelperProvider);
+  Widget build(BuildContext context) {
+    const statusHelper = MatchStatusHelper();
 
     return Padding(
       padding: EdgeInsets.only(

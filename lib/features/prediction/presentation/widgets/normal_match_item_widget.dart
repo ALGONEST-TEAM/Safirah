@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/helpers/navigateTo.dart';
-import '../../../../core/utils/team_color_extractor.dart';
 import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../generated/l10n.dart';
 import '../../data/model/matches_predictions_model.dart';
 import '../pages/match_details_page.dart';
-import '../riverpod/match_details_riverpod.dart';
 import '../riverpod/prediction_riverpod.dart';
 import 'team_widget.dart';
 
-class NormalMatchItemWidget extends ConsumerWidget {
+class NormalMatchItemWidget extends StatelessWidget {
   final MatchesPredictionsModel item;
   final bool isInMatchesTeam;
 
@@ -21,47 +19,43 @@ class NormalMatchItemWidget extends ConsumerWidget {
     this.isInMatchesTeam = false,
   });
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final statusHelper = ref.watch(matchStatusHelperProvider);
-
-    String _formatTime(String time) {
-      if (time.isEmpty || time.contains('ص') || time.contains('م')) return time;
-      try {
-        final parts = time.split(':');
-        if (parts.length >= 2) {
-          int hour = int.parse(parts[0]);
-          final String minute = parts[1].substring(0, 2);
-          String amPm = 'ص';
-          if (hour >= 12) {
-            amPm = 'م';
-            if (hour > 12) hour -= 12;
-          } else if (hour == 0) {
-            hour = 12;
-          }
-          final String hourStr = hour.toString().padLeft(2, '0');
-          return '$hourStr:$minute $amPm';
+  static String _formatTime(String time) {
+    if (time.isEmpty || time.contains('ص') || time.contains('م')) return time;
+    try {
+      final parts = time.split(':');
+      if (parts.length >= 2) {
+        int hour = int.parse(parts[0]);
+        final String minute = parts[1].substring(0, 2);
+        String amPm = 'ص';
+        if (hour >= 12) {
+          amPm = 'م';
+          if (hour > 12) hour -= 12;
+        } else if (hour == 0) {
+          hour = 12;
         }
-      } catch (_) {}
-      if (time.length >= 5) return time.substring(0, 5);
-      return time;
-    }
+        final String hourStr = hour.toString().padLeft(2, '0');
+        return '$hourStr:$minute $amPm';
+      }
+    } catch (_) {}
+    if (time.length >= 5) return time.substring(0, 5);
+    return time;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const statusHelper = MatchStatusHelper();
 
     return GestureDetector(
-      onTap:isInMatchesTeam==true? null:() {
-        TeamColorExtractor.preloadColors(
-          item.homeTeam.logo,
-          item.awayTeam.logo,
-        );
-        ref.read(matchEventsProvider( item.matchId).notifier).getMatchEvents();
-
-        navigateTo(
-          context,
-          MatchDetailsPage(
-            matchId: item.matchId,
-          ),
-        );
-      },
+      onTap: isInMatchesTeam == true
+          ? null
+          : () {
+              navigateTo(
+                context,
+                MatchDetailsPage(
+                  matchId: item.matchId,
+                ),
+              );
+            },
         behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 2.h),

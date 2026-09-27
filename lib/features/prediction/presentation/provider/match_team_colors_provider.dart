@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
-import '../../../../../core/utils/team_color_extractor.dart';
-import '../../../../../core/utils/team_color_helper.dart';
+// import '../../../../../core/utils/team_color_extractor.dart';
+// import '../../../../../core/utils/team_color_helper.dart';
 import '../riverpod/match_details_riverpod.dart';
 
 class MatchTeamColorsState {
@@ -62,10 +62,10 @@ final matchTeamColorsProvider = StateNotifierProvider.family.autoDispose<
 class MatchTeamColorsNotifier extends StateNotifier<MatchTeamColorsState> {
   MatchTeamColorsNotifier() : super(MatchTeamColorsState.defaults());
 
-  String? _lastHomeHex;
-  String? _lastAwayHex;
-  String? _lastHomeLogo;
-  String? _lastAwayLogo;
+  // String? _lastHomeHex;
+  // String? _lastAwayHex;
+  // String? _lastHomeLogo;
+  // String? _lastAwayLogo;
 
   void updateFromMatchDetails({
     String? homeHex,
@@ -73,6 +73,16 @@ class MatchTeamColorsNotifier extends StateNotifier<MatchTeamColorsState> {
     String? homeLogo,
     String? awayLogo,
   }) {
+    // [TEMPORARILY DISABLED AS REQUESTED - KEPT AS COMMENT WITHOUT DELETING]
+    // Keeps team backgrounds and glow strictly white with zero calculations.
+    state = state.copyWith(
+      homeColor: const Color(0xFFC40010),
+      awayColor: const Color(0xFF79ADE2),
+      homeGlowColor: Colors.white,
+      awayGlowColor: Colors.white,
+    );
+
+    /*
     if (_lastHomeHex == homeHex &&
         _lastAwayHex == awayHex &&
         _lastHomeLogo == homeLogo &&
@@ -103,14 +113,18 @@ class MatchTeamColorsNotifier extends StateNotifier<MatchTeamColorsState> {
 
     // Asynchronous dynamic logo extraction if needed
     _extractAsyncColors(homeHex, homeLogo, awayHex, awayLogo);
+    */
   }
 
+  /*
   void _extractAsyncColors(
     String? homeHex,
     String? homeLogo,
     String? awayHex,
     String? awayLogo,
   ) async {
+    // [TEMPORARILY DISABLED AS REQUESTED - KEPT AS COMMENT WITHOUT DELETING]
+    // Keeps team colors matching hex or default white with zero image processing.
     final bool needsHomeExtract = homeLogo != null && homeLogo.trim().isNotEmpty;
     final bool needsAwayExtract = awayLogo != null && awayLogo.trim().isNotEmpty;
 
@@ -122,7 +136,7 @@ class MatchTeamColorsNotifier extends StateNotifier<MatchTeamColorsState> {
         ? (TeamColorExtractor.getCachedColor(homeLogo) != null
             ? Future.value(TeamColorExtractor.getCachedColor(homeLogo)!)
             : TeamColorExtractor.extractColor(
-                hexColor: homeHex,
+                hexColor: null,
                 logoUrl: homeLogo,
                 defaultColor: const Color(0xFFC40010),
               ))
@@ -132,7 +146,7 @@ class MatchTeamColorsNotifier extends StateNotifier<MatchTeamColorsState> {
         ? (TeamColorExtractor.getCachedColor(awayLogo) != null
             ? Future.value(TeamColorExtractor.getCachedColor(awayLogo)!)
             : TeamColorExtractor.extractColor(
-                hexColor: awayHex,
+                hexColor: null,
                 logoUrl: awayLogo,
                 defaultColor: const Color(0xFF79ADE2),
               ))
@@ -159,4 +173,5 @@ class MatchTeamColorsNotifier extends StateNotifier<MatchTeamColorsState> {
       );
     }
   }
+  */
 }

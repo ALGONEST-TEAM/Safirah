@@ -7,8 +7,8 @@ class FadePageRoute<T> extends PageRouteBuilder<T> {
     required Widget child,
     super.settings,
   }) : super(
-          transitionDuration: const Duration(milliseconds: 500),
-          reverseTransitionDuration: const Duration(milliseconds: 500),
+          transitionDuration: const Duration(milliseconds: 250),
+          reverseTransitionDuration: const Duration(milliseconds: 250),
           pageBuilder: (_, __, ___) => child,
           transitionsBuilder: (_, animation, __, child) => FadeTransition(
             opacity: animation,

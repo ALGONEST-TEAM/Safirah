@@ -29,14 +29,18 @@ class LeagueForPredictionModel {
 
   factory LeagueForPredictionModel.fromJson(Map<String, dynamic> json) {
     return LeagueForPredictionModel(
-        id: json['id'],
-        name: json['name'] ?? '',
-        logo: json['logo'] ?? '',
-        matches: MatchesPredictionsModel.fromJsonList(json['matches'] ?? []));
+        id: int.tryParse((json['id'] ?? 0).toString()) ?? 0,
+        name: (json['name'] ?? '').toString(),
+        logo: (json['logo'] ?? '').toString(),
+        matches: MatchesPredictionsModel.fromJsonList(json['matches'] as List? ?? []));
   }
 
-  static List<LeagueForPredictionModel> fromJsonList(List json) {
-    return json.map((e) => LeagueForPredictionModel.fromJson(e)).toList();
+  static List<LeagueForPredictionModel> fromJsonList(List? json) {
+    if (json == null) return [];
+    return json
+        .whereType<Map<String, dynamic>>()
+        .map((e) => LeagueForPredictionModel.fromJson(e))
+        .toList();
   }
 }
 
@@ -61,12 +65,17 @@ class LeaguesContainerModel {
 
   factory LeaguesContainerModel.fromJson(Map<String, dynamic> json) {
     return LeaguesContainerModel(
-        date: json['label'] ?? '',
-        leagues: LeagueForPredictionModel.fromJsonList(json['competitions'] ?? []));
+        date: (json['label'] ?? json['date'] ?? '').toString(),
+        leagues: LeagueForPredictionModel.fromJsonList(
+            (json['competitions'] ?? json['leagues']) as List? ?? []));
   }
 
-  static List<LeaguesContainerModel> fromJsonList(List json) {
-    return json.map((e) => LeaguesContainerModel.fromJson(e)).toList();
+  static List<LeaguesContainerModel> fromJsonList(List? json) {
+    if (json == null) return [];
+    return json
+        .whereType<Map<String, dynamic>>()
+        .map((e) => LeaguesContainerModel.fromJson(e))
+        .toList();
   }
 }
 

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../../../../core/state/state.dart';
 import '../riverpod/match_details_riverpod.dart';
 import '../provider/match_details_providers.dart';
 import '../riverpod/match_details_websocket_notifier.dart';
+import '../../../../core/network/errors/app_exception_message.dart';
+import '../../../../core/widgets/error_widget.dart';
 import '../widgets/match_details/match_details_header_widget.dart';
-import '../widgets/match_details/match_details_shimmer_view.dart';
+import '../widgets/match_details/match_events_shimmer_widget.dart';
+import '../widgets/match_details/match_tab_bar_shimmer_widget.dart';
 import '../widgets/match_details/match_details_tab_bar_widget.dart';
 import '../widgets/match_details/match_details_tab_header_delegate.dart';
 import '../widgets/match_details/match_events_widget.dart';
@@ -80,7 +81,9 @@ class _MatchDetailsPageState extends ConsumerState<MatchDetailsPage>
         vsync: this,
         initialIndex: newIndex,
       );
-      oldController.dispose();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        oldController.dispose();
+      });
     }
   }
 
@@ -88,26 +91,23 @@ class _MatchDetailsPageState extends ConsumerState<MatchDetailsPage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
+    ref.read(matchDetailsWebSocketProvider(widget.matchId)).dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(matchDetailsWebSocketProvider(widget.matchId));
-
     final tabsConfig =
         ref.watch(matchDetailsTabsConfigProvider(widget.matchId));
-
-    if (tabsConfig.isLoading) {
-      return MatchDetailsShimmerView(matchId: widget.matchId);
-    }
 
     final List<_TabItem> tabItems = [
       for (final item in tabsConfig.tabs)
         _TabItem(item.label, _buildTabWidget(item.type, widget.matchId)),
     ];
 
-    _syncTabController(tabItems.length);
+    if (!tabsConfig.isLoading && tabItems.isNotEmpty) {
+      _syncTabController(tabItems.length);
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -137,19 +137,39 @@ class _MatchDetailsPageState extends ConsumerState<MatchDetailsPage>
             SliverPersistentHeader(
               pinned: true,
               delegate: MatchDetailsTabHeaderDelegate(
-                child: MatchDetailsTabBarWidget(
-                  controller: _tabController,
-                  tabLabels: tabItems.map((tab) => tab.label).toList(),
-                ),
+                child: tabsConfig.isLoading
+                    ? const MatchTabBarShimmerWidget()
+                    : MatchDetailsTabBarWidget(
+                        controller: _tabController,
+                        tabLabels: tabItems.map((tab) => tab.label).toList(),
+                      ),
               ),
             ),
           ];
         },
-        body: TabBarView(
-          controller: _tabController,
-          physics: const BouncingScrollPhysics(),
-          children: tabItems.map((tab) => tab.widget).toList(),
-        ),
+        body: tabsConfig.isError
+            ? Center(
+                child: ErrorsWidget(
+                  title: MessageOfError.get(
+                          tabsConfig.exception as Object)
+                      .first,
+                  subTitle: MessageOfError.get(
+                          tabsConfig.exception as Object)
+                      .last,
+                  onPressed: () {
+                    ref
+                        .read(matchDetailsProvider(widget.matchId).notifier)
+                        .getMatchDetails();
+                  },
+                ),
+              )
+            : tabsConfig.isLoading
+                ? const MatchEventsShimmerWidget()
+                : TabBarView(
+                    controller: _tabController,
+                    physics: const BouncingScrollPhysics(),
+                    children: tabItems.map((tab) => tab.widget).toList(),
+                  ),
       ),
     );
   }

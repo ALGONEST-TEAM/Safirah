@@ -1,11 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:palette_generator/palette_generator.dart';
+// import 'package:palette_generator/palette_generator.dart';
 import '../network/urls.dart';
 
 class TeamColorExtractor {
-  static final Map<String, List<Color>> _colorCache = {};
-  static final Map<String, Future<Color>> _pendingExtractions = {};
+  // static final Map<String, List<Color>> _colorCache = {};
+  // static final Map<String, Future<Color>> _pendingExtractions = {};
 
   /// Normalizes relative or malformed URLs (e.g. uploaded from dashboard)
   static String? normalizeUrl(String? raw) {
@@ -27,18 +27,24 @@ class TeamColorExtractor {
 
   /// Preload team logo colors in background before opening match details
   static void preloadColors(String? homeLogo, String? awayLogo) {
+    /* [TEMPORARILY DISABLED AS REQUESTED - KEPT AS COMMENT WITHOUT DELETING]
     if (homeLogo != null && homeLogo.trim().isNotEmpty && !_colorCache.containsKey(homeLogo.trim())) {
       extractColor(hexColor: null, logoUrl: homeLogo);
     }
     if (awayLogo != null && awayLogo.trim().isNotEmpty && !_colorCache.containsKey(awayLogo.trim())) {
       extractColor(hexColor: null, logoUrl: awayLogo);
     }
+    */
   }
 
   /// Synchronous instant lookup from memory cache
   static Color? getCachedColor(String? logoUrl) {
+    // [TEMPORARILY DISABLED AS REQUESTED - KEPT AS COMMENT WITHOUT DELETING]
+    return null;
+    /*
     if (logoUrl == null || logoUrl.trim().isEmpty) return null;
     return _colorCache[logoUrl.trim()]?.first;
+    */
   }
 
   /// Check if two colors are too similar
@@ -60,6 +66,9 @@ class TeamColorExtractor {
 
   /// Look for an alternative color in the cached logo palette that doesn't clash
   static Color? getAlternativeColor(String? logoUrl, Color clashingColor) {
+    // [TEMPORARILY DISABLED AS REQUESTED - KEPT AS COMMENT WITHOUT DELETING]
+    return null;
+    /*
     if (logoUrl == null || logoUrl.trim().isEmpty) return null;
     final colors = _colorCache[logoUrl.trim()];
     if (colors == null || colors.length <= 1) return null;
@@ -70,6 +79,7 @@ class TeamColorExtractor {
       }
     }
     return null;
+    */
   }
 
   /// Extract dominant vibrant color from team logo image if API hexColor is missing or empty.
@@ -78,6 +88,11 @@ class TeamColorExtractor {
     required String logoUrl,
     Color defaultColor = Colors.white,
   }) async {
+    // [TEMPORARILY DISABLED AS REQUESTED - KEPT AS COMMENT WITHOUT DELETING]
+    // Return white/defaultColor immediately without downloading or processing images.
+    return defaultColor;
+
+    /*
     // 1. If API hexColor is present and valid, parse and return it immediately!
     if (hexColor != null && hexColor.trim().isNotEmpty) {
       final parsed = parseHex(hexColor, defaultColor: Colors.transparent);
@@ -85,7 +100,6 @@ class TeamColorExtractor {
         return parsed;
       }
     }
-
     final trimmedKey = logoUrl.trim();
     if (trimmedKey.isEmpty) return defaultColor;
 
@@ -112,8 +126,10 @@ class TeamColorExtractor {
     final future = _performExtraction(normalized, trimmedKey, defaultColor);
     _pendingExtractions[trimmedKey] = future;
     return future;
+    */
   }
 
+  /* [TEMPORARILY DISABLED AS REQUESTED - KEPT AS COMMENT WITHOUT DELETING]
   static Future<Color> _performExtraction(
     String normalizedUrl,
     String cacheKey,
@@ -159,6 +175,7 @@ class TeamColorExtractor {
       _pendingExtractions.remove(cacheKey);
     }
   }
+  */
 
   /// Transforms the color to be softer, calmer, and more aesthetically pleasing
   static Color _beautifyColor(Color color) {

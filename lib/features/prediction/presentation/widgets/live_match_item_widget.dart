@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/helpers/navigateTo.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/team_color_extractor.dart';
 import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../core/widgets/online_images_widget.dart';
 import '../../data/model/matches_predictions_model.dart';
 import '../pages/match_details_page.dart';
-import '../riverpod/match_details_riverpod.dart';
 import 'live_match_timer_widget.dart';
 import 'live_goal_flash_widget.dart';
 
-class LiveMatchItemWidget extends ConsumerWidget {
+class LiveMatchItemWidget extends StatelessWidget {
   final MatchesPredictionsModel item;
   final bool isInMatchesTeam;
 
@@ -24,19 +22,11 @@ class LiveMatchItemWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, ref) {
+  Widget build(BuildContext context) {
     return GestureDetector(
       onTap: isInMatchesTeam == true
           ? null
           : () {
-              TeamColorExtractor.preloadColors(
-                item.homeTeam.logo,
-                item.awayTeam.logo,
-              );
-
-              ref
-                  .read(matchEventsProvider(item.matchId).notifier)
-                  .getMatchEvents();
               navigateTo(
                 context,
                 MatchDetailsPage(
@@ -93,7 +83,6 @@ class LiveMatchItemWidget extends ConsumerWidget {
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w800,
                   colorText: AppColors.fontColor,
-                  textAlign: TextAlign.center,
                 ),
                 lastGoalSide: item.lastGoalSide,
                 lastGoalTime: item.lastGoalTime,

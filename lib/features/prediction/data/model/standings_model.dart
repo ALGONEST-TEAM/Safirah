@@ -33,7 +33,9 @@ class StandingsData {
             ),
       rankingPeriods:
           RankingPeriods.fromJsonList(json['ranking_periods'] ?? []),
-      periods: (json['period']['label'] ?? '').toString(),
+      periods: json['period'] is Map
+          ? (json['period']['label'] ?? '').toString()
+          : (json['period'] ?? '').toString(),
     );
   }
 

@@ -6,7 +6,7 @@ import 'match_details_riverpod.dart';
 import 'match_lineups_riverpod.dart';
 
 final matchDetailsWebSocketProvider =
-    Provider.family<MatchDetailsWebSocketService, int>((ref, matchId) {
+    Provider.family.autoDispose<MatchDetailsWebSocketService, int>((ref, matchId) {
   final service = MatchDetailsWebSocketService(ref, matchId);
   ref.onDispose(() {
     service.dispose();

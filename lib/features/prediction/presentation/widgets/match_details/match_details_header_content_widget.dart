@@ -77,13 +77,12 @@ class _MatchDetailsHeaderContentWidgetState
     // RepaintBoundary promotes them to separate GPU layers.
     _homeLogoImage = GestureDetector(
       onTap: () {
-       // final teamId = md.teams?.home?.teamId ?? md.teams?.home?.id ?? 0;
-         final teamId = md.teams?.home?.sportmonksId;
-        if (teamId != 0) {
+        final teamId = md.teams?.home?.sportmonksId;
+        if (teamId != null && teamId != 0) {
           navigateTo(
               context,
               TeamMatchesPage(
-                teamId: teamId!,
+                teamId: teamId,
               ));
         }
       },
@@ -99,14 +98,12 @@ class _MatchDetailsHeaderContentWidgetState
 
     _awayLogoImage = GestureDetector(
       onTap: () {
-        final teamId = md.teams?.away?.sportmonksId ;
-        print(teamId);
-
-        if (teamId != 0) {
+        final teamId = md.teams?.away?.sportmonksId;
+        if (teamId != null && teamId != 0) {
           navigateTo(
             context,
             TeamMatchesPage(
-              teamId: teamId!,
+              teamId: teamId,
             ),
           );
         }
@@ -360,7 +357,7 @@ class _MatchDetailsHeaderContentWidgetState
                   matchDate: widget.matchDetails.date,
                   matchTime: widget.matchDetails.time,
                   status: widget.matchDetails.state?.id ??
-                      num.tryParse(widget.matchDetails.status ?? ''),
+                      num.tryParse(widget.matchDetails.status),
                   minute: widget.matchDetails.minute,
                   second: widget.matchDetails.second,
                   ticking: widget.matchDetails.ticking,

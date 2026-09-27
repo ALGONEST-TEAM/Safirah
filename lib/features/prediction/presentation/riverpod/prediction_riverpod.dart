@@ -144,7 +144,11 @@ class GetAllPredictionsNotifier
 
     result.fold(
       (failure) {
-        state = state.copyWith(state: States.error, exception: failure);
+        if (!moreData) {
+          state = state.copyWith(state: States.error, exception: failure);
+        } else {
+          state = state.copyWith(state: States.loaded);
+        }
       },
       (newData) {
         state = state.success(newData, moreData);
@@ -153,7 +157,7 @@ class GetAllPredictionsNotifier
   }
 }
 
-final getCompetitorPredictionsProvider = StateNotifierProvider.family<
+final getCompetitorPredictionsProvider = StateNotifierProvider.family.autoDispose<
     GetCompetitorPredictionsNotifier,
     DataState<PaginationModel<LeaguesContainerModel>>, int>(
   (ref, int competitorId) {
@@ -189,7 +193,11 @@ class GetCompetitorPredictionsNotifier
 
     result.fold(
       (failure) {
-        state = state.copyWith(state: States.error, exception: failure);
+        if (!moreData) {
+          state = state.copyWith(state: States.error, exception: failure);
+        } else {
+          state = state.copyWith(state: States.loaded);
+        }
       },
       (newData) {
         state = state.success(newData, moreData);

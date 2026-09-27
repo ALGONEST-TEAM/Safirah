@@ -81,8 +81,21 @@ class OnlineImagesWidget extends StatelessWidget {
     final normalized = _normalizeUrl(imageUrl);
     if (normalized == null) return _fallback();
 
+    final int? cacheWidth =
+        (size != null && size!.width.isFinite && size!.width > 0)
+            ? (size!.width * 2.5).round().clamp(60, 500)
+            : null;
+    final int? cacheHeight =
+        (size != null && size!.height.isFinite && size!.height > 0)
+            ? (size!.height * 2.5).round().clamp(60, 500)
+            : null;
+
     return CachedNetworkImage(
       imageUrl: normalized,
+      memCacheWidth: cacheWidth,
+      memCacheHeight: cacheHeight,
+      fadeInDuration: const Duration(milliseconds: 150),
+      fadeOutDuration: Duration.zero,
       placeholder: (context, value) {
         return Container(
           height: size?.height,

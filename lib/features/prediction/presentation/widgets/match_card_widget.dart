@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/helpers/navigateTo.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../core/widgets/online_images_widget.dart';
-import '../../../../generated/l10n.dart';
-import '../../../../services/auth/auth.dart';
 import '../../data/model/league_for_prediction_model.dart';
-import '../../data/model/matches_predictions_model.dart';
-import '../pages/match_details_page.dart';
 import '../riverpod/prediction_riverpod.dart';
 import 'live_match_item_widget.dart';
 import 'normal_match_item_widget.dart';
 
-class MatchCardWidget extends ConsumerWidget {
+class MatchCardWidget extends StatelessWidget {
   final LeagueForPredictionModel data;
   final String date;
   final bool hideHeader;
@@ -28,8 +23,8 @@ class MatchCardWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final statusHelper = ref.watch(matchStatusHelperProvider);
+  Widget build(BuildContext context) {
+    const statusHelper = MatchStatusHelper();
 
     return Card(
       color: Colors.white,

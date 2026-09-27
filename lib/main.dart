@@ -51,6 +51,11 @@ void main() async {
       debugPrint("Flutter Error in Release Mode: ${details.exception}");
     }
   };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint("==> [PlatformDispatcher Caught Async Error]: $error\n$stack");
+    return true;
+  };
   runZonedGuarded(
         () async {
       RemoteRequest.initDio();

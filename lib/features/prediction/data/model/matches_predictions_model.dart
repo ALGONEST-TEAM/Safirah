@@ -53,20 +53,20 @@ class MatchesPredictionsModel {
     final rawTimeAdded = clock?['added_time'] ?? clock?['time_added'] ?? json['time_added'];
 
     return MatchesPredictionsModel(
-      matchId: json['match_id'],
-      matchDate: json['match_date'] ?? '',
-      matchTime: json['match_time'] ?? '',
-      status: json['state_id'] ?? 0,
-      resultInfo: json['result_info'] ?? '',
-      hasPrediction: json['has_prediction'] ?? false,
-      isSpecialMatch: json['is_special_match'] ?? false,
+      matchId: int.tryParse((json['match_id'] ?? json['id'] ?? 0).toString()) ?? 0,
+      matchDate: (json['match_date'] ?? '').toString(),
+      matchTime: (json['match_time'] ?? '').toString(),
+      status: json['state_id'] != null ? num.tryParse(json['state_id'].toString()) ?? 0 : 0,
+      resultInfo: (json['result_info'] ?? '').toString(),
+      hasPrediction: json['has_prediction'] == true || json['has_prediction'] == 1 || json['has_prediction'].toString() == 'true',
+      isSpecialMatch: json['is_special_match'] == true || json['is_special_match'] == 1 || json['is_special_match'].toString() == 'true',
       homeTeam: TeamModelForPrediction.fromJson(json['home_team']),
       awayTeam: TeamModelForPrediction.fromJson(json['away_team']),
-      statusColor: json['status_color'] ?? '',
-      pointsEarned: json['points_earned'] ?? 0,
-      homeScore: prediction?['home_score'] ?? 0,
-      awayScore: prediction?['away_score'] ?? 0,
-      productionId: json['id'] ?? 0,
+      statusColor: (json['status_color'] ?? '').toString(),
+      pointsEarned: json['points_earned'] != null ? num.tryParse(json['points_earned'].toString()) ?? 0 : 0,
+      homeScore: prediction?['home_score'] != null ? num.tryParse(prediction!['home_score'].toString()) ?? 0 : 0,
+      awayScore: prediction?['away_score'] != null ? num.tryParse(prediction!['away_score'].toString()) ?? 0 : 0,
+      productionId: int.tryParse((json['id'] ?? 0).toString()) ?? 0,
       minute: rawMinute != null ? int.tryParse(rawMinute.toString()) : null,
       second: rawSecond != null ? int.tryParse(rawSecond.toString()) : null,
       ticking: rawTicking == true || rawTicking == 1 || rawTicking.toString() == 'true',
@@ -120,8 +120,12 @@ class MatchesPredictionsModel {
     );
   }
 
-  static List<MatchesPredictionsModel> fromJsonList(List json) {
-    return json.map((e) => MatchesPredictionsModel.fromJson(e)).toList();
+  static List<MatchesPredictionsModel> fromJsonList(List? json) {
+    if (json == null) return [];
+    return json
+        .whereType<Map<String, dynamic>>()
+        .map((e) => MatchesPredictionsModel.fromJson(e))
+        .toList();
   }
 }
 
@@ -152,12 +156,15 @@ class TeamModelForPrediction {
     );
   }
 
-  factory TeamModelForPrediction.fromJson(Map<String, dynamic> json) {
+  factory TeamModelForPrediction.fromJson(dynamic json) {
+    if (json == null || json is! Map) {
+      return TeamModelForPrediction(id: 0, name: '', logo: '', score: 0);
+    }
     return TeamModelForPrediction(
-      id: json['id'],
-      name: json['name'] ?? '',
-      logo: json['logo'] ?? '',
-      score: json['score'] ?? 0,
+      id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      name: (json['name'] ?? '').toString(),
+      logo: (json['logo'] ?? '').toString(),
+      score: json['score'] != null ? int.tryParse(json['score'].toString()) ?? 0 : 0,
     );
   }
 }

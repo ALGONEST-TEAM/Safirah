@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/extension/string.dart';
-import '../../../../core/widgets/auto_size_text_widget.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class MatchPointsStatusWidget extends StatelessWidget {
   final bool isOpened;
@@ -32,7 +32,7 @@ class MatchPointsStatusWidget extends StatelessWidget {
         vertical: 3.h,
       ),
       decoration: BoxDecoration(
-        color: (statusColor ?? '').toColor(),
+        color: (statusColor ?? '').toColorOrNull() ?? AppColors.primaryColor,
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(8.r),
           bottomRight: Radius.circular(8.r),
@@ -48,35 +48,25 @@ class MatchPointsStatusWidget extends StatelessWidget {
                 size: 13.sp,
               ),
               2.w.horizontalSpace,
-              AutoSizeTextWidget(
-                text: (pointsEarned ?? 0).toString(),
-                fontSize: 8.6.sp,
-                colorText: Colors.white,
-                fontWeight: FontWeight.w700,
+              Text(
+                (pointsEarned ?? 0).toString(),
+                style: TextStyle(
+                  fontSize: 8.6.sp,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
           2.h.verticalSpace,
-          AutoSizeTextWidget(
-            text: "${homeScore ?? 0} - ${awayScore ?? 0}",
-            colorText: Colors.white,
-            fontSize: 10.sp,
-            fontWeight: FontWeight.w700,
+          Text(
+            "${homeScore ?? 0} - ${awayScore ?? 0}",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          // Visibility(
-          //   visible: isOpened,
-          //   replacement: SvgPicture.asset(
-          //     rtl ? AppIcons.arrowBackEn : AppIcons.arrowBack,
-          //     color: Colors.white,
-          //     height: 15.h,
-          //   ),
-          //   child: AutoSizeTextWidget(
-          //     text: "${homeScore ?? 0} - ${awayScore ?? 0}",
-          //     colorText: Colors.white,
-          //     fontSize: 10.sp,
-          //     fontWeight: FontWeight.w700,
-          //   ),
-          // ),
         ],
       ),
     );

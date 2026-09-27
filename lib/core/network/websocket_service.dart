@@ -202,13 +202,19 @@ class WebSocketService {
       }
 
       final token = Auth().token;
-      if (token == null || token.isEmpty) {
+      if (token.isEmpty) {
         debugPrint(
             '==> [WebSocket Private Auth Skipped] User auth token is empty for: $channelName');
         return;
       }
 
-      final dio = Dio();
+      final dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 8),
+          sendTimeout: const Duration(seconds: 8),
+          receiveTimeout: const Duration(seconds: 8),
+        ),
+      );
       final response = await dio.post(
         'https://safirah.store/broadcasting/auth',
         data: 'socket_id=$socketId&channel_name=$channelName',
@@ -256,11 +262,16 @@ class WebSocketService {
 
   void _sendFrame(String event, Map<String, dynamic> data) {
     if (_channel != null && _isConnected) {
-      final frame = jsonEncode({
-        'event': event,
-        'data': data,
-      });
-      _channel!.sink.add(frame);
+      try {
+        final frame = jsonEncode({
+          'event': event,
+          'data': data,
+        });
+        _channel!.sink.add(frame);
+      } catch (e) {
+        debugPrint('==> [WebSocket Sink Add Error]: $e');
+        _handleDisconnect();
+      }
     }
   }
 
@@ -297,7 +308,12 @@ class WebSocketService {
     _isConnected = false;
     _isConnecting = false;
     _pingTimer?.cancel();
-    _subscription?.cancel();
+    try {
+      _subscription?.cancel();
+    } catch (_) {}
+    try {
+      _channel?.sink.close();
+    } catch (_) {}
     _channel = null;
     _scheduleReconnect();
   }
@@ -315,8 +331,12 @@ class WebSocketService {
   void dispose() {
     _pingTimer?.cancel();
     _reconnectTimer?.cancel();
-    _subscription?.cancel();
-    _channel?.sink.close();
+    try {
+      _subscription?.cancel();
+    } catch (_) {}
+    try {
+      _channel?.sink.close();
+    } catch (_) {}
     _isConnected = false;
     _isConnecting = false;
   }

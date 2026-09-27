@@ -41,6 +41,8 @@ class _TeamDetailsHeaderWidgetState extends State<TeamDetailsHeaderWidget> {
   }
 
   void _extractTeamColor() async {
+    // [TEMPORARILY DISABLED AS REQUESTED - KEPT AS COMMENT WITHOUT DELETING]
+    /*
     final logoUrl = widget.teamInfo.imagePath;
     if (logoUrl.trim().isEmpty) return;
 
@@ -61,6 +63,7 @@ class _TeamDetailsHeaderWidgetState extends State<TeamDetailsHeaderWidget> {
         _extractedColor = color;
       });
     }
+    */
   }
 
   @override

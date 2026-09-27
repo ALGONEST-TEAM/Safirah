@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -13,7 +13,7 @@ import 'match_status_action_widget.dart';
 import 'send_or_edit_prediction_widget.dart';
 import 'team_widget.dart';
 
-class PredictionCardWidget extends ConsumerStatefulWidget {
+class PredictionCardWidget extends StatefulWidget {
   final LeagueForPredictionModel data;
   final String date;
   final bool isCompetitor;
@@ -26,16 +26,16 @@ class PredictionCardWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<PredictionCardWidget> createState() =>
+  State<PredictionCardWidget> createState() =>
       _PredictionCardWidgetState();
 }
 
-class _PredictionCardWidgetState extends ConsumerState<PredictionCardWidget> {
+class _PredictionCardWidgetState extends State<PredictionCardWidget> {
   final Set<int> openedMatches = {};
 
   @override
   Widget build(BuildContext context) {
-    final statusHelper = ref.watch(matchStatusHelperProvider);
+    const statusHelper = MatchStatusHelper();
     final rtl = Directionality.of(context) == TextDirection.rtl;
 
     return Column(

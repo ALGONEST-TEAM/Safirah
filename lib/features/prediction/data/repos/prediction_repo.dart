@@ -10,6 +10,15 @@ class PredictionReposaitory {
   final PredictionRemoteDataSource _predictionRemoteDataSource =
       PredictionRemoteDataSource();
 
+  DioException _toDioException(Object e) {
+    if (e is DioException) return e;
+    return DioException(
+      requestOptions: RequestOptions(path: ''),
+      error: e.toString(),
+      type: DioExceptionType.unknown,
+    );
+  }
+
   Future<Either<DioException, List<LeaguesContainerModel>>>
       getAllMatches(String scope) async {
     try {
@@ -17,6 +26,8 @@ class PredictionReposaitory {
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
+    } catch (e) {
+      return Left(_toDioException(e));
     }
   }
 
@@ -24,10 +35,11 @@ class PredictionReposaitory {
       getAllPredictions(int page) async {
     try {
       final remote = await _predictionRemoteDataSource.getAllPredictions(page);
-   //   print(remote.data[4].leagues[0].matches[0].statusColor);
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
+    } catch (e) {
+      return Left(_toDioException(e));
     }
   }
 
@@ -36,10 +48,11 @@ class PredictionReposaitory {
     try {
       final remote = await _predictionRemoteDataSource.getCompetitorPredictions(
           competitorId, page);
-      print(remote.data[0]);
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
+    } catch (e) {
+      return Left(_toDioException(e));
     }
   }
 
@@ -57,6 +70,8 @@ class PredictionReposaitory {
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
+    } catch (e) {
+      return Left(_toDioException(e));
     }
   }
 
@@ -74,17 +89,19 @@ class PredictionReposaitory {
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
+    } catch (e) {
+      return Left(_toDioException(e));
     }
   }
 
   Future<Either<DioException, StandingsData>> standings(String scope) async {
     try {
       final remote = await _predictionRemoteDataSource.standings(scope);
-      print(remote.userItem.userId);
-
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
+    } catch (e) {
+      return Left(_toDioException(e));
     }
   }
 
@@ -94,6 +111,8 @@ class PredictionReposaitory {
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
+    } catch (e) {
+      return Left(_toDioException(e));
     }
   }
 }
