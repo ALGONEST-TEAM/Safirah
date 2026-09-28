@@ -173,6 +173,8 @@ class _TeamDetailsHeaderWidgetState extends State<TeamDetailsHeaderWidget> {
                       : CachedNetworkImage(
                           imageUrl: widget.teamInfo.imagePath,
                           fit: BoxFit.contain,
+                          memCacheWidth: 200,
+                          memCacheHeight: 200,
                         ),
                 ),
               ),

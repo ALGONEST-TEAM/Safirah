@@ -18,7 +18,7 @@ class PredictionRemoteDataSource {
       int page) async {
     final response = await RemoteRequest.getData(
       url: AppURL.prediction,
-      query: {'page': page},
+      query: {'page': page,'per_page':10},
     );
     return PaginationModel<LeaguesContainerModel>.fromJson(
       response.data['data'] ?? response.data,
@@ -32,7 +32,7 @@ class PredictionRemoteDataSource {
       int competitorId, int page) async {
     final response = await RemoteRequest.getData(
       url: AppURL.competitorPredictions(competitorId),
-      query: {'page': page},
+      query: {'page': page,'perPage':10},
     );
     return PaginationModel<LeaguesContainerModel>.fromJson(
       response.data['data']['predictions'] ?? response.data,

@@ -93,6 +93,8 @@ class _PlayerInfoRowWidget extends StatelessWidget {
                 ? CachedNetworkImage(
                     imageUrl: bestPlayer.image,
                     fit: BoxFit.cover,
+                    memCacheWidth: 120,
+                    memCacheHeight: 120,
                   )
                 : Icon(
                     Icons.person,
@@ -202,6 +204,8 @@ class _PlayerNameTeamWidget extends StatelessWidget {
                   child: CachedNetworkImage(
                     imageUrl: teamLogo!,
                     fit: BoxFit.cover,
+                    memCacheWidth: 60,
+                    memCacheHeight: 60,
                   ),
                 ),
               )

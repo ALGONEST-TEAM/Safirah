@@ -26,6 +26,8 @@ class MatchH2hTeamLogoWidget extends StatelessWidget {
           child: CachedNetworkImage(
             imageUrl: logoUrl!,
             fit: BoxFit.cover,
+            memCacheWidth: (size * 2.5).round().clamp(60, 200),
+            memCacheHeight: (size * 2.5).round().clamp(60, 200),
             errorWidget: (context, url, error) => Container(
               color: fallbackColor,
             ),
