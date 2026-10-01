@@ -88,6 +88,24 @@ class FirebaseMonitoringService {
 
       // 3. Catch all asynchronous / platform dispatcher errors
       PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+        final errorStr = error.toString();
+        final isNetworkException =
+            errorStr.contains('WebSocketChannelException') ||
+                errorStr.contains('SocketException') ||
+                errorStr.contains('Failed host lookup') ||
+                errorStr.contains('HandshakeException');
+
+        if (isNetworkException) {
+          // Record background network disconnects as non-fatal warnings
+          _crashlytics.recordError(
+            error,
+            stack,
+            fatal: false,
+            reason: 'Background Network Connectivity Issue',
+          );
+          return true;
+        }
+
         _crashlytics.recordError(error, stack, fatal: true);
         return true;
       };

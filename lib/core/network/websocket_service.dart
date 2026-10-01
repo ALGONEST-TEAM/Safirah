@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../services/auth/auth.dart';
 
-class WebSocketService {
+class WebSocketService with WidgetsBindingObserver {
   static final WebSocketService _instance = WebSocketService._internal();
   factory WebSocketService() => _instance;
-  WebSocketService._internal();
+
+  WebSocketService._internal() {
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   WebSocketChannel? _channel;
   StreamSubscription? _subscription;
@@ -17,6 +20,7 @@ class WebSocketService {
 
   bool _isConnected = false;
   bool _isConnecting = false;
+  bool _isAppInBackground = false;
   String? socketId;
 
   static const String _wssUrl =
@@ -27,25 +31,88 @@ class WebSocketService {
   final Map<String, List<Function(String eventName, Map<String, dynamic> data)>>
       _eventListeners = {};
 
+  int _reconnectAttempts = 0;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.hidden) {
+      _isAppInBackground = true;
+      debugPrint('==> [WebSocket] App entered background ($state). Suspending socket & timers.');
+      _disconnectSilently();
+    } else if (state == AppLifecycleState.resumed) {
+      final bool wasInBackground = _isAppInBackground;
+      _isAppInBackground = false;
+      debugPrint('==> [WebSocket] App resumed to foreground.');
+      if (wasInBackground) {
+        _reconnectAttempts = 0;
+        if (_subscribedChannels.isNotEmpty && !_isConnected && !_isConnecting) {
+          debugPrint('==> [WebSocket] Re-establishing connection for channels: $_subscribedChannels');
+          connect();
+        }
+      }
+    }
+  }
+
+  void _disconnectSilently() {
+    _isConnected = false;
+    _isConnecting = false;
+    _pingTimer?.cancel();
+    _pingTimer = null;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    try {
+      _subscription?.cancel();
+    } catch (_) {}
+    _subscription = null;
+    try {
+      _channel?.sink.close();
+    } catch (_) {}
+    _channel = null;
+    socketId = null;
+  }
+
   Future<void> connect() async {
+    if (_isAppInBackground) {
+      debugPrint('==> [WebSocket] Connection skipped: App is in background');
+      return;
+    }
     if (_isConnected || _isConnecting) return;
     _isConnecting = true;
 
     try {
       debugPrint('==> [WebSocketService] Connecting to $_wssUrl');
       final uri = Uri.parse(_wssUrl);
-      _channel = WebSocketChannel.connect(uri);
+      final channel = WebSocketChannel.connect(uri);
+      _channel = channel;
 
-      _subscription = _channel!.stream.listen(
+      _subscription = channel.stream.listen(
         _onMessage,
-        onError: _onError,
-        onDone: _onDone,
-        cancelOnError: false,
+        onError: (error) {
+          debugPrint('==> [WebSocket Stream Error]: $error');
+          _handleDisconnect();
+        },
+        onDone: () {
+          debugPrint('==> [WebSocket Stream Closed/Done]');
+          _handleDisconnect();
+        },
+        cancelOnError: true,
       );
 
-      _isConnected = true;
-      _isConnecting = false;
-      _startPingTimer();
+      // Handle channel readiness and connection failures gracefully without crashing
+      channel.ready.then((_) {
+        if (_channel == channel && !_isAppInBackground) {
+          _isConnected = true;
+          _isConnecting = false;
+          _reconnectAttempts = 0;
+          _startPingTimer();
+          debugPrint('==> [WebSocket] Connected successfully to $_wssUrl');
+        }
+      }).catchError((error) {
+        debugPrint('==> [WebSocket Ready CatchError]: $error');
+        if (_channel == channel) {
+          _handleDisconnect();
+        }
+      });
     } catch (e, stack) {
       _isConnecting = false;
       _isConnected = false;
@@ -184,15 +251,19 @@ class WebSocketService {
   }
 
   Future<void> _sendPrivateSubscribeFrame(String channelName) async {
+    if (_isAppInBackground) return;
     try {
       // 1. If socketId is not ready yet, wait briefly for connection_established handshake
       if (socketId == null || socketId!.isEmpty) {
         int retries = 0;
         while ((socketId == null || socketId!.isEmpty) && retries < 10) {
+          if (_isAppInBackground) return;
           await Future.delayed(const Duration(milliseconds: 150));
           retries++;
         }
       }
+
+      if (_isAppInBackground) return;
 
       // 2. If still not ready, skip for now. _resubscribeAll() will trigger it upon connection_established
       if (socketId == null || socketId!.isEmpty) {
@@ -261,6 +332,7 @@ class WebSocketService {
   }
 
   void _sendFrame(String event, Map<String, dynamic> data) {
+    if (_isAppInBackground) return;
     if (_channel != null && _isConnected) {
       try {
         final frame = jsonEncode({
@@ -287,57 +359,74 @@ class WebSocketService {
 
   void _startPingTimer() {
     _pingTimer?.cancel();
+    if (_isAppInBackground) return;
     _pingTimer = Timer.periodic(const Duration(seconds: 25), (_) {
-      if (_isConnected) {
+      if (_isConnected && !_isAppInBackground) {
         _sendFrame('pusher:ping', {});
       }
     });
-  }
-
-  void _onError(error) {
-    debugPrint('==> [WebSocket Stream Error]: $error');
-    _handleDisconnect();
-  }
-
-  void _onDone() {
-    debugPrint('==> [WebSocket Stream Closed/Done]');
-    _handleDisconnect();
   }
 
   void _handleDisconnect() {
     _isConnected = false;
     _isConnecting = false;
     _pingTimer?.cancel();
+    _pingTimer = null;
     try {
       _subscription?.cancel();
     } catch (_) {}
+    _subscription = null;
     try {
       _channel?.sink.close();
     } catch (_) {}
     _channel = null;
-    _scheduleReconnect();
+    socketId = null;
+
+    if (!_isAppInBackground && _subscribedChannels.isNotEmpty) {
+      _scheduleReconnect();
+    }
   }
 
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
-    _reconnectTimer = Timer(const Duration(seconds: 4), () {
+    _reconnectTimer = null;
+
+    if (_isAppInBackground) {
+      debugPrint('==> [WebSocket] Skipping reconnect scheduling: App is in background.');
+      return;
+    }
+
+    if (_subscribedChannels.isEmpty) {
+      debugPrint('==> [WebSocket] Skipping reconnect scheduling: No channels subscribed.');
+      return;
+    }
+
+    _reconnectAttempts++;
+
+    // Exponential backoff to protect CPU, RAM, and Battery from thread starvation
+    // 1st: 10s, 2nd: 20s, 3rd: 30s, 4th: 40s... After 4 attempts: 5 minutes
+    final int delaySeconds;
+    if (_reconnectAttempts > 4) {
+      delaySeconds = 300;
+    } else {
+      delaySeconds = 10 * _reconnectAttempts;
+    }
+
+    debugPrint(
+        '==> [WebSocket] Scheduling reconnect in ${delaySeconds}s (attempt: $_reconnectAttempts)');
+
+    _reconnectTimer = Timer(Duration(seconds: delaySeconds), () {
+      if (_isAppInBackground) return;
       if (!_isConnected && _subscribedChannels.isNotEmpty) {
-        debugPrint('==> [WebSocket] Retrying reconnection...');
         connect();
       }
     });
   }
 
   void dispose() {
-    _pingTimer?.cancel();
-    _reconnectTimer?.cancel();
-    try {
-      _subscription?.cancel();
-    } catch (_) {}
-    try {
-      _channel?.sink.close();
-    } catch (_) {}
-    _isConnected = false;
-    _isConnecting = false;
+    WidgetsBinding.instance.removeObserver(this);
+    _disconnectSilently();
+    _subscribedChannels.clear();
+    _eventListeners.clear();
   }
 }
