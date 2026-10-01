@@ -37,6 +37,7 @@ class StandingsScopeCardWidget extends ConsumerWidget {
         color: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
         elevation: 0,
+        margin: EdgeInsets.zero,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
           child: Row(

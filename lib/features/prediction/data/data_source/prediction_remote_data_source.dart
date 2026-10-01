@@ -73,9 +73,13 @@ class PredictionRemoteDataSource {
     return Future.value(unit);
   }
 
-  Future<StandingsData> standings(String scope) async {
+  Future<StandingsData> standings(String scope, {String? direction}) async {
+    final query = <String, dynamic>{'scope': scope};
+    if (direction != null && direction.isNotEmpty) {
+      query['direction'] = direction;
+    }
     final response = await RemoteRequest.getData(
-        url: AppURL.standings, query: {'scope': scope});
+        url: AppURL.standings, query: query);
     return StandingsData.fromJson(response.data['data']);
   }
 

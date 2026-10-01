@@ -94,9 +94,9 @@ class PredictionReposaitory {
     }
   }
 
-  Future<Either<DioException, StandingsData>> standings(String scope) async {
+  Future<Either<DioException, StandingsData>> standings(String scope, {String? direction}) async {
     try {
-      final remote = await _predictionRemoteDataSource.standings(scope);
+      final remote = await _predictionRemoteDataSource.standings(scope, direction: direction);
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);

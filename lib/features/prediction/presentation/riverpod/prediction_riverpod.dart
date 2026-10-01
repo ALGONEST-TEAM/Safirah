@@ -264,17 +264,38 @@ class EditPredictionNotifier extends StateNotifier<DataState<Unit>> {
   }
 }
 
+class StandingsFilter {
+  final String scope;
+  final String? direction;
+
+  const StandingsFilter({
+    this.scope = 'month',
+    this.direction,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StandingsFilter &&
+          runtimeType == other.runtimeType &&
+          scope == other.scope &&
+          direction == other.direction;
+
+  @override
+  int get hashCode => Object.hash(scope, direction);
+}
+
 final standingsProvider =
-    StateNotifierProvider.family<StandingsNotifier, DataState<StandingsData>,String>(
-  (ref,String scope) {
-    return StandingsNotifier(scope);
+    StateNotifierProvider.family<StandingsNotifier, DataState<StandingsData>, StandingsFilter>(
+  (ref, StandingsFilter filter) {
+    return StandingsNotifier(filter);
   },
 );
 
 class StandingsNotifier extends StateNotifier<DataState<StandingsData>> {
-  final String scope;
+  final StandingsFilter filter;
 
-  StandingsNotifier(this.scope)
+  StandingsNotifier(this.filter)
       : super(DataState<StandingsData>.initial(StandingsData.empty())) {
     getData();
   }
@@ -284,7 +305,7 @@ class StandingsNotifier extends StateNotifier<DataState<StandingsData>> {
   Future<void> getData() async {
     state = state.copyWith(state: States.loading);
 
-    final data = await _controller.standings(scope);
+    final data = await _controller.standings(filter.scope, direction: filter.direction);
     data.fold((failure) {
       state = state.copyWith(state: States.error, exception: failure);
     }, (newData) {
@@ -293,7 +314,8 @@ class StandingsNotifier extends StateNotifier<DataState<StandingsData>> {
   }
 }
 
-final standingsScopeProvider = StateProvider<String?>((ref) => null);
+final standingsScopeProvider = StateProvider<String>((ref) => 'month');
+final standingsDirectionProvider = StateProvider<String?>((ref) => null);
 
 final awardsScopeProvider = StateProvider<String>((ref) => 'season');
 
