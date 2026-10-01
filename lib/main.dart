@@ -17,6 +17,7 @@ import 'core/state/app_startup_shell.dart';
 import 'package:safirah/injection.dart' as di;
 import 'core/database/sync_auto_runner.dart';
 import 'core/database/sync_failed_notifier.dart';
+import 'core/monitoring/firebase_monitoring_service.dart';
 import 'core/theme/theme.dart';
 import 'core/widgets/bottomNavbar/bottom_navigation_bar_of_mange_league_widget.dart';
 import 'core/widgets/bottomNavbar/bottom_navigation_bar_widget.dart';
@@ -44,38 +45,20 @@ void main() async {
     DeviceOrientation.portraitUp,
   ]);
   await NotificationBootstrap.I.init(debug: kDebugMode);
+  await FirebaseMonitoringService.init();
 
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.dumpErrorToConsole(details);
-    if (kReleaseMode) {
-      debugPrint("Flutter Error in Release Mode: ${details.exception}");
-    }
-  };
-
-  PlatformDispatcher.instance.onError = (error, stack) {
-    debugPrint("==> [PlatformDispatcher Caught Async Error]: $error\n$stack");
-    return true;
-  };
-  runZonedGuarded(
-        () async {
-      RemoteRequest.initDio();
-      await Hive.initFlutter();
-      Hive.registerAdapter(SectionAndProductDataAdapter());
-      Hive.registerAdapter(SectionDataAdapter());
-      Hive.registerAdapter(PaginatedProductsListAdapter());
-      Hive.registerAdapter(CategoryDataAdapter());
-      Hive.registerAdapter(ProductDataAdapter());
-      Hive.registerAdapter(ColorOfProductDataAdapter());
-      Hive.registerAdapter(DiscountModelAdapter());
-      await di.init();
-      await Auth().onInit();
-      runApp(const AppRestartController(child: MyApp()));
-    },
-        (error, stackTrace) {
-      debugPrint("Caught error in release mode: $error");
-      debugPrint("Stack trace: $stackTrace");
-    },
-  );
+  RemoteRequest.initDio();
+  await Hive.initFlutter();
+  Hive.registerAdapter(SectionAndProductDataAdapter());
+  Hive.registerAdapter(SectionDataAdapter());
+  Hive.registerAdapter(PaginatedProductsListAdapter());
+  Hive.registerAdapter(CategoryDataAdapter());
+  Hive.registerAdapter(ProductDataAdapter());
+  Hive.registerAdapter(ColorOfProductDataAdapter());
+  Hive.registerAdapter(DiscountModelAdapter());
+  await di.init();
+  await Auth().onInit();
+  runApp(const AppRestartController(child: MyApp()));
 }
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
@@ -173,6 +156,9 @@ class _MyAppState extends ConsumerState<MyApp> {
       splitScreenMode: false,
       child: MaterialApp(
         navigatorKey: appNavigatorKey,
+        navigatorObservers: [
+          FirebaseMonitoringService.navigationObserver,
+        ],
         debugShowCheckedModeBanner: false,
         locale: locale,
         localizationsDelegates: const [

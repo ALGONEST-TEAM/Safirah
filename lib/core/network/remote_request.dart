@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:safirah/core/network/urls.dart';
 import '../../services/auth/auth.dart';
+import '../monitoring/firebase_monitoring_service.dart';
 
 class RemoteRequest {
   static late final Dio dio;
@@ -14,6 +15,23 @@ class RemoteRequest {
         connectTimeout: const Duration(seconds: 20),
         sendTimeout: const Duration(seconds: 60),
         receiveTimeout: const Duration(seconds: 60),
+      ),
+    );
+
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          FirebaseMonitoringService.log(
+            '🌐 [HTTP ${options.method}] ${options.path}',
+          );
+          return handler.next(options);
+        },
+        onError: (error, handler) {
+          FirebaseMonitoringService.log(
+            '⚠️ [HTTP ${error.response?.statusCode ?? 'ERR'}] ${error.requestOptions.path}: ${error.type.name}',
+          );
+          return handler.next(error);
+        },
       ),
     );
   }

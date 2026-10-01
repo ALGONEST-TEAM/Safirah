@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import '../../core/local/secure_storage.dart';
+import '../../core/monitoring/firebase_monitoring_service.dart';
 import '../../features/user/data/model/auth_model.dart';
 import '../../injection.dart';
 
@@ -29,8 +30,15 @@ class Auth {
         Map<String, dynamic> map = jsonDecode(read);
         AuthModel authModel = AuthModel.fromJson(map);
         user = authModel;
+        if (user.token.isNotEmpty) {
+          FirebaseMonitoringService.setUser(
+            id: user.user.id.toString(),
+            name: user.user.name,
+            phone: user.user.phoneNumber,
+          );
+        }
       }
-      print("token: ${user.token}");
+      log("token: ${user.token}", name: 'auth');
     } catch (ex) {
       throw '$ex';
     }
@@ -48,6 +56,13 @@ class Auth {
 
   Future<void> login(AuthModel data) async {
     user = data;
+    if (user.token.isNotEmpty) {
+      FirebaseMonitoringService.setUser(
+        id: user.user.id.toString(),
+        name: user.user.name,
+        phone: user.user.phoneNumber,
+      );
+    }
     _writeToCache();
   }
 
@@ -57,6 +72,7 @@ class Auth {
   }
 
   Future logout() async {
+    FirebaseMonitoringService.clearUser();
     // await secureStorage.delete(key: 'fcmToken');
     user = AuthModel.empty();
     await secureStorage.delete(key: _key);

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/monitoring/firebase_monitoring_service.dart';
 import '../../../../core/state/check_state_in_get_api_data_widget.dart';
 import '../../../../core/state/state.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -24,9 +26,11 @@ class PredictionListWidget extends ConsumerStatefulWidget {
 
 class _PredictionListWidgetState extends ConsumerState<PredictionListWidget> {
   final ScrollController _scrollController = ScrollController();
+  DateTime? _lastFetchAttempt;
 
   @override
   void initState() {
+    FirebaseMonitoringService.setCurrentScreen('PredictionList');
     _scrollController.addListener(_onScroll);
     super.initState();
   }
@@ -36,11 +40,17 @@ class _PredictionListWidgetState extends ConsumerState<PredictionListWidget> {
     final position = _scrollController.position;
     if (!position.hasContentDimensions) return;
 
-    const threshold = 200.0;
+    const threshold = 250.0;
     final isNearEnd = position.pixels >= (position.maxScrollExtent - threshold);
 
     if (isNearEnd &&
         ref.read(getAllPredictionsProvider).stateData != States.loadingMore) {
+      final now = DateTime.now();
+      if (_lastFetchAttempt != null &&
+          now.difference(_lastFetchAttempt!).inMilliseconds < 600) {
+        return; // Throttled to prevent multiple rapid duplicate calls
+      }
+      _lastFetchAttempt = now;
       ref.read(getAllPredictionsProvider.notifier).getData(moreData: true);
     }
   }
@@ -84,6 +94,7 @@ class _PredictionListWidgetState extends ConsumerState<PredictionListWidget> {
                   return ListView.builder(
                     controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
+                    scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
                     padding: EdgeInsets.symmetric(horizontal: 12.w)
                         .copyWith(bottom: 46.h),
                     itemCount: flatItems.length +
