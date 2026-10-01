@@ -28,9 +28,21 @@ class StandingsListCardWidget extends StatelessWidget {
         spacing: 8.h,
         children: [
           const StandingsHeaderWidget(),
-          Column(
-            children: List.generate(items.length, (i) {
-              final item = items[i];
+          if (items.isEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 24.h),
+              child: Center(
+                child: AutoSizeTextWidget(
+                  text: 'لا توجد بيانات ترتيب متاحة لهذه الفترة',
+                  fontSize: 12.sp,
+                  colorText: AppColors.fontColor2,
+                ),
+              ),
+            )
+          else
+            Column(
+              children: List.generate(items.length, (i) {
+                final item = items[i];
               return Column(
                 children: [
                   GestureDetector(
