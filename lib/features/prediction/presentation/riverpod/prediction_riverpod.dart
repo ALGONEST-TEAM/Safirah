@@ -325,28 +325,33 @@ final awardsScopeRefreshProvider =
 final awardsProvider =
     StateNotifierProvider<AwardsNotifier, DataState<AwardsData>>(
   (ref) {
-    return AwardsNotifier();
+    return AwardsNotifier(ref);
   },
 );
 
 class AwardsNotifier extends StateNotifier<DataState<AwardsData>> {
-  static const String initialScope = 'season';
+  final Ref _ref;
 
-  AwardsNotifier()
+  AwardsNotifier(this._ref)
       : super(DataState<AwardsData>.initial(AwardsData.empty())) {
     getData();
   }
 
   final _controller = PredictionReposaitory();
 
-  Future<void> getData() async {
+  Future<void> getData({String? scope}) async {
     state = state.copyWith(state: States.loading);
 
-    final data = await _controller.awards(initialScope);
+    final String targetScope =
+        (scope != null && scope.isNotEmpty) ? scope : _ref.read(awardsScopeProvider);
+    final data = await _controller.awards(targetScope);
     data.fold((failure) {
       state = state.copyWith(state: States.error, exception: failure);
     }, (newData) {
-      state = state.copyWith(state: States.loaded, data: newData);
+      final merged = state.data.scopes.isEmpty
+          ? newData
+          : state.data.mergeWith(newData);
+      state = state.copyWith(state: States.loaded, data: merged);
     });
   }
 
@@ -359,7 +364,9 @@ class AwardsNotifier extends StateNotifier<DataState<AwardsData>> {
     data.fold((error) {
       failure = error;
     }, (newData) {
-      final merged = state.data.scopes.isEmpty ? newData : state.data.mergeWith(newData);
+      final merged = state.data.scopes.isEmpty
+          ? newData
+          : state.data.mergeWith(newData);
       state = state.copyWith(state: States.loaded, data: merged);
     });
 

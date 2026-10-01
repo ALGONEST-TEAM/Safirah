@@ -127,7 +127,7 @@ class AppURL {
 
   static const String standings = '/predictions/rankings';
 
-  static const String awards = '/predictions/awards';
+  static const String awards = '/predictions/prizes';
 
   static const String awardsLegacy = '/predictions/prizes';
 

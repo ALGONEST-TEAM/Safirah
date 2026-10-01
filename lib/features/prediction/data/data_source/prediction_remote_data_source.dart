@@ -87,19 +87,6 @@ class PredictionRemoteDataSource {
     try {
       final response = await RemoteRequest.getData(
         url: AppURL.awards,
-      );
-      final parsed = AwardsData.fromJson(
-        response.data['data'] ?? response.data,
-        preferredScope: scope,
-      );
-      if (_shouldUseParsedAwards(parsed) && parsed.hasScope(scope)) return parsed;
-    } catch (_) {
-      // Fall through to scoped/new compatibility endpoint, then legacy/demo data.
-    }
-
-    try {
-      final response = await RemoteRequest.getData(
-        url: AppURL.awards,
         query: {'scope': scope},
       );
       final parsed = AwardsData.fromJson(
@@ -108,13 +95,12 @@ class PredictionRemoteDataSource {
       );
       if (_shouldUseParsedAwards(parsed)) return parsed;
     } catch (_) {
-      // Fall through to legacy endpoint, then demo data.
+      // Fall through to general request
     }
 
     try {
       final response = await RemoteRequest.getData(
-        url: AppURL.awardsLegacy,
-        query: {'scope': scope},
+        url: AppURL.awards,
       );
       final parsed = AwardsData.fromJson(
         response.data['data'] ?? response.data,

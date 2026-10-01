@@ -50,7 +50,10 @@ class StandingsScopeCardWidget extends ConsumerWidget {
               ),
               SvgPicture.asset(
                 AppIcons.arrowBottom,
-                color: AppColors.secondaryColor,
+                colorFilter: ColorFilter.mode(
+                  AppColors.secondaryColor,
+                  BlendMode.srcIn,
+                ),
                 height: 18.h,
               ),
             ],
