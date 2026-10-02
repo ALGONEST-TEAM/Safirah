@@ -153,8 +153,8 @@ class _AppNotificationBannerState extends State<_AppNotificationBanner>
       left: 0,
       right: 0,
       child: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
+        child: SizedBox(
+          width: double.infinity,
           child: SlideTransition(
             position: _slideAnimation,
             child: FadeTransition(
@@ -180,41 +180,26 @@ class _AppNotificationBannerState extends State<_AppNotificationBanner>
 Widget _buildBannerCard({
   required Color backgroundColor,
   required Widget content,
-  IconData? icon,
 }) {
   return Container(
-    margin: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
-    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+    width: double.infinity,
+    margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
     decoration: BoxDecoration(
       color: backgroundColor,
-      borderRadius: BorderRadius.circular(10.r),
+      borderRadius: BorderRadius.circular(8.r),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.18),
-          blurRadius: 12,
+          color: Colors.black.withValues(alpha: 0.16),
+          blurRadius: 10,
           offset: const Offset(0, 4),
         ),
       ],
     ),
     child: Material(
       color: Colors.transparent,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (icon != null) ...[
-            Icon(
-              icon,
-              color: Colors.white,
-              size: 19.r,
-            ),
-            8.w.horizontalSpace,
-          ],
-          Flexible(
-            child: content,
-          ),
-        ],
+      child: Center(
+        child: content,
       ),
     ),
   );
@@ -228,8 +213,7 @@ void showFlashBarSuccess({
   _AppNotificationOverlay.show(
     context: context,
     child: _buildBannerCard(
-      backgroundColor: AppColors.successSwatch.shade800.withValues(alpha: .95),
-      icon: Icons.check_circle_outline_rounded,
+      backgroundColor: AppColors.successSwatch.shade800.withValues(alpha: .9),
       content: Text(
         message,
         textAlign: TextAlign.center,
@@ -254,7 +238,6 @@ void showFlashBarError({
     context: context,
     child: _buildBannerCard(
       backgroundColor: const Color(0xFFBC2A23),
-      icon: Icons.error_outline_rounded,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -270,14 +253,14 @@ void showFlashBarError({
                 fontFamily: 'IBMPlexSansArabic',
               ),
             ),
-            3.h.verticalSpace,
+            4.h.verticalSpace,
           ],
           Text(
             text,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
-              fontSize: 12.4.sp,
+              fontSize: 12.8.sp,
               fontWeight: FontWeight.w500,
               fontFamily: 'IBMPlexSansArabic',
             ),
@@ -297,7 +280,6 @@ void showFlashBarWarring({
     context: context,
     child: _buildBannerCard(
       backgroundColor: AppColors.dangerColor,
-      icon: Icons.warning_amber_rounded,
       content: Text(
         message,
         textAlign: TextAlign.center,
