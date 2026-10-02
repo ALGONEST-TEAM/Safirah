@@ -106,13 +106,13 @@ class NormalMatchItemWidget extends StatelessWidget {
               ],
             ),
             if (canPredict) ...[
-              4.h.verticalSpace,
+              6.h.verticalSpace,
               _PredictButton(
                 item: item,
                 leagueName: leagueName,
                 date: date,
               ),
-              3.h.verticalSpace,
+              2.h.verticalSpace,
             ],
           ],
         ),
@@ -135,16 +135,7 @@ class _PredictButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool hasPrediction = item.hasPrediction == true;
-    const Color primaryColor = AppColors.primaryColor;
     final Color secondaryColor = AppColors.secondaryColor;
-
-    final Color accentColor = hasPrediction ? secondaryColor : primaryColor;
-    final Color bgColor = hasPrediction
-        ? secondaryColor.withValues(alpha: 0.07)
-        : primaryColor.withValues(alpha: 0.10);
-    final Color borderColor = hasPrediction
-        ? secondaryColor.withValues(alpha: 0.25)
-        : primaryColor.withValues(alpha: 0.35);
 
     final String buttonText;
     if (hasPrediction) {
@@ -157,7 +148,10 @@ class _PredictButton extends StatelessWidget {
       buttonText = 'توقع النتيجة';
     }
 
-    return Center(
+    final borderRadius = BorderRadius.circular(8.r);
+
+    return SizedBox(
+      width: double.infinity,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -180,32 +174,34 @@ class _PredictButton extends StatelessWidget {
               ),
             );
           },
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: borderRadius,
+          splashColor: secondaryColor.withValues(alpha: 0.12),
+          highlightColor: secondaryColor.withValues(alpha: 0.05),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.5.h),
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: 5.5.h),
             decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(16.r),
+              color: Colors.transparent,
+              borderRadius: borderRadius,
               border: Border.all(
-                color: borderColor,
-                width: 0.8,
+                color: secondaryColor,
+                width: 1.0,
               ),
             ),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   hasPrediction ? Icons.edit_outlined : Icons.stars_rounded,
-                  color: accentColor,
-                  size: 13.r,
+                  color: secondaryColor,
+                  size: 13.5.r,
                 ),
-                5.w.horizontalSpace,
+                6.w.horizontalSpace,
                 AutoSizeTextWidget(
                   text: buttonText,
-                  fontSize: 10.5.sp,
+                  fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
-                  colorText: accentColor,
+                  colorText: secondaryColor,
                 ),
               ],
             ),
