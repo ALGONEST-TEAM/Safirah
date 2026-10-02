@@ -52,7 +52,9 @@ class NormalMatchItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const statusHelper = MatchStatusHelper();
-    final bool canPredict = statusHelper.isNotStarted(item.status) && !isInMatchesTeam;
+    final bool canPredict = statusHelper.isNotStarted(item.status) &&
+        !isInMatchesTeam &&
+        (item.hasPrediction != true);
 
     return GestureDetector(
       onTap: isInMatchesTeam == true
@@ -134,20 +136,7 @@ class _PredictButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool hasPrediction = item.hasPrediction == true;
     final Color secondaryColor = AppColors.secondaryColor;
-
-    final String buttonText;
-    if (hasPrediction) {
-      if (item.homeScore != null && item.awayScore != null) {
-        buttonText = 'تعديل التوقع (${item.homeScore} - ${item.awayScore})';
-      } else {
-        buttonText = 'تعديل التوقع';
-      }
-    } else {
-      buttonText = 'توقع النتيجة';
-    }
-
     final borderRadius = BorderRadius.circular(8.r);
 
     return SizedBox(
@@ -170,7 +159,7 @@ class _PredictButton extends StatelessWidget {
                 league: leagueName ?? '',
                 date: date ?? item.matchDate,
                 matches: item,
-                isEdit: hasPrediction,
+                isEdit: false,
               ),
             );
           },
@@ -192,13 +181,13 @@ class _PredictButton extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  hasPrediction ? Icons.edit_outlined : Icons.stars_rounded,
+                  Icons.stars_rounded,
                   color: secondaryColor,
                   size: 13.5.r,
                 ),
                 6.w.horizontalSpace,
                 AutoSizeTextWidget(
-                  text: buttonText,
+                  text: 'توقع النتيجة',
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
                   colorText: secondaryColor,
