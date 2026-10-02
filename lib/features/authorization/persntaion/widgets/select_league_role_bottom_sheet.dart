@@ -1,4 +1,4 @@
-import 'package:another_flushbar/flushbar_helper.dart';
+import '../../../../core/helpers/flash_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -125,9 +125,10 @@ class _SelectLeagueRoleBottomSheetState
             functionSuccess: () {
               Navigator.of(context).pop();
 
-              FlushbarHelper.createSuccess(
+              showFlashBarSuccess(
+                context: context,
                 message: 'تم تعيين الدور بنجاح',
-              ).show(context);
+              );
             },
             hasMessageSuccess: false,
             state: assignUserState,
