@@ -65,9 +65,14 @@ class MatchCardWidget extends StatelessWidget {
               return Column(
                 children: [
                   if (isLiveMatch)
-                    LiveMatchItemWidget(item: item,isInMatchesTeam: hideHeader,)
+                    LiveMatchItemWidget(item: item, isInMatchesTeam: hideHeader,)
                   else
-                    NormalMatchItemWidget(item: item,isInMatchesTeam: hideHeader,),
+                    NormalMatchItemWidget(
+                      item: item,
+                      isInMatchesTeam: hideHeader,
+                      leagueName: data.name,
+                      date: date,
+                    ),
                   if (i != data.matches.length - 1)
                     Divider(
                       height: 4.h,
