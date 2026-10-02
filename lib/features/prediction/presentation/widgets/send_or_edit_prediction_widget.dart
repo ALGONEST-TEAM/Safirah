@@ -165,12 +165,40 @@ class _SendOrEditPredictionWidgetState
                     state: state,
                     functionSuccess: () {
                       Navigator.pop(context);
-                      if (widget.isEdit == false) {
-                        ref.invalidate(getAllMatchesProvider);
-                      }
-                      ref.invalidate(getAllPredictionsProvider);
                       final home = int.tryParse(_homeController.text) ?? 0;
                       final away = int.tryParse(_awayController.text) ?? 0;
+                      final matchId = widget.matches.matchId;
+
+                      // 1. تحديث فوري وسلس (Optimistic In-Place) للمباراة بدون أي وميض أو لودينق
+                      for (final scope in ['yesterday', 'today', 'tomorrow']) {
+                        ref
+                            .read(getAllMatchesProvider(scope).notifier)
+                            .updateMatchPrediction(
+                              matchId: matchId,
+                              homeScore: home,
+                              awayScore: away,
+                            );
+                      }
+
+                      // 2. تحديث فوري في قائمة توقعاتي (My Predictions)
+                      ref
+                          .read(getAllPredictionsProvider.notifier)
+                          .updatePredictionScore(
+                            matchId: matchId,
+                            homeScore: home,
+                            awayScore: away,
+                          );
+
+                      // 3. مزامنة صامتة في الخلفية (Silent Refresh) بدون إظهار أي شيمر أو لودينق
+                      final currentScope = ref.read(matchesScopeProvider);
+                      ref
+                          .read(getAllMatchesProvider(currentScope).notifier)
+                          .getData(silent: true);
+                      ref
+                          .read(getAllPredictionsProvider.notifier)
+                          .getData(silent: true);
+
+                      // 4. تمرير التحديث لصفحة تفاصيل المباراة إن كانت مفتوحة
                       widget.onSuccess?.call(home, away);
                     },
                     bottonWidget: DefaultButtonWidget(

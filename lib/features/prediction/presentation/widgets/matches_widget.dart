@@ -76,7 +76,9 @@ class _MatchesWidgetState extends ConsumerState<MatchesWidget> with WidgetsBindi
                 backgroundColor: Colors.white,
                 color: AppColors.primaryColor,
                 onRefresh: () async {
-                  ref.invalidate(getAllMatchesProvider(scope));
+                  await ref
+                      .read(getAllMatchesProvider(scope).notifier)
+                      .getData(silent: true);
                 },
                 child: Builder(
                   builder: (context) {

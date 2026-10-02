@@ -109,6 +109,43 @@ class GetAllMatchesNotifier
       );
     }
   }
+
+  void updateMatchPrediction({
+    required int matchId,
+    required int homeScore,
+    required int awayScore,
+  }) {
+    if (!mounted) return;
+    if (state.data.isEmpty) return;
+
+    bool updatedAny = false;
+    final newContainers = state.data.map((container) {
+      final newLeagues = container.leagues.map((league) {
+        final newMatches = league.matches.map((match) {
+          if (match.matchId == matchId) {
+            updatedAny = true;
+            return match.copyWith(
+              hasPrediction: true,
+              homeScore: homeScore,
+              awayScore: awayScore,
+            );
+          }
+          return match;
+        }).toList();
+
+        return league.copyWith(matches: newMatches);
+      }).toList();
+
+      return container.copyWith(leagues: newLeagues);
+    }).toList();
+
+    if (updatedAny) {
+      state = state.copyWith(
+        state: state.stateData,
+        data: newContainers,
+      );
+    }
+  }
 }
 
 final getAllPredictionsProvider = StateNotifierProvider<
@@ -129,13 +166,13 @@ class GetAllPredictionsNotifier
 
   final _controller = PredictionReposaitory();
 
-  Future<void> getData({bool moreData = false}) async {
+  Future<void> getData({bool moreData = false, bool silent = false}) async {
     if (moreData && state.data.currentPage >= state.data.lastPage) {
       return;
     }
     if (moreData) {
       state = state.copyWith(state: States.loadingMore);
-    } else {
+    } else if (!silent || state.data.data.isEmpty) {
       state = state.copyWith(state: States.loading);
     }
 
@@ -146,7 +183,7 @@ class GetAllPredictionsNotifier
 
     result.fold(
       (failure) {
-        if (!moreData) {
+        if (!moreData && (!silent || state.data.data.isEmpty)) {
           state = state.copyWith(state: States.error, exception: failure);
         } else {
           state = state.copyWith(state: States.loaded);
@@ -156,6 +193,43 @@ class GetAllPredictionsNotifier
         state = state.success(newData, moreData);
       },
     );
+  }
+
+  void updatePredictionScore({
+    required int matchId,
+    required int homeScore,
+    required int awayScore,
+  }) {
+    if (!mounted) return;
+    if (state.data.data.isEmpty) return;
+
+    bool updatedAny = false;
+    final newContainers = state.data.data.map((container) {
+      final newLeagues = container.leagues.map((league) {
+        final newMatches = league.matches.map((match) {
+          if (match.matchId == matchId) {
+            updatedAny = true;
+            return match.copyWith(
+              hasPrediction: true,
+              homeScore: homeScore,
+              awayScore: awayScore,
+            );
+          }
+          return match;
+        }).toList();
+
+        return league.copyWith(matches: newMatches);
+      }).toList();
+
+      return container.copyWith(leagues: newLeagues);
+    }).toList();
+
+    if (updatedAny) {
+      state = state.copyWith(
+        state: state.stateData,
+        data: state.data.copyWith(data: newContainers),
+      );
+    }
   }
 }
 

@@ -78,7 +78,9 @@ class _PredictionListWidgetState extends ConsumerState<PredictionListWidget> {
               backgroundColor: Colors.white,
               color: AppColors.primaryColor,
               onRefresh: () async {
-                ref.invalidate(getAllPredictionsProvider);
+                await ref
+                    .read(getAllPredictionsProvider.notifier)
+                    .getData(silent: true);
               },
               child: Builder(
                 builder: (context) {
