@@ -39,6 +39,7 @@ class _CompetitorPredictionListWidgetState extends ConsumerState<CompetitorPredi
   }
 
   void _onScroll() {
+    if (!mounted) return;
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
     if (!position.hasContentDimensions) return;

@@ -19,13 +19,13 @@ class AwardsWidget extends ConsumerWidget {
 
     return CheckStateInGetApiDataWidget(
       state: state,
-      refresh: () => ref.invalidate(awardsProvider),
+      refresh: () => ref.read(awardsProvider.notifier).getData(),
       widgetOfLoading: const LogoShimmerWidget(),
       widgetOfData: RefreshIndicator(
         backgroundColor: Colors.white,
         color: AppColors.primaryColor,
         onRefresh: () async {
-          ref.invalidate(awardsProvider);
+          await ref.read(awardsProvider.notifier).getData();
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),

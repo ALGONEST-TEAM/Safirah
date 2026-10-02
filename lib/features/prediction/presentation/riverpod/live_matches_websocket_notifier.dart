@@ -36,6 +36,7 @@ class LiveMatchesWebSocketService {
   }
 
   void _handleLiveMatchesEvent(String eventName, Map<String, dynamic> payload) {
+    if (!_isSubscribed) return;
     try {
       final int matchId = payload['match_id'] != null
           ? int.tryParse(payload['match_id'].toString()) ?? 0

@@ -38,6 +38,7 @@ class _TabItem {
 class _MatchDetailsPageState extends ConsumerState<MatchDetailsPage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
+  MatchDetailsWebSocketService? _wsService;
 
   @override
   void initState() {
@@ -46,9 +47,8 @@ class _MatchDetailsPageState extends ConsumerState<MatchDetailsPage>
     _tabController = TabController(length: 5, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ref
-            .read(matchDetailsWebSocketProvider(widget.matchId))
-            .startListening();
+        _wsService = ref.read(matchDetailsWebSocketProvider(widget.matchId));
+        _wsService?.startListening();
       }
     });
   }
@@ -64,9 +64,7 @@ class _MatchDetailsPageState extends ConsumerState<MatchDetailsPage>
             .read(matchDetailsProvider(widget.matchId).notifier)
             .getMatchDetails(isRefresh: true);
         ref.read(matchEventsProvider(widget.matchId).notifier).getMatchEvents();
-        ref
-            .read(matchDetailsWebSocketProvider(widget.matchId))
-            .startListening();
+        _wsService?.startListening();
       }
     }
   }
@@ -91,7 +89,8 @@ class _MatchDetailsPageState extends ConsumerState<MatchDetailsPage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
-    ref.read(matchDetailsWebSocketProvider(widget.matchId)).dispose();
+    _wsService?.dispose();
+    _wsService = null;
     super.dispose();
   }
 

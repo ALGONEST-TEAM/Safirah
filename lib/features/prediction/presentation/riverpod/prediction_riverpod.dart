@@ -35,6 +35,7 @@ class GetAllMatchesNotifier
     }
 
     final data = await _controller.getAllMatches(scope);
+    if (!mounted) return;
     data.fold((failure) {
       if (!silent || state.data.isEmpty) {
         state = state.copyWith(state: States.error, exception: failure);
@@ -141,6 +142,7 @@ class GetAllPredictionsNotifier
     final nextPage = moreData ? state.data.currentPage + 1 : 1;
 
     final result = await _controller.getAllPredictions(nextPage);
+    if (!mounted) return;
 
     result.fold(
       (failure) {
@@ -190,6 +192,7 @@ class GetCompetitorPredictionsNotifier
     final nextPage = moreData ? state.data.currentPage + 1 : 1;
 
     final result = await _controller.getCompetitorPredictions(competitorId, nextPage);
+    if (!mounted) return;
 
     result.fold(
       (failure) {
@@ -225,6 +228,7 @@ class SendPredictionNotifier extends StateNotifier<DataState<Unit>> {
       homeScore,
       awayScore,
     );
+    if (!mounted) return;
     user.fold((f) {
       state = state.copyWith(state: States.error, exception: f);
     }, (_) {
@@ -254,6 +258,7 @@ class EditPredictionNotifier extends StateNotifier<DataState<Unit>> {
       homeScore,
       awayScore,
     );
+    if (!mounted) return;
     user.fold((f) {
       state = state.copyWith(state: States.error, exception: f);
     }, (_) {
@@ -306,6 +311,7 @@ class StandingsNotifier extends StateNotifier<DataState<StandingsData>> {
     state = state.copyWith(state: States.loading);
 
     final data = await _controller.standings(filter.scope, direction: filter.direction);
+    if (!mounted) return;
     data.fold((failure) {
       state = state.copyWith(state: States.error, exception: failure);
     }, (newData) {
@@ -345,6 +351,7 @@ class AwardsNotifier extends StateNotifier<DataState<AwardsData>> {
     final String targetScope =
         (scope != null && scope.isNotEmpty) ? scope : _ref.read(awardsScopeProvider);
     final data = await _controller.awards(targetScope);
+    if (!mounted) return;
     data.fold((failure) {
       state = state.copyWith(state: States.error, exception: failure);
     }, (newData) {
@@ -359,6 +366,7 @@ class AwardsNotifier extends StateNotifier<DataState<AwardsData>> {
     if (scope.trim().isEmpty || state.data.hasScope(scope)) return null;
 
     final data = await _controller.awards(scope);
+    if (!mounted) return null;
     Object? failure;
 
     data.fold((error) {

@@ -43,6 +43,7 @@ class MatchDetailsWebSocketService {
 
   void _handleMatchDetailsEvent(
       String eventName, Map<String, dynamic> payload) {
+    if (!_isSubscribed) return;
     try {
       debugPrint(
           '==> [MatchDetails WebSocket Event]: $eventName | Match: $matchId | Payload: $payload');
