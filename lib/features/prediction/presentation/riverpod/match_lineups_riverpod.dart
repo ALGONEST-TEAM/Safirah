@@ -5,7 +5,7 @@ import '../../../../../core/state/state.dart';
 import '../../data/model/match_lineups_model.dart';
 import '../../data/repos/match_details_repo.dart';
 
-final matchLineupsProvider = StateNotifierProvider.family.autoDispose<
+final matchLineupsProvider = StateNotifierProvider.family<
     MatchLineupsNotifier, DataState<MatchLineupsModel>, int>(
   (ref, int matchId) {
     return MatchLineupsNotifier(matchId);
@@ -28,6 +28,9 @@ class MatchLineupsNotifier extends StateNotifier<DataState<MatchLineupsModel>> {
   final _repository = MatchDetailsRepository();
 
   Future<void> getMatchLineups({bool isRefresh = false}) async {
+    if (!isRefresh && state.stateData == States.loaded) {
+      return;
+    }
     if (!isRefresh && state.stateData != States.loaded) {
       state = state.copyWith(state: States.loading);
     }

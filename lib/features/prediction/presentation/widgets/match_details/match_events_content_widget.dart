@@ -7,6 +7,9 @@ import '../../provider/match_details_providers.dart';
 import 'match_details_stadium_info_widget.dart';
 import 'match_details_info_card_widget.dart';
 import 'match_details_who_will_win_widget.dart';
+import 'match_details_mini_standings_widget.dart';
+import 'match_details_mini_h2h_widget.dart';
+import 'match_details_latest_results_widget.dart';
 import 'match_events_key_stats_widget.dart';
 import 'match_events_best_player_widget.dart';
 import 'match_events_filter_widget.dart';
@@ -18,6 +21,8 @@ class MatchEventsContentWidget extends ConsumerWidget {
   final MatchEventsUIState eventsUI;
   final Color homeColor;
   final Color awayColor;
+  final VoidCallback? onViewMoreStandings;
+  final VoidCallback? onViewMoreH2H;
 
   const MatchEventsContentWidget({
     super.key,
@@ -26,6 +31,8 @@ class MatchEventsContentWidget extends ConsumerWidget {
     required this.eventsUI,
     required this.homeColor,
     required this.awayColor,
+    this.onViewMoreStandings,
+    this.onViewMoreH2H,
   });
 
   @override
@@ -51,6 +58,20 @@ class MatchEventsContentWidget extends ConsumerWidget {
             16.h.verticalSpace,
             MatchDetailsInfoCardWidget(matchDetails: matchDetails),
             16.h.verticalSpace,
+            MatchDetailsLatestResultsWidget(
+              matchId: matchId,
+              matchDetails: matchDetails,
+            ),
+            MatchDetailsMiniStandingsWidget(
+              matchId: matchId,
+              matchDetails: matchDetails,
+              onViewMoreStandings: onViewMoreStandings,
+            ),
+            MatchDetailsMiniH2HWidget(
+              matchId: matchId,
+              matchDetails: matchDetails,
+              onViewMoreH2H: onViewMoreH2H,
+            ),
           ],
         ),
       );
@@ -58,14 +79,14 @@ class MatchEventsContentWidget extends ConsumerWidget {
 
     // Find ball possession stat to determine dominant team color for the filter tabs
     final possessionStat = matchDetails.keyStatistics
-        .where((s) => s.code == 'ball-possession' || (s.label != null && s.label!.contains('استحواذ')))
+        .where((s) => s.code == 'ball-possession' || s.label.contains('استحواذ'))
         .firstOrNull;
 
     int homePossession = 50;
     int awayPossession = 50;
     if (possessionStat != null) {
-      homePossession = int.tryParse(double.tryParse(possessionStat.home ?? '50')?.toStringAsFixed(0) ?? '50') ?? 50;
-      awayPossession = int.tryParse(double.tryParse(possessionStat.away ?? '50')?.toStringAsFixed(0) ?? '50') ?? 50;
+      homePossession = int.tryParse(double.tryParse(possessionStat.home)?.toStringAsFixed(0) ?? '50') ?? 50;
+      awayPossession = int.tryParse(double.tryParse(possessionStat.away)?.toStringAsFixed(0) ?? '50') ?? 50;
     }
 
     // Default to app primary color, but if a team dominates possession, use their color!
@@ -129,6 +150,21 @@ class MatchEventsContentWidget extends ConsumerWidget {
           ),
           16.h.verticalSpace,
           MatchDetailsInfoCardWidget(matchDetails: matchDetails),
+          16.h.verticalSpace,
+          MatchDetailsLatestResultsWidget(
+            matchId: matchId,
+            matchDetails: matchDetails,
+          ),
+          MatchDetailsMiniStandingsWidget(
+            matchId: matchId,
+            matchDetails: matchDetails,
+            onViewMoreStandings: onViewMoreStandings,
+          ),
+          MatchDetailsMiniH2HWidget(
+            matchId: matchId,
+            matchDetails: matchDetails,
+            onViewMoreH2H: onViewMoreH2H,
+          ),
         ],
       ),
     );

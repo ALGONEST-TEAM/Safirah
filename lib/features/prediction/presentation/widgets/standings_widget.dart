@@ -84,7 +84,7 @@ class _StandingsWidgetState extends ConsumerState<StandingsWidget> {
                               children: [
                                 _infoRow(
                                     AppIcons.players,
-                                    'عدد الاعبين المشاركين: ',
+                                    'عدد اللاعبين المشاركين: ',
                                     state.data.participantsCount.toString()),
                                 _infoRow(AppIcons.dateEdit, 'الموسم السنوي: ',
                                     state.data.season),

@@ -358,14 +358,14 @@ class _SponsorFormState extends State<SponsorForm> {
                             padding: const EdgeInsets.all(12),
                             child: Row(
                               children: [
-                                Container(
+                                SizedBox(
                                   width: 20,
                                   height: 20,
-                                  decoration: const BoxDecoration(
-                                    image: DecorationImage(
-                                      image: NetworkImage('https://api.builder.io/api/v1/image/assets/2ec56fb55adc4d6fa0aff31e75533dda/8df9ab8e85906aacd4ac7877db99ef4bc033172e?placeholderIfAbsent=true'),
-                                      fit: BoxFit.contain,
-                                    ),
+                                  child: Image.network(
+                                    'https://api.builder.io/api/v1/image/assets/2ec56fb55adc4d6fa0aff31e75533dda/8df9ab8e85906aacd4ac7877db99ef4bc033172e?placeholderIfAbsent=true',
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) =>
+                                        const SizedBox.shrink(),
                                   ),
                                 ),
                                 const SizedBox(width: 73),

@@ -26,6 +26,9 @@ class MatchDetailsNotifier extends StateNotifier<DataState<MatchDetailsModel>> {
   final _repository = MatchDetailsRepository();
 
   Future<void> getMatchDetails({bool isRefresh = false}) async {
+    if (!isRefresh && state.stateData == States.loaded) {
+      return;
+    }
     // Only show loading shimmer if we don't have loaded data yet
     if (!isRefresh && state.stateData != States.loaded) {
       state = state.copyWith(state: States.loading);
@@ -277,9 +280,12 @@ class MatchEventsNotifier extends StateNotifier<DataState<MatchEventsModel>> {
 
   final _repository = MatchDetailsRepository();
 
-  Future<void> getMatchEvents() async {
+  Future<void> getMatchEvents({bool isRefresh = false}) async {
+    if (!isRefresh && state.stateData == States.loaded) {
+      return;
+    }
     // Only show loading shimmer if we don't have data yet (prevents UI flashing on socket updates)
-    if (state.data == null || state.data!.allEvents.isEmpty) {
+    if (state.data.allEvents.isEmpty) {
       state = state.copyWith(state: States.loading);
     }
 
@@ -290,7 +296,7 @@ class MatchEventsNotifier extends StateNotifier<DataState<MatchEventsModel>> {
     result.fold(
       (failure) {
         // If we already have data, don't show error screen on background refresh failure
-        if (state.data == null || state.data!.allEvents.isEmpty) {
+        if (state.data.allEvents.isEmpty) {
           state = state.copyWith(state: States.error, exception: failure);
         }
       },
@@ -318,7 +324,10 @@ class MatchH2HNotifier extends StateNotifier<DataState<MatchH2hModel>> {
 
   final _repository = MatchDetailsRepository();
 
-  Future<void> getMatchH2H() async {
+  Future<void> getMatchH2H({bool isRefresh = false}) async {
+    if (!isRefresh && state.stateData == States.loaded) {
+      return;
+    }
     state = state.copyWith(state: States.loading);
 
     final result = await _repository.getMatchH2H(matchId);

@@ -202,7 +202,7 @@ class HomePages extends ConsumerWidget {
                           if (index == 0) {
                             return LatestNewsCardWidget(
                               news: item,
-                              size: Size(double.infinity, 180.h),
+                              size: Size(double.infinity, 220.h),
                             );
                           }
 

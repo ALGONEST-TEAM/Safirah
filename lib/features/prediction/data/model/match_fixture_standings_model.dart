@@ -267,7 +267,9 @@ class MatchTeamStandingItemModel {
 
   factory MatchTeamStandingItemModel.fromJson(Map<String, dynamic> json) {
     return MatchTeamStandingItemModel(
-      position: json['position'] ?? 0,
+      position: json['position'] is int
+          ? json['position']
+          : (int.tryParse(json['position']?.toString() ?? '0') ?? 0),
       team: json['team'] != null
           ? MatchStandingsTeamDetailModel.fromJson(json['team'])
           : null,

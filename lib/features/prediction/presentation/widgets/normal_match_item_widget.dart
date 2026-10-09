@@ -177,22 +177,13 @@ class _PredictButton extends StatelessWidget {
                 width: 1.0,
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.stars_rounded,
-                  color: secondaryColor,
-                  size: 13.5.r,
-                ),
-                6.w.horizontalSpace,
-                AutoSizeTextWidget(
-                  text: 'توقع النتيجة',
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w700,
-                  colorText: secondaryColor,
-                ),
-              ],
+            child: Center(
+              child: AutoSizeTextWidget(
+                text: 'توقع النتيجة',
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w700,
+                colorText: secondaryColor,
+              ),
             ),
           ),
         ),

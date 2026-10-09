@@ -82,6 +82,22 @@ class FirebaseMonitoringService {
 
       // 2. Catch all synchronous & widget tree Flutter errors
       FlutterError.onError = (FlutterErrorDetails details) {
+        final errorStr = details.exceptionAsString();
+        final isImageDisposedError =
+            errorStr.contains('Decoded image has been disposed') ||
+            errorStr.contains('ImageCodecException');
+
+        if (isImageDisposedError) {
+          // Record as non-fatal warning: happens when images are discarded during fast scroll/unmount
+          _crashlytics.recordError(
+            details.exception,
+            details.stack,
+            fatal: false,
+            reason: 'Transient Image Engine Disposal during scroll/unmount',
+          );
+          return;
+        }
+
         FlutterError.dumpErrorToConsole(details);
         _crashlytics.recordFlutterFatalError(details);
       };

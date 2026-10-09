@@ -9,6 +9,8 @@ class MatchStandingsCellWidget extends StatelessWidget {
   final bool isHeader;
   final bool isHighlight;
   final Color? textColor;
+  final double? fontSize;
+  final FontWeight? fontWeight;
 
   const MatchStandingsCellWidget({
     super.key,
@@ -17,6 +19,8 @@ class MatchStandingsCellWidget extends StatelessWidget {
     this.isHeader = false,
     this.isHighlight = false,
     this.textColor,
+    this.fontSize,
+    this.fontWeight,
   });
 
   @override
@@ -26,8 +30,8 @@ class MatchStandingsCellWidget extends StatelessWidget {
         width: width,
         child: AutoSizeTextWidget(
           text: text,
-          fontSize: 11.sp,
-          fontWeight: FontWeight.w500,
+          fontSize: fontSize ?? 10.5.sp,
+          fontWeight: fontWeight ?? FontWeight.w500,
           colorText: AppColors.fontColor2,
           textAlign: TextAlign.center,
         ),
@@ -40,8 +44,8 @@ class MatchStandingsCellWidget extends StatelessWidget {
       width: width,
       child: AutoSizeTextWidget(
         text: text,
-        fontSize: 11.5.sp,
-        fontWeight: FontWeight.w500,
+        fontSize: fontSize ?? 11.sp,
+        fontWeight: fontWeight ?? FontWeight.w500,
         colorText: (isHighlight && textColor != null) ? textColor : defaultColor,
         textAlign: TextAlign.center,
       ),

@@ -177,7 +177,27 @@ class _MatchDetailsPageState extends ConsumerState<MatchDetailsPage>
     Widget child;
     switch (type) {
       case MatchDetailTabType.events:
-        child = MatchEventsWidget(matchId: matchId);
+        child = MatchEventsWidget(
+          matchId: matchId,
+          onViewMoreStandings: () {
+            final tabsConfig =
+                ref.read(matchDetailsTabsConfigProvider(matchId));
+            final index = tabsConfig.tabs
+                .indexWhere((t) => t.type == MatchDetailTabType.standings);
+            if (index != -1 && index < _tabController.length) {
+              _tabController.animateTo(index);
+            }
+          },
+          onViewMoreH2H: () {
+            final tabsConfig =
+                ref.read(matchDetailsTabsConfigProvider(matchId));
+            final index = tabsConfig.tabs
+                .indexWhere((t) => t.type == MatchDetailTabType.h2h);
+            if (index != -1 && index < _tabController.length) {
+              _tabController.animateTo(index);
+            }
+          },
+        );
         break;
       case MatchDetailTabType.lineups:
         child = MatchLineupsWidget(matchId: matchId);
@@ -199,3 +219,4 @@ class _MatchDetailsPageState extends ConsumerState<MatchDetailsPage>
     return RepaintBoundary(child: child);
   }
 }
+

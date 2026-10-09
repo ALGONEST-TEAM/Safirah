@@ -57,35 +57,44 @@ class OfflineImagesWidget extends StatelessWidget {
     final file = _fileFromPath(path);
     if (file == null) return fallback ?? const SizedBox.shrink();
 
-    final provider = FileImage(file);
-    final decorationImage = DecorationImage(
-      image: provider,
-      fit: fit ?? BoxFit.cover,
-    );
+    // Use Image.file instead of DecorationImage for lifecycle-safe rendering.
+    final double circularDiameter = (circularRadius ?? 35.sp) * 2;
+    final double? imgWidth =
+        size?.width ?? (circularImage ? circularDiameter : null);
+    final double? imgHeight =
+        size?.height ?? (circularImage ? circularDiameter : null);
 
     return SizedBox(
-      height: size?.height,
-      width: size?.width,
-      child: Stack(
-        clipBehavior: Clip.antiAlias,
-        children: [
-          circularImage
-              ? CircleAvatar(
-                  backgroundImage: provider,
-                  radius: circularRadius ?? 35.sp,
-                  backgroundColor: Colors.transparent,
-                )
-              : Container(
-                  decoration: BoxDecoration(
-                    image: decorationImage,
-                    color: backgroundColor ?? Colors.transparent,
-                    borderRadius: BorderRadius.circular(borderRadius ?? 8.r),
-                  ),
-                  height: size?.height,
-                  width: size?.width,
+      height: imgHeight,
+      width: imgWidth,
+      child: circularImage
+          ? ClipOval(
+              child: ColoredBox(
+                color: backgroundColor ?? Colors.transparent,
+                child: Image.file(
+                  file,
+                  fit: fit ?? BoxFit.cover,
+                  width: imgWidth,
+                  height: imgHeight,
+                  errorBuilder: (_, __, ___) =>
+                      fallback ?? const SizedBox.shrink(),
                 ),
-        ],
-      ),
+              ),
+            )
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(borderRadius ?? 8.r),
+              child: ColoredBox(
+                color: backgroundColor ?? Colors.transparent,
+                child: Image.file(
+                  file,
+                  fit: fit ?? BoxFit.cover,
+                  width: imgWidth,
+                  height: imgHeight,
+                  errorBuilder: (_, __, ___) =>
+                      fallback ?? const SizedBox.shrink(),
+                ),
+              ),
+            ),
     );
   }
 }

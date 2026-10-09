@@ -199,16 +199,20 @@ class CreateLeagueLogoPickerWidget extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12.r),
-              image: path.isNotEmpty
-                  ? DecorationImage(
-                image: FileImage(File(path)),
-                fit: BoxFit.cover,
-              )
-                  : null,
             ),
-            child: path.isEmpty
-                ? const Icon(Icons.upload, color: Colors.grey)
-                : const SizedBox.shrink(),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12.r),
+              child: path.isNotEmpty
+                  ? Image.file(
+                      File(path),
+                      width: double.infinity,
+                      height: 90.h,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.upload, color: Colors.grey),
+                    )
+                  : const Icon(Icons.upload, color: Colors.grey),
+            ),
           ),
         ),
       ],

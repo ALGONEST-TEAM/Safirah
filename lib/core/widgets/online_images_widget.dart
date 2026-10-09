@@ -47,15 +47,20 @@ class OnlineImagesWidget extends StatelessWidget {
   }
 
   Widget _fallback() {
-    return Container(
+    return SizedBox(
       height: size?.height,
       width: size?.width,
-      decoration: BoxDecoration(
-        color: backgroundColor ?? Colors.white,
+      child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius ?? 8.r),
-        image: const DecorationImage(
-          image: AssetImage('assets/images/logo.jpg'),
-          fit: BoxFit.contain,
+        child: ColoredBox(
+          color: backgroundColor ?? Colors.white,
+          child: Image.asset(
+            'assets/images/logo.jpg',
+            fit: BoxFit.contain,
+            width: size?.width,
+            height: size?.height,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
         ),
       ),
     );
@@ -111,35 +116,43 @@ class OnlineImagesWidget extends StatelessWidget {
         );
       },
       imageBuilder: (context, imageProvider) {
-        final image = DecorationImage(
-          image: imageProvider,
-          fit: fit ?? BoxFit.cover,
-        );
+        // Use Image widget instead of DecorationImage for lifecycle-safe rendering.
+        // Image widget properly unsubscribes from the ImageStream when disposed,
+        // preventing "Decoded image has been disposed" crashes during fast scrolling.
+        final double circularDiameter = (circularRadius ?? 35.sp) * 2;
+        final double? imgWidth =
+            size?.width ?? (circularImage ? circularDiameter : null);
+        final double? imgHeight =
+            size?.height ?? (circularImage ? circularDiameter : null);
 
         return SizedBox(
-          height: size?.height,
-          width: size?.width,
-          child: Stack(
-            clipBehavior: Clip.antiAlias,
-            children: [
-              circularImage
-                  ? CircleAvatar(
-                      backgroundImage: imageProvider,
-                      radius: circularRadius ?? 35.sp,
-                      backgroundColor: Colors.transparent,
-                    )
-                  : Container(
-                      decoration: BoxDecoration(
-                        image: image,
-                        color: backgroundColor ?? Colors.transparent,
-                        borderRadius:
-                            BorderRadius.circular(borderRadius ?? 8.r),
-                      ),
-                      height: size?.height,
-                      width: size?.width,
+          height: imgHeight,
+          width: imgWidth,
+          child: circularImage
+              ? ClipOval(
+                  child: ColoredBox(
+                    color: backgroundColor ?? Colors.transparent,
+                    child: Image(
+                      image: imageProvider,
+                      fit: fit ?? BoxFit.cover,
+                      width: imgWidth,
+                      height: imgHeight,
                     ),
-            ],
-          ),
+                  ),
+                )
+              : ClipRRect(
+                  borderRadius:
+                      BorderRadius.circular(borderRadius ?? 8.r),
+                  child: ColoredBox(
+                    color: backgroundColor ?? Colors.transparent,
+                    child: Image(
+                      image: imageProvider,
+                      fit: fit ?? BoxFit.cover,
+                      width: imgWidth,
+                      height: imgHeight,
+                    ),
+                  ),
+                ),
         );
       },
       errorWidget: (context, url, error) => _fallback(),

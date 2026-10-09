@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/state/check_state_in_get_api_data_widget.dart';
@@ -12,10 +11,14 @@ import 'match_events_shimmer_widget.dart';
 
 class MatchEventsWidget extends ConsumerWidget {
   final int matchId;
+  final VoidCallback? onViewMoreStandings;
+  final VoidCallback? onViewMoreH2H;
 
   const MatchEventsWidget({
     super.key,
     required this.matchId,
+    this.onViewMoreStandings,
+    this.onViewMoreH2H,
   });
 
   @override
@@ -47,10 +50,12 @@ class MatchEventsWidget extends ConsumerWidget {
         color: AppColors.primaryColor,
         child: MatchEventsContentWidget(
           matchId: matchId,
-          matchDetails: detailsState.data!,
+          matchDetails: detailsState.data,
           eventsUI: eventsUI,
           homeColor: teamColors.homeColor,
           awayColor: teamColors.awayColor,
+          onViewMoreStandings: onViewMoreStandings,
+          onViewMoreH2H: onViewMoreH2H,
         ),
       ),
     );
