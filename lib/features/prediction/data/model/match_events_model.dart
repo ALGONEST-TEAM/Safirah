@@ -29,7 +29,8 @@ class MatchEventsModel {
     List<MatchSingleEventModel> parseEvents(dynamic list) {
       if (list is List) {
         return list
-            .map((e) => MatchSingleEventModel.fromJson(e as Map<String, dynamic>))
+            .whereType<Map>()
+            .map((e) => MatchSingleEventModel.fromJson(Map<String, dynamic>.from(e)))
             .toList();
       }
       return [];
@@ -38,7 +39,8 @@ class MatchEventsModel {
     List<MatchEventPeriodModel> parsePeriods(dynamic list) {
       if (list is List) {
         return list
-            .map((e) => MatchEventPeriodModel.fromJson(e as Map<String, dynamic>))
+            .whereType<Map>()
+            .map((e) => MatchEventPeriodModel.fromJson(Map<String, dynamic>.from(e)))
             .toList();
       }
       return [];
@@ -48,17 +50,17 @@ class MatchEventsModel {
       matchId: json['match_id'] ?? 0,
       fixtureId: json['fixture_id']?.toString() ?? '',
       revision: json['revision'] ?? 0,
-      status: json['status'] != null
-          ? MatchEventStatusModel.fromJson(json['status'])
+      status: json['status'] is Map
+          ? MatchEventStatusModel.fromJson(Map<String, dynamic>.from(json['status']))
           : null,
-      score: json['score'] != null
-          ? MatchEventScoreModel.fromJson(json['score'])
+      score: json['score'] is Map
+          ? MatchEventScoreModel.fromJson(Map<String, dynamic>.from(json['score']))
           : null,
-      teams: json['teams'] != null
-          ? MatchEventTeamsModel.fromJson(json['teams'])
+      teams: json['teams'] is Map
+          ? MatchEventTeamsModel.fromJson(Map<String, dynamic>.from(json['teams']))
           : null,
-      counts: json['counts'] != null
-          ? MatchEventCountsModel.fromJson(json['counts'])
+      counts: json['counts'] is Map
+          ? MatchEventCountsModel.fromJson(Map<String, dynamic>.from(json['counts']))
           : null,
       highlights: parseEvents(json['highlights']),
       allEvents: parseEvents(json['all_events']),
@@ -217,10 +219,14 @@ class MatchSingleEventModel {
       category: json['category'] ?? '',
       name: json['name'] ?? '',
       time: json['time']?.toString() ?? '',
-      team: json['team'] != null ? MatchEventTeamModel.fromJson(json['team']) : null,
-      player: json['player'] != null ? MatchEventPlayerModel.fromJson(json['player']) : null,
-      relatedPlayer: json['related_player'] != null
-          ? MatchEventPlayerModel.fromJson(json['related_player'])
+      team: json['team'] is Map
+          ? MatchEventTeamModel.fromJson(Map<String, dynamic>.from(json['team']))
+          : null,
+      player: json['player'] is Map
+          ? MatchEventPlayerModel.fromJson(Map<String, dynamic>.from(json['player']))
+          : null,
+      relatedPlayer: json['related_player'] is Map
+          ? MatchEventPlayerModel.fromJson(Map<String, dynamic>.from(json['related_player']))
           : null,
       result: json['result']?.toString(),
       cancelled: json['cancelled'] ?? false,

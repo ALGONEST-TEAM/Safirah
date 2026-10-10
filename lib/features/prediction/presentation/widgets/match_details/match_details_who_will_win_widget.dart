@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/auto_size_text_widget.dart';
 import '../../../../../core/widgets/show_modal_bottom_sheet_widget.dart';
-import '../../riverpod/match_details_riverpod.dart';
 import 'match_details_who_will_win_team_logo_widget.dart';
 import '../../../data/model/match_details_model.dart';
 import '../../../data/model/matches_predictions_model.dart';
 import '../send_or_edit_prediction_widget.dart';
 
-class MatchDetailsWhoWillWinWidget extends ConsumerWidget {
+class MatchDetailsWhoWillWinWidget extends StatelessWidget {
   final String leagueName;
   final MatchesPredictionsModel? match;
   final MatchDetailsModel? matchDetails;
@@ -23,7 +21,7 @@ class MatchDetailsWhoWillWinWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final homeLogo =
         matchDetails?.teams?.home?.logo ?? match?.homeTeam.logo ?? '';
     final awayLogo =
@@ -184,17 +182,6 @@ class MatchDetailsWhoWillWinWidget extends ConsumerWidget {
                   date: predictionModel.matchDate,
                   matches: predictionModel,
                   isEdit: hasPrediction,
-                  onSuccess: (homeScore, awayScore) {
-                    ref
-                        .read(matchDetailsProvider(predictionModel.matchId).notifier)
-                        .updatePrediction(
-                          homeScore: homeScore,
-                          awayScore: awayScore,
-                        );
-                    ref
-                        .read(matchDetailsProvider(predictionModel.matchId).notifier)
-                        .getMatchDetails(isRefresh: true);
-                  },
                 ),
               );
             },

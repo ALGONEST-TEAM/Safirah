@@ -12,6 +12,7 @@ import 'match_header_background_widget.dart';
 import 'match_header_title_widget.dart';
 import 'match_header_score_widget.dart';
 import '../../pages/team_matches_page.dart';
+import '../../riverpod/prediction_riverpod.dart';
 
 class MatchDetailsHeaderContentWidget extends StatefulWidget {
   final MatchDetailsModel matchDetails;
@@ -62,6 +63,18 @@ class _MatchDetailsHeaderContentWidgetState
     // Only rebuild expensive children when actual DATA changes,
     // NOT on every scroll frame.
     if (!identical(old.matchDetails, widget.matchDetails) ||
+        old.matchDetails.id != widget.matchDetails.id ||
+        old.matchDetails.status != widget.matchDetails.status ||
+        old.matchDetails.teams?.home?.name !=
+            widget.matchDetails.teams?.home?.name ||
+        old.matchDetails.teams?.away?.name !=
+            widget.matchDetails.teams?.away?.name ||
+        old.matchDetails.teams?.home?.logo !=
+            widget.matchDetails.teams?.home?.logo ||
+        old.matchDetails.teams?.away?.logo !=
+            widget.matchDetails.teams?.away?.logo ||
+        old.matchDetails.competition?.name !=
+            widget.matchDetails.competition?.name ||
         old.rightGlowColor != widget.rightGlowColor ||
         old.leftGlowColor != widget.leftGlowColor) {
       _rebuildCachedChildren();
@@ -209,10 +222,15 @@ class _MatchDetailsHeaderContentWidgetState
     final statusBarHeight = mediaQuery.padding.top;
     final screenWidth = mediaQuery.size.width;
 
-    final bool isNotStarted = widget.matchDetails.status == '1' ||
+    const statusHelper = MatchStatusHelper();
+    final statusNum = widget.matchDetails.state?.id ??
+        num.tryParse(widget.matchDetails.status);
+    final bool isNotStarted = statusHelper.isNotStarted(statusNum) ||
+        widget.matchDetails.status == '1' ||
         widget.matchDetails.status == '13' ||
         widget.matchDetails.status == '26' ||
-        widget.matchDetails.state?.code == 'NS';
+        widget.matchDetails.state?.code == 'NS' ||
+        widget.matchDetails.state?.hasStarted == false;
 
     final double logoBoxWidth = 90.w;
     final double maxLogoSize = 55.w;

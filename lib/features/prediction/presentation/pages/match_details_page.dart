@@ -49,6 +49,12 @@ class _MatchDetailsPageState extends ConsumerState<MatchDetailsPage>
       if (mounted) {
         _wsService = ref.read(matchDetailsWebSocketProvider(widget.matchId));
         _wsService?.startListening();
+        ref
+            .read(matchDetailsProvider(widget.matchId).notifier)
+            .getMatchDetails(isRefresh: true);
+        ref
+            .read(matchEventsProvider(widget.matchId).notifier)
+            .getMatchEvents(isRefresh: true);
       }
     });
   }
@@ -63,7 +69,9 @@ class _MatchDetailsPageState extends ConsumerState<MatchDetailsPage>
         ref
             .read(matchDetailsProvider(widget.matchId).notifier)
             .getMatchDetails(isRefresh: true);
-        ref.read(matchEventsProvider(widget.matchId).notifier).getMatchEvents();
+        ref
+            .read(matchEventsProvider(widget.matchId).notifier)
+            .getMatchEvents(isRefresh: true);
         _wsService?.startListening();
       }
     }

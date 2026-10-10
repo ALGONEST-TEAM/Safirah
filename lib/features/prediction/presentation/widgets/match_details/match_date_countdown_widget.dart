@@ -75,11 +75,15 @@ class _MatchDateCountdownWidgetState extends State<MatchDateCountdownWidget> {
 
   DateTime? _parseDateTime(String dateStr, String timeStr) {
     if (dateStr.isEmpty) return null;
+    final cleanTime = timeStr.isNotEmpty ? timeStr : '00:00:00';
     try {
-      final cleanTime = timeStr.isNotEmpty ? timeStr : '00:00:00';
       return DateTime.parse('${dateStr.trim()}T${cleanTime.trim()}');
     } catch (_) {
-      return null;
+      try {
+        return DateTime.parse('${dateStr.trim()} ${cleanTime.trim()}');
+      } catch (_) {
+        return DateTime.tryParse(dateStr.trim());
+      }
     }
   }
 

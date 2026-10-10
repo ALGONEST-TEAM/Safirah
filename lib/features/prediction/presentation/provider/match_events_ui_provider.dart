@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../data/model/match_details_model.dart';
@@ -168,10 +167,14 @@ class MatchEventsUINotifier extends StateNotifier<MatchEventsUIState> {
       return;
     }
 
-    final bool isNotStarted = matchDetails.status == '1' ||
-        matchDetails.status == '13' ||
-        matchDetails.status == '26' ||
-        matchDetails.state?.code == 'NS';
+    final bool hasEvents =
+        eventsData != null && eventsData.allEvents.isNotEmpty;
+
+    final bool isNotStarted = !hasEvents &&
+        (matchDetails.status == '1' ||
+            matchDetails.status == '13' ||
+            matchDetails.status == '26' ||
+            matchDetails.state?.code == 'NS');
 
     final bool isFinished = matchDetails.status == '3' ||
         matchDetails.status == '100' ||

@@ -56,6 +56,8 @@ class MatchDetailsRepository {
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
+    } catch (e) {
+      return Left(DioException(requestOptions: RequestOptions(path: ''), error: e.toString()));
     }
   }
 
@@ -65,6 +67,8 @@ class MatchDetailsRepository {
       return Right(remote);
     } on DioException catch (e) {
       return Left(e);
+    } catch (e) {
+      return Left(DioException(requestOptions: RequestOptions(path: ''), error: e.toString()));
     }
   }
 }

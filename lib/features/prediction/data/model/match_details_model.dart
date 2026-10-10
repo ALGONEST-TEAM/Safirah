@@ -116,22 +116,68 @@ class MatchDetailsModel {
       apiId: json['api_id'] ?? '',
       name: json['name'] ?? '',
       round: json['round'],
-      date: json['date'] ?? '',
-      time: json['time'] ?? '',
+      date: (json['date'] ??
+              json['match_date'] ??
+              json['starting_at']?.toString().split(' ').first ??
+              '')
+          .toString(),
+      time: (json['time'] ??
+              json['match_time'] ??
+              (json['starting_at'] != null &&
+                      json['starting_at'].toString().contains(' ')
+                  ? json['starting_at'].toString().split(' ')[1]
+                  : ''))
+          .toString(),
       status: json['status']?.toString() ?? '',
-      state: json['state'] != null ? MatchStateModel.fromJson(json['state']) : null,
-      score: json['score'] != null ? MatchScoreModel.fromJson(json['score']) : null,
-      competition: json['competition'] != null ? MatchCompetitionModel.fromJson(json['competition']) : null,
-      teams: json['teams'] != null ? MatchTeamsModel.fromJson(json['teams']) : null,
-      venue: json['venue'] != null ? MatchVenueModel.fromJson(json['venue']) : null,
-      attendance: json['attendance'],
-      officials: json['officials'] != null
-          ? (json['officials'] as List).map((i) => MatchOfficialModel.fromJson(i)).toList()
+      state: json['state'] != null && json['state'] is Map
+          ? MatchStateModel.fromJson(Map<String, dynamic>.from(json['state']))
+          : null,
+      score: json['score'] != null && json['score'] is Map
+          ? MatchScoreModel.fromJson(Map<String, dynamic>.from(json['score']))
+          : null,
+      competition: json['competition'] != null && json['competition'] is Map
+          ? MatchCompetitionModel.fromJson(
+              Map<String, dynamic>.from(json['competition']))
+          : null,
+      teams: json['teams'] != null && json['teams'] is Map
+          ? MatchTeamsModel.fromJson(Map<String, dynamic>.from(json['teams']))
+          : (json['home_team'] != null || json['away_team'] != null)
+              ? MatchTeamsModel(
+                  home: json['home_team'] != null && json['home_team'] is Map
+                      ? MatchTeamModel.fromJson(
+                          Map<String, dynamic>.from(json['home_team']))
+                      : null,
+                  away: json['away_team'] != null && json['away_team'] is Map
+                      ? MatchTeamModel.fromJson(
+                          Map<String, dynamic>.from(json['away_team']))
+                      : null,
+                )
+              : null,
+      venue: json['venue'] != null && json['venue'] is Map
+          ? MatchVenueModel.fromJson(Map<String, dynamic>.from(json['venue']))
+          : null,
+      attendance: json['attendance'] is num
+          ? (json['attendance'] as num).toInt()
+          : int.tryParse(json['attendance']?.toString() ?? ''),
+      officials: json['officials'] != null && json['officials'] is List
+          ? (json['officials'] as List)
+              .whereType<Map>()
+              .map((i) =>
+                  MatchOfficialModel.fromJson(Map<String, dynamic>.from(i)))
+              .toList()
           : [],
-      keyStatistics: json['key_statistics'] != null
-          ? (json['key_statistics'] as List).map((i) => MatchKeyStatisticModel.fromJson(i)).toList()
+      keyStatistics: json['key_statistics'] != null &&
+              json['key_statistics'] is List
+          ? (json['key_statistics'] as List)
+              .whereType<Map>()
+              .map((i) =>
+                  MatchKeyStatisticModel.fromJson(Map<String, dynamic>.from(i)))
+              .toList()
           : [],
-      bestPlayer: json['best_player'] != null ? MatchBestPlayerModel.fromJson(json['best_player']) : null,
+      bestPlayer: json['best_player'] != null && json['best_player'] is Map
+          ? MatchBestPlayerModel.fromJson(
+              Map<String, dynamic>.from(json['best_player']))
+          : null,
       minute: (json['match_clock']?['minute'] ?? json['minute']) != null
           ? int.tryParse((json['match_clock']?['minute'] ?? json['minute']).toString())
           : null,
@@ -349,8 +395,12 @@ class MatchTeamsModel {
 
   factory MatchTeamsModel.fromJson(Map<String, dynamic> json) {
     return MatchTeamsModel(
-      home: json['home'] != null ? MatchTeamModel.fromJson(json['home']) : null,
-      away: json['away'] != null ? MatchTeamModel.fromJson(json['away']) : null,
+      home: json['home'] != null && json['home'] is Map
+          ? MatchTeamModel.fromJson(Map<String, dynamic>.from(json['home']))
+          : null,
+      away: json['away'] != null && json['away'] is Map
+          ? MatchTeamModel.fromJson(Map<String, dynamic>.from(json['away']))
+          : null,
     );
   }
 }

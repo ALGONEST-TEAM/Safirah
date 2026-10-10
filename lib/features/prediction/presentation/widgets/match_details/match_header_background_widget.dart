@@ -14,11 +14,6 @@ class MatchHeaderBackgroundWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // [TEMPORARILY DISABLED AS REQUESTED - KEPT AS COMMENT WITHOUT DELETING]
-    // Header background is pure white with zero gradient painting.
-    return const SizedBox.shrink();
-
-    /*
     // Dynamic radius: 
     // When expanded (ratio=1), radius is 1.5 for a soft large glow.
     // When collapsed (ratio=0), height is small (42.h), so we increase radius to 6.0 
@@ -67,6 +62,5 @@ class MatchHeaderBackgroundWidget extends StatelessWidget {
         ),
       ),
     );
-    */
   }
 }

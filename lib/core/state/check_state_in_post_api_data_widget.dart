@@ -27,19 +27,27 @@ class CheckStateInPostApiDataWidget extends StatelessWidget {
     //print(state.stateData.toString());
     if (state.stateData == States.loaded) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        functionSuccess!();
+        if (!context.mounted) {
+          state.stateData = States.initial;
+          return;
+        }
+        functionSuccess?.call();
 
-        hasMessageSuccess
-            ? showFlashBarSuccess(
-                context: context,
-                message: messageSuccess ?? S.of(context).successfully,
-              )
-            : const SizedBox.shrink();
+        if (hasMessageSuccess) {
+          showFlashBarSuccess(
+            context: context,
+            message: messageSuccess ?? S.of(context).successfully,
+          );
+        }
         state.stateData = States.initial;
       });
     } else if (state.stateData == States.error) {
       SchedulerBinding.instance.addPostFrameCallback(
         (_) {
+          if (!context.mounted) {
+            state.stateData = States.initial;
+            return;
+          }
           showFlashBarError(
             context: context,
             title: MessageOfError.get(state.exception as Object).first,

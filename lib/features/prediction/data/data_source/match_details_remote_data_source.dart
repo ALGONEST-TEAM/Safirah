@@ -23,8 +23,8 @@ class MatchDetailsRemoteDataSource {
               rawData['data'] != null)
           ? rawData['data']
           : rawData;
-      if (data is! Map<String, dynamic>) return MatchDetailsModel.empty();
-      return MatchDetailsModel.fromJson(data);
+      if (data is! Map) return MatchDetailsModel.empty();
+      return MatchDetailsModel.fromJson(Map<String, dynamic>.from(data));
     } catch (e, stack) {
       debugPrint('==> [ERROR in getMatchDetails]: $e\n$stack');
       rethrow;
@@ -45,8 +45,8 @@ class MatchDetailsRemoteDataSource {
               rawData['data'] != null)
           ? rawData['data']
           : rawData;
-      if (data is! Map<String, dynamic>) return MatchStatisticsModel.empty();
-      return MatchStatisticsModel.fromJson(data);
+      if (data is! Map) return MatchStatisticsModel.empty();
+      return MatchStatisticsModel.fromJson(Map<String, dynamic>.from(data));
     } catch (e, stack) {
       debugPrint('==> [ERROR in getMatchStatistics]: $e\n$stack');
       rethrow;
@@ -67,9 +67,10 @@ class MatchDetailsRemoteDataSource {
               rawData['data'] != null)
           ? rawData['data']
           : rawData;
-      if (data is! Map<String, dynamic>)
+      if (data is! Map) {
         return MatchFixtureStandingsModel.empty();
-      return MatchFixtureStandingsModel.fromJson(data);
+      }
+      return MatchFixtureStandingsModel.fromJson(Map<String, dynamic>.from(data));
     } catch (e, stack) {
       debugPrint('==> [ERROR in getMatchStandings]: $e\n$stack');
       rethrow;
@@ -89,9 +90,10 @@ class MatchDetailsRemoteDataSource {
               rawData['data'] != null)
           ? rawData['data']
           : rawData;
-      if (data is! Map<String, dynamic>)
+      if (data is! Map) {
         return MatchLineupsModel.empty(matchId);
-      return MatchLineupsModel.fromJson(data);
+      }
+      return MatchLineupsModel.fromJson(Map<String, dynamic>.from(data));
     } catch (e, stack) {
       debugPrint('==> [ERROR in getMatchLineups]: $e\n$stack');
       rethrow;
@@ -111,8 +113,8 @@ class MatchDetailsRemoteDataSource {
               rawData['data'] != null)
           ? rawData['data']
           : rawData;
-      if (data is! Map<String, dynamic>) return MatchEventsModel.empty(matchId);
-      return MatchEventsModel.fromJson(data);
+      if (data is! Map) return MatchEventsModel.empty(matchId);
+      return MatchEventsModel.fromJson(Map<String, dynamic>.from(data));
     } catch (e, stack) {
       debugPrint('==> [ERROR in getMatchEvents]: $e\n$stack');
       rethrow;
@@ -132,8 +134,8 @@ class MatchDetailsRemoteDataSource {
               rawData['data'] != null)
           ? rawData['data']
           : rawData;
-      if (data is! Map<String, dynamic>) return MatchH2hModel.empty(matchId);
-      return MatchH2hModel.fromJson(data);
+      if (data is! Map) return MatchH2hModel.empty(matchId);
+      return MatchH2hModel.fromJson(Map<String, dynamic>.from(data));
     } catch (e, stack) {
       debugPrint('==> [ERROR in getMatchH2H]: $e\n$stack');
       rethrow;

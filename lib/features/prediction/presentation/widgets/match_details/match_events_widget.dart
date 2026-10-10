@@ -28,24 +28,27 @@ class MatchEventsWidget extends ConsumerWidget {
     final eventsUI = ref.watch(matchEventsUIProvider(matchId));
     final teamColors = ref.watch(matchTeamColorsProvider(matchId));
 
-    // Use events state for loading check: if details loaded but events
-    // are still loading, we should show the shimmer instead of empty content.
-    final effectiveState = (detailsState.stateData == States.loaded &&
-            eventsState.stateData == States.loading)
-        ? eventsState
+    // If details loaded but events have never completed loading yet,
+    // show shimmer instead of prematurely showing "No events".
+    final bool isEventsLoadingInitial = eventsState.data.allEvents.isEmpty &&
+        eventsState.stateData != States.loaded &&
+        eventsState.stateData != States.error;
+
+    final effectiveState = (detailsState.stateData == States.loaded && isEventsLoadingInitial)
+        ? eventsState.copyWith(state: States.loading)
         : detailsState;
 
     return CheckStateInGetApiDataWidget(
       state: effectiveState,
       refresh: () {
-        ref.read(matchDetailsProvider(matchId).notifier).getMatchDetails();
-        ref.read(matchEventsProvider(matchId).notifier).getMatchEvents();
+        ref.read(matchDetailsProvider(matchId).notifier).getMatchDetails(isRefresh: true);
+        ref.read(matchEventsProvider(matchId).notifier).getMatchEvents(isRefresh: true);
       },
       widgetOfLoading: const MatchEventsShimmerWidget(),
       widgetOfData: RefreshIndicator(
         onRefresh: () async {
-          ref.read(matchDetailsProvider(matchId).notifier).getMatchDetails();
-          await ref.read(matchEventsProvider(matchId).notifier).getMatchEvents();
+          ref.read(matchDetailsProvider(matchId).notifier).getMatchDetails(isRefresh: true);
+          await ref.read(matchEventsProvider(matchId).notifier).getMatchEvents(isRefresh: true);
         },
         color: AppColors.primaryColor,
         child: MatchEventsContentWidget(

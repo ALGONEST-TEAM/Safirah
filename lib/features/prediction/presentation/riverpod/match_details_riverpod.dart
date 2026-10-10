@@ -8,8 +8,8 @@ import '../../data/model/match_h2h_model.dart';
 import '../../data/repos/match_details_repo.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
-final matchDetailsProvider = StateNotifierProvider.family
-    .autoDispose<MatchDetailsNotifier, DataState<MatchDetailsModel>, int>(
+final matchDetailsProvider = StateNotifierProvider.family<MatchDetailsNotifier,
+    DataState<MatchDetailsModel>, int>(
   (ref, int matchId) {
     return MatchDetailsNotifier(matchId);
   },
@@ -284,8 +284,8 @@ class MatchEventsNotifier extends StateNotifier<DataState<MatchEventsModel>> {
     if (!isRefresh && state.stateData == States.loaded) {
       return;
     }
-    // Only show loading shimmer if we don't have data yet (prevents UI flashing on socket updates)
-    if (state.data.allEvents.isEmpty) {
+    // Only show loading shimmer if we don't have loaded data yet
+    if (!isRefresh && state.stateData != States.loaded) {
       state = state.copyWith(state: States.loading);
     }
 
@@ -296,7 +296,7 @@ class MatchEventsNotifier extends StateNotifier<DataState<MatchEventsModel>> {
     result.fold(
       (failure) {
         // If we already have data, don't show error screen on background refresh failure
-        if (state.data.allEvents.isEmpty) {
+        if (!isRefresh && state.stateData != States.loaded) {
           state = state.copyWith(state: States.error, exception: failure);
         }
       },

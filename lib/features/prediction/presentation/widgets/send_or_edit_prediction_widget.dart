@@ -10,6 +10,7 @@ import '../../../../core/widgets/buttons/default_button.dart';
 import '../../../../generated/l10n.dart';
 import '../../data/model/matches_predictions_model.dart';
 import '../riverpod/prediction_riverpod.dart';
+import '../riverpod/match_details_riverpod.dart';
 import 'prediction_fields_widget.dart';
 import 'team_widget.dart';
 
@@ -164,12 +165,23 @@ class _SendOrEditPredictionWidgetState
                   child: CheckStateInPostApiDataWidget(
                     state: state,
                     functionSuccess: () {
-                      Navigator.pop(context);
+                      if (!mounted) return;
                       final home = int.tryParse(_homeController.text) ?? 0;
                       final away = int.tryParse(_awayController.text) ?? 0;
                       final matchId = widget.matches.matchId;
 
-                      // 1. تحديث فوري وسلس (Optimistic In-Place) للمباراة بدون أي وميض أو لودينق
+                      // 1. تحديث مباشر في تفاصيل المباراة
+                      ref
+                          .read(matchDetailsProvider(matchId).notifier)
+                          .updatePrediction(
+                            homeScore: home,
+                            awayScore: away,
+                          );
+                      ref
+                          .read(matchDetailsProvider(matchId).notifier)
+                          .getMatchDetails(isRefresh: true);
+
+                      // 2. تحديث فوري وسلس (Optimistic In-Place) للمباراة بدون أي وميض أو لودينق
                       for (final scope in ['yesterday', 'today', 'tomorrow']) {
                         ref
                             .read(getAllMatchesProvider(scope).notifier)
@@ -180,7 +192,7 @@ class _SendOrEditPredictionWidgetState
                             );
                       }
 
-                      // 2. تحديث فوري في قائمة توقعاتي (My Predictions)
+                      // 3. تحديث فوري في قائمة توقعاتي (My Predictions)
                       ref
                           .read(getAllPredictionsProvider.notifier)
                           .updatePredictionScore(
@@ -189,7 +201,7 @@ class _SendOrEditPredictionWidgetState
                             awayScore: away,
                           );
 
-                      // 3. مزامنة صامتة في الخلفية (Silent Refresh) بدون إظهار أي شيمر أو لودينق
+                      // 4. مزامنة صامتة في الخلفية (Silent Refresh) بدون إظهار أي شيمر أو لودينق
                       final currentScope = ref.read(matchesScopeProvider);
                       ref
                           .read(getAllMatchesProvider(currentScope).notifier)
@@ -198,8 +210,13 @@ class _SendOrEditPredictionWidgetState
                           .read(getAllPredictionsProvider.notifier)
                           .getData(silent: true);
 
-                      // 4. تمرير التحديث لصفحة تفاصيل المباراة إن كانت مفتوحة
+                      // 5. استدعاء رد النداء الإضافي بأمان
                       widget.onSuccess?.call(home, away);
+
+                      // 6. إغلاق الـ Bottom Sheet في النهاية فقط وبعد اكتمال جميع التحديثات
+                      if (mounted) {
+                        Navigator.pop(context);
+                      }
                     },
                     bottonWidget: DefaultButtonWidget(
                       text: widget.isEdit

@@ -137,10 +137,32 @@ class _PredictButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color secondaryColor = AppColors.secondaryColor;
-    final borderRadius = BorderRadius.circular(8.r);
+    final borderRadius = BorderRadius.circular(10.r);
 
-    return SizedBox(
-      width: double.infinity,
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        gradient: LinearGradient(
+          colors: [
+            secondaryColor.withValues(alpha: 0.06),
+            secondaryColor.withValues(alpha: 0.02),
+          ],
+          begin: Alignment.centerRight,
+          end: Alignment.centerLeft,
+        ),
+        border: Border.all(
+          color: secondaryColor.withValues(alpha: 0.18),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: secondaryColor.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -164,19 +186,10 @@ class _PredictButton extends StatelessWidget {
             );
           },
           borderRadius: borderRadius,
-          splashColor: secondaryColor.withValues(alpha: 0.12),
-          highlightColor: secondaryColor.withValues(alpha: 0.05),
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(vertical: 5.5.h),
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: borderRadius,
-              border: Border.all(
-                color: secondaryColor,
-                width: 1.0,
-              ),
-            ),
+          splashColor: secondaryColor.withValues(alpha: 0.10),
+          highlightColor: secondaryColor.withValues(alpha: 0.04),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.5.h),
             child: Center(
               child: AutoSizeTextWidget(
                 text: 'توقع النتيجة',
@@ -191,3 +204,5 @@ class _PredictButton extends StatelessWidget {
     );
   }
 }
+
+

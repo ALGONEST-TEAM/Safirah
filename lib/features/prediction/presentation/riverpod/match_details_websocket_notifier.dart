@@ -143,7 +143,7 @@ class MatchDetailsWebSocketService {
             );
       } else if (eventName == 'match.event.created' ||
           eventName == 'match.event.updated') {
-        _ref.read(matchEventsProvider(matchId).notifier).getMatchEvents();
+        _ref.read(matchEventsProvider(matchId).notifier).getMatchEvents(isRefresh: true);
       } else if (eventName == 'match.statistics.updated') {
         _ref
             .read(matchStatisticsProvider(matchId).notifier)
